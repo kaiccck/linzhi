@@ -1,0 +1,13 @@
+{
+ "_meta": {
+  "name": "02x_geoconv_v2_server_ak_sn_blocked",
+  "request": "https://api.map.baidu.com/geoconv/v2/?coords=121.5886,31.2055&model=2&output=json&ak=***",
+  "http_status": 200,
+  "latency_ms": 78,
+  "ts": "2026-09-26T14:49:35+0800"
+ },
+ "response": {
+  "status": 211,
+  "message": "APP SN校验失败"
+ }
+}

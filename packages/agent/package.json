@@ -1,0 +1,30 @@
+{
+  "name": "@zoudedao/agent",
+  "version": "0.1.0",
+  "description": "走得到 AI 层：体检顾问 Agent、工具注册表（与 MCP Server 共用）、数字溯源校验、体检报告生成、OpenAI 兼容 LLM 客户端。",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "zoudedao-advisor": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node -e \"require('node:fs').chmodSync('dist/cli.js', 0o755)\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "ask": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@zoudedao/core": "workspace:*",
+    "zod": "^4.6.5"
+  }
+}

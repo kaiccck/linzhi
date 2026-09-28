@@ -1,0 +1,33 @@
+# 走得到：docker compose up --build，然后打开 http://localhost:8787
+# - 没有 .env.local：样例回放模式，不需要任何 Key。
+# - 有 .env.local（从 .env.example 复制）：服务端 Key 在运行时注入，自动进入实时模式。
+# - 浏览器端 AK 在构建时写入前端，需要让 compose 读取 .env.local 做变量替换：
+#     docker compose --env-file .env.local up --build
+# - 访问 Docker Hub / npm 较慢时（镜像源内容与官方相同）：
+#     NODE_IMAGE=docker.m.daocloud.io/library/node:24-slim NPM_REGISTRY=https://registry.npmmirror.com/ \
+#       docker compose up --build
+services:
+  zoudedao:
+    build:
+      context: .
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:24-slim}
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org/}
+        VITE_BAIDU_BROWSER_AK: ${VITE_BAIDU_BROWSER_AK:-}
+    image: zoudedao:latest
+    init: true
+    restart: unless-stopped
+    ports:
+      - '8787:8787'
+    env_file:
+      - path: .env.local
+        required: false
+    environment:
+      # Fixed inside the container regardless of .env.local; change the host side of `ports` instead.
+      HOST: 0.0.0.0
+      PORT: '8787'
+    volumes:
+      - zdd-cache:/app/data/cache
+
+volumes:
+  zdd-cache:

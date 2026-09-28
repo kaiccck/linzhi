@@ -1,0 +1,540 @@
+{
+ "_meta": {
+  "name": "06d_place_v3_around_community_mix_p0",
+  "request": "https://api.map.baidu.com/place/v3/around?location=31.183127,121.589561&radius=1500&radius_limit=true&scope=2&page_size=20&output=json&query=%E7%A4%BE%E5%8C%BA%E5%8D%AB%E7%94%9F%E6%9C%8D%E5%8A%A1%E4%B8%AD%E5%BF%83$%E5%85%BB%E8%80%81%E9%99%A2$%E5%B9%BC%E5%84%BF%E5%9B%AD$%E8%B6%85%E5%B8%82$%E5%85%AC%E4%BA%A4%E7%AB%99$%E5%9C%B0%E9%93%81%E7%AB%99$%E5%85%AC%E5%9B%AD$%E8%8F%9C%E5%9C%BA&page_num=0&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 228,
+  "ts": "2026-09-26T16:50:48+0800"
+ },
+ "response": {
+  "status": 0,
+  "message": "ok",
+  "total": 21,
+  "result_type": "poi_type",
+  "results": [
+   {
+    "name": "民办兴满幼儿园",
+    "location": {
+     "lat": 31.170195465855205,
+     "lng": 121.59056628344679
+    },
+    "address": "上海市浦东新区卫行路30号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "street_id": "610852117aca30dcc51b75c8",
+    "detail": 1,
+    "uid": "610852117aca30dcc51b75c8",
+    "detail_info": {
+     "classified_poi_tag": "教育培训;幼儿园",
+     "new_alias": "上海浦东新区民办兴满幼儿园",
+     "distance": 1441,
+     "tag": "教育培训;幼儿园",
+     "navi_location": {
+      "lat": 31.170544344741185,
+      "lng": 121.59047867260871
+     },
+     "type": "education",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=610852117aca30dcc51b75c8&output=html&source=placeapi_v3",
+     "overall_rating": "0.0",
+     "comment_num": "2",
+     "shop_hours": "",
+     "label": "幼儿园",
+     "children": []
+    }
+   },
+   {
+    "name": "罗山路华夏中路",
+    "location": {
+     "lat": 31.18128865643099,
+     "lng": 121.58971495931499
+    },
+    "address": "浦东70路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "d64c7b004fc164b503ff2d66",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 204,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "华夏西路罗山路",
+    "location": {
+     "lat": 31.175098342432474,
+     "lng": 121.59090278869084
+    },
+    "address": "北蔡1路;浦东118路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "0bbfddb0c39ff09cfea778d6",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 901,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "华夏中路罗山路",
+    "location": {
+     "lat": 31.174847847980807,
+     "lng": 121.59062269703283
+    },
+    "address": "浦东118路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "0be61fc6c5da69afbe4842f3",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 926,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "科苑路海科路",
+    "location": {
+     "lat": 31.18714955586633,
+     "lng": 121.5993518909955
+    },
+    "address": "浦东58路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "224ba4ea7362dbfd626858ba",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 1033,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "华夏中路科苑路",
+    "location": {
+     "lat": 31.177981413561177,
+     "lng": 121.60119144101881
+    },
+    "address": "浦东118路;浦东118路区间",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "detail": 0,
+    "uid": "50bec6af223f1c5b9f9d6864",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 1245,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "华夏西路卫行路(上海海关学院)",
+    "location": {
+     "lat": 31.172337845816703,
+     "lng": 121.58396230065964
+    },
+    "address": "北蔡1路;浦东118路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "a97c8a15c6393065d4851f66",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 1312,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "海科路科苑路",
+    "location": {
+     "lat": 31.186685315867066,
+     "lng": 121.60282716552193
+    },
+    "address": "161路;浦东58路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "e539c5d5d1b091e015a190b4",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 1322,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "张衡路科苑路",
+    "location": {
+     "lat": 31.1934028631029,
+     "lng": 121.5980926463316
+    },
+    "address": "188路;浦东14路;浦东25路;浦东58路;浦东70路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "detail": 0,
+    "uid": "17f2d1a0d07e0f9054bfff7e",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 1401,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "罗山路辅路华夏西路",
+    "location": {
+     "lat": 31.170624177498226,
+     "lng": 121.593682684922
+    },
+    "address": "北蔡1路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "a101b41dac7e45d542d63e82",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 1444,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "张衡路科苑路(曙光医院)",
+    "location": {
+     "lat": 31.19370690293489,
+     "lng": 121.59881129073958
+    },
+    "address": "188路;大桥六线;浦东14路;浦东22路;浦东25路;浦东58路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "detail": 0,
+    "uid": "6602624e9ef5fdd50782c2c2",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 1469,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "五星路枢纽站",
+    "location": {
+     "lat": 31.181120821628017,
+     "lng": 121.5740686332644
+    },
+    "address": "715路;794路;798路",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "616b62ab5c9902a62bb97c64",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;公交车站",
+     "distance": 1490,
+     "tag": "交通设施;公交车站",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "无障碍电梯(华夏中路地铁站1号口)",
+    "location": {
+     "lat": 31.182216878644848,
+     "lng": 121.59000565097801
+    },
+    "address": "上海市浦东新区地铁13号线16号线换乘站华夏中路站F2",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 1,
+    "uid": "6b174ed543d17a46bda24065",
+    "detail_info": {
+     "classified_poi_tag": "生活服务;公共设施;电梯",
+     "new_alias": "无障碍电梯(华夏中路地铁站1号口)",
+     "distance": 109,
+     "tag": "生活服务;其他",
+     "navi_location": {
+      "lat": 31.182209716053094,
+      "lng": 121.58984891742637
+     },
+     "indoor_floor": "F2",
+     "type": "life",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=6b174ed543d17a46bda24065&output=html&source=placeapi_v3",
+     "shop_hours": "00:00-24:00",
+     "label": "电梯",
+     "children": [],
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 0,
+         "hour": 0,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "华夏中路地铁站-1口",
+    "location": {
+     "lat": 31.18205429753476,
+     "lng": 121.59010185949813
+    },
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "7e4fd2ebb92df557bda24004",
+    "detail_info": {
+     "classified_poi_tag": "出入口;其他",
+     "distance": 129,
+     "tag": "出入口;其他",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "华夏中路地铁站-2口",
+    "location": {
+     "lat": 31.18187943563655,
+     "lng": 121.58907913867503
+    },
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "4522c234d02e62322806ce05",
+    "detail_info": {
+     "classified_poi_tag": "出入口;其他",
+     "distance": 146,
+     "tag": "出入口;其他",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "华夏中路",
+    "location": {
+     "lat": 31.18124934310556,
+     "lng": 121.58878224870398
+    },
+    "address": "地铁13号线;地铁16号线",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 1,
+    "uid": "e933be9e6b8cdf094251c0eb",
+    "detail_info": {
+     "classified_poi_tag": "交通设施;地铁站",
+     "distance": 221,
+     "tag": "交通设施;地铁站",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=e933be9e6b8cdf094251c0eb&output=html&source=placeapi_v3",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "华夏中路地铁站-3口",
+    "location": {
+     "lat": 31.180654157425874,
+     "lng": 121.58890567588105
+    },
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "835aefeff464af0c744ff19d",
+    "detail_info": {
+     "classified_poi_tag": "出入口;其他",
+     "distance": 281,
+     "tag": "出入口;其他",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "华夏中路地铁站-6口",
+    "location": {
+     "lat": 31.180734097585663,
+     "lng": 121.58694036308633
+    },
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "a557b99be1450f3eb8bd636e",
+    "detail_info": {
+     "classified_poi_tag": "出入口;其他",
+     "distance": 364,
+     "tag": "出入口;其他",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "华夏中路地铁站-4口",
+    "location": {
+     "lat": 31.1803363270342,
+     "lng": 121.58699866311393
+    },
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 0,
+    "uid": "a02deae311e4606b3010af93",
+    "detail_info": {
+     "classified_poi_tag": "出入口;其他",
+     "distance": 394,
+     "tag": "出入口;其他",
+     "detail_url": "http://map.baidu.com/",
+     "shop_hours": "",
+     "label": "",
+     "children": []
+    }
+   },
+   {
+    "name": "鹏海绿地公园",
+    "location": {
+     "lat": 31.184451432817994,
+     "lng": 121.57523481347745
+    },
+    "address": "上海市浦东新区五星路与西中路交叉口西北150米",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "street_id": "4fb2b96f5b0d2e2821022031",
+    "detail": 1,
+    "uid": "4fb2b96f5b0d2e2821022031",
+    "detail_info": {
+     "classified_poi_tag": "旅游景点;公园;城市公园",
+     "distance": 1370,
+     "tag": "旅游景点;公园",
+     "navi_location": {
+      "lat": 31.18224905037003,
+      "lng": 121.57459529385794
+     },
+     "type": "scope",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=4fb2b96f5b0d2e2821022031&output=html&source=placeapi_v3",
+     "overall_rating": "4.3",
+     "comment_num": "4",
+     "shop_hours": "00:00-24:00",
+     "label": "景区,",
+     "children": [],
+     "d7_hot_value": 1,
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 0,
+         "hour": 0,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,710 @@
+{
+ "_meta": {
+  "name": "bv_reverse_A",
+  "request": "https://api.map.baidu.com/reverse_geocoding/v3/?location=31.190070,121.644195&coordtype=bd09ll&extensions_town=true&extensions_poi=1&radius=300&output=json&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 88,
+  "ts": "2026-09-26T17:19:10+0800"
+ },
+ "response": {
+  "status": 0,
+  "result": {
+   "location": {
+    "lng": 121.64419499999993,
+    "lat": 31.19006986138216
+   },
+   "formatted_address": "上海市浦东新区张江镇孙环路174号",
+   "edz": {
+    "name": ""
+   },
+   "business": "张江",
+   "business_info": [
+    {
+     "name": "张江",
+     "location": {
+      "lng": 121.62501818619602,
+      "lat": 31.208733519712162
+     },
+     "adcode": 310115,
+     "distance": 0,
+     "direction": "内"
+    }
+   ],
+   "addressComponent": {
+    "country": "中国",
+    "country_code": 0,
+    "region_code_iso": "CHN",
+    "country_code_iso": "CHN",
+    "country_code_iso2": "CN",
+    "province": "上海市",
+    "city": "上海市",
+    "city_level": 2,
+    "district": "浦东新区",
+    "town": "张江镇",
+    "town_code": "310115125",
+    "distance": "10",
+    "direction": "附近",
+    "adcode": "310115",
+    "street": "孙环路",
+    "street_number": "174号"
+   },
+   "pois": [
+    {
+     "addr": "孙耀路111弄",
+     "cp": "",
+     "direction": "内",
+     "distance": "0",
+     "name": "申城佳苑",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64363637636528,
+      "y": 31.18949481701396
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "70f49da17155518bd92f28a5",
+     "zip": "",
+     "popularity_level": "1",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙耀路与高木桥路交叉口西南120米（孙建路与孙耀路交叉路口西北角）",
+     "cp": " ",
+     "direction": "东北",
+     "distance": "170",
+     "name": "申城佳苑-二期",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64358247803467,
+      "y": 31.188861532008385
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "7f01f096b5d22d14a2a93410",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑",
+      "tag": "房地产;住宅区",
+      "addr": "孙耀路111弄",
+      "point": {
+       "x": 121.64363637636528,
+       "y": 31.18949481701396
+      },
+      "direction": "东北",
+      "distance": "97",
+      "uid": "70f49da17155518bd92f28a5",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区高木桥路655号(近孙环路)",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "78",
+     "name": "东方德尚幼儿园",
+     "poiType": "教育培训",
+     "point": {
+      "x": 121.64452569882015,
+      "y": 31.19060691691158
+     },
+     "tag": "教育培训;幼儿园",
+     "tel": "(021)50497986",
+     "uid": "af2e028ae051da0579b55cbf",
+     "zip": "",
+     "popularity_level": "8",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙建路815弄1~27号",
+     "cp": " ",
+     "direction": "西",
+     "distance": "200",
+     "name": "申城佳苑2期A块",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64589112319531,
+      "y": 31.18954887773083
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "d19cc0229bd1cf2b96ca071c",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑-二期",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区孙耀路与高木桥路交叉口西南120米（孙建路与孙耀路交叉路口西北角）",
+      "point": {
+       "x": 121.64358247803467,
+       "y": 31.188861532008385
+      },
+      "direction": "东北",
+      "distance": "170",
+      "uid": "7f01f096b5d22d14a2a93410",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙建路665弄1-27号",
+     "cp": " ",
+     "direction": "东北",
+     "distance": "212",
+     "name": "申城佳苑2期B块",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64312434222458,
+      "y": 31.188707071601762
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "358b2a92c62b726795ca0768",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑-二期",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区孙耀路与高木桥路交叉口西南120米（孙建路与孙耀路交叉路口西北角）",
+      "point": {
+       "x": 121.64358247803467,
+       "y": 31.188861532008385
+      },
+      "direction": "东北",
+      "distance": "170",
+      "uid": "7f01f096b5d22d14a2a93410",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区高木桥路613号",
+     "cp": " ",
+     "direction": "东",
+     "distance": "64",
+     "name": "新日电动车厂家直销(高木桥路店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.64361841025507,
+      "y": 31.190035422779243
+     },
+     "tag": "购物;商铺",
+     "tel": "15921848889",
+     "uid": "6345b26584ab032311882447",
+     "zip": "",
+     "popularity_level": "8",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区张江镇孙耀路111弄1-78号",
+     "cp": " ",
+     "direction": "东南",
+     "distance": "253",
+     "name": "申城佳苑1期B块",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.6422889181003,
+      "y": 31.191139793435603
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "c07f3cf637ce3ecf008972cb",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑",
+      "tag": "房地产;住宅区",
+      "addr": "孙耀路111弄",
+      "point": {
+       "x": 121.64363637636528,
+       "y": 31.18949481701396
+      },
+      "direction": "东北",
+      "distance": "97",
+      "uid": "70f49da17155518bd92f28a5",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区张江镇孙建路665弄22号",
+     "cp": " ",
+     "direction": "北",
+     "distance": "113",
+     "name": "孙耀路居委会",
+     "poiType": "政府机构",
+     "point": {
+      "x": 121.64400468162437,
+      "y": 31.189209066992497
+     },
+     "tag": "政府机构;居民委员会",
+     "tel": "(021)50623338",
+     "uid": "e2fb418f1d137fd7246e983c",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "高木桥路601号",
+     "cp": " ",
+     "direction": "东",
+     "distance": "110",
+     "name": "上海良楼精品酒店(张江路地铁站店)",
+     "poiType": "酒店",
+     "point": {
+      "x": 121.64321417277559,
+      "y": 31.189942747726676
+     },
+     "tag": "酒店",
+     "tel": "02150336601,13262263552",
+     "uid": "a12d34f1326ed227b020a877",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区张江镇高木桥路561号",
+     "cp": " ",
+     "direction": "东北",
+     "distance": "239",
+     "name": "库迪咖啡",
+     "poiType": "美食",
+     "point": {
+      "x": 121.6422260367146,
+      "y": 31.189324911700805
+     },
+     "tag": "美食;咖啡厅",
+     "tel": "15001766342",
+     "uid": "8b01d77747d207343f9a5e58",
+     "zip": "",
+     "popularity_level": "6",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙耀路111弄178号",
+     "cp": " ",
+     "direction": "东南",
+     "distance": "59",
+     "name": "申城佳苑1期B块-19号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64377112219177,
+      "y": 31.19035206185068
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "e41b287e296f69e0cf06a4b1",
+     "zip": "",
+     "popularity_level": "2",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑1期B块",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区张江镇孙耀路111弄1-78号",
+      "point": {
+       "x": 121.6422889181003,
+       "y": 31.191139793435603
+      },
+      "direction": "东南",
+      "distance": "253",
+      "uid": "c07f3cf637ce3ecf008972cb",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙环路177弄1-53号",
+     "cp": " ",
+     "direction": "南",
+     "distance": "261",
+     "name": "申城佳苑1期A块",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64493891935474,
+      "y": 31.19198157771236
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "ee0cfffffb3bd165631c67dc",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑",
+      "tag": "房地产;住宅区",
+      "addr": "孙耀路111弄",
+      "point": {
+       "x": 121.64363637636528,
+       "y": 31.18949481701396
+      },
+      "direction": "东北",
+      "distance": "97",
+      "uid": "70f49da17155518bd92f28a5",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙耀路111弄178号",
+     "cp": " ",
+     "direction": "东",
+     "distance": "92",
+     "name": "申城佳苑1期B块-17号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64338485082249,
+      "y": 31.190236218412068
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "2eb7bc40e224afe3adcb66c6",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑1期B块",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区张江镇孙耀路111弄1-78号",
+      "point": {
+       "x": 121.6422889181003,
+       "y": 31.191139793435603
+      },
+      "direction": "东南",
+      "distance": "253",
+      "uid": "c07f3cf637ce3ecf008972cb",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙建路815弄",
+     "cp": " ",
+     "direction": "西北",
+     "distance": "62",
+     "name": "申城佳苑2期A块-16号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64470535992214,
+      "y": 31.189865518446194
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "eb61f40bf63dd7348bf15df5",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑2期A块",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区孙建路815弄1~27号",
+      "point": {
+       "x": 121.64589112319531,
+       "y": 31.18954887773083
+      },
+      "direction": "西",
+      "distance": "200",
+      "uid": "d19cc0229bd1cf2b96ca071c",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙耀路111弄1-78号",
+     "cp": " ",
+     "direction": "东南",
+     "distance": "74",
+     "name": "申城佳苑1期B块-18号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64358247803467,
+      "y": 31.19029800159715
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "f50dc7fe38d97a4814948e1b",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑1期B块",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区张江镇孙耀路111弄1-78号",
+      "point": {
+       "x": 121.6422889181003,
+       "y": 31.191139793435603
+      },
+      "direction": "东南",
+      "distance": "253",
+      "uid": "c07f3cf637ce3ecf008972cb",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区张江镇孙环路188号",
+     "cp": " ",
+     "direction": "东北",
+     "distance": "73",
+     "name": "申城佳苑2期B块-12号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64386993579787,
+      "y": 31.18957976955503
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "079bdd3617986facb6147f75",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑2期B块",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区孙建路665弄1-27号",
+      "point": {
+       "x": 121.64312434222458,
+       "y": 31.188707071601762
+      },
+      "direction": "东北",
+      "distance": "212",
+      "uid": "358b2a92c62b726795ca0768",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙建路815弄",
+     "cp": " ",
+     "direction": "西",
+     "distance": "101",
+     "name": "申城佳苑2期A块-15号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64510061434653,
+      "y": 31.189989085264415
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "8d18f32b146f28cfa8f7294c",
+     "zip": "",
+     "popularity_level": "4",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑2期A块",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区孙建路815弄1~27号",
+      "point": {
+       "x": 121.64589112319531,
+       "y": 31.18954887773083
+      },
+      "direction": "西",
+      "distance": "200",
+      "uid": "d19cc0229bd1cf2b96ca071c",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙耀路111弄1-78号",
+     "cp": " ",
+     "direction": "东南",
+     "distance": "100",
+     "name": "申城佳苑1期B块-21号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64356451192448,
+      "y": 31.190622362650565
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "356246bbe9b5b527d0ff2316",
+     "zip": "",
+     "popularity_level": "3",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑1期B块",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区张江镇孙耀路111弄1-78号",
+      "point": {
+       "x": 121.6422889181003,
+       "y": 31.191139793435603
+      },
+      "direction": "东南",
+      "distance": "253",
+      "uid": "c07f3cf637ce3ecf008972cb",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙建路815弄",
+     "cp": " ",
+     "direction": "西北",
+     "distance": "108",
+     "name": "申城佳苑2期A块-21号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64493891935474,
+      "y": 31.1895334318149
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "0843a64d15e72ba994ec84cb",
+     "zip": "",
+     "popularity_level": "2",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑2期A块",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区孙建路815弄1~27号",
+      "point": {
+       "x": 121.64589112319531,
+       "y": 31.18954887773083
+      },
+      "direction": "西",
+      "distance": "200",
+      "uid": "d19cc0229bd1cf2b96ca071c",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区孙建路665弄1-19号申城佳苑",
+     "cp": " ",
+     "direction": "北",
+     "distance": "118",
+     "name": "申城佳苑2期B块-22号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.64397773245906,
+      "y": 31.189170452057898
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "80f74d0fde56970df7e73bf6",
+     "zip": "",
+     "popularity_level": "4",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "申城佳苑2期B块",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区孙建路665弄1-27号",
+      "point": {
+       "x": 121.64312434222458,
+       "y": 31.188707071601762
+      },
+      "direction": "东北",
+      "distance": "212",
+      "uid": "358b2a92c62b726795ca0768",
+      "popularity_level": "9"
+     }
+    }
+   ],
+   "roads": [],
+   "poiRegions": [
+    {
+     "direction_desc": "内",
+     "name": "申城佳苑",
+     "tag": "房地产;住宅区",
+     "uid": "70f49da17155518bd92f28a5",
+     "distance": "0",
+     "region_area": 1055681.65
+    }
+   ],
+   "sematic_description": "申城佳苑内,孙耀路居委会北113米",
+   "formatted_address_poi": "上海市浦东新区张江镇申城佳苑",
+   "cityCode": 289
+  }
+ }
+}

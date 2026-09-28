@@ -1,0 +1,54 @@
+{
+ "_meta": {
+  "name": "04e0_routematrix_walking_1x3_burst",
+  "request": "https://api.map.baidu.com/routematrix/v2/walking?origins=31.19007,121.644195&destinations=31.194117,121.644195%7C31.197714,121.644195%7C31.201312,121.644195&output=json&ak=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 107,
+  "ts": "2026-09-26T17:17:01+0800"
+ },
+ "response": {
+  "status": 0,
+  "message": "成功",
+  "num": 3,
+  "mode": "walking",
+  "result": [
+   {
+    "distance": {
+     "text": "1.0公里",
+     "value": 1044
+    },
+    "duration": {
+     "text": "15分钟",
+     "value": 892
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "986米",
+     "value": 986
+    },
+    "duration": {
+     "text": "14分钟",
+     "value": 842
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.6公里",
+     "value": 1629
+    },
+    "duration": {
+     "text": "23分钟",
+     "value": 1393
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   }
+  ]
+ }
+}

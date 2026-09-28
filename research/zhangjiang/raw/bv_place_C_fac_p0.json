@@ -1,0 +1,766 @@
+{
+ "_meta": {
+  "name": "bv_place_C_fac_p0",
+  "request": "https://api.map.baidu.com/place/v3/around?query=%E8%8F%9C%E5%B8%82%E5%9C%BA$%E8%8F%9C%E5%9C%BA$%E5%86%9C%E8%B4%B8%E5%B8%82%E5%9C%BA$%E8%8D%AF%E5%BA%97$%E8%8D%AF%E6%88%BF$%E5%B0%8F%E5%AD%A6&location=31.185923,121.618088&radius=1500&radius_limit=true&scope=2&page_size=20&page_num=0&output=json&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 219,
+  "ts": "2026-09-26T17:19:17+0800"
+ },
+ "response": {
+  "status": 0,
+  "message": "ok",
+  "total": 9,
+  "result_type": "poi_type",
+  "results": [
+   {
+    "name": "益丰大药房(惠万家店)",
+    "location": {
+     "lat": 31.185316910489842,
+     "lng": 121.61657869576032
+    },
+    "address": "荣科路299号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "street_id": "b2e8c1f034e6364416c90505",
+    "telephone": "(021)23570020,18817616668",
+    "detail": 1,
+    "uid": "b2e8c1f034e6364416c90505",
+    "detail_info": {
+     "classified_poi_tag": "医疗;药店",
+     "distance": 158,
+     "tag": "医疗;药店",
+     "navi_location": {
+      "lat": 31.185154655814852,
+      "lng": 121.61665719574138
+     },
+     "brand": "益丰大药房",
+     "type": "hospital",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=b2e8c1f034e6364416c90505&output=html&source=placeapi_v3",
+     "overall_rating": "3.3",
+     "image_num": "22",
+     "shop_hours": "08:00-21:30",
+     "label": "药店",
+     "children": [],
+     "parent_id": "b2603645a2536d00e81e9791",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 21,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 21,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 21,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 21,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 21,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 21,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 21,
+         "minute": 30
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "勤浩医药",
+    "location": {
+     "lat": 31.19414122177614,
+     "lng": 121.61231479882666
+    },
+    "address": "上海市浦东新区李冰路张江润和国际总部园",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "detail": 1,
+    "uid": "1a7caf771b6f1eaa17948e59",
+    "detail_info": {
+     "classified_poi_tag": "医疗;药店",
+     "distance": 1066,
+     "tag": "医疗;药店",
+     "navi_location": {
+      "lat": 31.194074939669278,
+      "lng": 121.61232165177482
+     },
+     "type": "hospital",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=1a7caf771b6f1eaa17948e59&output=html&source=placeapi_v3",
+     "image_num": "3",
+     "shop_hours": "08:00-21:00",
+     "label": "药店",
+     "children": [],
+     "parent_id": "b7021bf82f7bf5fbf4e73b46",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 21,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "倍特药业",
+    "location": {
+     "lat": 31.196683769139796,
+     "lng": 121.61162256460067
+    },
+    "address": "上海市浦东新区张江镇张衡路1187号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "detail": 1,
+    "uid": "94bd0c03297e6422631c679e",
+    "detail_info": {
+     "classified_poi_tag": "医疗;药店",
+     "distance": 1345,
+     "tag": "医疗;药店",
+     "navi_location": {
+      "lat": 31.196673711085314,
+      "lng": 121.61162554702886
+     },
+     "type": "hospital",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=94bd0c03297e6422631c679e&output=html&source=placeapi_v3",
+     "shop_hours": "",
+     "label": "药店",
+     "children": [],
+     "parent_id": "b8030f48681dec1e0482c2f3"
+    }
+   },
+   {
+    "name": "同祺智慧大药房(孙农路店)",
+    "location": {
+     "lat": 31.181668195231733,
+     "lng": 121.63229913201549
+    },
+    "address": "上海市浦东新区孙农路422号一层",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "telephone": "18717708929",
+    "detail": 1,
+    "uid": "0c496357ef19c1f61e580098",
+    "detail_info": {
+     "classified_poi_tag": "医疗;药店",
+     "distance": 1432,
+     "tag": "医疗;药店",
+     "navi_location": {
+      "lat": 31.18156653029956,
+      "lng": 121.63229690478377
+     },
+     "brand": "同祺智慧大药房",
+     "type": "hospital",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=0c496357ef19c1f61e580098&output=html&source=placeapi_v3",
+     "overall_rating": "0",
+     "image_num": "7",
+     "comment_num": "2",
+     "shop_hours": "08:30-17:30",
+     "label": "药店",
+     "children": [],
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 1,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 2,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 3,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 4,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 5,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 6,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 0,
+         "hour": 17,
+         "minute": 30
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "上海鹿衔本草大药房有限公司",
+    "location": {
+     "lat": 31.1775076276989,
+     "lng": 121.61187292234631
+    },
+    "address": "上海市浦东新区张江镇盛荣路88弄盛大源创谷14号、16号01室",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "telephone": "(021)61622518",
+    "detail": 1,
+    "uid": "a67ac5bd37127a3abd484242",
+    "detail_info": {
+     "classified_poi_tag": "医疗;药店",
+     "distance": 1106,
+     "tag": "医疗;药店",
+     "navi_location": {
+      "lat": 31.177468584972324,
+      "lng": 121.61187395031324
+     },
+     "type": "hospital",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=a67ac5bd37127a3abd484242&output=html&source=placeapi_v3",
+     "image_num": "1",
+     "shop_hours": "09:00-18:00",
+     "label": "药店",
+     "children": [],
+     "parent_id": "51815bdff45dcfda3b221c78",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 18,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 18,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 18,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 18,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 18,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 18,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 18,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "益丰大药房(久弘店)",
+    "location": {
+     "lat": 31.176264449793152,
+     "lng": 121.61250110738943
+    },
+    "address": "上海市浦东新区盛荣路188弄4号楼105-1室",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "street_id": "ce595e3e87b1166d5af6be0b",
+    "telephone": "(021)68778852",
+    "detail": 1,
+    "uid": "ce595e3e87b1166d5af6be0b",
+    "detail_info": {
+     "classified_poi_tag": "医疗;药店",
+     "distance": 1198,
+     "tag": "医疗;药店",
+     "navi_location": {
+      "lat": 31.1761156198322,
+      "lng": 121.61272067665693
+     },
+     "brand": "益丰大药房",
+     "type": "hospital",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=ce595e3e87b1166d5af6be0b&output=html&source=placeapi_v3",
+     "overall_rating": "5.0",
+     "image_num": "23",
+     "comment_num": "1",
+     "shop_hours": "08:00-22:00",
+     "label": "医保定点药店,药店",
+     "children": [],
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 22,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "复美大药房(茂春店)",
+    "location": {
+     "lat": 31.17775919639504,
+     "lng": 121.62995374615949
+    },
+    "address": "上海市浦东新区茂春路93号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "street_id": "f3d105c62a663fec9cf779a9",
+    "telephone": "15801773358",
+    "detail": 1,
+    "uid": "f3d105c62a663fec9cf779a9",
+    "detail_info": {
+     "classified_poi_tag": "医疗;药店",
+     "distance": 1448,
+     "tag": "医疗;药店",
+     "navi_location": {
+      "lat": 31.177574962540312,
+      "lng": 121.63001572576324
+     },
+     "brand": "复美大药房",
+     "type": "hospital",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=f3d105c62a663fec9cf779a9&output=html&source=placeapi_v3",
+     "image_num": "3",
+     "shop_hours": "00:00-24:00",
+     "label": "药店",
+     "children": [],
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 0,
+         "hour": 0,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "万科实验小学(张江校区)",
+    "location": {
+     "lat": 31.186043748004234,
+     "lng": 121.62135381835972
+    },
+    "address": "上海市浦东新区环科路1000弄",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "street_id": "51e4fe90f8d24bef616858b2",
+    "telephone": "(021)68820589",
+    "detail": 1,
+    "uid": "51e4fe90f8d24bef616858b2",
+    "detail_info": {
+     "classified_poi_tag": "教育培训;小学",
+     "distance": 310,
+     "tag": "教育培训;小学",
+     "navi_location": {
+      "lat": 31.18650365159559,
+      "lng": 121.62132006492543
+     },
+     "type": "education",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=51e4fe90f8d24bef616858b2&output=html&source=placeapi_v3",
+     "overall_rating": "0",
+     "comment_num": "2",
+     "shop_hours": "",
+     "label": "小学",
+     "children": []
+    }
+   },
+   {
+    "name": "筑桥实验小学",
+    "location": {
+     "lat": 31.187269496387373,
+     "lng": 121.60673955550953
+    },
+    "address": "上海市浦东新区海科路669弄",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "street_id": "e1e69577d34d8699a3acc4e2",
+    "telephone": "(021)38574999",
+    "detail": 1,
+    "uid": "e1e69577d34d8699a3acc4e2",
+    "detail_info": {
+     "classified_poi_tag": "教育培训;小学",
+     "distance": 1089,
+     "tag": "教育培训;小学",
+     "navi_location": {
+      "lat": 31.186823497324696,
+      "lng": 121.60687561070615
+     },
+     "type": "education",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=e1e69577d34d8699a3acc4e2&output=html&source=placeapi_v3",
+     "overall_rating": "0",
+     "comment_num": "3",
+     "shop_hours": "",
+     "label": "小学",
+     "children": [],
+     "d7_hot_value": 2
+    }
+   }
+  ]
+ }
+}

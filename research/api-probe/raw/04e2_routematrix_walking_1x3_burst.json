@@ -1,0 +1,16 @@
+{
+ "_meta": {
+  "name": "04e2_routematrix_walking_1x3_burst",
+  "request": "https://api.map.baidu.com/routematrix/v2/walking?origins=31.19007,121.644195&destinations=31.192932,121.64754%7C31.195475,121.650514%7C31.198019,121.653488&output=json&ak=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 53,
+  "ts": "2026-09-26T17:17:01+0800"
+ },
+ "response": {
+  "status": 401,
+  "message": "当前并发量已经超过约定并发配额，限制访问",
+  "num": 3,
+  "mode": "walking"
+ }
+}

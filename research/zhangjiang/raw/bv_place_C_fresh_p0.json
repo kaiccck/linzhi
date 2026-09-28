@@ -1,0 +1,503 @@
+{
+ "_meta": {
+  "name": "bv_place_C_fresh_p0",
+  "request": "https://api.map.baidu.com/place/v3/around?query=%E8%B6%85%E5%B8%82$%E7%94%9F%E9%B2%9C$%E7%9B%92%E9%A9%AC$%E8%8F%9C%E7%AF%AE%E5%AD%90&location=31.185923,121.618088&radius=1500&radius_limit=true&scope=2&page_size=20&page_num=0&output=json&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 224,
+  "ts": "2026-09-26T17:19:18+0800"
+ },
+ "response": {
+  "status": 0,
+  "message": "ok",
+  "total": 4,
+  "result_type": "poi_type",
+  "results": [
+   {
+    "name": "联华超市(盛荣路店)",
+    "location": {
+     "lat": 31.176658143890062,
+     "lng": 121.61297379574879
+    },
+    "address": "盛荣路188弄5栋106室",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "street_id": "",
+    "telephone": "18221627658",
+    "detail": 1,
+    "uid": "91898224f54409817bf796cf",
+    "detail_info": {
+     "classified_poi_tag": "购物;超市",
+     "distance": 1139,
+     "tag": "购物;超市",
+     "navi_location": {
+      "lat": 31.17675922868806,
+      "lng": 121.61315408614972
+     },
+     "brand": "联华超市",
+     "type": "shopping",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=91898224f54409817bf796cf&output=html&source=placeapi_v3",
+     "overall_rating": "4.0",
+     "comment_num": "2",
+     "shop_hours": "07:00-22:00",
+     "label": "超市",
+     "children": [],
+     "parent_id": "de65381af4b7a88c71210b69",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 22,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "联华超市(勤政路店)",
+    "location": {
+     "lat": 31.178074023201383,
+     "lng": 121.63087837202092
+    },
+    "address": "茂春路149号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "street_id": "488ad4fc2b5a6a5f8f1a89e9",
+    "detail": 1,
+    "uid": "488ad4fc2b5a6a5f8f1a89e9",
+    "detail_info": {
+     "classified_poi_tag": "购物;超市",
+     "new_alias": "联华(勤政路店);联华超市(勤政路店);联华超市（勤政路店）",
+     "distance": 1497,
+     "tag": "购物;超市",
+     "navi_location": {
+      "lat": 31.177913549027448,
+      "lng": 121.63093784671771
+     },
+     "brand": "联华超市",
+     "type": "shopping",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=488ad4fc2b5a6a5f8f1a89e9&output=html&source=placeapi_v3",
+     "overall_rating": "4.7",
+     "shop_hours": "07:00-22:00",
+     "label": "超市",
+     "children": [],
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 22,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "百联(茂春路店)",
+    "location": {
+     "lat": 31.178198146237083,
+     "lng": 121.63092373644918
+    },
+    "address": "上海市浦东新区茂春路华发四季",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "detail": 1,
+    "uid": "bf89c03e630bce9d59bbbc24",
+    "detail_info": {
+     "classified_poi_tag": "购物;超市",
+     "distance": 1492,
+     "tag": "购物;超市",
+     "navi_location": {
+      "lat": 31.17794289036467,
+      "lng": 121.63101576301578
+     },
+     "brand": "百联",
+     "type": "shopping",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=bf89c03e630bce9d59bbbc24&output=html&source=placeapi_v3",
+     "shop_hours": "07:00-22:00",
+     "label": "超市",
+     "children": [],
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 22,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "清美生鲜(荣科路店)",
+    "location": {
+     "lat": 31.18520862967645,
+     "lng": 121.6174310080282
+    },
+    "address": "荣科路368号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "street_id": "c8498a80aea1c0e1a4c7567b",
+    "telephone": "4006921616",
+    "detail": 1,
+    "uid": "c8498a80aea1c0e1a4c7567b",
+    "detail_info": {
+     "classified_poi_tag": "美食",
+     "distance": 101,
+     "tag": "美食",
+     "navi_location": {
+      "lat": 31.185471839325125,
+      "lng": 121.61729585625744
+     },
+     "brand": "清美鲜食",
+     "type": "cater",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=c8498a80aea1c0e1a4c7567b&output=html&source=placeapi_v3",
+     "price": "38.5",
+     "overall_rating": "4.6",
+     "comment_num": "0",
+     "shop_hours": "06:30-22:00",
+     "label": "美食",
+     "children": [],
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 6,
+         "minute": 30
+        },
+        "close": {
+         "day": 1,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 6,
+         "minute": 30
+        },
+        "close": {
+         "day": 2,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 6,
+         "minute": 30
+        },
+        "close": {
+         "day": 3,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 6,
+         "minute": 30
+        },
+        "close": {
+         "day": 4,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 6,
+         "minute": 30
+        },
+        "close": {
+         "day": 5,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 6,
+         "minute": 30
+        },
+        "close": {
+         "day": 6,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 6,
+         "minute": 30
+        },
+        "close": {
+         "day": 0,
+         "hour": 22,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

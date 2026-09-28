@@ -1,0 +1,518 @@
+{
+ "_meta": {
+  "name": "08d_v3_region_venue",
+  "request": "https://api.map.baidu.com/place/v3/region?query=%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%88%9B%E6%96%B0%E5%B0%8F%E9%95%87&region=%E4%B8%8A%E6%B5%B7&region_limit=true&scope=2&page_size=10&page_num=0&output=json&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 255,
+  "ts": "2026-09-26T16:58:40+0800"
+ },
+ "response": {
+  "status": 0,
+  "message": "ok",
+  "total": 19,
+  "result_type": "poi_type",
+  "query_type": "precise",
+  "results": [
+   {
+    "name": "上海人工智能创新中心",
+    "location": {
+     "lat": 31.165984949917767,
+     "lng": 121.46843527139617
+    },
+    "address": "上海市徐汇区龙文路129号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "徐汇区",
+    "town": "龙华街道",
+    "town_code": 310104016,
+    "telephone": "(021)23537800",
+    "detail": 1,
+    "uid": "b8679cdf3a1672ded7b74e73",
+    "detail_info": {
+     "classified_poi_tag": "政府机构;事业单位",
+     "tag": "政府机构;行政单位",
+     "navi_location": {
+      "lat": 31.16615237248302,
+      "lng": 121.46841004042881
+     },
+     "type": "life",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=b8679cdf3a1672ded7b74e73&output=html&source=placeapi_v3",
+     "image_num": "1",
+     "shop_hours": "",
+     "label": "事业单位",
+     "children": [],
+     "parent_id": "18306d9503ab440d8bdb7351"
+    }
+   },
+   {
+    "name": "北杨人工智能创新中心·展示中心",
+    "location": {
+     "lat": 31.12998728106077,
+     "lng": 121.44501491963169
+    },
+    "address": "上海市徐汇区老沪闵路1232-临",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "徐汇区",
+    "town": "华泾镇",
+    "town_code": 310104103,
+    "telephone": "(021)64029200",
+    "detail": 1,
+    "uid": "1995bfdceecc802feedfca45",
+    "detail_info": {
+     "classified_poi_tag": "文化传媒;展览馆",
+     "tag": "文化传媒;展览馆",
+     "navi_location": {
+      "lat": 31.130266211123462,
+      "lng": 121.44479085862105
+     },
+     "type": "enterprise",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=1995bfdceecc802feedfca45&output=html&source=placeapi_v3",
+     "overall_rating": "4.6",
+     "comment_num": "1",
+     "shop_hours": "08:30-17:30",
+     "label": "展览馆",
+     "children": [],
+     "d7_hot_value": 1,
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 1,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 2,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 3,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 4,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 5,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 6,
+         "hour": 17,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 8,
+         "minute": 30
+        },
+        "close": {
+         "day": 0,
+         "hour": 17,
+         "minute": 30
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "科创1号人工智能产业园",
+    "location": {
+     "lat": 31.359258677733358,
+     "lng": 121.44299364240368
+    },
+    "address": "上海市宝山区顾村镇蕰川路489号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "宝山区",
+    "town": "杨行镇",
+    "town_code": 310113103,
+    "telephone": "(021)56566969,021-36550389",
+    "detail": 1,
+    "uid": "0a6a5d6fba2865fef4e73b9b",
+    "detail_info": {
+     "classified_poi_tag": "公司企业;园区",
+     "new_alias": "科创1号",
+     "tag": "公司企业;园区",
+     "navi_location": {
+      "lat": 31.358061264928285,
+      "lng": 121.44122857995409
+     },
+     "type": "enterprise",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=0a6a5d6fba2865fef4e73b9b&output=html&source=placeapi_v3",
+     "overall_rating": "0",
+     "comment_num": "1",
+     "shop_hours": "",
+     "label": "园区",
+     "children": [
+      {
+       "uid": "1dfe40a49b740c1a3904b136",
+       "name": "科创1号人工智能产业园-3号门",
+       "show_name": "南门",
+       "tag": "出入口 门",
+       "location": {
+        "lat": 31.358095013961357,
+        "lng": 121.44266396520678
+       },
+       "address": "上海市宝山区顾村镇蕰川路489号",
+       "classified_poi_tag": "出入口;门"
+      },
+      {
+       "uid": "6a8216f34ac6cd36871541e7",
+       "name": "科创1号人工智能产业园-4号门",
+       "show_name": "东2门",
+       "tag": "出入口 门",
+       "location": {
+        "lat": 31.35941799006289,
+        "lng": 121.44490935505306
+       },
+       "address": "上海市宝山区顾村镇蕰川路489号",
+       "classified_poi_tag": "出入口;门"
+      },
+      {
+       "uid": "970627c79da0d130d6b74e72",
+       "name": "科创1号人工智能产业园-地下停车场",
+       "show_name": "地下停车场",
+       "tag": "交通设施 停车场 地下停车场",
+       "location": {
+        "lat": 31.358139085783478,
+        "lng": 121.44265395491237
+       },
+       "address": "上海市宝山区顾村镇蕰川路489号",
+       "classified_poi_tag": "交通设施;停车场;地下停车场"
+      },
+      {
+       "uid": "cf852faa3987d0e8d7851f8b",
+       "name": "科创1号人工智能产业园-1号门",
+       "show_name": "北门",
+       "tag": "出入口 门",
+       "location": {
+        "lat": 31.36017888363487,
+        "lng": 121.44189555273319
+       },
+       "address": "上海市宝山区顾村镇蕰川路489号",
+       "classified_poi_tag": "出入口;门"
+      },
+      {
+       "uid": "884f326bed75301858109360",
+       "name": "科创1号人工智能产业园-东门",
+       "show_name": "东1门",
+       "tag": "出入口 门",
+       "location": {
+        "lat": 31.361010756933332,
+        "lng": 121.44404161692128
+       },
+       "address": "上海市宝山区顾村镇蕰川路489号",
+       "classified_poi_tag": "出入口;门"
+      },
+      {
+       "uid": "018fb3dfec4d557db726551a",
+       "name": "科创1号人工智能产业园-5号门",
+       "show_name": "东门",
+       "tag": "出入口 门",
+       "location": {
+        "lat": 31.360288309237415,
+        "lng": 121.44441689744181
+       },
+       "address": "上海市宝山区顾村镇蕰川路489号",
+       "classified_poi_tag": "出入口;门"
+      }
+     ],
+     "d7_hot_value": 2
+    }
+   },
+   {
+    "name": "上海人工智能实验室新园区",
+    "location": {
+     "lat": 31.168994753843165,
+     "lng": 121.45512831255466
+    },
+    "address": "上海市徐汇区龙兰路801号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "徐汇区",
+    "town": "龙华街道",
+    "town_code": 310104016,
+    "detail": 1,
+    "uid": "ef1f295c4569f9595fbe8657",
+    "detail_info": {
+     "classified_poi_tag": "公司企业;园区",
+     "tag": "公司企业;园区",
+     "navi_location": {
+      "lat": 31.169066502433495,
+      "lng": 121.45509003628688
+     },
+     "type": "enterprise",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=ef1f295c4569f9595fbe8657&output=html&source=placeapi_v3",
+     "shop_hours": "",
+     "label": "园区",
+     "children": [],
+     "parent_id": "f819c85110e3b9c7f822135d"
+    }
+   },
+   {
+    "name": "马桥人工智能创新中心",
+    "location": {
+     "lat": 31.19538246365352,
+     "lng": 121.32155387644299
+    },
+    "address": "上海市闵行区申长路599号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "闵行区",
+    "town": "新虹街道",
+    "town_code": 310112008,
+    "detail": 1,
+    "uid": "5195b792d1f27987b23c81ab",
+    "detail_info": {
+     "classified_poi_tag": "公司企业;园区",
+     "tag": "公司企业;园区",
+     "navi_location": {
+      "lat": 31.195344536462997,
+      "lng": 121.32157284988602
+     },
+     "type": "enterprise",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=5195b792d1f27987b23c81ab&output=html&source=placeapi_v3",
+     "shop_hours": "",
+     "label": "园区",
+     "children": [],
+     "parent_id": "5e9d404582ffdfa8c236441e"
+    }
+   },
+   {
+    "name": "智期人工智能学院",
+    "location": {
+     "lat": 31.288240396648394,
+     "lng": 121.44798687358089
+    },
+    "address": "上海市静安区万荣路700号大宁中心广场二期b1栋",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "静安区",
+    "town": "彭浦镇",
+    "town_code": 310106101,
+    "detail": 1,
+    "uid": "89bd568baf8292d1b64f5412",
+    "detail_info": {
+     "classified_poi_tag": "公司企业;公司",
+     "tag": "公司企业;公司",
+     "navi_location": {
+      "lat": 31.288292253584945,
+      "lng": 121.44806084705439
+     },
+     "type": "enterprise",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=89bd568baf8292d1b64f5412&output=html&source=placeapi_v3",
+     "overall_rating": "0",
+     "comment_num": "1",
+     "shop_hours": "",
+     "label": "公司",
+     "children": []
+    }
+   },
+   {
+    "name": "人工智能产业基地",
+    "location": {
+     "lat": 31.231200182050088,
+     "lng": 121.39524205708759
+    },
+    "address": "上海市普陀长风新村泸定路276弄",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "普陀区",
+    "town": "长风新村街道",
+    "town_code": 310107014,
+    "detail": 1,
+    "uid": "85737c9c3a0fba1114c90575",
+    "detail_info": {
+     "classified_poi_tag": "行政区划",
+     "tag": "行政区划",
+     "navi_location": {
+      "lat": 31.23060326305272,
+      "lng": 121.39513716728013
+     },
+     "type": "life",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=85737c9c3a0fba1114c90575&output=html&source=placeapi_v3",
+     "shop_hours": "",
+     "label": "行政区划",
+     "children": []
+    }
+   },
+   {
+    "name": "珑睿科技长三角人工智能先进计算中心及生态产业园",
+    "location": {
+     "lat": 31.03794623911654,
+     "lng": 121.16653536068875
+    },
+    "address": "上海市松江区文翔路3999弄",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "松江区",
+    "town": "小昆山镇",
+    "town_code": 310117121,
+    "street_id": "",
+    "detail": 1,
+    "uid": "3005bcbac73e4593d7b74e53",
+    "detail_info": {
+     "classified_poi_tag": "公司企业;园区",
+     "new_alias": "腾讯长三角人工智能超算中心及产业基地",
+     "tag": "公司企业;园区",
+     "navi_location": {
+      "lat": 31.040317269976484,
+      "lng": 121.16525661370446
+     },
+     "type": "enterprise",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=3005bcbac73e4593d7b74e53&output=html&source=placeapi_v3",
+     "overall_rating": "0",
+     "comment_num": "7",
+     "shop_hours": "",
+     "label": "园区",
+     "children": [
+      {
+       "uid": "dbd2e69e5659357eb9df8f62",
+       "name": "珑睿科技长三角人工智能先进计算中心及生态产业园-北门",
+       "show_name": "北门",
+       "tag": "出入口 门",
+       "location": {
+        "lat": 31.040334007919952,
+        "lng": 121.16524937337104
+       },
+       "address": "上海市松江区文翔路4000号",
+       "classified_poi_tag": "出入口;门"
+      },
+      {
+       "uid": "f17749cde231ea909868b413",
+       "name": "珑睿科技长三角人工智能先进计算中心及生态产业园-东门",
+       "show_name": "东门",
+       "tag": "出入口 门",
+       "location": {
+        "lat": 31.03854580643458,
+        "lng": 121.16831444743906
+       },
+       "address": "上海市松江区文翔路v-58地块",
+       "classified_poi_tag": "出入口;门"
+      },
+      {
+       "uid": "f2495c9e4c067c73c9c3db1a",
+       "name": "珑睿科技长三角人工智能先进计算中心及生态产业园-西门",
+       "show_name": "西门",
+       "tag": "出入口 门",
+       "location": {
+        "lat": 31.037180752143527,
+        "lng": 121.16415944129372
+       },
+       "address": "上海市松江区文翔路3999弄",
+       "classified_poi_tag": "出入口;门"
+      }
+     ]
+    }
+   },
+   {
+    "name": "鑫智谷Xmart国际人工智能创新园",
+    "location": {
+     "lat": 31.01711468593986,
+     "lng": 121.37513285943287
+    },
+    "address": "上海市闵行区昆阳路1508号5层",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "闵行区",
+    "town": "马桥镇",
+    "town_code": 310112112,
+    "detail": 1,
+    "uid": "de8fd78310ed08ddebe5822d",
+    "detail_info": {
+     "classified_poi_tag": "公司企业",
+     "tag": "公司企业",
+     "navi_location": {
+      "lat": 31.016771705087365,
+      "lng": 121.37492897341177
+     },
+     "type": "enterprise",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=de8fd78310ed08ddebe5822d&output=html&source=placeapi_v3",
+     "shop_hours": "",
+     "label": "公司企业",
+     "children": [],
+     "parent_id": "698bcb66147312025a3ac885"
+    }
+   },
+   {
+    "name": "人工智能基地",
+    "location": {
+     "lat": 31.097166732148462,
+     "lng": 121.27701570959717
+    },
+    "address": "上海市松江区洞泾镇同乐路662-临",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "松江区",
+    "town": "洞泾镇",
+    "town_code": 310117106,
+    "detail": 1,
+    "uid": "808af617030365403ce231f8",
+    "detail_info": {
+     "classified_poi_tag": "公司企业",
+     "tag": "公司企业",
+     "navi_location": {
+      "lat": 31.097172654391397,
+      "lng": 121.27690795064683
+     },
+     "type": "enterprise",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=808af617030365403ce231f8&output=html&source=placeapi_v3",
+     "shop_hours": "",
+     "label": "公司企业",
+     "children": []
+    }
+   }
+  ]
+ }
+}

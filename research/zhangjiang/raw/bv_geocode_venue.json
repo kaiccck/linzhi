@@ -1,0 +1,23 @@
+{
+ "_meta": {
+  "name": "bv_geocode_venue",
+  "request": "https://api.map.baidu.com/geocoding/v3/?address=%E4%B8%8A%E6%B5%B7%E5%B8%82%E6%B5%A6%E4%B8%9C%E6%96%B0%E5%8C%BA%E6%B5%B7%E7%A7%91%E8%B7%AF1650%E5%8F%B7&city=%E4%B8%8A%E6%B5%B7%E5%B8%82&output=json&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 90,
+  "ts": "2026-09-26T17:19:05+0800"
+ },
+ "response": {
+  "status": 0,
+  "result": {
+   "location": {
+    "lng": 121.58956054059783,
+    "lat": 31.183126632536755
+   },
+   "precise": 0,
+   "confidence": 80,
+   "comprehension": 99,
+   "level": "门址"
+  }
+ }
+}

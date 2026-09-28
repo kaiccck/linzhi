@@ -1,0 +1,23 @@
+{
+ "_meta": {
+  "name": "bv_geocode_C",
+  "request": "https://api.map.baidu.com/geocoding/v3/?address=%E4%B8%8A%E6%B5%B7%E5%B8%82%E6%B5%A6%E4%B8%9C%E6%96%B0%E5%8C%BA%E4%B8%87%E7%A7%91%E7%BF%A1%E7%BF%A0%E5%85%AC%E5%9B%AD&city=%E4%B8%8A%E6%B5%B7%E5%B8%82&output=json&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 107,
+  "ts": "2026-09-26T17:19:09+0800"
+ },
+ "response": {
+  "status": 0,
+  "result": {
+   "location": {
+    "lng": 121.61705946886927,
+    "lat": 31.185453458441376
+   },
+   "precise": 1,
+   "confidence": 70,
+   "comprehension": 100,
+   "level": "地产小区"
+  }
+ }
+}

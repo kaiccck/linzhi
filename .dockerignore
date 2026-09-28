@@ -1,0 +1,27 @@
+# Build context for the root Dockerfile: sources, lockfile and sample data only. Never secrets.
+.env*
+.git
+.github
+.workflow
+**/node_modules
+**/dist
+**/coverage
+**/.vite
+**/*.tsbuildinfo
+**/.DS_Store
+.cache
+data/cache
+
+# Research inputs (raw OSM / Baidu responses), design mockups and tooling state are not part of the product build.
+research
+design
+.impeccable
+.claude
+.idea
+.vscode
+*.pdf
+
+# Editing these should not invalidate the build cache.
+Dockerfile
+.dockerignore
+docker-compose.yml

@@ -1,0 +1,15 @@
+{
+ "_meta": {
+  "name": "01b_geocoding_browser_ak_referer_localhost",
+  "request": "https://api.map.baidu.com/geocoding/v3/?address=%E4%B8%8A%E6%B5%B7%E5%B8%82%E6%B5%A6%E4%B8%9C%E6%96%B0%E5%8C%BA%E6%B5%B7%E7%A7%91%E8%B7%AF1650%E5%8F%B7&city=%E4%B8%8A%E6%B5%B7%E5%B8%82&output=json&ak=***",
+  "headers": {
+   "Referer": "http://localhost:5173/"
+  },
+  "http_status": 200,
+  "latency_ms": 85
+ },
+ "response": {
+  "status": 240,
+  "message": "APP 服务被禁用"
+ }
+}

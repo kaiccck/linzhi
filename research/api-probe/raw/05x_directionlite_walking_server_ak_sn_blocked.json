@@ -1,0 +1,13 @@
+{
+ "_meta": {
+  "name": "05x_directionlite_walking_server_ak_sn_blocked",
+  "request": "https://api.map.baidu.com/directionlite/v1/walking?origin=31.2035,121.5930&destination=31.2080,121.5980&output=json&ak=***",
+  "http_status": 200,
+  "latency_ms": 92,
+  "ts": "2026-09-26T14:49:35+0800"
+ },
+ "response": {
+  "status": 211,
+  "message": "APP SN校验失败"
+ }
+}

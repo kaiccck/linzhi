@@ -1,0 +1,3548 @@
+{
+ "id": "pudong-markets-2023q4",
+ "category": "菜市场",
+ "title": "2023年四季度浦东新区菜市场实效测评得分及排名",
+ "publisher": "上海市浦东新区商务委员会",
+ "published": "2023-11-21",
+ "url": "https://www.pudong.gov.cn/019011001/20231123/770324.html",
+ "retrieved": "2026-09-28",
+ "region": {
+  "city": "上海市",
+  "district": "浦东新区"
+ },
+ "note": "浦东新区标准化菜市场实效测评：纳入检查 196 家，实际检查 171 家；其余因装修改造、业态调整等未参评（status 列）。名称与地址按原文转录；bd09 由 apps/server/scripts/geocode-official.ts 用百度地理编码补充，geocode 字段记录精度。",
+ "counts": {
+  "listed": 196,
+  "active": 171
+ },
+ "entries": [
+  {
+   "rank": 1,
+   "town": "南汇新城镇",
+   "name": "浦商生鲜古棕店",
+   "address": "古棕路201号",
+   "score": 995,
+   "status": "active",
+   "bd09": [
+    121.924249,
+    30.889452
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区古棕路201号"
+   }
+  },
+  {
+   "rank": 1,
+   "town": "浦兴路街道",
+   "name": "浦汇生活市集",
+   "address": "台儿庄路19号",
+   "score": 995,
+   "status": "active",
+   "bd09": [
+    121.596439,
+    31.269918
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区台儿庄路19号"
+   }
+  },
+  {
+   "rank": 1,
+   "town": "宣桥镇",
+   "name": "浦商生鲜南季店",
+   "address": "南季路111号",
+   "score": 995,
+   "status": "active",
+   "bd09": [
+    121.71614,
+    31.064092
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区南季路111号"
+   }
+  },
+  {
+   "rank": 1,
+   "town": "张江镇",
+   "name": "浦商生鲜香楠店",
+   "address": "香楠路251号",
+   "score": 995,
+   "status": "active",
+   "bd09": [
+    121.620886,
+    31.222123
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区香楠路251号"
+   }
+  },
+  {
+   "rank": 5,
+   "town": "高行镇",
+   "name": "浦商生鲜绿洲店",
+   "address": "振庭路68号",
+   "score": 990,
+   "status": "active",
+   "bd09": [
+    121.597835,
+    31.327554
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区振庭路68号"
+   }
+  },
+  {
+   "rank": 5,
+   "town": "老港镇",
+   "name": "浦商邻里荟中港店",
+   "address": "鑫旺路88号",
+   "score": 990,
+   "status": "active",
+   "bd09": [
+    121.845375,
+    31.044456
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区鑫旺路88号"
+   }
+  },
+  {
+   "rank": 7,
+   "town": "三林镇",
+   "name": "浦商邻里荟前滩店",
+   "address": "高青西路470弄1-6号",
+   "score": 985,
+   "status": "active",
+   "bd09": [
+    121.483899,
+    31.154399
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区高青西路470弄1-6号"
+   }
+  },
+  {
+   "rank": 8,
+   "town": "惠南镇",
+   "name": "浦商生鲜荡湾店",
+   "address": "城东路62号东首",
+   "score": 984,
+   "status": "active",
+   "bd09": [
+    121.768404,
+    31.055172
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区城东路62号东首"
+   }
+  },
+  {
+   "rank": 9,
+   "town": "张江镇",
+   "name": "浦商生鲜环西店",
+   "address": "孙环路643号",
+   "score": 980,
+   "status": "active",
+   "bd09": [
+    121.648146,
+    31.182108
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区孙环路643号"
+   }
+  },
+  {
+   "rank": 9,
+   "town": "张江镇",
+   "name": "浦商生鲜申城佳苑店",
+   "address": "孙建路858号",
+   "score": 980,
+   "status": "active",
+   "bd09": [
+    121.647076,
+    31.188721
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区孙建路858号"
+   }
+  },
+  {
+   "rank": 11,
+   "town": "泥城镇",
+   "name": "浦商生鲜云荷店",
+   "address": "云汉路979号",
+   "score": 973,
+   "status": "active",
+   "bd09": [
+    121.813069,
+    30.91705
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区云汉路979号"
+   }
+  },
+  {
+   "rank": 11,
+   "town": "泥城镇",
+   "name": "浦商生鲜云绣店",
+   "address": "云汉路669号",
+   "score": 973,
+   "status": "active",
+   "bd09": [
+    121.819016,
+    30.914795
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区云汉路669号"
+   }
+  },
+  {
+   "rank": 13,
+   "town": "泥城镇",
+   "name": "浦商邻里荟松帆店",
+   "address": "池月路58号",
+   "score": 970,
+   "status": "active",
+   "bd09": [
+    121.815789,
+    30.904849
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区池月路58号"
+   }
+  },
+  {
+   "rank": 13,
+   "town": "周家渡街道",
+   "name": "浦商邻里荟云莲店",
+   "address": "昌里东路738号",
+   "score": 970,
+   "status": "active",
+   "bd09": [
+    121.524476,
+    31.186252
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区昌里东路738号"
+   }
+  },
+  {
+   "rank": 13,
+   "town": "万祥镇",
+   "name": "浦商菜市场万祥店",
+   "address": "万和路228弄18号",
+   "score": 970,
+   "status": "active",
+   "bd09": [
+    121.824949,
+    30.977494
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区万和路228弄18号"
+   }
+  },
+  {
+   "rank": 16,
+   "town": "高行镇",
+   "name": "万有俱进菜市场",
+   "address": "俱进路408号",
+   "score": 965,
+   "status": "active",
+   "bd09": [
+    121.618272,
+    31.305805
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区俱进路408号"
+   }
+  },
+  {
+   "rank": 16,
+   "town": "宣桥镇",
+   "name": "浦商邻里荟宣欣店",
+   "address": "宣中路440-452号",
+   "score": 965,
+   "status": "active",
+   "bd09": [
+    121.710241,
+    31.031004
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区宣中路440-452号"
+   }
+  },
+  {
+   "rank": 16,
+   "town": "张江镇",
+   "name": "浦商生鲜紫薇店",
+   "address": "广兰路1092弄2-6号",
+   "score": 965,
+   "status": "active",
+   "bd09": [
+    121.626805,
+    31.210717
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区广兰路1092弄2-6号"
+   }
+  },
+  {
+   "rank": 19,
+   "town": "浦兴路街道",
+   "name": "清美鲜家博兴店",
+   "address": "博兴路1622号",
+   "score": 964,
+   "status": "active",
+   "bd09": [
+    121.608112,
+    31.279619
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区博兴路1622号"
+   }
+  },
+  {
+   "rank": 19,
+   "town": "三林镇",
+   "name": "浦商生鲜高青店",
+   "address": "东书房路629弄23-24号一层A区",
+   "score": 964,
+   "status": "active",
+   "bd09": [
+    121.544146,
+    31.169569
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区东书房路629弄23-24号一层A区"
+   }
+  },
+  {
+   "rank": 21,
+   "town": "高桥镇",
+   "name": "凌桥农贸市场",
+   "address": "江东路1380弄115号",
+   "score": 961,
+   "status": "active",
+   "bd09": [
+    121.549954,
+    31.37124
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区江东路1380弄115号"
+   }
+  },
+  {
+   "rank": 21,
+   "town": "唐镇",
+   "name": "正育农贸市场",
+   "address": "南曹路510号",
+   "score": 961,
+   "status": "active",
+   "bd09": [
+    121.666195,
+    31.206386
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区南曹路510号"
+   }
+  },
+  {
+   "rank": 23,
+   "town": "金桥镇",
+   "name": "浦商邻里荟金葵店",
+   "address": "金葵路1176号",
+   "score": 960,
+   "status": "active",
+   "bd09": [
+    121.639096,
+    31.244592
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金葵路1176号"
+   }
+  },
+  {
+   "rank": 23,
+   "town": "张江镇",
+   "name": "浦商邻里荟孙桥店",
+   "address": "孙桥路301弄2号",
+   "score": 960,
+   "status": "active",
+   "bd09": [
+    121.637666,
+    31.186359
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区孙桥路301弄2号"
+   }
+  },
+  {
+   "rank": 23,
+   "town": "张江镇",
+   "name": "浦商邻里荟益江店",
+   "address": "益江路433号",
+   "score": 960,
+   "status": "active",
+   "bd09": [
+    121.634131,
+    31.20379
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区益江路433号"
+   }
+  },
+  {
+   "rank": 26,
+   "town": "曹路镇",
+   "name": "金晓市场",
+   "address": "金晓路73-95号",
+   "score": 959,
+   "status": "active",
+   "bd09": [
+    121.683132,
+    31.284819
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金晓路73-95号"
+   }
+  },
+  {
+   "rank": 26,
+   "town": "周家渡街道",
+   "name": "浦商邻里荟齐河路店",
+   "address": "齐河路23号",
+   "score": 959,
+   "status": "active",
+   "bd09": [
+    121.506519,
+    31.183674
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区齐河路23号"
+   }
+  },
+  {
+   "rank": 28,
+   "town": "高行镇",
+   "name": "浦商生鲜金地店",
+   "address": "启帆路312号",
+   "score": 958,
+   "status": "active",
+   "bd09": [
+    121.591393,
+    31.318511
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区启帆路312号"
+   }
+  },
+  {
+   "rank": 29,
+   "town": "金桥镇",
+   "name": "浦商邻里荟张桥店",
+   "address": "金高路2021号",
+   "score": 955,
+   "status": "active",
+   "bd09": [
+    121.615487,
+    31.27138
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金高路2021号"
+   }
+  },
+  {
+   "rank": 30,
+   "town": "潍坊新村街道",
+   "name": "浦商邻里荟潍坊五村店",
+   "address": "崂山路潍坊五村546号",
+   "score": 952,
+   "status": "active",
+   "bd09": [
+    121.530475,
+    31.226422
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 75,
+    "level": "楼号",
+    "query": "上海市浦东新区崂山路潍坊五村546号"
+   }
+  },
+  {
+   "rank": 31,
+   "town": "高行镇",
+   "name": "华高菜市场",
+   "address": "金高路1071弄",
+   "score": 950,
+   "status": "active",
+   "bd09": [
+    121.616781,
+    31.287438
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金高路1071弄"
+   }
+  },
+  {
+   "rank": 32,
+   "town": "南码头路街道",
+   "name": "六里二菜市场佰品汇生鲜",
+   "address": "高科西路1400号",
+   "score": 948,
+   "status": "active",
+   "bd09": [
+    121.527222,
+    31.193424
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区高科西路1400号"
+   }
+  },
+  {
+   "rank": 33,
+   "town": "浦兴路街道",
+   "name": "清美鲜家双桥店",
+   "address": "双桥路216号",
+   "score": 947,
+   "status": "active",
+   "bd09": [
+    121.603401,
+    31.290467
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区双桥路216号"
+   }
+  },
+  {
+   "rank": 34,
+   "town": "潍坊新村街道",
+   "name": "浦商菜市场王家宅店",
+   "address": "东建新村20号",
+   "score": 946,
+   "status": "active",
+   "bd09": [
+    121.526581,
+    31.223134
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 75,
+    "level": "楼号",
+    "query": "上海市浦东新区东建新村20号"
+   }
+  },
+  {
+   "rank": 35,
+   "town": "花木街道",
+   "name": "浦商生鲜锦博店",
+   "address": "高科西路2111弄163号",
+   "score": 944,
+   "status": "active",
+   "bd09": [
+    121.542368,
+    31.194224
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区高科西路2111弄163号"
+   }
+  },
+  {
+   "rank": 36,
+   "town": "潍坊新村街道",
+   "name": "浦商邻里荟竹园店",
+   "address": "福山路307号",
+   "score": 943,
+   "status": "active",
+   "bd09": [
+    121.535638,
+    31.235627
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区福山路307号"
+   }
+  },
+  {
+   "rank": 37,
+   "town": "塘桥街道",
+   "name": "浦商菜市场南泉店",
+   "address": "南泉路1315号",
+   "score": 942,
+   "status": "active",
+   "bd09": [
+    121.528659,
+    31.216044
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区南泉路1315号"
+   }
+  },
+  {
+   "rank": 38,
+   "town": "浦兴路街道",
+   "name": "长岛菜市场",
+   "address": "长岛路1510号",
+   "score": 938,
+   "status": "active",
+   "bd09": [
+    121.607296,
+    31.270069
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区长岛路1510号"
+   }
+  },
+  {
+   "rank": 38,
+   "town": "三林镇",
+   "name": "灵杨农贸市场",
+   "address": "上南路3787号",
+   "score": 938,
+   "status": "active",
+   "bd09": [
+    121.511676,
+    31.157387
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区上南路3787号"
+   }
+  },
+  {
+   "rank": 40,
+   "town": "合庆镇",
+   "name": "合庆菜市场",
+   "address": "东川公路5943号",
+   "score": 935,
+   "status": "active",
+   "bd09": [
+    121.725065,
+    31.242126
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区东川公路5943号"
+   }
+  },
+  {
+   "rank": 41,
+   "town": "上钢新村街道",
+   "name": "上钢集贸市场",
+   "address": "上南路1500弄11-12号",
+   "score": 934,
+   "status": "active",
+   "bd09": [
+    121.501426,
+    31.181478
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区上南路1500弄11-12号"
+   }
+  },
+  {
+   "rank": 42,
+   "town": "航头镇",
+   "name": "浦商生鲜航阳店",
+   "address": "航瑞路388弄61号一层",
+   "score": 933,
+   "status": "active",
+   "bd09": [
+    121.601494,
+    31.079372
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区航瑞路388弄61号一层"
+   }
+  },
+  {
+   "rank": 42,
+   "town": "南汇新城镇",
+   "name": "欧景市集",
+   "address": "夏栎路330弄11号",
+   "score": 933,
+   "status": "active",
+   "bd09": [
+    121.923157,
+    30.921475
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区夏栎路330弄11号"
+   }
+  },
+  {
+   "rank": 42,
+   "town": "潍坊新村街道",
+   "name": "浦商菜市场杨家渡店",
+   "address": "浦东南路东南新村31号",
+   "score": 933,
+   "status": "active",
+   "bd09": [
+    121.522783,
+    31.231113
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 75,
+    "level": "楼号",
+    "query": "上海市浦东新区浦东南路东南新村31号"
+   }
+  },
+  {
+   "rank": 45,
+   "town": "新场镇",
+   "name": "新场集贸市场",
+   "address": "牌楼西路239号",
+   "score": 932,
+   "status": "active",
+   "bd09": [
+    121.648655,
+    31.028823
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区牌楼西路239号"
+   }
+  },
+  {
+   "rank": 46,
+   "town": "陆家嘴街道",
+   "name": "崂山市场",
+   "address": "浦东大道101弄28号",
+   "score": 931,
+   "status": "active",
+   "bd09": [
+    121.517856,
+    31.244239
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区浦东大道101弄28号"
+   }
+  },
+  {
+   "rank": 47,
+   "town": "三林镇",
+   "name": "浦商菜市场永泰店",
+   "address": "永泰路1988号",
+   "score": 930,
+   "status": "active",
+   "bd09": [
+    121.54826,
+    31.15203
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区永泰路1988号"
+   }
+  },
+  {
+   "rank": 47,
+   "town": "三林镇",
+   "name": "迎博农贸市场",
+   "address": "大道站路230号",
+   "score": 930,
+   "status": "active",
+   "bd09": [
+    121.544986,
+    31.166816
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区大道站路230号"
+   }
+  },
+  {
+   "rank": 49,
+   "town": "金杨新村街道",
+   "name": "金杨市集",
+   "address": "金杨路632号",
+   "score": 928,
+   "status": "active",
+   "bd09": [
+    121.588608,
+    31.256378
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金杨路632号"
+   }
+  },
+  {
+   "rank": 49,
+   "town": "塘桥街道",
+   "name": "清美鲜食茂兴路店",
+   "address": "茂兴路61号",
+   "score": 928,
+   "status": "active",
+   "bd09": [
+    121.521694,
+    31.215538
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区茂兴路61号"
+   }
+  },
+  {
+   "rank": 51,
+   "town": "曹路镇",
+   "name": "浦商菜市场顾东店",
+   "address": "水洞港路69号",
+   "score": 925,
+   "status": "active",
+   "bd09": [
+    121.669939,
+    31.300219
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区水洞港路69号"
+   }
+  },
+  {
+   "rank": 51,
+   "town": "惠南镇",
+   "name": "浦商菜市场红光店",
+   "address": "拱乐路888号",
+   "score": 925,
+   "status": "active",
+   "bd09": [
+    121.773392,
+    31.069484
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区拱乐路888号"
+   }
+  },
+  {
+   "rank": 51,
+   "town": "陆家嘴街道",
+   "name": "万有菜场商城路店",
+   "address": "商城路357号",
+   "score": 925,
+   "status": "active",
+   "bd09": [
+    121.517915,
+    31.23531
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区商城路357号"
+   }
+  },
+  {
+   "rank": 51,
+   "town": "三林镇",
+   "name": "爱博菜市场",
+   "address": "东书房路111号",
+   "score": 925,
+   "status": "active",
+   "bd09": [
+    121.540086,
+    31.175499
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区东书房路111号"
+   }
+  },
+  {
+   "rank": 51,
+   "town": "书院镇",
+   "name": "浦商生鲜石潭街店",
+   "address": "石潭街109号",
+   "score": 925,
+   "status": "active",
+   "bd09": [
+    121.879667,
+    30.982711
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区石潭街109号"
+   }
+  },
+  {
+   "rank": 56,
+   "town": "曹路镇",
+   "name": "浦商菜市场曹路店",
+   "address": "川沙路343号-1",
+   "score": 924,
+   "status": "active",
+   "bd09": [
+    121.673766,
+    31.285419
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区川沙路343号-1"
+   }
+  },
+  {
+   "rank": 56,
+   "town": "康桥镇",
+   "name": "梓潼市集",
+   "address": "秀海路182弄",
+   "score": 924,
+   "status": "active",
+   "bd09": [
+    121.567713,
+    31.124504
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 70,
+    "level": "医疗",
+    "query": "上海市浦东新区秀海路182弄"
+   }
+  },
+  {
+   "rank": 58,
+   "town": "浦兴路街道",
+   "name": "绿景苑菜市场",
+   "address": "台儿庄路533号",
+   "score": 923,
+   "status": "active",
+   "bd09": [
+    121.602618,
+    31.262561
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区台儿庄路533号"
+   }
+  },
+  {
+   "rank": 59,
+   "town": "高东镇",
+   "name": "浦商邻里荟兴村店",
+   "address": "园一路139号",
+   "score": 922,
+   "status": "active",
+   "bd09": [
+    121.637033,
+    31.322387
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区园一路139号"
+   }
+  },
+  {
+   "rank": 60,
+   "town": "高桥镇",
+   "name": "潼港农贸市场",
+   "address": "清溪路128号",
+   "score": 920,
+   "status": "active",
+   "bd09": [
+    121.581983,
+    31.350958
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区清溪路128号"
+   }
+  },
+  {
+   "rank": 61,
+   "town": "三林镇",
+   "name": "灵丰农贸市场",
+   "address": "灵岩南路254号",
+   "score": 918,
+   "status": "active",
+   "bd09": [
+    121.50149,
+    31.16409
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区灵岩南路254号"
+   }
+  },
+  {
+   "rank": 61,
+   "town": "洋泾街道",
+   "name": "羽山综合市场",
+   "address": "羽山路780号",
+   "score": 918,
+   "status": "active",
+   "bd09": [
+    121.556522,
+    31.241173
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区羽山路780号"
+   }
+  },
+  {
+   "rank": 61,
+   "town": "沪东新村街道",
+   "name": "正育农贸五莲店",
+   "address": "莱阳路五莲路",
+   "score": 918,
+   "status": "active",
+   "bd09": [
+    121.589796,
+    31.283131
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区莱阳路五莲路"
+   }
+  },
+  {
+   "rank": 64,
+   "town": "花木街道",
+   "name": "博文市场",
+   "address": "严镇路253号",
+   "score": 916,
+   "status": "active",
+   "bd09": [
+    121.536719,
+    31.197874
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区严镇路253号"
+   }
+  },
+  {
+   "rank": 64,
+   "town": "惠南镇",
+   "name": "浦商生鲜拱乐店",
+   "address": "拱乐路听潮路交叉口",
+   "score": 916,
+   "status": "active",
+   "bd09": [
+    121.748658,
+    31.061642
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区拱乐路听潮路交叉口"
+   }
+  },
+  {
+   "rank": 66,
+   "town": "惠南镇",
+   "name": "浦商邻里荟拱秀店",
+   "address": "拱秀路城西路交叉口",
+   "score": 915,
+   "status": "active",
+   "bd09": [
+    121.755479,
+    31.037915
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区拱秀路城西路交叉口"
+   }
+  },
+  {
+   "rank": 67,
+   "town": "高东镇",
+   "name": "浦商邻里荟高东店",
+   "address": "光明路321号",
+   "score": 914,
+   "status": "active",
+   "bd09": [
+    121.624773,
+    31.337483
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区光明路321号"
+   }
+  },
+  {
+   "rank": 67,
+   "town": "航头镇",
+   "name": "航盛集贸市场",
+   "address": "航兴路58号",
+   "score": 914,
+   "status": "active",
+   "bd09": [
+    121.603502,
+    31.028789
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区航兴路58号"
+   }
+  },
+  {
+   "rank": 69,
+   "town": "航头镇",
+   "name": "浦商生鲜航兆店",
+   "address": "航头镇航梅路699号",
+   "score": 913,
+   "status": "active",
+   "bd09": [
+    121.585164,
+    31.03488
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区航头镇航梅路699号"
+   }
+  },
+  {
+   "rank": 69,
+   "town": "北蔡镇",
+   "name": "鹏海菜市场",
+   "address": "陈春东路120号",
+   "score": 913,
+   "status": "active",
+   "bd09": [
+    121.566976,
+    31.181529
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区陈春东路120号"
+   }
+  },
+  {
+   "rank": 71,
+   "town": "沪东新村街道",
+   "name": "浦商菜市场沪东店",
+   "address": "沪东路67号",
+   "score": 912,
+   "status": "active",
+   "bd09": [
+    121.586985,
+    31.277175
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区沪东路67号"
+   }
+  },
+  {
+   "rank": 72,
+   "town": "航头镇",
+   "name": "浦商菜市场航月店",
+   "address": "鹤弛路198号",
+   "score": 911,
+   "status": "active",
+   "bd09": [
+    121.550455,
+    31.227348
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 20,
+    "level": "区县",
+    "query": "上海市浦东新区鹤弛路198号"
+   }
+  },
+  {
+   "rank": 72,
+   "town": "唐镇",
+   "name": "新旺港集贸市场",
+   "address": "虹盛路24号",
+   "score": 911,
+   "status": "active",
+   "bd09": [
+    121.69039,
+    31.243673
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区虹盛路24号"
+   }
+  },
+  {
+   "rank": 74,
+   "town": "川沙新镇",
+   "name": "川迪农贸市场",
+   "address": "华夏二路1285弄",
+   "score": 910,
+   "status": "active",
+   "bd09": [
+    121.697558,
+    31.181738
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区华夏二路1285弄"
+   }
+  },
+  {
+   "rank": 74,
+   "town": "唐镇",
+   "name": "唐安集贸市场",
+   "address": "唐安路797弄1号",
+   "score": 910,
+   "status": "active",
+   "bd09": [
+    121.659964,
+    31.214546
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区唐安路797弄1号"
+   }
+  },
+  {
+   "rank": 74,
+   "town": "祝桥镇",
+   "name": "浦商邻里荟航城集市",
+   "address": "施新路499弄1-4号",
+   "score": 910,
+   "status": "active",
+   "bd09": [
+    121.756141,
+    31.152386
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区施新路499弄1-4号"
+   }
+  },
+  {
+   "rank": 77,
+   "town": "新场镇",
+   "name": "坦直集贸市场",
+   "address": "坦直路82号",
+   "score": 909,
+   "status": "active",
+   "bd09": [
+    121.65476,
+    31.079082
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区坦直路82号"
+   }
+  },
+  {
+   "rank": 78,
+   "town": "北蔡镇",
+   "name": "天之菜市场",
+   "address": "北艾路227弄8号",
+   "score": 908,
+   "status": "active",
+   "bd09": [
+    121.548317,
+    31.191424
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区北艾路227弄8号"
+   }
+  },
+  {
+   "rank": 78,
+   "town": "花木街道",
+   "name": "米蘅集市",
+   "address": "东建路350号",
+   "score": 908,
+   "status": "active",
+   "bd09": [
+    121.540571,
+    31.206665
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区东建路350号"
+   }
+  },
+  {
+   "rank": 80,
+   "town": "祝桥镇",
+   "name": "浦商邻里荟东港店",
+   "address": "祝城路东港卫生所东侧",
+   "score": 907,
+   "status": "active",
+   "bd09": [
+    121.766533,
+    31.114147
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区祝城路东港卫生所东侧"
+   }
+  },
+  {
+   "rank": 81,
+   "town": "康桥镇",
+   "name": "灵花菜场",
+   "address": "康花路246号",
+   "score": 906,
+   "status": "active",
+   "bd09": [
+    121.553968,
+    31.157354
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区康花路246号"
+   }
+  },
+  {
+   "rank": 82,
+   "town": "曹路镇",
+   "name": "海鹏市场",
+   "address": "海鹏路138-160号",
+   "score": 905,
+   "status": "active",
+   "bd09": [
+    121.677956,
+    31.294229
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区海鹏路138-160号"
+   }
+  },
+  {
+   "rank": 82,
+   "town": "惠南镇",
+   "name": "浦商菜市场听潮店",
+   "address": "西门路121弄9号",
+   "score": 905,
+   "status": "active",
+   "bd09": [
+    121.751872,
+    31.052025
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区西门路121弄9号"
+   }
+  },
+  {
+   "rank": 82,
+   "town": "三林镇",
+   "name": "鼎炯农贸市场",
+   "address": "和炯路191号",
+   "score": 905,
+   "status": "active",
+   "bd09": [
+    121.510302,
+    31.127093
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区和炯路191号"
+   }
+  },
+  {
+   "rank": 85,
+   "town": "曹路镇",
+   "name": "越幸市场",
+   "address": "龚华路235号48号-1",
+   "score": 903,
+   "status": "active",
+   "bd09": [
+    121.692034,
+    31.269956
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区龚华路235号48号-1"
+   }
+  },
+  {
+   "rank": 85,
+   "town": "川沙新镇",
+   "name": "黄楼农贸市场",
+   "address": "黄楼为民街30号",
+   "score": 903,
+   "status": "active",
+   "bd09": [
+    121.676273,
+    31.170329
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区黄楼为民街30号"
+   }
+  },
+  {
+   "rank": 87,
+   "town": "北蔡镇",
+   "name": "亿家美菜市场",
+   "address": "下南路386号",
+   "score": 900,
+   "status": "active",
+   "bd09": [
+    121.547115,
+    31.176895
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区下南路386号"
+   }
+  },
+  {
+   "rank": 87,
+   "town": "三林镇",
+   "name": "康德农贸市场",
+   "address": "和炯路659号",
+   "score": 900,
+   "status": "active",
+   "bd09": [
+    121.517458,
+    31.130862
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区和炯路659号"
+   }
+  },
+  {
+   "rank": 87,
+   "town": "唐镇",
+   "name": "唐兴菜市场",
+   "address": "顾唐路2800号",
+   "score": 900,
+   "status": "active",
+   "bd09": [
+    121.673537,
+    31.218566
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区顾唐路2800号"
+   }
+  },
+  {
+   "rank": 90,
+   "town": "金杨新村街道",
+   "name": "浦商菜市场万德店",
+   "address": "博山东路90号",
+   "score": 898,
+   "status": "active",
+   "bd09": [
+    121.567697,
+    31.254059
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区博山东路90号"
+   }
+  },
+  {
+   "rank": 91,
+   "town": "上钢新村街道",
+   "name": "喻龙市场",
+   "address": "耀华路211号-1",
+   "score": 896,
+   "status": "active",
+   "bd09": [
+    121.496065,
+    31.182824
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区耀华路211号-1"
+   }
+  },
+  {
+   "rank": 92,
+   "town": "三林镇",
+   "name": "杨东菜市场",
+   "address": "杨思路1351号",
+   "score": 895,
+   "status": "active",
+   "bd09": [
+    121.513995,
+    31.170373
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区杨思路1351号"
+   }
+  },
+  {
+   "rank": 92,
+   "town": "洋泾街道",
+   "name": "泾东集贸市场",
+   "address": "崮山路311号",
+   "score": 895,
+   "status": "active",
+   "bd09": [
+    121.560928,
+    31.252067
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区崮山路311号"
+   }
+  },
+  {
+   "rank": 94,
+   "town": "花木街道",
+   "name": "浦商菜市场锦安店",
+   "address": "锦安东路240-244号",
+   "score": 894,
+   "status": "active",
+   "bd09": [
+    121.550089,
+    31.208549
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区锦安东路240-244号"
+   }
+  },
+  {
+   "rank": 95,
+   "town": "曹路镇",
+   "name": "星港市场",
+   "address": "新辉西路1号",
+   "score": 893,
+   "status": "active",
+   "bd09": [
+    121.71118,
+    31.260547
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新辉西路1号"
+   }
+  },
+  {
+   "rank": 95,
+   "town": "川沙新镇",
+   "name": "妙境农贸市场",
+   "address": "妙境路635号",
+   "score": 893,
+   "status": "active",
+   "bd09": [
+    121.698113,
+    31.195302
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区妙境路635号"
+   }
+  },
+  {
+   "rank": 95,
+   "town": "高桥镇",
+   "name": "高桥农贸市场",
+   "address": "海高一村28号—30号",
+   "score": 893,
+   "status": "active",
+   "bd09": [
+    121.589501,
+    31.355139
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 75,
+    "level": "楼号",
+    "query": "上海市浦东新区海高一村28号—30号"
+   }
+  },
+  {
+   "rank": 98,
+   "town": "高桥镇",
+   "name": "春晖农贸市场",
+   "address": "春晖路106弄1-98号",
+   "score": 892,
+   "status": "active",
+   "bd09": [
+    121.592824,
+    31.348626
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区春晖路106弄1-98号"
+   }
+  },
+  {
+   "rank": 99,
+   "town": "三林镇",
+   "name": "懿德农贸市场",
+   "address": "懿行路603弄3号201室",
+   "score": 890,
+   "status": "active",
+   "bd09": [
+    121.512927,
+    31.131565
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区懿行路603弄3号201室"
+   }
+  },
+  {
+   "rank": 100,
+   "town": "康桥镇",
+   "name": "康叶菜场",
+   "address": "秀沿路2751号",
+   "score": 888,
+   "status": "active",
+   "bd09": [
+    121.615687,
+    31.143663
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区秀沿路2751号"
+   }
+  },
+  {
+   "rank": 101,
+   "town": "南码头路街道",
+   "name": "兰陵菜市场",
+   "address": "兰陵路48号",
+   "score": 887,
+   "status": "active",
+   "bd09": [
+    121.522746,
+    31.200826
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区兰陵路48号"
+   }
+  },
+  {
+   "rank": 102,
+   "town": "高东镇",
+   "name": "杨园菜市场",
+   "address": "镇南路1号",
+   "score": 885,
+   "status": "active",
+   "bd09": [
+    121.640429,
+    31.310692
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区镇南路1号"
+   }
+  },
+  {
+   "rank": 103,
+   "town": "川沙新镇",
+   "name": "新德农贸市场",
+   "address": "德川路369弄287号一层",
+   "score": 884,
+   "status": "active",
+   "bd09": [
+    121.675905,
+    31.198802
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区德川路369弄287号一层"
+   }
+  },
+  {
+   "rank": 103,
+   "town": "高行镇",
+   "name": "百汇菜市场",
+   "address": "莱阳路3415号",
+   "score": 884,
+   "status": "active",
+   "bd09": [
+    121.588886,
+    31.336678
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区莱阳路3415号"
+   }
+  },
+  {
+   "rank": 105,
+   "town": "航头镇",
+   "name": "浦商菜市场下沙店",
+   "address": "下沙西街181",
+   "score": 883,
+   "status": "active",
+   "bd09": [
+    121.593365,
+    31.056054
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区下沙西街181"
+   }
+  },
+  {
+   "rank": 106,
+   "town": "川沙新镇",
+   "name": "川南农贸市场",
+   "address": "川环南路401号",
+   "score": 880,
+   "status": "active",
+   "bd09": [
+    121.712111,
+    31.194323
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区川环南路401号"
+   }
+  },
+  {
+   "rank": 106,
+   "town": "南汇新城镇",
+   "name": "光明邻里集市临港方竹店",
+   "address": "方竹路211弄33号",
+   "score": 880,
+   "status": "active",
+   "bd09": [
+    121.91713,
+    30.898725
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 70,
+    "level": "教育",
+    "query": "上海市浦东新区方竹路211弄33号"
+   }
+  },
+  {
+   "rank": 106,
+   "town": "周浦镇",
+   "name": "新公元集贸市场",
+   "address": "德浦路17号",
+   "score": 880,
+   "status": "active",
+   "bd09": [
+    121.583357,
+    31.129318
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区德浦路17号"
+   }
+  },
+  {
+   "rank": 109,
+   "town": "北蔡镇",
+   "name": "莲溪市集",
+   "address": "北中路353号",
+   "score": 879,
+   "status": "active",
+   "bd09": [
+    121.564637,
+    31.190334
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区北中路353号"
+   }
+  },
+  {
+   "rank": 110,
+   "town": "高桥镇",
+   "name": "展凌农贸市场",
+   "address": "凌创路229-251号",
+   "score": 877,
+   "status": "active",
+   "bd09": [
+    121.543877,
+    31.367026
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区凌创路229-251号"
+   }
+  },
+  {
+   "rank": 111,
+   "town": "川沙新镇",
+   "name": "六团农贸市场",
+   "address": "普庆路290号",
+   "score": 876,
+   "status": "active",
+   "bd09": [
+    121.730545,
+    31.1609
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区普庆路290号"
+   }
+  },
+  {
+   "rank": 112,
+   "town": "北蔡镇",
+   "name": "紫叶菜市场",
+   "address": "莲安西路250号",
+   "score": 875,
+   "status": "active",
+   "bd09": [
+    121.557415,
+    31.186846
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区莲安西路250号"
+   }
+  },
+  {
+   "rank": 112,
+   "town": "航头镇",
+   "name": "鹤波集贸市场",
+   "address": "鹤波路251号",
+   "score": 875,
+   "status": "active",
+   "bd09": [
+    121.612577,
+    31.078964
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区鹤波路251号"
+   }
+  },
+  {
+   "rank": 112,
+   "town": "金杨新村街道",
+   "name": "博山市场",
+   "address": "博山东路358号",
+   "score": 875,
+   "status": "active",
+   "bd09": [
+    121.573644,
+    31.258156
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区博山东路358号"
+   }
+  },
+  {
+   "rank": 115,
+   "town": "康桥镇",
+   "name": "康桥老街菜市场",
+   "address": "秀沈路247号",
+   "score": 874,
+   "status": "active",
+   "bd09": [
+    121.567779,
+    31.141514
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区秀沈路247号"
+   }
+  },
+  {
+   "rank": 115,
+   "town": "洋泾街道",
+   "name": "凌浦菜市场",
+   "address": "浦东大道1623弄24号",
+   "score": 874,
+   "status": "active",
+   "bd09": [
+    121.548877,
+    31.25219
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 70,
+    "level": "地产小区",
+    "query": "上海市浦东新区浦东大道1623弄24号"
+   }
+  },
+  {
+   "rank": 117,
+   "town": "潍坊新村街道",
+   "name": "浦商邻里荟浦城店",
+   "address": "浦城路550号",
+   "score": 873,
+   "status": "active",
+   "bd09": [
+    121.520679,
+    31.230786
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区浦城路550号"
+   }
+  },
+  {
+   "rank": 118,
+   "town": "曹路镇",
+   "name": "民建集贸市场",
+   "address": "民同路276号",
+   "score": 871,
+   "status": "active",
+   "bd09": [
+    121.659176,
+    31.275584
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区民同路276号"
+   }
+  },
+  {
+   "rank": 118,
+   "town": "惠南镇",
+   "name": "品上生活中心菜场",
+   "address": "听悦路1330号",
+   "score": 871,
+   "status": "active",
+   "bd09": [
+    121.745459,
+    31.07154
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区听悦路1330号"
+   }
+  },
+  {
+   "rank": 120,
+   "town": "高行镇",
+   "name": "秋岚菜市场",
+   "address": "秋岚路271号",
+   "score": 870,
+   "status": "active",
+   "bd09": [
+    121.601287,
+    31.333998
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区秋岚路271号"
+   }
+  },
+  {
+   "rank": 120,
+   "town": "花木街道",
+   "name": "培花集市",
+   "address": "芳草路373号一层",
+   "score": 870,
+   "status": "active",
+   "bd09": [
+    121.564336,
+    31.200274
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区芳草路373号一层"
+   }
+  },
+  {
+   "rank": 122,
+   "town": "东明路街道",
+   "name": "东明菜市场",
+   "address": "永泰路1155号",
+   "score": 869,
+   "status": "active",
+   "bd09": [
+    121.531388,
+    31.148908
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区永泰路1155号"
+   }
+  },
+  {
+   "rank": 122,
+   "town": "祝桥镇",
+   "name": "龙汇市场",
+   "address": "振兴街（工商所对面）",
+   "score": 869,
+   "status": "active",
+   "bd09": [
+    121.76562,
+    31.122754
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区振兴街（工商所对面）"
+   }
+  },
+  {
+   "rank": 124,
+   "town": "康桥镇",
+   "name": "绿欣康楠菜市场",
+   "address": "康汇路200号",
+   "score": 868,
+   "status": "active",
+   "bd09": [
+    121.609015,
+    31.126642
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区康汇路200号"
+   }
+  },
+  {
+   "rank": 124,
+   "town": "洋泾街道",
+   "name": "盒马菜市",
+   "address": "博山路191号101室",
+   "score": 868,
+   "status": "active",
+   "bd09": [
+    121.561795,
+    31.250446
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区博山路191号101室"
+   }
+  },
+  {
+   "rank": 126,
+   "town": "三林镇",
+   "name": "三彩农贸市场",
+   "address": "三彩路107号",
+   "score": 866,
+   "status": "active",
+   "bd09": [
+    121.505358,
+    31.130531
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区三彩路107号"
+   }
+  },
+  {
+   "rank": 127,
+   "town": "周浦镇",
+   "name": "周东集贸市场",
+   "address": "周东路391-1号",
+   "score": 864,
+   "status": "active",
+   "bd09": [
+    121.596207,
+    31.10958
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区周东路391-1号"
+   }
+  },
+  {
+   "rank": 128,
+   "town": "川沙新镇",
+   "name": "川北农贸市场",
+   "address": "新德路500号",
+   "score": 862,
+   "status": "active",
+   "bd09": [
+    121.700229,
+    31.203131
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新德路500号"
+   }
+  },
+  {
+   "rank": 128,
+   "town": "沪东新村街道",
+   "name": "正育生鲜超市博兴店",
+   "address": "博兴路5500-580号",
+   "score": 862,
+   "status": "active",
+   "bd09": [
+    121.60814,
+    31.282567
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区博兴路5500-580号"
+   }
+  },
+  {
+   "rank": 128,
+   "town": "上钢新村街道",
+   "name": "昌青市场",
+   "address": "耀华路414弄5号",
+   "score": 862,
+   "status": "active",
+   "bd09": [
+    121.494203,
+    31.177856
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区耀华路414弄5号"
+   }
+  },
+  {
+   "rank": 131,
+   "town": "合庆镇",
+   "name": "蔡路菜市场",
+   "address": "塘东街88号",
+   "score": 861,
+   "status": "active",
+   "bd09": [
+    121.736535,
+    31.219371
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区塘东街88号"
+   }
+  },
+  {
+   "rank": 132,
+   "town": "康桥镇",
+   "name": "万有菜场康桥店",
+   "address": "浦三路4888弄5-7号1层",
+   "score": 858,
+   "status": "active",
+   "bd09": [
+    121.539081,
+    31.167078
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区浦三路4888弄5-7号1层"
+   }
+  },
+  {
+   "rank": 132,
+   "town": "祝桥镇",
+   "name": "瀚辉市场",
+   "address": "江晖路409弄54号一层",
+   "score": 858,
+   "status": "active",
+   "bd09": [
+    121.746373,
+    31.177983
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区江晖路409弄54号一层"
+   }
+  },
+  {
+   "rank": 132,
+   "town": "宣桥镇",
+   "name": "张家桥菜市场",
+   "address": "张家桥路67号",
+   "score": 858,
+   "status": "active",
+   "bd09": [
+    121.696578,
+    31.043798
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区张家桥路67号"
+   }
+  },
+  {
+   "rank": 135,
+   "town": "祝桥镇",
+   "name": "华飞市场",
+   "address": "施湾三路1059弄",
+   "score": 857,
+   "status": "active",
+   "bd09": [
+    121.759018,
+    31.146525
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 75,
+    "level": "购物",
+    "query": "上海市浦东新区施湾三路1059弄"
+   }
+  },
+  {
+   "rank": 136,
+   "town": "大团镇",
+   "name": "浦商菜市场金团店",
+   "address": "永春南路389号",
+   "score": 856,
+   "status": "active",
+   "bd09": [
+    121.745102,
+    30.973189
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区永春南路389号"
+   }
+  },
+  {
+   "rank": 137,
+   "town": "金杨新村街道",
+   "name": "荟选集市",
+   "address": "云山路1230号B101铺位",
+   "score": 853,
+   "status": "active",
+   "bd09": [
+    121.580348,
+    31.252343
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区云山路1230号B101铺位"
+   }
+  },
+  {
+   "rank": 138,
+   "town": "南汇新城镇",
+   "name": "新芦苑菜市场",
+   "address": "芦潮港港辉路525号6幢一、二层",
+   "score": 852,
+   "status": "active",
+   "bd09": [
+    121.863452,
+    30.882179
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区芦潮港港辉路525号6幢一、二层"
+   }
+  },
+  {
+   "rank": 139,
+   "town": "祝桥镇",
+   "name": "浦商菜市场江镇店",
+   "address": "川南奉公路1915弄75号",
+   "score": 851,
+   "status": "active",
+   "bd09": [
+    121.75384,
+    31.183661
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "餐饮",
+    "query": "上海市浦东新区川南奉公路1915弄75号"
+   }
+  },
+  {
+   "rank": 140,
+   "town": "浦兴路街道",
+   "name": "金岛菜市场",
+   "address": "长岛路1288号",
+   "score": 848,
+   "status": "active",
+   "bd09": [
+    121.601687,
+    31.268016
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区长岛路1288号"
+   }
+  },
+  {
+   "rank": 140,
+   "town": "周浦镇",
+   "name": "平安里集贸市场",
+   "address": "周秀路99号",
+   "score": 848,
+   "status": "active",
+   "bd09": [
+    121.612917,
+    31.105889
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区周秀路99号"
+   }
+  },
+  {
+   "rank": 140,
+   "town": "浦兴路街道",
+   "name": "连城菜市场",
+   "address": "五莲路916号",
+   "score": 848,
+   "status": "active",
+   "bd09": [
+    121.599476,
+    31.276469
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区五莲路916号"
+   }
+  },
+  {
+   "rank": 140,
+   "town": "南码头路街道",
+   "name": "大桥菜市场",
+   "address": "东三里桥路27号",
+   "score": 848,
+   "status": "active",
+   "bd09": [
+    121.515158,
+    31.205892
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区东三里桥路27号"
+   }
+  },
+  {
+   "rank": 144,
+   "town": "高桥镇",
+   "name": "上炼农贸市场",
+   "address": "和雅路98弄4—46号",
+   "score": 847,
+   "status": "active",
+   "bd09": [
+    121.57684,
+    31.343215
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区和雅路98弄4—46号"
+   }
+  },
+  {
+   "rank": 145,
+   "town": "沪东新村街道",
+   "name": "江南山水集贸市场",
+   "address": "寿光路185号",
+   "score": 846,
+   "status": "active",
+   "bd09": [
+    121.592464,
+    31.28009
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区寿光路185号"
+   }
+  },
+  {
+   "rank": 146,
+   "town": "书院镇",
+   "name": "滨果集贸市场",
+   "address": "滨果公路2825号",
+   "score": 844,
+   "status": "active",
+   "bd09": [
+    121.910888,
+    30.961192
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区滨果公路2825号"
+   }
+  },
+  {
+   "rank": 146,
+   "town": "书院镇",
+   "name": "新港集贸市场",
+   "address": "新欣东路11弄22号",
+   "score": 844,
+   "status": "active",
+   "bd09": [
+    121.875193,
+    30.990603
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新欣东路11弄22号"
+   }
+  },
+  {
+   "rank": 148,
+   "town": "老港镇",
+   "name": "易买购中心菜场",
+   "address": "建中路333号",
+   "score": 843,
+   "status": "active",
+   "bd09": [
+    121.847994,
+    31.039177
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区建中路333号"
+   }
+  },
+  {
+   "rank": 149,
+   "town": "东明路街道",
+   "name": "凌兆菜市场",
+   "address": "灵岩南路1133号",
+   "score": 839,
+   "status": "active",
+   "bd09": [
+    121.506941,
+    31.147658
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区灵岩南路1133号"
+   }
+  },
+  {
+   "rank": 150,
+   "town": "祝桥镇",
+   "name": "浦商菜市场施湾店",
+   "address": "施宏路461号",
+   "score": 837,
+   "status": "active",
+   "bd09": [
+    121.7664,
+    31.158093
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区施宏路461号"
+   }
+  },
+  {
+   "rank": 151,
+   "town": "沪东新村街道",
+   "name": "东波苑生鲜超市",
+   "address": "东波路258号",
+   "score": 836,
+   "status": "active",
+   "bd09": [
+    121.58734,
+    31.289218
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区东波路258号"
+   }
+  },
+  {
+   "rank": 151,
+   "town": "书院镇",
+   "name": "书院集贸市场",
+   "address": "老芦公路1367号",
+   "score": 836,
+   "status": "active",
+   "bd09": [
+    121.873316,
+    30.932201
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区老芦公路1367号"
+   }
+  },
+  {
+   "rank": 153,
+   "town": "康桥镇",
+   "name": "聚顺集贸市场",
+   "address": "军民公路2912-2928号",
+   "score": 835,
+   "status": "active",
+   "bd09": [
+    121.579263,
+    31.143897
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区军民公路2912-2928号"
+   }
+  },
+  {
+   "rank": 154,
+   "town": "金杨新村街道",
+   "name": "越盛市集",
+   "address": "博山东路600号",
+   "score": 832,
+   "status": "active",
+   "bd09": [
+    121.579292,
+    31.261558
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区博山东路600号"
+   }
+  },
+  {
+   "rank": 154,
+   "town": "宣桥镇",
+   "name": "宣竹菜市场",
+   "address": "宣春路72弄76号",
+   "score": 832,
+   "status": "active",
+   "bd09": [
+    121.722828,
+    31.088268
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 75,
+    "level": "购物",
+    "query": "上海市浦东新区宣春路72弄76号"
+   }
+  },
+  {
+   "rank": 156,
+   "town": "北蔡镇",
+   "name": "下南菜市场",
+   "address": "下南路480号",
+   "score": 827,
+   "status": "active",
+   "bd09": [
+    121.546475,
+    31.177925
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区下南路480号"
+   }
+  },
+  {
+   "rank": 157,
+   "town": "周浦镇",
+   "name": "周南集贸市场",
+   "address": "韵浦路259号",
+   "score": 824,
+   "status": "active",
+   "bd09": [
+    121.587672,
+    31.117616
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区韵浦路259号"
+   }
+  },
+  {
+   "rank": 157,
+   "town": "大团镇",
+   "name": "家家居农贸市场",
+   "address": "永春东路15号",
+   "score": 824,
+   "status": "active",
+   "bd09": [
+    121.752664,
+    30.976219
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区永春东路15号"
+   }
+  },
+  {
+   "rank": 159,
+   "town": "北蔡镇",
+   "name": "地杰菜市场",
+   "address": "御青路311号",
+   "score": 817,
+   "status": "active",
+   "bd09": [
+    121.578805,
+    31.163657
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区御青路311号"
+   }
+  },
+  {
+   "rank": 160,
+   "town": "东明路街道",
+   "name": "林博菜市场",
+   "address": "三林路277号",
+   "score": 815,
+   "status": "active",
+   "bd09": [
+    121.504059,
+    31.14419
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区三林路277号"
+   }
+  },
+  {
+   "rank": 161,
+   "town": "南汇新城镇",
+   "name": "联华超市生活鲜竹柏店",
+   "address": "竹柏路276弄1号",
+   "score": 814,
+   "status": "active",
+   "bd09": [
+    121.917579,
+    30.907302
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区竹柏路276弄1号"
+   }
+  },
+  {
+   "rank": 162,
+   "town": "上钢新村街道",
+   "name": "荟选集市后滩店",
+   "address": "济明路518弄7号",
+   "score": 812,
+   "status": "active",
+   "bd09": [
+    121.482901,
+    31.175647
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区济明路518弄7号"
+   }
+  },
+  {
+   "rank": 163,
+   "town": "周家渡街道",
+   "name": "昌莲市场",
+   "address": "昌里东路80弄",
+   "score": 809,
+   "status": "active",
+   "bd09": [
+    121.513338,
+    31.181702
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区昌里东路80弄"
+   }
+  },
+  {
+   "rank": 164,
+   "town": "宣桥镇",
+   "name": "毅斐菜市场",
+   "address": "下盐公路4012弄77号",
+   "score": 806,
+   "status": "active",
+   "bd09": [
+    121.727364,
+    31.076791
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区下盐公路4012弄77号"
+   }
+  },
+  {
+   "rank": 165,
+   "town": "周浦镇",
+   "name": "瑞园菜市场",
+   "address": "瑞阳路331号",
+   "score": 800,
+   "status": "active",
+   "bd09": [
+    121.596303,
+    31.102083
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区瑞阳路331号"
+   }
+  },
+  {
+   "rank": 166,
+   "town": "周浦镇",
+   "name": "瓦南集贸市场",
+   "address": "瓦屑建设路35号",
+   "score": 799,
+   "status": "active",
+   "bd09": [
+    121.660838,
+    31.112789
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区瓦屑建设路35号"
+   }
+  },
+  {
+   "rank": 167,
+   "town": "金杨新村街道",
+   "name": "金口市场",
+   "address": "金口路416号",
+   "score": 797,
+   "status": "active",
+   "bd09": [
+    121.587073,
+    31.251963
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金口路416号"
+   }
+  },
+  {
+   "rank": 168,
+   "town": "惠南镇",
+   "name": "伟民菜场",
+   "address": "运河路269号",
+   "score": 795,
+   "status": "active",
+   "bd09": [
+    121.766924,
+    31.05333
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区运河路269号"
+   }
+  },
+  {
+   "rank": 169,
+   "town": "南码头路街道",
+   "name": "六里农贸菜市场",
+   "address": "浦三路686号",
+   "score": 790,
+   "status": "active",
+   "bd09": [
+    121.523486,
+    31.193105
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区浦三路686号"
+   }
+  },
+  {
+   "rank": 170,
+   "town": "北蔡镇",
+   "name": "浦三市集",
+   "address": "成山路1211号",
+   "score": 734,
+   "status": "active",
+   "bd09": [
+    121.528556,
+    31.181255
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区成山路1211号"
+   }
+  },
+  {
+   "rank": 171,
+   "town": "祝桥镇",
+   "name": "盐仓市场",
+   "address": "川南奉公路5676弄201号",
+   "score": 708,
+   "status": "active",
+   "bd09": [
+    121.767396,
+    31.093055
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 50,
+    "level": "NoClass",
+    "query": "上海市浦东新区川南奉公路5676弄201号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "北蔡镇",
+   "name": "浦商菜市场锦华店",
+   "address": "锦尊路309号",
+   "score": null,
+   "status": "业态调整",
+   "bd09": [
+    121.538785,
+    31.187849
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区锦尊路309号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "北蔡镇",
+   "name": "魏都生活中心菜场南新店",
+   "address": "下南路307弄83号",
+   "score": null,
+   "status": "业态调整",
+   "bd09": [
+    121.549711,
+    31.175849
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区下南路307弄83号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "祝桥镇",
+   "name": "浦商菜市场祝和苑店",
+   "address": "千汇路1000弄210号",
+   "score": null,
+   "status": "业态调整",
+   "bd09": [
+    121.769193,
+    31.127999
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区千汇路1000弄210号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "周浦镇",
+   "name": "周浦集贸市场",
+   "address": "韵浦路58号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.579504,
+    31.116972
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区韵浦路58号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "周浦镇",
+   "name": "吉祥里集贸市场",
+   "address": "周建路166号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.598881,
+    31.094404
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区周建路166号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "张江镇",
+   "name": "贝越市场",
+   "address": "建中路242弄198号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.618544,
+    31.208043
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区建中路242弄198号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "张江镇",
+   "name": "吉家市场",
+   "address": "晨晖路725号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.601857,
+    31.20626
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区晨晖路725号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "张江镇",
+   "name": "浦商生鲜杨镇店",
+   "address": "杨镇路97号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.598685,
+    31.223933
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区杨镇路97号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "惠南镇",
+   "name": "浦商生鲜南门店",
+   "address": "南门路68号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.762056,
+    31.044231
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区南门路68号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "高桥镇",
+   "name": "浦商生鲜冬融店",
+   "address": "冬融路242-286号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.595963,
+    31.3396
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区冬融路242-286号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "陆家嘴街道",
+   "name": "浦商菜市场福山店",
+   "address": "福山路51-1号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.532119,
+    31.243519
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区福山路51-1号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "南码头路街道",
+   "name": "临沂菜市场",
+   "address": "南码头路560号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.5175,
+    31.19704
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区南码头路560号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "上钢新村街道",
+   "name": "西营市场",
+   "address": "西营路56号",
+   "score": null,
+   "status": "业态调整",
+   "bd09": [
+    121.489701,
+    31.17639
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区西营路56号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "塘桥街道",
+   "name": "峨山菜市场",
+   "address": "峨山路488号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.531392,
+    31.219485
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区峨山路488号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "塘桥街道",
+   "name": "浦商生鲜环龙店",
+   "address": "环龙路65弄68号地下一层",
+   "score": null,
+   "status": "业态调整",
+   "bd09": [
+    121.535325,
+    31.211644
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区环龙路65弄68号地下一层"
+   }
+  },
+  {
+   "rank": null,
+   "town": "东明路街道",
+   "name": "尚博湾市集",
+   "address": "尚博路758号",
+   "score": null,
+   "status": "业态调整",
+   "bd09": [
+    121.531604,
+    31.156001
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区尚博路758号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "东明路街道",
+   "name": "环林东路菜市场",
+   "address": "环林东路799弄67号",
+   "score": null,
+   "status": "业态调整",
+   "bd09": [
+    121.538882,
+    31.149194
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区环林东路799弄67号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "康桥镇",
+   "name": "御霞菜市场",
+   "address": "御霞路156弄5号",
+   "score": null,
+   "status": "业态调整",
+   "bd09": [
+    121.591256,
+    31.15866
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区御霞路156弄5号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "康桥镇",
+   "name": "康花河市场",
+   "address": "康花路58号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.566838,
+    31.156904
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区康花路58号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "花木街道",
+   "name": "樱花市场",
+   "address": "樱花路291号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.55598,
+    31.21272
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区樱花路291号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "花木街道",
+   "name": "苗桐市场",
+   "address": "芳草路665号",
+   "score": null,
+   "status": "业态调整",
+   "bd09": [
+    121.553694,
+    31.212537
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区芳草路665号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "金杨新村街道",
+   "name": "香山市场",
+   "address": "灵山路1783号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.576056,
+    31.247828
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区灵山路1783号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "陆家嘴街道",
+   "name": "锦德菜市场",
+   "address": "乳山路90号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.525555,
+    31.239683
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区乳山路90号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "周家渡街道",
+   "name": "昌洪市场",
+   "address": "洪山路237弄15号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.509235,
+    31.178391
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区洪山路237弄15号"
+   }
+  },
+  {
+   "rank": null,
+   "town": "洋泾街道",
+   "name": "栖山农贸市场",
+   "address": "巨野路236号",
+   "score": null,
+   "status": "装修改造",
+   "bd09": [
+    121.551865,
+    31.247043
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区巨野路236号"
+   }
+  }
+ ]
+}

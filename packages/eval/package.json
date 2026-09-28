@@ -1,0 +1,33 @@
+{
+  "name": "@zoudedao/eval",
+  "version": "0.1.0",
+  "private": true,
+  "description": "走得到精度–配额评测：稠密参考网格 vs 直线圆、16 方位射线法与实时引擎（不同路线预算），输出真实对比测试报告的数据与图表。",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "eval": "node --conditions=source --import tsx src/cli.ts",
+    "eval:live": "node --env-file=../../.env.local --conditions=source --import tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@zoudedao/baidu": "workspace:*",
+    "@zoudedao/core": "workspace:*",
+    "@zoudedao/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  }
+}

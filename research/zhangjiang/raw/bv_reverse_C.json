@@ -1,0 +1,710 @@
+{
+ "_meta": {
+  "name": "bv_reverse_C",
+  "request": "https://api.map.baidu.com/reverse_geocoding/v3/?location=31.185923,121.618088&coordtype=bd09ll&extensions_town=true&extensions_poi=1&radius=300&output=json&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 83,
+  "ts": "2026-09-26T17:19:12+0800"
+ },
+ "response": {
+  "status": 0,
+  "result": {
+   "location": {
+    "lng": 121.61808799999993,
+    "lat": 31.18592286089566
+   },
+   "formatted_address": "上海市浦东新区张江镇川和路",
+   "edz": {
+    "name": ""
+   },
+   "business": "张江",
+   "business_info": [
+    {
+     "name": "张江",
+     "location": {
+      "lng": 121.62501818619602,
+      "lat": 31.208733519712162
+     },
+     "adcode": 310115,
+     "distance": 0,
+     "direction": "内"
+    }
+   ],
+   "addressComponent": {
+    "country": "中国",
+    "country_code": 0,
+    "region_code_iso": "CHN",
+    "country_code_iso": "CHN",
+    "country_code_iso2": "CN",
+    "province": "上海市",
+    "city": "上海市",
+    "city_level": 2,
+    "district": "浦东新区",
+    "town": "张江镇",
+    "town_code": "310115125",
+    "distance": "",
+    "direction": "",
+    "adcode": "310115",
+    "street": "川和路",
+    "street_number": ""
+   },
+   "pois": [
+    {
+     "addr": "海市浦东新区荣科路286号",
+     "cp": "",
+     "direction": "内",
+     "distance": "0",
+     "name": "万科翡翠公园",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.61705551632502,
+      "y": 31.185447897668965
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "eb5e3f51d2b3e6b995f08c24",
+     "zip": "",
+     "popularity_level": "1",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区川和路万科翡翠公园-四期",
+     "cp": " ",
+     "direction": "附近",
+     "distance": "45",
+     "name": "联华超市(川和路店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.6181514490472,
+      "y": 31.185579193596404
+     },
+     "tag": "购物;超市",
+     "tel": "",
+     "uid": "6181655a01b6d2352b201a38",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "万科翡翠公园-五期",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区川和路399弄",
+      "point": {
+       "x": 121.61913060205308,
+       "y": 31.18592674075186
+      },
+      "direction": "西",
+      "distance": "116",
+      "uid": "df69f36473acee695af6be2e",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区川和路322弄",
+     "cp": " ",
+     "direction": "东",
+     "distance": "142",
+     "name": "万科·翡翠公园-3期",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.61680399078223,
+      "y": 31.18591129423898
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "b4b294905f81c00be60738f2",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "万科翡翠公园",
+      "tag": "房地产;住宅区",
+      "addr": "海市浦东新区荣科路286号",
+      "point": {
+       "x": 121.61705551632502,
+       "y": 31.185447897668965
+      },
+      "direction": "东北",
+      "distance": "130",
+      "uid": "eb5e3f51d2b3e6b995f08c24",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区川和路388弄1~23号万科翡翠公园四期",
+     "cp": " ",
+     "direction": "东北",
+     "distance": "146",
+     "name": "万科翡翠公园-四期",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.61755856741061,
+      "y": 31.184884095419417
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "69f930532c6e3e3b95ca0705",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "万科翡翠公园",
+      "tag": "房地产;住宅区",
+      "addr": "海市浦东新区荣科路286号",
+      "point": {
+       "x": 121.61705551632502,
+       "y": 31.185447897668965
+      },
+      "direction": "东北",
+      "distance": "130",
+      "uid": "eb5e3f51d2b3e6b995f08c24",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区川和路333弄",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "150",
+     "name": "万科翡翠公园-六期",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.61879822901439,
+      "y": 31.186915312281204
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "a3c267d9d32e0c10aecb663b",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "万科翡翠公园",
+      "tag": "房地产;住宅区",
+      "addr": "海市浦东新区荣科路286号",
+      "point": {
+       "x": 121.61705551632502,
+       "y": 31.185447897668965
+      },
+      "direction": "东北",
+      "distance": "130",
+      "uid": "eb5e3f51d2b3e6b995f08c24",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区荣科路395号",
+     "cp": " ",
+     "direction": "附近",
+     "distance": "32",
+     "name": "贤佳齿科(上海星诺荣科口腔门诊部)",
+     "poiType": "医疗",
+     "point": {
+      "x": 121.61779212684321,
+      "y": 31.185919017495742
+     },
+     "tag": "医疗;诊所",
+     "tel": "(021)23563789,17321098217",
+     "uid": "32cbfd91379db912c056ac28",
+     "zip": "",
+     "popularity_level": "7",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区荣科路479号",
+     "cp": " ",
+     "direction": "附近",
+     "distance": "39",
+     "name": "缪斯琴行(万科店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.6182412795982,
+      "y": 31.18619705431515
+     },
+     "tag": "购物;商铺",
+     "tel": "17621713837",
+     "uid": "a661d7f7f9fd848a4207c104",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "川和路荣科路交叉口336号",
+     "cp": " ",
+     "direction": "附近",
+     "distance": "44",
+     "name": "库迪咖啡(荣科路万科翡翠公园店)",
+     "poiType": "美食",
+     "point": {
+      "x": 121.61772924545751,
+      "y": 31.1860657592532
+     },
+     "tag": "美食;咖啡厅",
+     "tel": "15900812453",
+     "uid": "5d51dccf92a6ca069a0050c9",
+     "zip": "",
+     "popularity_level": "7",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区川和路399弄",
+     "cp": " ",
+     "direction": "西",
+     "distance": "116",
+     "name": "万科翡翠公园-五期",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.61913060205308,
+      "y": 31.18592674075186
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "df69f36473acee695af6be2e",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "万科翡翠公园",
+      "tag": "房地产;住宅区",
+      "addr": "海市浦东新区荣科路286号",
+      "point": {
+       "x": 121.61705551632502,
+       "y": 31.185447897668965
+      },
+      "direction": "东北",
+      "distance": "130",
+      "uid": "eb5e3f51d2b3e6b995f08c24",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区川和路322弄万科翡翠公园宝马私人",
+     "cp": " ",
+     "direction": "东南",
+     "distance": "59",
+     "name": "依威能源充电站(万科翡翠公园【宝马私人】)",
+     "poiType": "交通设施",
+     "point": {
+      "x": 121.61770229629221,
+      "y": 31.186235670474836
+     },
+     "tag": "交通设施;充电站",
+     "tel": "4001800910",
+     "uid": "546a30cd1ea1ae18d2f49ed9",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区环科路850号(学林路地铁站3号口步行410米)",
+     "cp": " ",
+     "direction": "西北",
+     "distance": "186",
+     "name": "万科实验幼儿园",
+     "poiType": "教育培训",
+     "point": {
+      "x": 121.61929229704486,
+      "y": 31.184922712120038
+     },
+     "tag": "教育培训;幼儿园",
+     "tel": "",
+     "uid": "33e50abad49aa9dc2ce67b0c",
+     "zip": "",
+     "popularity_level": "8",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "百业路167弄31号",
+     "cp": " ",
+     "direction": "东",
+     "distance": "218",
+     "name": "泊寓(上海翡翠公园店)",
+     "poiType": "酒店",
+     "point": {
+      "x": 121.61622009220075,
+      "y": 31.185393834586556
+     },
+     "tag": "酒店",
+     "tel": "18516156171",
+     "uid": "aab59b07f672d8f91ce99926",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "2049翡翠公园",
+      "tag": "购物",
+      "addr": "上海市浦东新区荣科路280号",
+      "point": {
+       "x": 121.61636382108234,
+       "y": 31.18489954210158
+      },
+      "direction": "东北",
+      "distance": "233",
+      "uid": "b2603645a2536d00e81e9791",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市川和路388弄",
+     "cp": " ",
+     "direction": "东北",
+     "distance": "177",
+     "name": "民防工程",
+     "poiType": "政府机构",
+     "point": {
+      "x": 121.61716331298622,
+      "y": 31.18480686197045
+     },
+     "tag": "政府机构;其他",
+     "tel": "",
+     "uid": "03396cbbfa295b31b75f1e0a",
+     "zip": "",
+     "popularity_level": "2",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区荣科路277、279、281号一层",
+     "cp": " ",
+     "direction": "东北",
+     "distance": "270",
+     "name": "招商银行(荣科路支行)",
+     "poiType": "金融",
+     "point": {
+      "x": 121.61594161749265,
+      "y": 31.184945882132777
+     },
+     "tag": "金融;银行",
+     "tel": "(021)68910387",
+     "uid": "6c0fdd51b727d751fe0eb050",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区张江镇荣科路450号(学林路地铁站3号口步行370米)",
+     "cp": " ",
+     "direction": "附近",
+     "distance": "43",
+     "name": "中酒连锁(荣科路店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.61846585597569,
+      "y": 31.186003973278066
+     },
+     "tag": "购物;商铺",
+     "tel": "13122123832",
+     "uid": "c806e8dc1bab6cb1a5da399c",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区川和路万科翡翠公园-四期",
+     "cp": " ",
+     "direction": "附近",
+     "distance": "49",
+     "name": "联华(川和路店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.6181065337717,
+      "y": 31.185540577166247
+     },
+     "tag": "购物",
+     "tel": "",
+     "uid": "cbd85e0535942f49306212c0",
+     "zip": "",
+     "popularity_level": "6",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "百业路祥科路298号",
+     "cp": " ",
+     "direction": "东南",
+     "distance": "255",
+     "name": "张江高科·佑越国际",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.61604043109875,
+      "y": 31.186814910960972
+     },
+     "tag": "房地产;写字楼",
+     "tel": "",
+     "uid": "4ea92db307897d83f82213fd",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "荣科路489号",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "62",
+     "name": "花里(荣科路店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.61846585597569,
+      "y": 31.186282009845467
+     },
+     "tag": "购物;商铺",
+     "tel": "13524281891",
+     "uid": "97b1027cde8e5c85c72ba16a",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区川和路万科翡翠公园6期",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "70",
+     "name": "万科翡翠公园六期-7号",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.6184389068104,
+      "y": 31.186374688517986
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "362147a1ff782be28f55eca4",
+     "zip": "",
+     "popularity_level": "3",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "万科翡翠公园-六期",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区川和路333弄",
+      "point": {
+       "x": 121.61879822901439,
+       "y": 31.186915312281204
+      },
+      "direction": "西南",
+      "distance": "150",
+      "uid": "a3c267d9d32e0c10aecb663b",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "荣科路495号1层2室",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "72",
+     "name": "华致酒库(荣科路店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.6185467034716,
+      "y": 31.186320625970147
+     },
+     "tag": "购物;商铺",
+     "tel": "15900590287",
+     "uid": "825f5ba28ab98e4ceae58281",
+     "zip": "",
+     "popularity_level": "7",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    }
+   ],
+   "roads": [],
+   "poiRegions": [
+    {
+     "direction_desc": "内",
+     "name": "万科翡翠公园",
+     "tag": "房地产;住宅区",
+     "uid": "eb5e3f51d2b3e6b995f08c24",
+     "distance": "0",
+     "region_area": 445270.41
+    }
+   ],
+   "sematic_description": "万科翡翠公园内,联华超市(川和路店)附近45米",
+   "formatted_address_poi": "上海市浦东新区张江镇万科翡翠公园",
+   "cityCode": 289
+  }
+ }
+}

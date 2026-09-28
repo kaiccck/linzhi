@@ -1,0 +1,21 @@
+.env*
+!.env.example
+node_modules/
+dist/
+.DS_Store
+coverage/
+*.tsbuildinfo
+.vite/
+.cache/
+**/data/cache/
+.impeccable/review/
+.impeccable/tmp/
+.impeccable/mocks/
+design/mockups/**/_frame.html
+design/mockups/**/_m.html
+
+# local tooling
+.claude/
+
+# finished demo videos are published as links (too large for the repo)
+docs/*.mp4

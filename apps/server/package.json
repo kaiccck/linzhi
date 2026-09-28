@@ -1,0 +1,30 @@
+{
+  "name": "@zoudedao/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "走得到 API：体检分析（REST + SSE）、样例回放、静态资源托管。",
+  "license": "Apache-2.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx watch --conditions=source src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@fastify/rate-limit": "^11.2.0",
+    "@fastify/static": "^10.1.5",
+    "@zoudedao/agent": "workspace:*",
+    "@zoudedao/baidu": "workspace:*",
+    "@zoudedao/core": "workspace:*",
+    "@zoudedao/engine": "workspace:*",
+    "fastify": "^5.12.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  }
+}

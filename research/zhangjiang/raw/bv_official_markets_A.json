@@ -1,0 +1,454 @@
+{
+ "_about": "2026-09-28 百度地图 Web 服务实测，用于按浦东新区商务委 2023Q4 标准化菜市场名录校正样例 zj-a 的菜市场判定。markets：地点检索 v3 around（申城佳苑中心 121.644195,31.19007；query “菜场$生鲜” 800 m 与 “浦商” 2500 m）返回的两家名录内菜市场；routes：zj-a 12 个小区（OSM 轮廓几何中心，与 zj-a 其余判定相同的起点）到这两家出入口（navi_location）的步行批量算路（routematrix/v2/walking，距离 m、耗时 s = 距离/1.17）。经 @zoudedao/baidu 客户端解析，不含任何 Key。",
+ "date": "2026-09-28",
+ "official_list": "data/official/pudong-markets-2023q4.json",
+ "markets": [
+  {
+   "uid": "123b8352ba8ce94c9ee321b9",
+   "name": "浦商生鲜(申城佳苑店)",
+   "location": [
+    121.64702541356276,
+    31.18871031527292
+   ],
+   "naviLocation": [
+    121.64677080659852,
+    31.188677607315807
+   ],
+   "address": "上海市浦东新区孙建路858号",
+   "province": "上海市",
+   "city": "上海市",
+   "area": "浦东新区",
+   "town": "张江镇",
+   "townCode": "310115125",
+   "telephone": "(021)50198678",
+   "tag": "购物",
+   "classifiedTag": "购物",
+   "type": "shopping",
+   "label": "购物",
+   "brand": "浦商生鲜",
+   "distanceM": 308,
+   "parentId": "cdc4d30d756cf79a3c9a5e19",
+   "children": [],
+   "extra": {
+    "detail_url": "http://api.map.baidu.com/place/detail?uid=123b8352ba8ce94c9ee321b9&output=html&source=placeapi_v3",
+    "overall_rating": "4.6",
+    "shop_hours": "07:00-22:00",
+    "regular_open_hour": {
+     "periods": [
+      {
+       "open": {
+        "day": 1,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 1,
+        "hour": 22,
+        "minute": 0
+       }
+      },
+      {
+       "open": {
+        "day": 2,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 2,
+        "hour": 22,
+        "minute": 0
+       }
+      },
+      {
+       "open": {
+        "day": 3,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 3,
+        "hour": 22,
+        "minute": 0
+       }
+      },
+      {
+       "open": {
+        "day": 4,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 4,
+        "hour": 22,
+        "minute": 0
+       }
+      },
+      {
+       "open": {
+        "day": 5,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 5,
+        "hour": 22,
+        "minute": 0
+       }
+      },
+      {
+       "open": {
+        "day": 6,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 6,
+        "hour": 22,
+        "minute": 0
+       }
+      },
+      {
+       "open": {
+        "day": 0,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 0,
+        "hour": 22,
+        "minute": 0
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "uid": "0a15c7ecde5493e5ed74f879",
+   "name": "浦商生鲜(环西店)",
+   "location": [
+    121.6483303819771,
+    31.182410276424754
+   ],
+   "naviLocation": [
+    121.6482101651463,
+    31.182340342536026
+   ],
+   "address": "孙环路643号1层",
+   "province": "上海市",
+   "city": "上海市",
+   "area": "浦东新区",
+   "town": "张江镇",
+   "townCode": "310115125",
+   "telephone": "15216838902",
+   "tag": "购物;超市",
+   "classifiedTag": "购物;超市;生鲜超市",
+   "type": "shopping",
+   "label": "生鲜超市",
+   "brand": "浦商生鲜",
+   "distanceM": 938,
+   "parentId": null,
+   "children": [],
+   "extra": {
+    "detail_url": "http://api.map.baidu.com/place/detail?uid=0a15c7ecde5493e5ed74f879&output=html&source=placeapi_v3",
+    "overall_rating": "4.3",
+    "comment_num": "7",
+    "shop_hours": "07:00-21:30",
+    "regular_open_hour": {
+     "periods": [
+      {
+       "open": {
+        "day": 1,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 1,
+        "hour": 21,
+        "minute": 30
+       }
+      },
+      {
+       "open": {
+        "day": 2,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 2,
+        "hour": 21,
+        "minute": 30
+       }
+      },
+      {
+       "open": {
+        "day": 3,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 3,
+        "hour": 21,
+        "minute": 30
+       }
+      },
+      {
+       "open": {
+        "day": 4,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 4,
+        "hour": 21,
+        "minute": 30
+       }
+      },
+      {
+       "open": {
+        "day": 5,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 5,
+        "hour": 21,
+        "minute": 30
+       }
+      },
+      {
+       "open": {
+        "day": 6,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 6,
+        "hour": 21,
+        "minute": 30
+       }
+      },
+      {
+       "open": {
+        "day": 0,
+        "hour": 7,
+        "minute": 0
+       },
+       "close": {
+        "day": 0,
+        "hour": 21,
+        "minute": 30
+       }
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "routes": [
+  {
+   "community": "川杨新苑三期",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 1143,
+     "duration_s": 977
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 1696,
+     "duration_s": 1451
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑一期B块",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 1006,
+     "duration_s": 860
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 1544,
+     "duration_s": 1322
+    }
+   ]
+  },
+  {
+   "community": "孙桥花苑",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 1189,
+     "duration_s": 1018
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 1742,
+     "duration_s": 1491
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑二期B块",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 499,
+     "duration_s": 426
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 1052,
+     "duration_s": 899
+    }
+   ]
+  },
+  {
+   "community": "川杨新苑四期",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 1281,
+     "duration_s": 1095
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 1834,
+     "duration_s": 1569
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑三期B块",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 544,
+     "duration_s": 464
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 787,
+     "duration_s": 673
+    }
+   ]
+  },
+  {
+   "community": "孙桥黄浦花园",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 1125,
+     "duration_s": 963
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 1678,
+     "duration_s": 1436
+    }
+   ]
+  },
+  {
+   "community": "虹御公寓",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 1700,
+     "duration_s": 1455
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 2253,
+     "duration_s": 1929
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑一期A块",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 656,
+     "duration_s": 558
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 1295,
+     "duration_s": 1109
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑二期A块",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 215,
+     "duration_s": 180
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 994,
+     "duration_s": 847
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑三期A块",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 520,
+     "duration_s": 444
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 707,
+     "duration_s": 605
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑一期C块",
+   "to": [
+    {
+     "market": "浦商生鲜(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 946,
+     "duration_s": 809
+    },
+    {
+     "market": "浦商生鲜(环西店)",
+     "status": "ok",
+     "distance_m": 1484,
+     "duration_s": 1270
+    }
+   ]
+  }
+ ]
+}

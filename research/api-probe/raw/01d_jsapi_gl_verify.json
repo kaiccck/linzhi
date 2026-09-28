@@ -1,0 +1,66 @@
+{
+ "_meta": {
+  "name": "01d_jsapi_gl_verify",
+  "request": "https://api.map.baidu.com/?qt=verify&v=gl&type=webgl&ak=***&time=<ms>&callback=cb (the auth check BMapGL runs after getscript)",
+  "note": "v=1.0 returns error -1 '版本过低请使用最新版本JSAPI'; the loader itself uses v=gl"
+ },
+ "results": [
+  {
+   "ak": "BROWSER",
+   "referer": "http://localhost:5173/",
+   "response": {
+    "error": 0,
+    "error_msg": "",
+    "popup": 0
+   }
+  },
+  {
+   "ak": "BROWSER",
+   "referer": "https://example.invalid/",
+   "response": {
+    "error": 0,
+    "error_msg": "",
+    "popup": 0
+   }
+  },
+  {
+   "ak": "BROWSER",
+   "referer": null,
+   "response": {
+    "error": 0,
+    "error_msg": "",
+    "popup": 0
+   }
+  },
+  {
+   "ak": "SERVER",
+   "referer": "http://localhost:5173/",
+   "response": {
+    "error": 240,
+    "error_msg": "APP 服务被禁用；详情信息请前往：https://lbsyun.baidu.com/surl/5bacf6",
+    "popup": 0
+   }
+  },
+  {
+   "ak": "BROWSER",
+   "referer": "http://localhost:5173/",
+   "v": "1.0",
+   "response": {
+    "error": -1,
+    "error_msg": "版本过低请使用最新版本JSAPI；详情信息请前往：https://lbsyun.baidu.com/surl/5bacf6",
+    "popup": 0
+   }
+  }
+ ],
+ "loader": {
+  "request": "https://api.map.baidu.com/api?v=1.0&type=webgl&ak=***",
+  "http": 200,
+  "bytes": 417,
+  "body": "see 01c_jsapi_gl_loader_browser_ak.js.txt (document.write of getscript + bmap.css)"
+ },
+ "getscript_business_info": {
+  "business": 0,
+  "unauth": 0,
+  "watermark_ratio": 0
+ }
+}

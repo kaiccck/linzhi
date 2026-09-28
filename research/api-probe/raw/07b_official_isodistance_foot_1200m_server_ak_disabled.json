@@ -1,0 +1,14 @@
+{
+ "_meta": {
+  "name": "07b_official_isodistance_foot_1200m_server_ak_disabled",
+  "request": "https://api.map.baidu.com/logistics_truck/v1/isodistance?profile=foot_shortest&point=121.5930,31.2035&distanceLimit=1200&inputCrs=bd09ll&outputCrs=bd09ll&ak=***",
+  "http_status": 200,
+  "latency_ms": 112,
+  "ts": "2026-09-26T14:49:35+0800",
+  "renamed_from": "07b_official_isodistance_foot_server_ak"
+ },
+ "response": {
+  "status": 240,
+  "message": "APP 服务被禁用"
+ }
+}

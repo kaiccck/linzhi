@@ -1,0 +1,618 @@
+{
+ "_meta": {
+  "name": "04f_routematrix_walking_1x50_road_prefer3",
+  "request": "https://api.map.baidu.com/routematrix/v2/walking?origins=31.19007,121.644195&destinations=31.194117,121.644195%7C31.197714,121.644195%7C31.201312,121.644195%7C31.193809,121.646005%7C31.197132,121.647615%7C31.200456,121.649224%7C31.192932,121.64754%7C31.195475,121.650514%7C31.198019,121.653488%7C31.191619,121.648566%7C31.192995,121.652451%7C31.194371,121.656336%7C31.19007,121.648926%7C31.19007,121.653131%7C31.190069,121.657336%7C31.188521,121.648566%7C31.187144,121.65245%7C31.185767,121.656335%7C31.187208,121.64754%7C31.184665,121.650513%7C31.182121,121.653486%7C31.186331,121.646005%7C31.183008,121.647614%7C31.179684,121.649223%7C31.186023,121.644195%7C31.182426,121.644195%7C31.178828,121.644195%7C31.186331,121.642385%7C31.183008,121.640776%7C31.179684,121.639167%7C31.187208,121.64085%7C31.184665,121.637877%7C31.182121,121.634904%7C31.188521,121.639824%7C31.187144,121.63594%7C31.185767,121.632055%7C31.19007,121.639464%7C31.19007,121.635259%7C31.190069,121.631054%7C31.191619,121.639824%7C31.192995,121.635939%7C31.194371,121.632054%7C31.192932,121.64085%7C31.195475,121.637876%7C31.198019,121.634902%7C31.193809,121.642385%7C31.197132,121.640775%7C31.200456,121.639166%7C31.192768,121.644195%7C31.187372,121.644195&output=json&road_prefer=3&ak=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 122,
+  "ts": "2026-09-26T17:17:03+0800"
+ },
+ "response": {
+  "status": 0,
+  "message": "成功",
+  "num": 50,
+  "mode": "walking",
+  "result": [
+   {
+    "distance": {
+     "text": "1.0公里",
+     "value": 1044
+    },
+    "duration": {
+     "text": "15分钟",
+     "value": 892
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "986米",
+     "value": 986
+    },
+    "duration": {
+     "text": "14分钟",
+     "value": 842
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.6公里",
+     "value": 1629
+    },
+    "duration": {
+     "text": "23分钟",
+     "value": 1393
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "678米",
+     "value": 678
+    },
+    "duration": {
+     "text": "10分钟",
+     "value": 580
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.4公里",
+     "value": 1373
+    },
+    "duration": {
+     "text": "20分钟",
+     "value": 1176
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.8公里",
+     "value": 1832
+    },
+    "duration": {
+     "text": "26分钟",
+     "value": 1569
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "812米",
+     "value": 812
+    },
+    "duration": {
+     "text": "12分钟",
+     "value": 695
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.1公里",
+     "value": 1060
+    },
+    "duration": {
+     "text": "15分钟",
+     "value": 908
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "2.4公里",
+     "value": 2373
+    },
+    "duration": {
+     "text": "34分钟",
+     "value": 2026
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "994米",
+     "value": 994
+    },
+    "duration": {
+     "text": "14分钟",
+     "value": 851
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.3公里",
+     "value": 1276
+    },
+    "duration": {
+     "text": "18分钟",
+     "value": 1092
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.8公里",
+     "value": 1831
+    },
+    "duration": {
+     "text": "26分钟",
+     "value": 1566
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "464米",
+     "value": 464
+    },
+    "duration": {
+     "text": "7分钟",
+     "value": 397
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.6公里",
+     "value": 1592
+    },
+    "duration": {
+     "text": "23分钟",
+     "value": 1363
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "2.2公里",
+     "value": 2198
+    },
+    "duration": {
+     "text": "31分钟",
+     "value": 1882
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "714米",
+     "value": 714
+    },
+    "duration": {
+     "text": "10分钟",
+     "value": 611
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.3公里",
+     "value": 1289
+    },
+    "duration": {
+     "text": "18分钟",
+     "value": 1103
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "2.1公里",
+     "value": 2101
+    },
+    "duration": {
+     "text": "30分钟",
+     "value": 1799
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "573米",
+     "value": 573
+    },
+    "duration": {
+     "text": "8分钟",
+     "value": 490
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.2公里",
+     "value": 1154
+    },
+    "duration": {
+     "text": "16分钟",
+     "value": 988
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.6公里",
+     "value": 1577
+    },
+    "duration": {
+     "text": "23分钟",
+     "value": 1351
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "438米",
+     "value": 438
+    },
+    "duration": {
+     "text": "6分钟",
+     "value": 375
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "889米",
+     "value": 889
+    },
+    "duration": {
+     "text": "13分钟",
+     "value": 761
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.3公里",
+     "value": 1315
+    },
+    "duration": {
+     "text": "19分钟",
+     "value": 1126
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "594米",
+     "value": 594
+    },
+    "duration": {
+     "text": "8分钟",
+     "value": 507
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.1公里",
+     "value": 1119
+    },
+    "duration": {
+     "text": "16分钟",
+     "value": 956
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.6公里",
+     "value": 1641
+    },
+    "duration": {
+     "text": "23分钟",
+     "value": 1404
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "617米",
+     "value": 617
+    },
+    "duration": {
+     "text": "9分钟",
+     "value": 528
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.4公里",
+     "value": 1362
+    },
+    "duration": {
+     "text": "19分钟",
+     "value": 1165
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.6公里",
+     "value": 1598
+    },
+    "duration": {
+     "text": "23分钟",
+     "value": 1368
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "617米",
+     "value": 617
+    },
+    "duration": {
+     "text": "9分钟",
+     "value": 528
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.1公里",
+     "value": 1118
+    },
+    "duration": {
+     "text": "16分钟",
+     "value": 956
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.7公里",
+     "value": 1709
+    },
+    "duration": {
+     "text": "24分钟",
+     "value": 1462
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "468米",
+     "value": 468
+    },
+    "duration": {
+     "text": "7分钟",
+     "value": 400
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.0公里",
+     "value": 1006
+    },
+    "duration": {
+     "text": "14分钟",
+     "value": 860
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.9公里",
+     "value": 1854
+    },
+    "duration": {
+     "text": "26分钟",
+     "value": 1585
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "660米",
+     "value": 660
+    },
+    "duration": {
+     "text": "9分钟",
+     "value": 564
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "972米",
+     "value": 972
+    },
+    "duration": {
+     "text": "14分钟",
+     "value": 831
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.6公里",
+     "value": 1599
+    },
+    "duration": {
+     "text": "23分钟",
+     "value": 1368
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "664米",
+     "value": 664
+    },
+    "duration": {
+     "text": "9分钟",
+     "value": 567
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.2公里",
+     "value": 1195
+    },
+    "duration": {
+     "text": "17分钟",
+     "value": 1023
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.7公里",
+     "value": 1672
+    },
+    "duration": {
+     "text": "24分钟",
+     "value": 1432
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "591米",
+     "value": 591
+    },
+    "duration": {
+     "text": "8分钟",
+     "value": 506
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.1公里",
+     "value": 1111
+    },
+    "duration": {
+     "text": "16分钟",
+     "value": 950
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "1.7公里",
+     "value": 1707
+    },
+    "duration": {
+     "text": "24分钟",
+     "value": 1461
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "677米",
+     "value": 677
+    },
+    "duration": {
+     "text": "10分钟",
+     "value": 578
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "905米",
+     "value": 905
+    },
+    "duration": {
+     "text": "13分钟",
+     "value": 774
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "2.2公里",
+     "value": 2219
+    },
+    "duration": {
+     "text": "32分钟",
+     "value": 1899
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "381米",
+     "value": 381
+    },
+    "duration": {
+     "text": "5分钟",
+     "value": 325
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   },
+   {
+    "distance": {
+     "text": "534米",
+     "value": 534
+    },
+    "duration": {
+     "text": "8分钟",
+     "value": 455
+    },
+    "restrictions_status": 0,
+    "retrograde_dist": 0
+   }
+  ]
+ }
+}

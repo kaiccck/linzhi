@@ -1,0 +1,701 @@
+{
+ "_meta": {
+  "name": "bv_reverse_B",
+  "request": "https://api.map.baidu.com/reverse_geocoding/v3/?location=31.205134,121.638346&coordtype=bd09ll&extensions_town=true&extensions_poi=1&radius=300&output=json&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 165,
+  "ts": "2026-09-26T17:19:11+0800"
+ },
+ "response": {
+  "status": 0,
+  "result": {
+   "location": {
+    "lng": 121.63834599999993,
+    "lat": 31.20513386320035
+   },
+   "formatted_address": "上海市浦东新区张江镇益江路208号",
+   "edz": {
+    "name": ""
+   },
+   "business": "张江",
+   "business_info": [
+    {
+     "name": "张江",
+     "location": {
+      "lng": 121.62501818619602,
+      "lat": 31.208733519712162
+     },
+     "adcode": 310115,
+     "distance": 0,
+     "direction": "内"
+    }
+   ],
+   "addressComponent": {
+    "country": "中国",
+    "country_code": 0,
+    "region_code_iso": "CHN",
+    "country_code_iso": "CHN",
+    "country_code_iso2": "CN",
+    "province": "上海市",
+    "city": "上海市",
+    "city_level": 2,
+    "district": "浦东新区",
+    "town": "张江镇",
+    "town_code": "310115125",
+    "distance": "3",
+    "direction": "附近",
+    "adcode": "310115",
+    "street": "益江路",
+    "street_number": "208号"
+   },
+   "pois": [
+    {
+     "addr": "益江路238号",
+     "cp": " ",
+     "direction": "东",
+     "distance": "98",
+     "name": "联华超市(益江店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.63748298362192,
+      "y": 31.20528694293533
+     },
+     "tag": "购物;超市",
+     "tel": "13166266965",
+     "uid": "9f97b1c58df2b51fb74f549d",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路1弄12号",
+     "cp": " ",
+     "direction": "西",
+     "distance": "137",
+     "name": "旺辰公寓",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.63952213712957,
+      "y": 31.20481592048558
+     },
+     "tag": "房地产;住宅区",
+     "tel": "15301782508",
+     "uid": "886da49b630decc94151c00d",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路126弄4幢",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "71",
+     "name": "玉兰香苑一期B组-4号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.6387585774461,
+      "y": 31.205557200648478
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "13bbb69b7c2d187f1e5800c0",
+     "zip": "",
+     "popularity_level": "2",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "玉兰香苑一期B组",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区益江路126弄1-112号",
+      "point": {
+       "x": 121.63975569656216,
+       "y": 31.207047464888277
+      },
+      "direction": "西南",
+      "distance": "293",
+      "uid": "c879fa014601604bc809f0ae",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路玉兰香苑一期B组",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "67",
+     "name": "玉兰香苑商业广场",
+     "poiType": "购物",
+     "point": {
+      "x": 121.63874959439099,
+      "y": 31.205526314092157
+     },
+     "tag": "购物",
+     "tel": "",
+     "uid": "81f5e4e31c3b116714a190ae",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区张江镇益江路194号",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "61",
+     "name": "玉兰香苑一期B组-3号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.6386867130053,
+      "y": 31.205510870810183
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "b6c71921837af0d53a04b148",
+     "zip": "",
+     "popularity_level": "2",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "玉兰香苑一期B组",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区益江路126弄1-112号",
+      "point": {
+       "x": 121.63975569656216,
+       "y": 31.207047464888277
+      },
+      "direction": "西南",
+      "distance": "293",
+      "uid": "c879fa014601604bc809f0ae",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路299号",
+     "cp": " ",
+     "direction": "北",
+     "distance": "280",
+     "name": "益丰新村",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.63794111943201,
+      "y": 31.20299358181217
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "33fbfa83f8d462c00af5ebae",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区张江镇盛夏路1065",
+     "cp": " ",
+     "direction": "西北",
+     "distance": "108",
+     "name": "美蛙四季张江店(盛夏路店)",
+     "poiType": "美食",
+     "point": {
+      "x": 121.63892027243789,
+      "y": 31.204460721661682
+     },
+     "tag": "美食",
+     "tel": "",
+     "uid": "447e398b1fef0de0a30464ac",
+     "zip": "",
+     "popularity_level": "3",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路135弄8号101室(休闲广场)",
+     "cp": " ",
+     "direction": "西",
+     "distance": "143",
+     "name": "RELX悦刻(休闲广场店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.63954010323977,
+      "y": 31.20471553834582
+     },
+     "tag": "购物;商铺",
+     "tel": "18951290584",
+     "uid": "9d4cd8573b68d51652e5c58c",
+     "zip": "",
+     "popularity_level": "7",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区张江镇益江路250号",
+     "cp": " ",
+     "direction": "东",
+     "distance": "134",
+     "name": "上海市浦东新区张江镇江夏居委退役军人服务站",
+     "poiType": "政府机构",
+     "point": {
+      "x": 121.63715061058323,
+      "y": 31.204970354336673
+     },
+     "tag": "政府机构",
+     "tel": "(021)33920320",
+     "uid": "d8a60263194c80ba7f29bdb9",
+     "zip": "",
+     "popularity_level": "2",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路121号",
+     "cp": " ",
+     "direction": "西",
+     "distance": "242",
+     "name": "上海农商银行(益江路支行)",
+     "poiType": "金融",
+     "point": {
+      "x": 121.64047434097016,
+      "y": 31.205526314092157
+     },
+     "tag": "金融;银行",
+     "tel": "(021)33922452,(021)58956570",
+     "uid": "373cf757e3e6a3134254d794",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区盛夏路玉兰香苑一期A块11幢",
+     "cp": " ",
+     "direction": "东",
+     "distance": "192",
+     "name": "益江路286弄小区-11号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.63662959338744,
+      "y": 31.205302386254235
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "bcea43154ffb95dcc056ac92",
+     "zip": "",
+     "popularity_level": "3",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "益江路286弄小区",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区盛夏路玉兰香苑一期A组",
+      "point": {
+       "x": 121.63633315256915,
+       "y": 31.206059105761017
+      },
+      "direction": "东南",
+      "distance": "254",
+      "uid": "d91985344ac7a27aeee4a582",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区盛夏路1107弄1-121号玉兰香苑三期",
+     "cp": " ",
+     "direction": "西北",
+     "distance": "245",
+     "name": "慧乐渔具(玉兰香苑三期店)",
+     "poiType": "购物",
+     "point": {
+      "x": 121.63937840824798,
+      "y": 31.20345689161579
+     },
+     "tag": "购物;商铺",
+     "tel": "13818619519",
+     "uid": "d8144417f267dc0a4207c1ee",
+     "zip": "",
+     "popularity_level": "8",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "",
+      "tag": "",
+      "addr": "",
+      "point": {
+       "x": 0.0,
+       "y": 0.0
+      },
+      "direction": "",
+      "distance": "",
+      "uid": "",
+      "popularity_level": ""
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路126弄1-112号",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "293",
+     "name": "玉兰香苑一期B组",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.63975569656216,
+      "y": 31.207047464888277
+     },
+     "tag": "房地产;住宅区",
+     "tel": "",
+     "uid": "c879fa014601604bc809f0ae",
+     "zip": "",
+     "popularity_level": "9",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "玉兰香苑",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区盛夏路1109弄",
+      "point": {
+       "x": 121.64308841000418,
+       "y": 31.204545660633425
+      },
+      "direction": "西",
+      "distance": "533",
+      "uid": "587b91ab81447ff1fa0cad8b",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区X630与张东路辅路交叉口西南方向229米玉兰香苑1期",
+     "cp": " ",
+     "direction": "南",
+     "distance": "94",
+     "name": "玉兰香苑一期B组-10号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.6386507807849,
+      "y": 31.20581201434944
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "414d369b97fc7fa50b1cc7e2",
+     "zip": "",
+     "popularity_level": "1",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "玉兰香苑一期B组",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区益江路126弄1-112号",
+      "point": {
+       "x": 121.63975569656216,
+       "y": 31.207047464888277
+      },
+      "direction": "西南",
+      "distance": "293",
+      "uid": "c879fa014601604bc809f0ae",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路126弄9幢",
+     "cp": " ",
+     "direction": "南",
+     "distance": "82",
+     "name": "玉兰香苑一期B组-9号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.6384711196829,
+      "y": 31.20575796301626
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "00c8e5b257cee24341d63edd",
+     "zip": "",
+     "popularity_level": "4",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "玉兰香苑一期B组",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区益江路126弄1-112号",
+      "point": {
+       "x": 121.63975569656216,
+       "y": 31.207047464888277
+      },
+      "direction": "西南",
+      "distance": "293",
+      "uid": "c879fa014601604bc809f0ae",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路126弄1-112号",
+     "cp": " ",
+     "direction": "南",
+     "distance": "118",
+     "name": "玉兰香苑一期B组-14号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.6383363738564,
+      "y": 31.20605138416427
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "d2e625845736dbc70c0a70c9",
+     "zip": "",
+     "popularity_level": "2",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "玉兰香苑一期B组",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区益江路126弄1-112号",
+      "point": {
+       "x": 121.63975569656216,
+       "y": 31.207047464888277
+      },
+      "direction": "西南",
+      "distance": "293",
+      "uid": "c879fa014601604bc809f0ae",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路126弄1112号",
+     "cp": " ",
+     "direction": "西南",
+     "distance": "88",
+     "name": "玉兰香苑一期B组-5号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.63892925549298,
+      "y": 31.20560353046385
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "6b5ead9db6a4fe839d9d68ca",
+     "zip": "",
+     "popularity_level": "5",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "玉兰香苑一期B组",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区益江路126弄1-112号",
+      "point": {
+       "x": 121.63975569656216,
+       "y": 31.207047464888277
+      },
+      "direction": "西南",
+      "distance": "293",
+      "uid": "c879fa014601604bc809f0ae",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区张江镇益江路135弄-9号102室",
+     "cp": " ",
+     "direction": "西北",
+     "distance": "136",
+     "name": "YUMMY韩式炸鸡(旺辰公寓店)",
+     "poiType": "美食",
+     "point": {
+      "x": 121.63946823879897,
+      "y": 31.204707816638294
+     },
+     "tag": "美食",
+     "tel": "",
+     "uid": "44607704655c15bedbd89172",
+     "zip": "",
+     "popularity_level": "4",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "旺辰公寓",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区益江路1弄12号",
+      "point": {
+       "x": 121.63952213712957,
+       "y": 31.20481592048558
+      },
+      "direction": "西",
+      "distance": "137",
+      "uid": "886da49b630decc94151c00d",
+      "popularity_level": "5"
+     }
+    },
+    {
+     "addr": "上海市浦东新区盛夏路玉兰香苑一期B组",
+     "cp": " ",
+     "direction": "南",
+     "distance": "123",
+     "name": "玉兰香苑一期B组-15号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.638480102738,
+      "y": 31.206082270547434
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "b3483c6c549d07741d1d115e",
+     "zip": "",
+     "popularity_level": "3",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "玉兰香苑一期B组",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区益江路126弄1-112号",
+      "point": {
+       "x": 121.63975569656216,
+       "y": 31.207047464888277
+      },
+      "direction": "西南",
+      "distance": "293",
+      "uid": "c879fa014601604bc809f0ae",
+      "popularity_level": "9"
+     }
+    },
+    {
+     "addr": "上海市浦东新区益江路299号",
+     "cp": " ",
+     "direction": "北",
+     "distance": "86",
+     "name": "益丰新村-59号楼",
+     "poiType": "房地产",
+     "point": {
+      "x": 121.63818366191971,
+      "y": 31.20448388684344
+     },
+     "tag": "房地产;内部楼栋",
+     "tel": "",
+     "uid": "43cd38bb61fafddb16c90576",
+     "zip": "",
+     "popularity_level": "3",
+     "aoi_name": "",
+     "alias_name": "",
+     "parent_poi": {
+      "name": "益丰新村",
+      "tag": "房地产;住宅区",
+      "addr": "上海市浦东新区益江路299号",
+      "point": {
+       "x": 121.63794111943201,
+       "y": 31.20299358181217
+      },
+      "direction": "北",
+      "distance": "280",
+      "uid": "33fbfa83f8d462c00af5ebae",
+      "popularity_level": "9"
+     }
+    }
+   ],
+   "roads": [],
+   "poiRegions": [],
+   "sematic_description": "联华超市(益江店)东98米",
+   "formatted_address_poi": "上海市浦东新区张江镇联华超市(益江店)东98米",
+   "cityCode": 289
+  }
+ }
+}

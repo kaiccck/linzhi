@@ -1,0 +1,14 @@
+dist
+coverage
+pnpm-lock.yaml
+research
+# design archive and design-tool state: kept exactly as reviewed
+design/mockups
+.impeccable
+data/samples
+data/official
+*.min.js
+# hand-tuned slide markup (inline whitespace matters in CJK copy) and generated deck assets
+docs/deck/index.html
+docs/deck/assets
+docs/deck/png

@@ -1,0 +1,966 @@
+{
+ "_meta": {
+  "name": "06b_place_v3_around_meishi_p0",
+  "request": "https://api.map.baidu.com/place/v3/around?location=31.183127,121.589561&radius=1500&radius_limit=true&scope=2&page_size=20&output=json&query=%E7%BE%8E%E9%A3%9F&page_num=0&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 237,
+  "ts": "2026-09-26T16:50:47+0800"
+ },
+ "response": {
+  "status": 0,
+  "message": "ok",
+  "total": 8,
+  "result_type": "poi_type",
+  "query_type": "general",
+  "results": [
+   {
+    "name": "宴周康·精致江浙菜(北蔡店)",
+    "location": {
+     "lat": 31.1839901143528,
+     "lng": 121.58257513729113
+    },
+    "address": "五星路727弄6号5楼（免费停车）",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "telephone": "18516260493",
+    "detail": 1,
+    "uid": "6b33336b01e3aa88b05c6a14",
+    "detail_info": {
+     "classified_poi_tag": "美食;中餐馆;江浙菜",
+     "distance": 671,
+     "tag": "美食;中餐厅",
+     "navi_location": {
+      "lat": 31.183892920518577,
+      "lng": 121.58222514233698
+     },
+     "brand": "宴周康精致江浙菜",
+     "type": "cater",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=6b33336b01e3aa88b05c6a14&output=html&source=placeapi_v3",
+     "price": "308.0",
+     "overall_rating": "5.0",
+     "comment_num": "1",
+     "shop_hours": "11:00-13:30,17:00-20:30",
+     "label": "江浙菜",
+     "children": [],
+     "parent_id": "2188a75c28b9f6236c476051",
+     "ranking": "北蔡游客爱去榜NO.5",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 13,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 1,
+         "hour": 17,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 20,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 13,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 17,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 20,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 13,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 17,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 20,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 13,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 17,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 20,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 13,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 17,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 20,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 13,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 17,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 20,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 13,
+         "minute": 30
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 17,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 20,
+         "minute": 30
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "张江海科雅乐轩聚聚乐",
+    "location": {
+     "lat": 31.186278534393466,
+     "lng": 121.60399109997121
+    },
+    "address": "北蔡镇海科路550号(海科雅乐轩酒店)",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "telephone": "(021)38168873",
+    "detail": 1,
+    "uid": "5e3d6219ad8a093bb54f5431",
+    "detail_info": {
+     "classified_poi_tag": "美食;自助餐",
+     "distance": 1416,
+     "tag": "美食;其他",
+     "navi_location": {
+      "lat": 31.186434700790322,
+      "lng": 121.6040384063653
+     },
+     "type": "cater",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=5e3d6219ad8a093bb54f5431&output=html&source=placeapi_v3",
+     "price": "105.6",
+     "overall_rating": "4.5",
+     "comment_num": "2",
+     "shop_hours": "11:00-21:00",
+     "label": "涉外酒店,自助餐",
+     "children": [],
+     "parent_id": "a4d86447402882624107c1db",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 21,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "肯德基(天安万科店)",
+    "location": {
+     "lat": 31.182774595360087,
+     "lng": 121.5806961516559
+    },
+    "address": "五星路706弄1号103室",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "telephone": "(021)59097778",
+    "detail": 1,
+    "uid": "0020f321b99b33275fd4fed5",
+    "detail_info": {
+     "classified_poi_tag": "美食;快餐店;西式快餐;汉堡店",
+     "distance": 844,
+     "tag": "美食;小吃快餐店",
+     "navi_location": {
+      "lat": 31.18305365113708,
+      "lng": 121.58069225345915
+     },
+     "brand": "肯德基",
+     "type": "cater",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=0020f321b99b33275fd4fed5&output=html&source=placeapi_v3",
+     "price": "37.4",
+     "overall_rating": "4.5",
+     "shop_hours": "08:00-20:00",
+     "label": "汉堡店",
+     "children": [],
+     "parent_id": "d099f7785acda4ec28d7abf3",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 20,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 20,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 20,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 20,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 20,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 20,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 8,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 20,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "上海科技大学-清真食堂",
+    "location": {
+     "lat": 31.183418348168765,
+     "lng": 121.60346846582551
+    },
+    "address": "中科路1号上海科技大学1食堂1楼",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "detail": 1,
+    "uid": "ad3362840edf99052cb17e9e",
+    "detail_info": {
+     "classified_poi_tag": "美食;中餐馆;清真菜",
+     "distance": 1323,
+     "tag": "美食;中餐厅",
+     "navi_location": {
+      "lat": 31.183283793585133,
+      "lng": 121.60384006318566
+     },
+     "type": "cater",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=ad3362840edf99052cb17e9e&output=html&source=placeapi_v3",
+     "price": "20.9",
+     "overall_rating": "4.2",
+     "comment_num": "0",
+     "shop_hours": "11:00-23:00",
+     "label": "清真菜",
+     "children": [],
+     "parent_id": "0aa0111cd4a95ad77c29bdf4",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 23,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 23,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 23,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 23,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 23,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 23,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 23,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "上海海关学院-食堂",
+    "location": {
+     "lat": 31.174131660337373,
+     "lng": 121.58222749305877
+    },
+    "address": "华夏西路5677号上海海关学院内",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "street_id": "",
+    "detail": 1,
+    "uid": "56e88cba87220f7ca4c75665",
+    "detail_info": {
+     "classified_poi_tag": "美食;快餐店",
+     "new_alias": "上海海关学院食堂",
+     "distance": 1219,
+     "tag": "美食;小吃快餐店",
+     "navi_location": {
+      "lat": 31.174036272288895,
+      "lng": 121.58182306295564
+     },
+     "type": "cater",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=56e88cba87220f7ca4c75665&output=html&source=placeapi_v3",
+     "price": "16.5",
+     "overall_rating": "4.0",
+     "comment_num": "2",
+     "shop_hours": "11:00-22:00",
+     "label": "快餐店",
+     "children": [],
+     "parent_id": "4cf8d24e969359e59cf7796b",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 2,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 21,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 11,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 22,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "大诚肉夹馍凉皮",
+    "location": {
+     "lat": 31.18282031856085,
+     "lng": 121.57943403241438
+    },
+    "address": "上海市浦东新区五星路676弄1号109室",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "telephone": "15301603320",
+    "detail": 1,
+    "uid": "f8cc89b8c41264a47369d36d",
+    "detail_info": {
+     "classified_poi_tag": "美食;小吃;肉夹馍",
+     "distance": 963,
+     "tag": "美食;小吃快餐店",
+     "navi_location": {
+      "lat": 31.18286996506504,
+      "lng": 121.57921248159275
+     },
+     "type": "cater",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=f8cc89b8c41264a47369d36d&output=html&source=placeapi_v3",
+     "price": "27.0",
+     "overall_rating": "4.0",
+     "shop_hours": "09:00-22:00",
+     "label": "肉夹馍",
+     "children": [],
+     "parent_id": "fe6a95c990e9a356badf8f2e",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 9,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 22,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   },
+   {
+    "name": "唐记同福下饭酸菜鱼(五星路店)",
+    "location": {
+     "lat": 31.18273798588934,
+     "lng": 121.58070342793054
+    },
+    "address": "上海市浦东新区五星路天安万科御河企业公馆-D区",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "detail": 1,
+    "uid": "1eb93c24830812abacee7ae6",
+    "detail_info": {
+     "classified_poi_tag": "美食;中餐馆",
+     "distance": 843,
+     "tag": "美食;中餐厅",
+     "navi_location": {
+      "lat": 31.18305350829109,
+      "lng": 121.58070329010353
+     },
+     "brand": "唐记同福下饭酸菜鱼",
+     "type": "cater",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=1eb93c24830812abacee7ae6&output=html&source=placeapi_v3",
+     "overall_rating": "4.0",
+     "shop_hours": "",
+     "label": "中餐馆",
+     "children": []
+    }
+   },
+   {
+    "name": "肯德基(上海科技大学食堂店)",
+    "location": {
+     "lat": 31.183457197177017,
+     "lng": 121.60347852684721
+    },
+    "address": "环科路199号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "张江镇",
+    "town_code": 310115125,
+    "telephone": "(021)20680956",
+    "detail": 1,
+    "uid": "fee81087e0436edaf8f0cb9a",
+    "detail_info": {
+     "classified_poi_tag": "美食;快餐店;西式快餐;汉堡店",
+     "distance": 1324,
+     "tag": "美食;小吃快餐店",
+     "navi_location": {
+      "lat": 31.182993158862676,
+      "lng": 121.60368327807126
+     },
+     "brand": "肯德基",
+     "type": "cater",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=fee81087e0436edaf8f0cb9a&output=html&source=placeapi_v3",
+     "price": "27.0",
+     "overall_rating": "4.1",
+     "comment_num": "2",
+     "shop_hours": "07:00-22:00",
+     "label": "汉堡店",
+     "children": [],
+     "parent_id": "0aa0111cd4a95ad77c29bdf4",
+     "regular_open_hour": {
+      "periods": [
+       {
+        "open": {
+         "day": 1,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 1,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 2,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 2,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 3,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 3,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 4,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 4,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 5,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 5,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 6,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 6,
+         "hour": 22,
+         "minute": 0
+        }
+       },
+       {
+        "open": {
+         "day": 0,
+         "hour": 7,
+         "minute": 0
+        },
+        "close": {
+         "day": 0,
+         "hour": 22,
+         "minute": 0
+        }
+       }
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

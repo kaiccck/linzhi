@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    // The repo-wide "source" condition also matches eventsource-parser (a dependency of the MCP
+    // client used in tests), whose "source" export is raw .ts with .ts import paths.
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src", "test", "vitest.config.ts"]
+}

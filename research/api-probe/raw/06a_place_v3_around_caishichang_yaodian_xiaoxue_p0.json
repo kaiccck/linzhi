@@ -1,0 +1,49 @@
+{
+ "_meta": {
+  "name": "06a_place_v3_around_caishichang_yaodian_xiaoxue_p0",
+  "request": "https://api.map.baidu.com/place/v3/around?location=31.183127,121.589561&radius=1500&radius_limit=true&scope=2&page_size=20&output=json&query=%E8%8F%9C%E5%B8%82%E5%9C%BA$%E8%8D%AF%E5%BA%97$%E5%B0%8F%E5%AD%A6&page_num=0&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 140,
+  "ts": "2026-09-26T16:50:46+0800"
+ },
+ "response": {
+  "status": 0,
+  "message": "ok",
+  "total": 1,
+  "result_type": "poi_type",
+  "results": [
+   {
+    "name": "上海浦东新区民办鲁冰花小学",
+    "location": {
+     "lat": 31.17005673280293,
+     "lng": 121.59018243750239
+    },
+    "address": "上海市浦东新区北蔡镇卫行路30号",
+    "province": "上海市",
+    "city": "上海市",
+    "area": "浦东新区",
+    "town": "北蔡镇",
+    "town_code": 310115105,
+    "telephone": "(021)20210000",
+    "detail": 1,
+    "uid": "d10a5a74b39358da9e95deab",
+    "detail_info": {
+     "classified_poi_tag": "教育培训;小学",
+     "distance": 1454,
+     "tag": "教育培训;小学",
+     "navi_location": {
+      "lat": 31.170332701833118,
+      "lng": 121.59012711197992
+     },
+     "type": "education",
+     "detail_url": "http://api.map.baidu.com/place/detail?uid=d10a5a74b39358da9e95deab&output=html&source=placeapi_v3",
+     "overall_rating": "0",
+     "shop_hours": "",
+     "label": "小学",
+     "children": []
+    }
+   }
+  ]
+ }
+}

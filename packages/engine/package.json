@@ -1,0 +1,26 @@
+{
+  "name": "@zoudedao/engine",
+  "version": "0.1.0",
+  "description": "走得到实时分析引擎：输入中心点，编排 core 算法与百度客户端，逐阶段产出完整的 AnalysisResult（配额优先）。",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@zoudedao/baidu": "workspace:*",
+    "@zoudedao/core": "workspace:*"
+  }
+}

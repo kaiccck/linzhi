@@ -1,0 +1,17 @@
+{
+ "_meta": {
+  "name": "06c_place_v3_around_caishichang_yaodian_xiaoxue_p1",
+  "request": "https://api.map.baidu.com/place/v3/around?location=31.183127,121.589561&radius=1500&radius_limit=true&scope=2&page_size=20&output=json&query=%E8%8F%9C%E5%B8%82%E5%9C%BA$%E8%8D%AF%E5%BA%97$%E5%B0%8F%E5%AD%A6&page_num=1&ak=***&sn=***",
+  "signed": true,
+  "http_status": 200,
+  "latency_ms": 128,
+  "ts": "2026-09-26T16:50:47+0800"
+ },
+ "response": {
+  "status": 0,
+  "message": "ok",
+  "total": 1,
+  "result_type": "poi_type",
+  "results": []
+ }
+}

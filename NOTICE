@@ -1,0 +1,8 @@
+走得到（zoudedao）
+Copyright 2026 走得到项目贡献者
+
+本项目以 Apache License 2.0 授权，见 LICENSE。
+
+第三方数据说明：
+- data/samples/ 中的底图预览几何来自 OpenStreetMap（© OpenStreetMap 贡献者），以 ODbL 1.0 授权：https://www.openstreetmap.org/copyright
+- 步行路线、距离与设施数据来自百度地图开放平台 Web 服务的实测响应（2026-09-26），仅用于演示与测试；使用百度地图服务须遵守其服务条款。

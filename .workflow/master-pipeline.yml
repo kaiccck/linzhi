@@ -1,0 +1,40 @@
+# Gitee Go 流水线：与 .github/workflows/ci.yml 等价的检查。
+# 注意：推到 Gitee 后需在 Gitee Go 中确认可选的 Node.js 版本（项目要求 >= 22.12）。
+version: '1.0'
+name: master-pipeline
+displayName: 走得到 · 构建与测试
+triggers:
+  trigger: auto
+  push:
+    branches:
+      include:
+        - main
+  pr:
+    branches:
+      include:
+        - main
+stages:
+  - name: check
+    displayName: 格式 · Lint · 类型 · 测试 · 构建
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: build@nodejs
+        name: build_nodejs
+        displayName: Node.js 检查与构建
+        nodeVersion: 22.12.0
+        commands:
+          - corepack enable
+          - corepack prepare pnpm@10.33.0 --activate
+          - pnpm install --frozen-lockfile
+          - pnpm format:check
+          - pnpm lint
+          - pnpm build
+          - pnpm typecheck
+          - pnpm test
+        caches:
+          - ~/.local/share/pnpm/store
+        notify: []
+        strategy:
+          retry: '0'
