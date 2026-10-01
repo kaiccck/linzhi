@@ -6,10 +6,26 @@
 import type { BaiduClient } from '@zoudedao/baidu';
 import { createEngineAnalyzer, EngineError, type OfficialList } from '@zoudedao/engine';
 import { AnalyzeError, type Analyzer } from './analyzer.js';
+import type { OfficialData } from './official.js';
 
-/** `official`: lists fused with Baidu POIs (data/official/*.json, see official.ts). */
-export function createLiveAnalyzer(client: BaiduClient, official: readonly OfficialList[] = []): Analyzer {
-  const engine = createEngineAnalyzer({ client, official });
+const isLists = (x: readonly OfficialList[] | Partial<OfficialData>): x is readonly OfficialList[] =>
+  Array.isArray(x);
+
+/**
+ * `official`: data/official (see official.ts) — facility lists fused with Baidu POIs, catchment tables
+ * for 对口小学, curated exclusions. A plain array is taken as facility lists only.
+ */
+export function createLiveAnalyzer(
+  client: BaiduClient,
+  official: readonly OfficialList[] | Partial<OfficialData> = {},
+): Analyzer {
+  const data: Partial<OfficialData> = isLists(official) ? { lists: [...official] } : official;
+  const engine = createEngineAnalyzer({
+    client,
+    official: data.lists ?? [],
+    catchment: data.catchments ?? [],
+    exclusions: data.exclusions ?? [],
+  });
   return {
     name: engine.name,
     async analyze(input, emit, signal) {

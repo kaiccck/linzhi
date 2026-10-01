@@ -59,11 +59,37 @@ export interface StageEvent {
   progress: number;
 }
 
+/** A quota ledger update: calls of one Baidu service used so far today, and its daily limit. */
+export interface QuotaEvent {
+  service: string;
+  used: number;
+  limit?: number;
+}
+
 export interface AnalyzeHandlers {
   onStage?(e: StageEvent): void;
   /** shallow-merged partial result so far (docs/api.md: `{ ...prev, ...partial }`) */
   onPartial?(p: Partial<AnalysisResult>): void;
+  onQuota?(q: QuotaEvent): void;
 }
+
+import type { BrowserPoi } from './nearby.js';
+
+/** The request body of POST /api/analyze. */
+export interface AnalyzeBody {
+  center_bd09: [number, number];
+  label: string;
+  profile: 'adult' | 'elder';
+  /** 浏览器端周边检索 (data/nearby.ts): shops the server's place search may leave out */
+  browser_pois?: BrowserPoi[];
+}
+
+/** What streams a live check: `analyze` against the server, or a dev-only stand-in. */
+export type AnalyzeFn = (
+  body: AnalyzeBody,
+  handlers: AnalyzeHandlers,
+  signal: AbortSignal,
+) => Promise<AnalysisResult>;
 
 /**
  * POST `url` and read its event stream (EventSource cannot POST). `onEvent` returns a value to end
@@ -120,11 +146,7 @@ export async function postEvents<T>(
 }
 
 /** POST /api/analyze and read the event stream. Resolves with `result`. */
-export async function analyze(
-  body: { center_bd09: [number, number]; label: string; profile: 'adult' | 'elder' },
-  handlers: AnalyzeHandlers,
-  signal: AbortSignal,
-): Promise<AnalysisResult> {
+export const analyze: AnalyzeFn = async (body, handlers, signal) => {
   let partial: Partial<AnalysisResult> = {};
   const result = await postEvents<AnalysisResult>(
     '/api/analyze',
@@ -134,6 +156,9 @@ export async function analyze(
       else if (event === 'partial') {
         partial = { ...partial, ...(payload as Partial<AnalysisResult>) };
         handlers.onPartial?.(partial);
+      } else if (event === 'quota') {
+        if (typeof payload.service === 'string' && typeof payload.used === 'number')
+          handlers.onQuota?.(payload as unknown as QuotaEvent);
       } else if (event === 'result') return payload as unknown as AnalysisResult;
       return undefined;
     },
@@ -141,4 +166,4 @@ export async function analyze(
   );
   if (!result) throw new ApiError('upstream', '分析连接意外结束');
   return result;
-}
+};

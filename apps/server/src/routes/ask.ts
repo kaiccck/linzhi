@@ -8,12 +8,14 @@ import {
 } from '@zoudedao/agent';
 import type { FastifyInstance, FastifySchemaValidationError } from 'fastify';
 import { untilAborted } from '../abort.js';
-import { answerQuestion, LIVE_RESULTS_MAX, type LiveResults, type ServerBackend } from '../advisor.js';
+import { answerQuestion, type LiveResults, type ServerBackend } from '../advisor.js';
 import { ApiError } from '../errors.js';
 import { formatWait } from '../rate-limit.js';
 import { forClient } from '../redact.js';
 import { sseEvent } from './analyze.js';
 
+/** POST /api/ask per IP per 10 minutes, template and LLM mode alike (ZDD_ASK_PER_10MIN overrides). */
+export const ASK_PER_10MIN = 30;
 export const QUESTION_MAX = 300;
 export const HISTORY_MAX = 8;
 export const HISTORY_CONTENT_MAX = 2000;
@@ -146,6 +148,8 @@ export function registerAskRoute(app: FastifyInstance, opts: AskRouteOptions): v
       tool: c.tool,
       title: title(c.tool),
       summary: cut(c.summary),
+      // the places the result names, for the map; [] when it names none
+      anchors: c.anchors ?? [],
     })),
     grounding: {
       ok: a.grounding.ok,
@@ -156,6 +160,8 @@ export function registerAskRoute(app: FastifyInstance, opts: AskRouteOptions): v
     ...(a.analysisId ? { analysis_id: a.analysisId } : {}),
     ...(a.attachments?.length ? { attachments: a.attachments } : {}),
     ...(a.repaired ? { repaired: true } : {}),
+    // numbers that were real but cited in the wrong place, whose source ids the system appended
+    ...(a.citationsAdded?.length ? { citations_added: a.citationsAdded } : {}),
     ...(a.fallback
       ? { fallback: { reason: clean(a.fallback.reason), unsupported: a.fallback.unsupported } }
       : {}),
@@ -202,7 +208,7 @@ export function registerAskRoute(app: FastifyInstance, opts: AskRouteOptions): v
         throw new ApiError(
           400,
           'invalid_input',
-          `analysis_id「${analysisId}」对应的分析不存在或已过期（实时体检的结果只在服务端保留最近 ${LIVE_RESULTS_MAX} 个），请重新体检，或切换到样例`,
+          `analysis_id「${analysisId}」对应的分析不存在或已过期（实时体检的结果在服务端${opts.live.retention()}），请重新体检，或切换到样例`,
         );
       }
       if (running.size >= opts.maxConcurrent) {

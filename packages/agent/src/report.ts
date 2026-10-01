@@ -3,25 +3,14 @@
  * pure functions of the AnalysisResult: the same result always renders the same report, and every
  * number in it can be traced back to a field of the result.
  */
-import { TASK_RULE_M, type AnalysisResult, type HardCategory, type LngLat } from '@zoudedao/core';
-import {
-  GB_RADIUS_M,
-  HARD_CATEGORIES,
-  checkRows,
-  describePlace,
-  isPending,
-  rulesOf,
-  statusUnderRule,
-  toBd09,
-  type RuleStatus,
-} from './analysis.js';
+import type { AnalysisResult, HardCategory, LngLat } from '@zoudedao/core';
+import { viaName } from '@zoudedao/core';
+import { HARD_CATEGORIES, checkRows, describePlace, isPending, toBd09 } from './analysis.js';
 import { beijingDate, fmtNumber } from './format.js';
 import { communitiesWithGaps, gapRows, pendingRows, type GapRow, type PendingRow } from './rows.js';
 import { siteSuggestionsOf } from './siting.js';
-import { overview, provenance, type Overview } from './summary.js';
+import { overview, provenance, type FacilityOverview, type Overview } from './summary.js';
 import type { ZddMeta } from './types.js';
-
-type RuleCounts = Record<RuleStatus, number>;
 
 export interface ReportSuggestion {
   rank: number;
@@ -48,7 +37,6 @@ export interface ReportModel {
     straight_m: number;
     route_m: number;
   } | null;
-  dual_criteria: { category: HardCategory; task_m: number; gb_m: number; task: RuleCounts; gb: RuleCounts }[];
   siting: {
     category: HardCategory;
     source: 'analysis' | 'estimated' | 'none';
@@ -58,6 +46,10 @@ export interface ReportModel {
   method: string[];
   sources: string[];
   limitations: string[];
+  /** Communities have outlines (sample data); live results only know gates. */
+  outlines: boolean;
+  /** How far the gray areas reach, in words (samples with outlines state their halo in meta.notes). */
+  gray_scope: string;
 }
 
 const m = (v: number, digits = 0) => `${fmtNumber(v, digits, true)} m`;
@@ -81,13 +73,6 @@ function verdictOf(o: Overview, withGaps: number): string {
   return `${lead}${circle}${pending}。`;
 }
 
-function countRule(result: AnalysisResult, category: HardCategory, rule_m: number): RuleCounts {
-  const out: RuleCounts = { 达标: 0, 未达标: 0, 待核实: 0 };
-  for (const row of checkRows(result))
-    if (row.category === category) out[statusUnderRule(row.check, rule_m)]++;
-  return out;
-}
-
 function methodLines(result: AnalysisResult, o: Overview): string[] {
   const s = o.sampling;
   const rm = s.by_src.routematrix;
@@ -108,16 +93,22 @@ function methodLines(result: AnalysisResult, o: Overview): string[] {
   parts.push(
     `画圆法对照：以分析中心为圆心、半径 ${m(o.isochrone.circle_r15_m)}（900 秒 × ${fmtNumber(o.speed_mps, 2, true)} m/s）的直线 15 分钟圆。`,
   );
-  const ruleLine =
-    rulesOf(result) === 'gb50180'
-      ? '判定距离按国标半径（小学、菜市场 500 m，药店 300 m）'
-      : '判定距离按赛题口径 1 km';
   parts.push(
-    `设施可达：从每个小区出发，对直线距离在判定距离内的候选设施做批量算路（步行距离不会短于直线距离，更远的候选不必算）。${ruleLine}：步行最短距离不超过判定距离为覆盖；直线在判定距离内、步行超出为伪覆盖；直线就已超出为盲区；步行距离与判定距离相差不超过 50 m 另标临界。菜市场、药店、小学任一类缺失，即记为该小区的服务缺口。`,
+    `设施可达：从每个小区出发，对直线距离在判定距离内的候选设施做批量算路（步行距离不会短于直线距离，更远的候选不必算）。判定距离按赛题口径 1 km：步行最短距离不超过判定距离为覆盖；直线在判定距离内、步行超出为伪覆盖；直线就已超出为盲区；步行距离与判定距离相差不超过 50 m 另标临界。菜市场、药店、小学任一类缺失，即记为该小区的服务缺口。`,
   );
   parts.push(
     '待核实：还有更近的候选设施没有从该小区算路，实际最短步行可能更短。这些检查单独列出，不计入缺口，也不画结论颜色。',
   );
+  if (o.facilities) {
+    parts.push(
+      '圈内设施：对清单里的每处设施，在耗时场上读出从分析中心走到它入口的时间，不超过 15 分钟即为步行可达；与直线 15 分钟圆内的数量对照。菜场摊位并入菜市场，同一地铁站或公交站的各出入口算一处。',
+    );
+  }
+  if (o.gray_areas.length) {
+    parts.push(
+      '灰色区域：把每个位置交给离它最近的小区，按该小区已核实的判定数缺了几类必需设施，栅格化后提取“缺至少 1 类、2 类……”和“有伪覆盖”的范围；未核实的判定不计入。',
+    );
+  }
   parts.push(
     '规划建议：候选点取实测步行路径上每隔 50 m 的点和各小区位置，用 L̂ = max(max(ρ̂(s), ρ̂(d))·|s − d|, |t̂(s) − t̂(d)|·v) 估算新设施到小区的步行距离，贪心最大覆盖选址。标注“估算”的建议没有用实测路线核验。',
   );
@@ -182,7 +173,7 @@ export function buildReportModel(result: AnalysisResult, id: string): ReportMode
       example = {
         community: community.name,
         category,
-        facility: check.via ?? check.nearest_straight ?? category,
+        facility: viaName(check) ?? check.nearest_straight ?? category,
         straight_m: straight,
         route_m: check.route_m,
       };
@@ -198,13 +189,6 @@ export function buildReportModel(result: AnalysisResult, id: string): ReportMode
     gaps,
     pending: pendingRows(result),
     pseudo_example: example,
-    dual_criteria: HARD_CATEGORIES.map((category) => ({
-      category,
-      task_m: TASK_RULE_M[category],
-      gb_m: GB_RADIUS_M[category],
-      task: countRule(result, category, TASK_RULE_M[category]),
-      gb: countRule(result, category, GB_RADIUS_M[category]),
-    })),
     siting: HARD_CATEGORIES.map((category) => {
       const entry = suggestions[category];
       return {
@@ -227,6 +211,8 @@ export function buildReportModel(result: AnalysisResult, id: string): ReportMode
     method: methodLines(result, o),
     sources: sourceLines(result),
     limitations: limitationLines(result, o),
+    outlines: result.communities.some((c) => c.pts.length >= 3),
+    gray_scope: grayScope(result),
   };
 }
 
@@ -281,6 +267,78 @@ function keyNumbers(o: Overview): string {
   return table(['指标', '数值', '说明'], rows);
 }
 
+function facilitiesSection(o: Overview, f: FacilityOverview): string {
+  const count = (n: number, unit: string) => `${n} ${unit}`;
+  const rows = f.rows.map((r) => {
+    const cut = r.complete === false;
+    const found = cut
+      ? `至少 ${count(r.found, r.unit)}（清单只到离中心 ${m(r.known_radius_m ?? 0)}）`
+      : count(r.found, r.unit);
+    const at = (n: number) => (cut ? `至少 ${count(n, r.unit)}` : count(n, r.unit));
+    const near =
+      r.nearest === null || r.nearest_min === null
+        ? '—'
+        : `${r.nearest}，${fmtNumber(r.nearest_min, 1)} 分钟`;
+    return [r.category, found, at(r.circle), at(r.walk), near];
+  });
+  const lines = [
+    '### 圈内设施：15 分钟走得到几处',
+    '',
+    table(
+      [
+        '类别',
+        '清单',
+        `直线 15 分钟圆内（半径 ${m(f.circle_r_m)}）`,
+        '15 分钟步行可达',
+        '最近一处（步行时间）',
+      ],
+      rows,
+    ),
+    '',
+    `步行时间按 ${fmtNumber(o.speed_mps, 2, true)} m/s 从分析中心走到设施入口计算；菜场摊位并入菜市场，同一地铁站或公交站的各出入口算一处。`,
+  ];
+  if (f.none_within_walk.length) {
+    lines.push('', `15 分钟内一处也走不到：${f.none_within_walk.join('、')}。`);
+  }
+  if (f.rows.some((r) => r.complete === false)) {
+    lines.push('', '标“至少”的类别检索页数用完，更远的没有统计，实际数量可能更多。');
+  }
+  return lines.join('\n');
+}
+
+/** Where the gray reaches: live results stand each gate for ~250 m; outline samples state their halo. */
+function grayScope(result: AnalysisResult): string {
+  if (!result.communities.some((c) => c.pts.length >= 3)) {
+    return '实时模式没有小区轮廓，每个小区出入口代表周围约 250 m。';
+  }
+  const notes = (result.meta as { notes?: unknown }).notes;
+  const halo = /轮廓外\s*(\d+)\s*米/.exec(Array.isArray(notes) ? notes.join('\n') : '')?.[1];
+  return halo
+    ? `范围为小区轮廓及其外 ${halo} m（轮廓外的位置取最近小区的判定，水面不计）。`
+    : '范围限于小区轮廓内。';
+}
+
+function graySection(o: Overview, scope: string): string {
+  const lines = [
+    '### 灰色区域（设施匮乏的范围）',
+    '',
+    `每个位置交给离它最近的小区，按该小区已核实的判定数缺了几类必需设施（小学、菜市场、药店），缺得越多颜色越深；伪覆盖层标出“直线看着近、实际走不到”的范围。${
+      scope
+    }`,
+    '',
+    table(
+      ['图层', '面积', '块数', '涉及小区'],
+      o.gray_areas.map((g) => [
+        g.kind === 'pseudo' ? '有伪覆盖' : `缺至少 ${g.min_missing} 类`,
+        `${fmtNumber(g.area_km2, 3)} km²`,
+        `${g.polygons}`,
+        g.communities.join('、') || '—',
+      ]),
+    ),
+  ];
+  return lines.join('\n');
+}
+
 function checksSection(model: ReportModel): string {
   const o = model.overview;
   const h = o.headline;
@@ -332,6 +390,7 @@ function checksSection(model: ReportModel): string {
   } else {
     out.push('没有已核实的服务缺口。', '');
   }
+  if (o.gray_areas.length) out.push(graySection(o, model.gray_scope), '');
   if (model.pending.length) {
     out.push(
       '### 待核实（不计入缺口）',
@@ -378,31 +437,9 @@ function pseudoSection(model: ReportModel): string {
   return lines.join('\n');
 }
 
-function dualSection(model: ReportModel): string {
-  const fmtCounts = (c: RuleCounts) => `${c.达标} / ${c.未达标} / ${c.待核实}`;
-  return [
-    '## 四、国标口径对照（GB 50180-2018）',
-    '',
-    '赛题口径：小学、菜市场、药店都按步行不超过 1 km 判定。国标 GB 50180-2018《城市居住区规划设计标准》：小学、菜市场或生鲜超市属十分钟生活圈，服务半径不宜大于 500 m；药店属五分钟生活圈的社区商业网点，按 300 m 步行距离。',
-    '',
-    table(
-      ['类别', '赛题口径', '达标 / 未达标 / 待核实', '国标口径', '达标 / 未达标 / 待核实'],
-      model.dual_criteria.map((d) => [
-        d.category,
-        m(d.task_m),
-        fmtCounts(d.task),
-        m(d.gb_m),
-        fmtCounts(d.gb),
-      ]),
-    ),
-    '',
-    '说明：只用已测到的路线判断——直线就超出判定距离的记为未达标；最短实测步行超出、但还有更近的设施没有算路的记为待核实。国标允许生鲜超市替代菜市场，本表沿用本次分析的菜市场候选，国标达标数可能偏低。',
-  ].join('\n');
-}
-
 function sitingSection(model: ReportModel): string {
   const o = model.overview;
-  const lines = ['## 五、规划建议', ''];
+  const lines = ['## 四、规划建议', ''];
   for (const s of model.siting) {
     const n = o.by_category[s.category];
     if (s.source === 'none') {
@@ -464,14 +501,13 @@ export function renderMarkdown(model: ReportModel): string {
     '',
     keyNumbers(o),
     '',
+    ...(o.facilities ? [facilitiesSection(o, o.facilities), ''] : []),
     checksSection(model),
     pseudoSection(model),
     '',
-    dualSection(model),
-    '',
     sitingSection(model),
     '',
-    '## 六、方法、数据来源与局限',
+    '## 五、方法、数据来源与局限',
     '',
     '### 方法',
     '',
@@ -487,7 +523,7 @@ export function renderMarkdown(model: ReportModel): string {
     '',
     '---',
     '',
-    `本报告由走得到（zoudedao）根据分析结果 \`${model.analysis_id}\` 确定性生成：同一份分析结果总是生成同一份报告，报告中的每个数字都能在分析结果中找到来源。`,
+    `本报告由邻至（zoudedao）根据分析结果 \`${model.analysis_id}\` 确定性生成：同一份分析结果总是生成同一份报告，报告中的每个数字都能在分析结果中找到来源。`,
     '',
   ];
   return sections.join('\n');

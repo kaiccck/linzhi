@@ -1,3 +1,5 @@
+import type { XY } from '@zoudedao/core';
+
 /**
  * A view maps local metres (x east, y north) to CSS pixels of the map panel.
  *
@@ -52,12 +54,31 @@ export interface Composition {
   span: number;
 }
 
+// 2,200 m keeps zoom 16 on a 1280×720 or 1366×768 laptop (2,500 m dropped them to 15, half the size)
 export const compositionFor = (narrow: boolean): Composition =>
-  narrow ? { cx: 0, cy: 30, span: 2150 } : { cx: 300, cy: -20, span: 2500 };
+  narrow ? { cx: 0, cy: 30, span: 2150 } : { cx: 300, cy: -20, span: 2200 };
 
-export function staticView(width: number, height: number, c: Composition): View {
+/**
+ * Phones: the map box is short and the 走一遍 card covers its foot, so the fixed composition would
+ * push an area whose homes lie off to one side (sample V's lie south-west) under the card. There the
+ * composition centres the bounding box of the unit codes and 你在这里 (the origin); the span stays.
+ */
+export function focusedComposition(base: Composition, points: readonly XY[]): Composition {
+  let [x0, x1, y0, y1] = [0, 0, 0, 0];
+  for (const [x, y] of points) {
+    x0 = Math.min(x0, x);
+    x1 = Math.max(x1, x);
+    y0 = Math.min(y0, y);
+    y1 = Math.max(y1, y);
+  }
+  return { ...base, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+}
+
+/** `shiftY` moves the composition's centre off the panel's middle (px, + down), e.g. into the band
+ * the floating controls leave free; `shiftX` moves it right (the 路演 card covers the left side). */
+export function staticView(width: number, height: number, c: Composition, shiftY = 0, shiftX = 0): View {
   const s = Math.min(width, height) / c.span;
-  return affineView(width, height, width / 2 - c.cx * s, height / 2 + c.cy * s, s, s);
+  return affineView(width, height, width / 2 + shiftX - c.cx * s, height / 2 + shiftY + c.cy * s, s, s);
 }
 
 /** Map-panel widths below this use the compact overlay rules (flag above the dot, no callouts). */

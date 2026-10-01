@@ -36,9 +36,46 @@ function transformLng(x: number, y: number): number {
   return r;
 }
 
+/** The box of the GCJ-02 formulas (degrees); Baidu's BD-09 offset stays inside it too. */
+export const CHINA_BOX = { minLng: 72.004, maxLng: 137.8347, minLat: 0.8293, maxLat: 55.8271 } as const;
+
 /** GCJ-02 is only defined inside mainland China; outside it the offset is zero. */
 export function outOfChina(lng: number, lat: number): boolean {
-  return lng < 72.004 || lng > 137.8347 || lat < 0.8293 || lat > 55.8271;
+  return lng < CHINA_BOX.minLng || lng > CHINA_BOX.maxLng || lat < CHINA_BOX.minLat || lat > CHINA_BOX.maxLat;
+}
+
+export interface TypedCoordinates {
+  lng: number;
+  lat: number;
+  /** Written latitude first, e.g. "31.19007, 121.644195". */
+  swapped: boolean;
+  /** One of the two orders lies in CHINA_BOX; false = two numbers, but not a point in China. */
+  inChina: boolean;
+}
+
+// at most 3 integer digits: "1650 20" is a house number and a floor, not a point
+const NUM = String.raw`[+-]?\d{1,3}(?:\.\d+)?`;
+const COORD_RE = new RegExp(String.raw`^(${NUM})\s*(?:[,;、]\s*|\s+)(${NUM})$`);
+const BRACKETS = /^[([{【]\s*(.*?)\s*[)\]}】]$/s;
+
+/**
+ * Two numbers typed as a point: "121.644195,31.19007", "121.644195 31.19007", full-width commas,
+ * digits and spaces, optional brackets. China's longitudes (72–138°) and latitudes (0.8–56°) never
+ * overlap, so "31.19007, 121.644195" is read latitude first without ambiguity. null when the text is
+ * not exactly two numbers of at most 3 integer digits (an address, a place name, a house number).
+ * Same rules as the web's search plate (apps/web/src/data/coords.ts).
+ */
+export function parseCoordinateText(text: string): TypedCoordinates | null {
+  let t = text.normalize('NFKC').trim();
+  t = BRACKETS.exec(t)?.[1] ?? t;
+  const m = COORD_RE.exec(t);
+  if (!m) return null;
+  const a = Number(m[1]);
+  const b = Number(m[2]);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  if (!outOfChina(a, b)) return { lng: a, lat: b, swapped: false, inChina: true };
+  if (!outOfChina(b, a)) return { lng: b, lat: a, swapped: true, inChina: true };
+  return { lng: a, lat: b, swapped: false, inChina: false };
 }
 
 export function wgs84ToGcj02(lng: number, lat: number): LngLat {

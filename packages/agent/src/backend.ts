@@ -71,7 +71,7 @@ const HTTP_DEFAULT_MESSAGES: Record<number, string> = {
   404: '资源不存在',
   409: '服务端当前为样例模式（未配置百度服务端 Key），不能分析新地点，只能查看样例社区',
   429: '请求过于频繁或百度配额已用尽，请稍后再试',
-  500: '走得到服务内部错误，请稍后再试',
+  500: '邻至服务内部错误，请稍后再试',
   502: '地图服务暂时不可用，请稍后再试',
   503: '服务繁忙、正在重启或地图服务鉴权失败，请稍后再试',
   504: '请求超时，请稍后再试',
@@ -97,7 +97,7 @@ export class HttpBackend implements ZddBackend {
     if (timeout.aborted) {
       return new BackendError(
         'timeout',
-        `走得到服务在 ${Math.round(timeoutMs / 1000)} 秒内没有响应`,
+        `邻至服务在 ${Math.round(timeoutMs / 1000)} 秒内没有响应`,
         undefined,
         {
           cause: err,
@@ -106,7 +106,7 @@ export class HttpBackend implements ZddBackend {
     }
     return new BackendError(
       'unreachable',
-      `无法连接走得到服务（${this.baseUrl}），请确认服务已启动`,
+      `无法连接邻至服务（${this.baseUrl}），请确认服务已启动`,
       undefined,
       {
         cause: err,
@@ -116,7 +116,7 @@ export class HttpBackend implements ZddBackend {
 
   async #fail(res: Response): Promise<BackendError> {
     let code = `http_${res.status}`;
-    let message = HTTP_DEFAULT_MESSAGES[res.status] ?? `走得到服务返回错误（HTTP ${res.status}）`;
+    let message = HTTP_DEFAULT_MESSAGES[res.status] ?? `邻至服务返回错误（HTTP ${res.status}）`;
     try {
       const body = (await res.json()) as { error?: unknown; message?: unknown };
       if (typeof body.error === 'string') code = body.error;
@@ -146,7 +146,7 @@ export class HttpBackend implements ZddBackend {
       return await res.json();
     } catch (err) {
       if (combined.aborted) throw this.#networkError(err, timeout, this.#timeoutMs, signal);
-      throw new BackendError('invalid_response', '走得到服务返回的不是合法 JSON', res.status, { cause: err });
+      throw new BackendError('invalid_response', '邻至服务返回的不是合法 JSON', res.status, { cause: err });
     }
   }
 

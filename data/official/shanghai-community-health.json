@@ -1,0 +1,757 @@
+{
+ "id": "shanghai-community-health",
+ "category": "社区卫生",
+ "title": "上海市社区卫生服务中心信息",
+ "publisher": "上海市卫生健康委员会",
+ "published": "2026-03-31",
+ "url": "https://wsjkw.sh.gov.cn/fwjg/20180601/0012-55892.html",
+ "retrieved": "2026-09-28",
+ "region": {
+  "city": "上海市",
+  "district": "浦东新区"
+ },
+ "note": "市卫健委“便民服务—服务机构”页的全市社区卫生服务中心表（2026-03-31 更新，247 家），只转录了浦东新区的 46 家（序号 126–171）；表中只有服务中心，没有社区卫生服务站。名称与地址按网页原文，多个地址时 address 取第一个、address_full 保留原文。bd09 由 apps/server/scripts/geocode-official.ts 用百度地理编码补充。",
+ "counts": {
+  "listed": 46,
+  "active": 46
+ },
+ "entries": [
+  {
+   "seq": 126,
+   "name": "凌桥社区卫生服务中心",
+   "address": "凌创路169号",
+   "status": "active",
+   "bd09": [
+    121.54261,
+    31.368514
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区凌创路169号"
+   }
+  },
+  {
+   "seq": 127,
+   "name": "万祥社区卫生服务中心",
+   "address": "严木桥路163号",
+   "status": "active",
+   "bd09": [
+    121.814842,
+    30.962364
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区严木桥路163号"
+   }
+  },
+  {
+   "seq": 128,
+   "name": "南汇新城镇社区卫生服务中心",
+   "address": "潮和路280号",
+   "status": "active",
+   "bd09": [
+    121.867614,
+    30.873536
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区潮和路280号"
+   }
+  },
+  {
+   "seq": 129,
+   "name": "金桥社区卫生服务中心",
+   "address": "佳林路1028号",
+   "status": "active",
+   "bd09": [
+    121.620631,
+    31.268604
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区佳林路1028号"
+   }
+  },
+  {
+   "seq": 130,
+   "name": "浦兴社区卫生服务中心",
+   "address": "归昌路250号",
+   "status": "active",
+   "bd09": [
+    121.604817,
+    31.283314
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区归昌路250号"
+   }
+  },
+  {
+   "seq": 131,
+   "name": "三林社区卫生服务中心",
+   "address": "三林路375号",
+   "status": "active",
+   "bd09": [
+    121.505673,
+    31.145174
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区三林路375号"
+   }
+  },
+  {
+   "seq": 132,
+   "name": "洋泾社区卫生服务中心",
+   "address": "灵山路885号",
+   "status": "active",
+   "bd09": [
+    121.55838,
+    31.239261
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区灵山路885号"
+   }
+  },
+  {
+   "seq": 133,
+   "name": "陆家嘴社区卫生服务中心",
+   "address": "乳山路235弄1号",
+   "status": "active",
+   "bd09": [
+    121.533802,
+    31.243459
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区乳山路235弄1号"
+   }
+  },
+  {
+   "seq": 134,
+   "name": "大团社区卫生服务中心",
+   "address": "永定南路169号",
+   "status": "active",
+   "bd09": [
+    121.746879,
+    30.973401
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区永定南路169号"
+   }
+  },
+  {
+   "seq": 135,
+   "name": "周家渡社区卫生服务中心",
+   "address": "昌里东路239号",
+   "status": "active",
+   "bd09": [
+    121.515507,
+    31.182661
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区昌里东路239号"
+   }
+  },
+  {
+   "seq": 136,
+   "name": "川沙华夏社区卫生服务中心",
+   "address": "新德西路359号",
+   "status": "active",
+   "bd09": [
+    121.677138,
+    31.198582
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新德西路359号"
+   }
+  },
+  {
+   "seq": 137,
+   "name": "上钢社区卫生服务中心",
+   "address": "昌里路360号",
+   "status": "active",
+   "address_full": "昌里路360号；成山路66号3号楼；（预防接种、儿童保健、住院部）",
+   "bd09": [
+    121.496022,
+    31.178422
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区昌里路360号"
+   }
+  },
+  {
+   "seq": 138,
+   "name": "高行社区卫生服务中心",
+   "address": "金高路180号",
+   "status": "active",
+   "bd09": [
+    121.613376,
+    31.300906
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金高路180号"
+   }
+  },
+  {
+   "seq": 139,
+   "name": "迎博社区卫生服务中心",
+   "address": "新浦路297号",
+   "status": "active",
+   "bd09": [
+    121.541811,
+    31.174871
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新浦路297号"
+   }
+  },
+  {
+   "seq": 140,
+   "name": "惠南社区卫生服务中心",
+   "address": "观海路259号",
+   "status": "active",
+   "bd09": [
+    121.789365,
+    31.037725
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区观海路259号"
+   }
+  },
+  {
+   "seq": 141,
+   "name": "新场社区卫生服务中心",
+   "address": "牌楼西路58号",
+   "status": "active",
+   "bd09": [
+    121.651951,
+    31.030435
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区牌楼西路58号"
+   }
+  },
+  {
+   "seq": 142,
+   "name": "孙桥社区卫生服务中心",
+   "address": "横沔江路274号",
+   "status": "active",
+   "bd09": [
+    121.640053,
+    31.179807
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区横沔江路274号"
+   }
+  },
+  {
+   "seq": 143,
+   "name": "东明社区卫生服务中心",
+   "address": "环林东路555号",
+   "status": "active",
+   "bd09": [
+    121.53642,
+    31.150322
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区环林东路555号"
+   }
+  },
+  {
+   "seq": 144,
+   "name": "北蔡社区卫生服务中心",
+   "address": "莲园路271号",
+   "status": "active",
+   "bd09": [
+    121.559739,
+    31.191615
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区莲园路271号"
+   }
+  },
+  {
+   "seq": 145,
+   "name": "合庆社区卫生服务中心",
+   "address": "前哨路215号",
+   "status": "active",
+   "bd09": [
+    121.728397,
+    31.244757
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区前哨路215号"
+   }
+  },
+  {
+   "seq": 146,
+   "name": "机场社区卫生服务中心",
+   "address": "川南奉公路3385号",
+   "status": "active",
+   "bd09": [
+    121.765132,
+    31.155561
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区川南奉公路3385号"
+   }
+  },
+  {
+   "seq": 147,
+   "name": "六灶社区卫生服务中心",
+   "address": "崇溪路120号",
+   "status": "active",
+   "bd09": [
+    121.719642,
+    31.116631
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区崇溪路120号"
+   }
+  },
+  {
+   "seq": 148,
+   "name": "高东社区卫生服务中心",
+   "address": "北新园路459号",
+   "status": "active",
+   "bd09": [
+    121.635121,
+    31.326141
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区北新园路459号"
+   }
+  },
+  {
+   "seq": 149,
+   "name": "王港社区卫生服务中心",
+   "address": "新雅路196号",
+   "status": "active",
+   "bd09": [
+    121.688659,
+    31.243154
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新雅路196号"
+   }
+  },
+  {
+   "seq": 150,
+   "name": "三林康德社区卫生服务中心",
+   "address": "和佳路17号",
+   "status": "active",
+   "bd09": [
+    121.518447,
+    31.132881
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区和佳路17号"
+   }
+  },
+  {
+   "seq": 151,
+   "name": "航头鹤沙社区卫生服务中心",
+   "address": "沪南公路4591号",
+   "status": "active",
+   "bd09": [
+    121.593117,
+    31.08288
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区沪南公路4591号"
+   }
+  },
+  {
+   "seq": 152,
+   "name": "老港社区卫生服务中心",
+   "address": "鑫盛路13号",
+   "status": "active",
+   "bd09": [
+    121.845755,
+    31.045676
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区鑫盛路13号"
+   }
+  },
+  {
+   "seq": 153,
+   "name": "金杨社区卫生服务中心",
+   "address": "金杨路121号",
+   "status": "active",
+   "bd09": [
+    121.579202,
+    31.253286
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金杨路121号"
+   }
+  },
+  {
+   "seq": 154,
+   "name": "潍坊社区卫生服务中心",
+   "address": "崂山路639号",
+   "status": "active",
+   "bd09": [
+    121.530784,
+    31.229514
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区崂山路639号"
+   }
+  },
+  {
+   "seq": 155,
+   "name": "塘桥社区卫生服务中心",
+   "address": "浦建路131号",
+   "status": "active",
+   "bd09": [
+    121.52814,
+    31.21469
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区浦建路131号"
+   }
+  },
+  {
+   "seq": 156,
+   "name": "曹路社区卫生服务中心",
+   "address": "龚新路470号",
+   "status": "active",
+   "bd09": [
+    121.689356,
+    31.264556
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区龚新路470号"
+   }
+  },
+  {
+   "seq": 157,
+   "name": "高桥社区卫生服务中心",
+   "address": "欧高路128号",
+   "status": "active",
+   "bd09": [
+    121.584382,
+    31.356252
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区欧高路128号"
+   }
+  },
+  {
+   "seq": 158,
+   "name": "康桥社区卫生服务中心",
+   "address": "康弘路565号",
+   "status": "active",
+   "bd09": [
+    121.604824,
+    31.131635
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区康弘路565号"
+   }
+  },
+  {
+   "seq": 159,
+   "name": "川沙社区卫生服务中心",
+   "address": "绣川路338号",
+   "status": "active",
+   "bd09": [
+    121.701265,
+    31.185748
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区绣川路338号"
+   }
+  },
+  {
+   "seq": 160,
+   "name": "泥城社区卫生服务中心",
+   "address": "云汉路588号",
+   "status": "active",
+   "bd09": [
+    121.821628,
+    30.914452
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区云汉路588号"
+   }
+  },
+  {
+   "seq": 161,
+   "name": "宣桥社区卫生服务中心",
+   "address": "沪南公路8719号",
+   "status": "active",
+   "bd09": [
+    121.701565,
+    31.044268
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区沪南公路8719号"
+   }
+  },
+  {
+   "seq": 162,
+   "name": "张江社区卫生服务中心",
+   "address": "益江路458号",
+   "status": "active",
+   "bd09": [
+    121.632712,
+    31.203418
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区益江路458号"
+   }
+  },
+  {
+   "seq": 163,
+   "name": "周浦社区卫生服务中心",
+   "address": "沈梅东路163号",
+   "status": "active",
+   "bd09": [
+    121.591677,
+    31.099151
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区沈梅东路163号"
+   }
+  },
+  {
+   "seq": 164,
+   "name": "沪东社区卫生服务中心",
+   "address": "莱阳路512号",
+   "status": "active",
+   "bd09": [
+    121.589698,
+    31.281538
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区莱阳路512号"
+   }
+  },
+  {
+   "seq": 165,
+   "name": "南码头社区卫生服务中心",
+   "address": "浦三路696号",
+   "status": "active",
+   "bd09": [
+    121.524032,
+    31.192261
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区浦三路696号"
+   }
+  },
+  {
+   "seq": 166,
+   "name": "航头社区卫生服务中心",
+   "address": "沪南公路5395号",
+   "status": "active",
+   "bd09": [
+    121.599929,
+    31.050235
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区沪南公路5395号"
+   }
+  },
+  {
+   "seq": 167,
+   "name": "江镇社区卫生服务中心",
+   "address": "东亭路762号",
+   "status": "active",
+   "bd09": [
+    121.758974,
+    31.178004
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区东亭路762号"
+   }
+  },
+  {
+   "seq": 168,
+   "name": "书院社区卫生服务中心",
+   "address": "新卫路6号",
+   "status": "active",
+   "bd09": [
+    121.879326,
+    30.988282
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新卫路6号"
+   }
+  },
+  {
+   "seq": 169,
+   "name": "唐镇社区卫生服务中心",
+   "address": "创新中路75号",
+   "status": "active",
+   "bd09": [
+    121.666563,
+    31.211397
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区创新中路75号"
+   }
+  },
+  {
+   "seq": 170,
+   "name": "祝桥社区卫生服务中心",
+   "address": "川南奉公路5009号",
+   "status": "active",
+   "bd09": [
+    121.764904,
+    31.121148
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区川南奉公路5009号"
+   }
+  },
+  {
+   "seq": 171,
+   "name": "花木社区卫生服务中心",
+   "address": "玉兰路96号",
+   "status": "active",
+   "bd09": [
+    121.555029,
+    31.211014
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区玉兰路96号"
+   }
+  }
+ ]
+}

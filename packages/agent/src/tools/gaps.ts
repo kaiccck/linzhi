@@ -9,12 +9,15 @@ import {
   speedOf,
   within15,
 } from '../analysis.js';
+import { AnchorBook } from '../anchors.js';
 import { FactBook, fmtNumber } from '../format.js';
 import {
   communitiesWithGaps,
+  communityStatusRows,
   coveredRows,
   gapRows,
   pendingRows,
+  type CommunityStatusRow,
   type CoveredRow,
   type GapRow,
   type PendingRow,
@@ -36,12 +39,21 @@ export interface GapsData {
     blind: number;
     borderline: number;
     pending: number;
+    /** 菜市场 gaps listed with a 买菜替代 (gaps[].alt, a shop within the rule on foot): still gaps. */
+    with_alt: number;
   };
   gaps: GapRow[];
   pending: PendingRow[];
   /** Only with the community filter: the checks that are fine, so a question about one place is answered whole. */
   covered: CoveredRow[];
   communities_with_gaps: { community: string; missing: HardCategory[] }[];
+  /** Every community in scope: verdict and walking minutes per category (answers "哪些小区都方便"). */
+  by_community: CommunityStatusRow[];
+  /**
+   * Area-wide: communities (not facilities) that reach each category within 15 minutes. Empty with
+   * the community filter, where it answered a different question than the one asked and a real model
+   * read "within 6, total 12" as "6 of 12 schools".
+   */
   within_15min: Partial<
     Record<HardCategory, { limit_m: number; within: number; undetermined: number; total: number }>
   >;
@@ -54,7 +66,9 @@ export const listServiceGaps = defineTool({
     '列出一次体检中“小区 × 设施类别”的服务缺口，按步行距离从远到近排序，给出直线距离、实测步行距离、经由设施、步行分钟数。' +
     '只有已核实（verified=true）的检查才算缺口：伪覆盖 = 直线在判定距离内、步行超出；盲区 = 直线就已超出（route_basis=lower_bound 表示判定距离内根本没有这类设施，没有算路）；临界 = 步行距离与判定距离相差不超过 50 m。' +
     '未核实的检查单独列在 pending（待核实），回答时只能说“待核实”，不能说成缺口。' +
-    '可按类别（小学/菜市场/药店）、状态和小区过滤；指定 community 时还会返回该小区能走到的设施（covered）。老年人画像的 analysis_id 会给出 15 分钟内能走到的小区数。',
+    '菜市场缺口可能带 alt（买菜替代：判定距离内步行能到的能买菜的超市或果蔬店及步行距离），只作参考，不算覆盖，缺口仍计为缺口；alt 为 null 表示判定距离内步行没有这样的店。' +
+    '可按类别（小学/菜市场/药店）、状态和小区过滤；问某个小区时传 community（小区名，如“申城佳苑三期A块”），还会返回该小区能走到的设施（covered）。' +
+    '老年人画像的 analysis_id 是原 id 加 ~elder（如 zj-a~elder），会给出 15 分钟内能走到的小区数。',
   inputSchema: z.object({
     analysis_id: z.string().trim().min(1).max(80).describe('analyze_life_circle 返回的 analysis_id'),
     category: z.enum(['小学', '菜市场', '药店']).optional().describe('只看某一类设施'),
@@ -126,12 +140,14 @@ export const listServiceGaps = defineTool({
         blind: all.filter((g) => g.status === '盲区').length,
         borderline: all.filter((g) => g.borderline).length,
         pending: pending.length,
+        with_alt: all.filter((g) => g.alt).length,
       },
       gaps: all.slice(0, args.limit),
       pending,
       covered,
       communities_with_gaps: communitiesWithGaps(all),
-      within_15min: Object.fromEntries(cats.map((c) => [c, within15(result, c)])),
+      by_community: communityStatusRows(result, scope),
+      within_15min: community ? {} : Object.fromEntries(cats.map((c) => [c, within15(result, c)])),
     };
 
     const book = new FactBook();
@@ -146,6 +162,13 @@ export const listServiceGaps = defineTool({
       }
       return `直线 ${straight}、步行 ${m(`${key}的步行距离`, g.route_m)}（约 ${minutes(`${key}的步行时间`, g.walk_min)}）`;
     };
+    /** "；可在联华超市(益江店)买菜（超市，步行 530 m，约 7.6 分钟；只作参考，不算覆盖）" for a 菜市场 gap. */
+    const altText = (g: GapRow) => {
+      if (g.alt === undefined) return '';
+      if (g.alt === null) return '；判定距离内步行也没有能买菜的超市或果蔬店';
+      const key = `${g.community}的买菜替代${g.alt.name}`;
+      return `；可在${g.alt.name}买菜（${g.alt.kind}，步行 ${m(`${key}的步行距离`, g.alt.route_m)}，约 ${minutes(`${key}的步行时间`, g.alt.walk_min)}；只作参考，不算覆盖）`;
+    };
 
     let summary: string;
     if (community) {
@@ -153,7 +176,7 @@ export const listServiceGaps = defineTool({
         const gap = all.find((g) => g.category === cat);
         if (gap) {
           const via = gap.via ? `最近能走到的是${gap.via}，` : '';
-          return `${cat}步行 ${fmtNumber(gap.rule_m)} m 内走不到（${gap.status}${gap.borderline ? '、临界' : ''}）：${via}${walk(gap)}`;
+          return `${cat}步行 ${fmtNumber(gap.rule_m)} m 内走不到（${gap.status}${gap.borderline ? '、临界' : ''}）：${via}${walk(gap)}${altText(gap)}`;
         }
         const ok = covered.find((c) => c.category === cat);
         if (ok) {
@@ -189,6 +212,9 @@ export const listServiceGaps = defineTool({
         if (!args.category) {
           summary += `，涉及 ${book.add('有缺口的小区数', data.communities_with_gaps.length, '个')}小区`;
         }
+        if (n.with_alt) {
+          summary += `；其中菜市场缺口 ${book.add('有买菜替代的菜市场缺口数', n.with_alt, '个')}在判定距离内步行能到能买菜的超市或果蔬店（买菜替代，只作参考，仍计为缺口）`;
+        }
       }
       summary += pending.length
         ? `；另有 ${book.add('待核实数', pending.length, '项')}待核实，不计入缺口。`
@@ -202,7 +228,8 @@ export const listServiceGaps = defineTool({
         summary += `待核实：${names.join('、')}（原因：有更近的设施还没有算路）。`;
       }
     }
-    if (profileOf(result) === 'elder') {
+    // area-wide counts only for area-wide questions (see within_15min)
+    if (profileOf(result) === 'elder' && !community) {
       const limit = book.add('老年人 15 分钟步行距离', Math.round(900 * speed), 'm');
       const parts = cats.map((c) => {
         const w = within15(result, c);
@@ -213,6 +240,25 @@ export const listServiceGaps = defineTool({
       });
       summary += `按老年人步速 ${book.add('老年人步速', speed, 'm/s', { digits: 2, trim: true })}，15 分钟最多走 ${limit}：整个片区能在 15 分钟内走到的小区——${parts.join('；')}。`;
     }
-    return { summary, data, facts: book.facts };
+    // the places named: each gap's community and the facility its walk reaches, then the pending ones
+    const anchors = new AnchorBook(result, id);
+    const via = (community: string, category: HardCategory) => {
+      const check = result.communities.find((c) => c.name === community)?.checks?.[category];
+      anchors.poi({ uid: check?.via_uid ?? null, name: check?.via ?? null });
+    };
+    for (const g of data.gaps) {
+      anchors.community(g.community);
+      if (g.via) via(g.community, g.category);
+      // the 买菜替代 shop, when the inventory lists it
+      const alt = g.alt && result.communities.find((c) => c.name === g.community)?.checks?.[g.category]?.alt;
+      if (alt) anchors.poi({ uid: alt.uid, name: alt.name });
+    }
+    for (const c of covered) {
+      anchors.community(c.community);
+      if (c.via) via(c.community, c.category);
+    }
+    for (const p of pending) anchors.community(p.community);
+    if (community) anchors.community(community);
+    return { summary, data, facts: book.facts, anchors: anchors.anchors };
   },
 });

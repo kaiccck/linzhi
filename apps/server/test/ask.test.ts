@@ -7,11 +7,25 @@ import { LiveResults, NO_LIVE_MESSAGE } from '../src/advisor.js';
 import type { Analyzer } from '../src/analyzer.js';
 import { ANALYZE_BODY, makeApp, parseSse, SAMPLES_DIR, STUB_RESULT, type SseEvent } from './helpers.js';
 
+interface AnchorPayload {
+  type: 'community' | 'poi' | 'gray_area' | 'site';
+  analysis_id: string;
+  name?: string;
+  code?: string;
+  uid?: string;
+  category?: string;
+  id?: string;
+  kind?: string;
+  xy?: [number, number];
+  bd09?: [number, number];
+}
+
 interface AnswerPayload {
   answer: string;
   mode: 'llm' | 'template';
   model?: string;
-  citations: { id: string; tool: string; title: string; summary: string }[];
+  citations: { id: string; tool: string; title: string; summary: string; anchors: AnchorPayload[] }[];
+  citations_added?: string[];
   grounding: { ok: boolean; checked: number; unsupported: string[]; uncited: string[] };
   analysis_id?: string;
   attachments?: { filename: string; mime_type: string; content: string }[];
@@ -118,16 +132,51 @@ describe('POST /api/ask in template mode (no LLM configured)', () => {
       '结论：不太方便：申城佳苑片区 12 个小区中，有 2 个步行 1,000 m 内走不到菜市场（伪覆盖 2、盲区 0）[T2]。',
     );
     expect(a.citations).toEqual([
-      { id: 'T1', tool: 'analyze_life_circle', title: '生活圈体检', summary: expect.any(String) },
+      {
+        id: 'T1',
+        tool: 'analyze_life_circle',
+        title: '生活圈体检',
+        summary: expect.any(String),
+        anchors: expect.any(Array),
+      },
       {
         id: 'T2',
         tool: 'list_service_gaps',
         title: '服务缺口清单',
         summary: expect.stringContaining('菜市场'),
+        anchors: expect.any(Array),
       },
     ]);
     expect(a.grounding).toMatchObject({ ok: true, unsupported: [], uncited: [] });
     expect(a.grounding.checked).toBeGreaterThan(15);
+    expect(a).not.toHaveProperty('citations_added');
+    await app.close();
+  });
+
+  it('puts the places each result names on its citation: communities with codes, facilities, gray areas', async () => {
+    const app = await makeApp();
+    const a = answerOf(
+      parseSse((await app.inject(ask({ question: '老人买菜方便吗？', analysis_id: 'zj-a' }))).payload),
+    );
+    const [overview, gaps] = a.citations;
+    // T1: the gray layers, the communities with verified gaps, the nearest facilities
+    const layers = overview!.anchors.filter((x) => x.type === 'gray_area');
+    expect(layers.map((x) => x.id)).toEqual(
+      (zjA().gray_areas ?? []).map((g) => `${g.kind}-${g.min_missing}`),
+    );
+    // T2 names the two 伪覆盖 communities of 菜市场 and where their walks end
+    const communities = gaps!.anchors.filter((x) => x.type === 'community');
+    expect(communities.map((x) => x.name)).toEqual(['川杨新苑四期', '川杨新苑三期']);
+    for (const c of communities) {
+      expect(c).toMatchObject({ analysis_id: 'zj-a~elder', code: expect.stringMatching(/^A-\d\d$/) });
+      const community = zjA().communities.find((x) => x.name === c.name)!;
+      expect(c.xy![0]).toBeCloseTo(community.centroid[0], 0);
+      expect(c.bd09![0]).toBeGreaterThan(121);
+    }
+    const pois = gaps!.anchors.filter((x) => x.type === 'poi');
+    expect(pois.map((p) => p.name)).toContain(
+      zjA().communities.find((x) => x.name === '川杨新苑四期')!.checks['菜市场'].via,
+    );
     await app.close();
   });
 
@@ -245,15 +294,23 @@ describe('POST /api/ask validation', () => {
 });
 
 describe('POST /api/ask rate limit', () => {
-  it('allows 30 questions per IP per 10 minutes in template mode, 12 with an LLM', async () => {
+  it('allows 30 questions per IP per 10 minutes, with or without an LLM (judges share one IP)', async () => {
     const template = await makeApp();
     const res = await template.inject(ask({ question: '15 分钟能走多远？' }));
     expect(res.headers['x-ratelimit-limit']).toBe('30');
     await template.close();
 
     const llm = await makeApp({}, { llm: { ...LLM, fetch: scriptedLlm([{ content: '好的。' }]).fetch } });
-    expect((await llm.inject(ask({ question: '你好' }))).headers['x-ratelimit-limit']).toBe('12');
+    expect((await llm.inject(ask({ question: '你好' }))).headers['x-ratelimit-limit']).toBe('30');
     await llm.close();
+
+    // ZDD_ASK_PER_10MIN still decides when it is set
+    const tight = await makeApp(
+      { rateLimit: { globalPerMinute: 300, analyzePerHour: 6, locatePerMinute: 30, askPer10Min: 12 } },
+      { llm: { ...LLM, fetch: scriptedLlm([{ content: '好的。' }]).fetch } },
+    );
+    expect((await tight.inject(ask({ question: '你好' }))).headers['x-ratelimit-limit']).toBe('12');
+    await tight.close();
   });
 
   it('answers 429 rate_limited beyond the budget, per IP', async () => {
@@ -318,6 +375,25 @@ describe('POST /api/ask with a scripted OpenAI-compatible model', () => {
     expect(llm.requests[0]?.messages[0]?.content).toContain('analysis_id = zj-a');
     expect(res.payload).not.toContain('sk-test-secret');
     expect(lines.join('')).not.toContain('sk-test-secret');
+    await app.close();
+  });
+
+  it('appends missing source ids itself and lists them in citations_added', async () => {
+    const llm = scriptedLlm([analyzeCall, { content: '结论：画圆把可达面积高估了 1.88 倍。' }]);
+    const app = await makeApp({}, { llm: { ...LLM, fetch: llm.fetch } });
+    const events = parseSse(
+      (await app.inject(ask({ question: '画圆高估了多少？', analysis_id: 'zj-a' }))).payload,
+    );
+    // no rewrite round: the number is real, only its source id was missing
+    expect(events.map((e) => e.event)).toEqual(['tool_call', 'tool_result', 'answer']);
+    const a = answerOf(events);
+    expect(a).toMatchObject({
+      mode: 'llm',
+      answer: '结论：画圆把可达面积高估了 1.88 倍 [T1]。',
+      citations_added: ['1.88 倍 → T1'],
+      grounding: { ok: true, uncited: [] },
+    });
+    expect(a).not.toHaveProperty('repaired');
     await app.close();
   });
 

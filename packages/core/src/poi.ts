@@ -6,7 +6,7 @@
  *   3. per-category name blacklist (小学 ≠ 培训/辅导/托管/兴趣/英语; 药店 ≠ 兽药/宠物/医疗器械)
  *   4. stall merge: "英英肉店(孙桥菜市场店)", or a 肉店/水产-type shop within 60 m of a market, or a
  *      POI whose parent_id is a market, belongs to that market and never counts on its own
- *   5. 生鲜超市 stays its own category (GB 50180 accepts it for 菜市场, the task rule does not)
+ *   5. 生鲜超市 stays its own category (the task rule does not accept it for 菜市场)
  *   6. dedupe by parent_id (a same-category child of a kept POI) and by normalised name within 30 m
  *   7. routing point = navi_location (the entrance) when Baidu gives one
  */
@@ -65,11 +65,18 @@ const RULES: readonly CategoryRule[] = [
   { cat: '菜市场', tag: /菜市场|农贸市场/, name: /菜市场|菜场|农贸市场|生鲜市场/ },
   { cat: '生鲜超市', tag: /生鲜超市/, name: /生鲜超市/ },
   { cat: '药店', tag: /药店|药房/, name: /药店|药房/, exclude: /兽药|宠物|医疗器械/ },
-  { cat: '社区卫生', tag: /社区医疗|社区卫生/, name: /社区卫生服务/ },
+  // Baidu tags community health centres as plain 医疗;综合医院 / 诊所: the name decides
+  { cat: '社区卫生', tag: /社区医疗|社区卫生/, name: /社区卫生服务|卫生服务(?:中心|站)|卫生院/ },
   { cat: '超市', tag: /超市/ },
   { cat: '地铁', tag: /地铁站/ },
   { cat: '公交', tag: /公交车站/ },
-  { cat: '养老', tag: /养老|敬老/, name: /养老院|敬老院|日间照料|长者照护/ },
+  // Shanghai's elderly services: care homes, day care, 长者照护之家 and the meal points (长者食堂,
+  // 社区食堂, 助餐点), which Baidu files under 美食. Not "自助餐".
+  {
+    cat: '养老',
+    tag: /养老|敬老/,
+    name: /养老院|敬老院|日间照料|长者照护|长者食堂|老年食堂|社区食堂|老年助餐|助餐点|助餐服务/,
+  },
   { cat: '公园', tag: /公园/ },
 ];
 

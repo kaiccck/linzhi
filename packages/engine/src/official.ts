@@ -1,6 +1,7 @@
 /**
- * Multi-source POI fusion (技术设计文档 §6.4): an official facility list — e.g. 浦东新区商务委's
- * standardized-market evaluation — confirms, re-classifies or adds facilities that Baidu's place search
+ * Multi-source POI fusion (技术设计文档 §6.4): an official facility list — 浦东新区商务委's
+ * standardized-market evaluation, 浦东教育局's 2026 enrolment list of primary schools, 市卫健委's
+ * community health centres — confirms, re-classifies or adds facilities that Baidu's place search
  * mis-tags or misses. The list decides what a facility is; Baidu keeps the say on where its door is
  * (uid, navi_location) whenever the two agree.
  *
@@ -9,15 +10,22 @@
  * are tagged 生鲜超市, which the task rule does not count. With the list, the area's 菜市场 gaps drop
  * from 4 to 2.
  *
- * An active entry within the facility radius is matched to a Baidu row from everything the place
- * searches returned (before cleaning, so plain-购物 rows count too): same branch token or same street
- * address, within 250 m of the geocoded point (400 m when both agree), never a market stall and never
- * a row of an unrelated category (a pharmacy in the market's building is not the market). Unmatched,
- * it is added at its geocoded address. Inactive entries (装修改造, 业态调整 …) change nothing.
+ * An active entry within the radius is matched to a Baidu row from everything the place searches
+ * returned (before cleaning, so plain-购物 rows count too): same name key or same street address
+ * (road and number, 号 or 弄), within a category's radius of the geocoded point, never a market stall
+ * and never a row of an unrelated category (a pharmacy in the market's building is not the market).
+ * Name keys by category: a market's branch (浦商生鲜(申城佳苑店) ↔ 浦商生鲜申城佳苑店), a school's name and
+ * campus (孙桥小学(张江校区) ↔ 上海市浦东新区孙桥小学（张江校区）, 校区/分校 spellings folded), a health
+ * centre's name without region. School and centre names are unique within a district, so a name
+ * alone may match farther out (big campuses, geocoded doors). Unmatched, an entry is added at its
+ * geocoded address. Inactive entries (装修改造, 业态调整, 特殊教育 …) change nothing.
  */
 import { parseAddress, type PlacePoi } from '@zoudedao/baidu';
 import {
   categorize,
+  healthKey,
+  roadNumber,
+  schoolKey,
   type DroppedPoi,
   type FacilityCategory,
   type LngLat,
@@ -30,23 +38,37 @@ import { r1 } from './round.js';
 /** One facility of an official list (data/official/*.json). */
 export interface OfficialEntry {
   rank?: number;
+  seq?: number;
   town?: string;
-  /** Official name, e.g. 浦商生鲜申城佳苑店. */
+  /** Official name, e.g. 浦商生鲜申城佳苑店, 上海市浦东新区孙桥小学（张江校区）. */
   name: string;
   /** Street address as published, e.g. 孙建路858号. */
   address?: string;
   score?: number;
-  /** 'active' = in service; anything else (装修改造, 业态调整 …) is never added. */
+  /** 'active' = in service; anything else (装修改造, 业态调整, 特殊教育 …) is never added. */
   status: string;
   /** Geocoded point of the address, BD-09. */
   bd09?: LngLat;
   /** Baidu geocoding flags of bd09; trusted only when precise at 门址 / 楼号 level. */
   geocode?: { precise: boolean; confidence?: number | null; level?: string | null; query?: string };
+  /** Schools list: 学校代码, school and campus as published, 公办/民办, 对口招生范围, 新开办 … */
+  code?: string;
+  school?: string;
+  campus?: string;
+  sector?: string;
+  catchment?: string;
+  opened?: string;
+  /** Towns of the school's 2025 地段 (geocoding order only). */
+  catchment_towns?: string[];
+  /** Health list: the full published address when it names several sites. */
+  address_full?: string;
 }
 
 /** An official facility list as stored in data/official/*.json; the server reads files, the engine does not. */
 export interface OfficialList {
   id: string;
+  /** Absent or 'facilities' for facility lists (catchment tables and exclusions have their own kinds). */
+  kind?: 'facilities';
   /** What every entry is, e.g. 菜市场. */
   category: FacilityCategory;
   title: string;
@@ -56,7 +78,7 @@ export interface OfficialList {
   retrieved?: string;
   region: { city: string; district?: string };
   note?: string;
-  counts?: { listed: number; active: number };
+  counts?: Record<string, number>;
   entries: OfficialEntry[];
 }
 
@@ -64,7 +86,7 @@ export interface OfficialList {
 export interface OfficialSummary {
   list: string;
   category: FacilityCategory;
-  /** Active entries within the facility radius. */
+  /** Active entries within the radius. */
   in_range: number;
   /** Matched a Baidu POI Baidu already put in the list's category. */
   confirmed: number;
@@ -76,6 +98,8 @@ export interface OfficialSummary {
   imprecise: number;
   /** Inactive entries within range (never used). */
   inactive_in_range: number;
+  /** Active entries of the list without coordinates yet (never used, wherever they are). */
+  ungeocoded?: number;
 }
 
 export interface FusionResult {
@@ -89,9 +113,29 @@ export interface FusionResult {
   warnings: string[];
 }
 
-/** Match radius around the geocoded point; up to MAX when branch name and street address both agree. */
+/** Match radius around the geocoded point; up to MAX when name and street address both agree. */
 export const OFFICIAL_MATCH_M = 250;
 export const OFFICIAL_MATCH_MAX_M = 400;
+
+/** Radii by what agrees, per category (metres). Schools and health centres have district-unique names. */
+export interface MatchRadii {
+  name: number;
+  street: number;
+  both: number;
+}
+
+const DEFAULT_RADII: MatchRadii = {
+  name: OFFICIAL_MATCH_M,
+  street: OFFICIAL_MATCH_M,
+  both: OFFICIAL_MATCH_MAX_M,
+};
+
+export const OFFICIAL_MATCH_RADII: Readonly<Partial<Record<FacilityCategory, MatchRadii>>> = {
+  小学: { name: 800, street: OFFICIAL_MATCH_M, both: 1000 },
+  社区卫生: { name: 600, street: OFFICIAL_MATCH_M, both: 800 },
+};
+
+export const radiiOf = (cat: FacilityCategory): MatchRadii => OFFICIAL_MATCH_RADII[cat] ?? DEFAULT_RADII;
 
 const KNOWN: ReadonlySet<FacilityCategory> = new Set<FacilityCategory>([
   '小学',
@@ -106,6 +150,10 @@ const KNOWN: ReadonlySet<FacilityCategory> = new Set<FacilityCategory>([
   '地铁',
   '公园',
 ]);
+
+/** Measure word of a category in the Chinese notes. */
+const MEASURE: Partial<Record<FacilityCategory, string>> = { 小学: '所', 幼儿园: '所' };
+const measureOf = (cat: FacilityCategory) => MEASURE[cat] ?? '家';
 
 /** Baidu categories a listed facility may hide under ('其他' = no category, e.g. a plain 购物 tag). */
 function compatible(cat: FacilityCategory): ReadonlySet<FacilityCategory> {
@@ -126,6 +174,14 @@ export function branchToken(name: string): string {
     .replace(BRAND_WORDS, '');
 }
 
+/** The key two names of one facility share, by the list's category (module comment). */
+export function officialNameKey(name: string, category: FacilityCategory): string {
+  if (category === '菜市场' || category === '生鲜超市') return branchToken(name);
+  if (category === '小学' || category === '幼儿园') return schoolKey(name).key;
+  if (category === '社区卫生') return healthKey(name);
+  return healthKey(name);
+}
+
 /** Street and number only: 上海市浦东新区孙建路858号(近孙环路) → 孙建路858号; null without a number. */
 export function streetAddress(address: string | null | undefined): string | null {
   if (!address) return null;
@@ -135,6 +191,14 @@ export function streetAddress(address: string | null | undefined): string | null
     .replace(/\s/g, '');
   const m = /^(.*?\d[\d\-－—]*号)/.exec(parseAddress(text).core);
   return m ? m[1]! : null;
+}
+
+/** Same site by address: equal street and number, or the same road and number as 号 on one side and 弄 on the other. */
+export function sameStreet(a: string | null | undefined, b: string | null | undefined): boolean {
+  const sa = streetAddress(a);
+  if (sa !== null && sa === streetAddress(b)) return true;
+  const ra = roadNumber(a);
+  return ra !== null && ra === roadNumber(b);
 }
 
 const precise = (e: OfficialEntry) =>
@@ -148,6 +212,8 @@ export function fuseOfficial(args: {
   pool: readonly PlacePoi[];
   frame: LocalFrame;
   radius_m: number;
+  /** District of the analysis, when known: a list of that district reports its entries without coordinates. */
+  district?: string | undefined;
 }): FusionResult {
   const { frame } = args;
   const pois = args.pois.map((p) => ({ ...p }));
@@ -169,6 +235,7 @@ export function fuseOfficial(args: {
       continue;
     }
     const ok = compatible(list.category);
+    const radii = radiiOf(list.category);
     const s: OfficialSummary = {
       list: list.id,
       category: list.category,
@@ -179,6 +246,8 @@ export function fuseOfficial(args: {
       imprecise: 0,
       inactive_in_range: 0,
     };
+    const ungeocoded = list.entries.filter((e) => !e.bd09 && e.status === 'active').length;
+    if (ungeocoded) s.ungeocoded = ungeocoded;
     const from = new Set<string>();
     const inactive = new Set<string>();
     list.entries.forEach((e, index) => {
@@ -198,22 +267,21 @@ export function fuseOfficial(args: {
       };
 
       // the best Baidu row for the entry
-      const token = branchToken(e.name);
-      const street = streetAddress(e.address);
+      const token = officialNameKey(e.name, list.category);
       let best: { row: PlacePoi; score: number; d: number } | null = null;
       for (const [uid, row] of rows) {
         if (claimed.has(uid)) continue;
         const [x, y] = frame.toXY(row.location[0], row.location[1]);
         const d = Math.hypot(x - xy[0], y - xy[1]);
-        if (d > OFFICIAL_MATCH_MAX_M) continue;
+        if (d > radii.both) continue;
         const cleaned = byUid.get(uid) ?? survivor.get(uid);
         if (cleaned?.stall_of) continue; // a stall is never the market itself
         const cat = cleaned?.cat ?? categorize(row.name, row.classifiedTag ?? row.tag ?? '').cat;
         if (!ok.has(cat)) continue;
-        const byName = token.length >= 2 && branchToken(row.name) === token;
-        const byStreet = street !== null && streetAddress(row.address) === street;
-        if (!(byName || byStreet) || d > (byName && byStreet ? OFFICIAL_MATCH_MAX_M : OFFICIAL_MATCH_M))
-          continue;
+        const byName = token.length >= 2 && officialNameKey(row.name, list.category) === token;
+        const byStreet = sameStreet(e.address, row.address);
+        if (!(byName || byStreet)) continue;
+        if (d > (byName && byStreet ? radii.both : byName ? radii.name : radii.street)) continue;
         const score = (byName && byStreet ? 2 : 1) + (cat === list.category ? 0.5 : 0) - d / 1e4;
         if (!best || score > best.score) best = { row, score, d };
       }
@@ -282,14 +350,25 @@ export function fuseOfficial(args: {
     });
 
     summaries.push(s);
-    if (!s.in_range && !s.inactive_in_range) continue;
-    const fromText = [...from].join('或') || '其他类别';
+    const sameDistrict = !args.district || !list.region.district || list.region.district === args.district;
+    const missing = ungeocoded && sameDistrict ? `名录中另有 ${ungeocoded} 条尚无坐标，没有参与融合。` : '';
+    if (!s.in_range && !s.inactive_in_range) {
+      if (missing) {
+        notes.push(
+          `${list.category}名录（${list.publisher}《${list.title}》）：范围内没有已定位的条目；${missing}`,
+        );
+        attribution.push(`${list.publisher}《${list.title}》（${list.published}）：${list.url}`);
+      }
+      continue;
+    }
+    const m = measureOf(list.category);
+    const fromText = [...from].map((c) => (c === '其他' ? '其他类别' : c)).join('或') || '其他类别';
     const rest = s.inactive_in_range
-      ? `；另有 ${s.inactive_in_range} 家${[...inactive].join('、')}，未计入`
+      ? `；另有 ${s.inactive_in_range} ${m}${[...inactive].join('、')}，未计入`
       : '';
     notes.push(
-      `${list.category}名录（${list.publisher}《${list.title}》）：范围内 ${s.in_range} 家，与百度 POI 一致 ${s.confirmed} 家，` +
-        `百度标为${fromText}而改类 ${s.reclassified} 家，百度检索未返回、按官方地址补充 ${s.added} 家${rest}。`,
+      `${list.category}名录（${list.publisher}《${list.title}》）：范围内 ${s.in_range} ${m}，与百度 POI 一致 ${s.confirmed} ${m}，` +
+        `百度标为${fromText}而改类 ${s.reclassified} ${m}，百度检索未返回、按官方地址补充 ${s.added} ${m}${rest}。${missing}`,
     );
     attribution.push(`${list.publisher}《${list.title}》（${list.published}）：${list.url}`);
   }

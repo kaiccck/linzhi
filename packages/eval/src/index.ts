@@ -1,5 +1,5 @@
 /**
- * @zoudedao/eval — the accuracy–quota evaluation of 走得到 (技术设计文档 §5.9 / §11): how close the
+ * @zoudedao/eval — the accuracy–quota evaluation of 邻至 (技术设计文档 §5.9 / §11): how close the
  * isochrone gets to a dense measured reference as a function of Baidu route quota, against the
  * straight-line circle and the 16-bearing ray method. The CLI is src/cli.ts (plan / run / score).
  */

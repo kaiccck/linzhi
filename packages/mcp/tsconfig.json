@@ -7,5 +7,5 @@
     // client used in tests), whose "source" export is raw .ts with .ts import paths.
     "allowImportingTsExtensions": true
   },
-  "include": ["src", "test", "vitest.config.ts"]
+  "include": ["src", "test", "demo", "vitest.config.ts"]
 }

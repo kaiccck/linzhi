@@ -1,3 +1,7 @@
 packages:
   - packages/*
   - apps/*
+
+# `pnpm -r build|test|typecheck` keeps going when one package fails (still exiting non-zero), so a
+# broken package never leaves the others' dist stale (packages/mcp once needed a manual rebuild).
+bail: false

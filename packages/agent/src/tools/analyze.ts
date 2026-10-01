@@ -1,11 +1,14 @@
-import type { LngLat } from '@zoudedao/core';
+import type { AnalysisResult, LngLat } from '@zoudedao/core';
 import * as z from 'zod';
-import { HARD_CATEGORIES, profileOf } from '../analysis.js';
+import { AnchorBook, type Anchor } from '../anchors.js';
+import { HARD_CATEGORIES, checkRows, isWalkGap, profileOf } from '../analysis.js';
 import type { StoredAnalysis } from '../backend.js';
 import { FactBook } from '../format.js';
 import {
   categorySentence,
+  facilitySentence,
   gapSentence,
+  graySentence,
   overview,
   profileSentence,
   provenance,
@@ -37,7 +40,7 @@ async function runLive(
   if (!ctx.backend.analyze) {
     throw new ToolError(
       'live_unavailable',
-      `当前使用本地样例数据，不能分析新地点。${await availableText(ctx)}要分析任意地点，请启动配置了百度 Key 的走得到服务，并设置 ZDD_API_URL 指向它。`,
+      `当前使用本地样例数据，不能分析新地点。${await availableText(ctx)}要分析任意地点，请启动配置了百度 Key 的邻至服务，并设置 ZDD_API_URL 指向它。`,
     );
   }
   const result = await ctx.backend.analyze(
@@ -64,6 +67,19 @@ async function withProfile(
   );
 }
 
+/**
+ * The places the headline is about: the 灰色区域 layers, the communities with verified gaps, and the
+ * nearest facility of each category of the 圈内设施统计.
+ */
+export function overviewAnchors(result: AnalysisResult, id: string, o: Overview): Anchor[] {
+  const book = new AnchorBook(result, id).grayAreas();
+  for (const r of checkRows(result)) if (isWalkGap(r.check)) book.communityAt(r.index);
+  for (const row of o.facilities?.rows ?? []) {
+    if (row.nearest) book.poi({ name: row.nearest, category: row.category });
+  }
+  return book.anchors;
+}
+
 /** The headline of one analysis in the product's words; shared with the template advisor. */
 export function analysisSummary(o: Overview, book: FactBook, note = ''): string {
   const tag = o.profile === 'elder' ? '，老年人画像' : '';
@@ -85,6 +101,7 @@ export function analysisSummary(o: Overview, book: FactBook, note = ''): string 
     });
     parts.push(`15 分钟内能走到的小区：${within.join('、')}。`);
   }
+  parts.push(facilitySentence(o, book), graySentence(o, book));
   if (note) parts.push(note);
   return parts.filter(Boolean).join('');
 }
@@ -115,11 +132,16 @@ export const analyzeLifeCircle = defineTool<typeof analyzeSchema, AnalyzeData>({
   description:
     '对一个社区做 15 分钟步行生活圈体检，或读取已有结果，返回 analysis_id 和核心数字：15 分钟步行可达面积与直线圆面积、' +
     '画圆高估倍数、15 分钟有效步行半径中位数、小学/菜市场/药店在已核实检查中的覆盖/伪覆盖/盲区数、待核实数，' +
-    '以及“画圆法找到的缺口 vs 实测步行核实的缺口”。' +
+    '以及“画圆法找到的缺口 vs 实测步行核实的缺口”；' +
+    '圈内设施统计 facilities.rows（小学、幼儿园、菜市场、超市、药店、社区卫生、养老、公交、地铁、公园：清单数 found、直线 15 分钟圆内 circle、' +
+    '15 分钟步行可达 walk、最近一处 nearest 与步行分钟 nearest_min；complete=false 表示清单被检索页数截断，数量是下限），' +
+    '以及灰色区域 gray_areas（缺至少 n 类必需设施或有伪覆盖的范围：面积、块数、涉及小区）。' +
+    '“圈里有几家药店”“附近有什么设施”这类问题用 facilities 回答。' +
     'sample_id、analysis_id、center_bd09、place 四选一：sample_id 读内置样例（如 zj-a 申城佳苑片区）；analysis_id 读已有结果；' +
     'center_bd09 对该点实时体检（需要服务端实时模式和百度 Key，约 1 分钟）；place 先定位，候选不唯一时返回候选，请用户确认后再调用。' +
     'profile=elder 按老年人步速 0.9 m/s 重算时间（路线距离与 1 km 判定不变），返回新的 analysis_id。' +
-    '后续的 get_isochrone、list_service_gaps、simulate_facility、export_report 都使用这里返回的 analysis_id。' +
+    '后续的 get_isochrone、list_service_gaps、simulate_facility、export_report 都使用这里返回的 analysis_id；' +
+    '已知 analysis_id（包括老年人画像 <id>~elder）时可以直接调用它们，不必先调用本工具。' +
     '待核实（verified=false）的检查不是缺口，回答时不要把它们算进伪覆盖或盲区。',
   inputSchema: analyzeSchema,
   outputSchema: z.looseObject({
@@ -134,6 +156,25 @@ export const analyzeLifeCircle = defineTool<typeof analyzeSchema, AnalyzeData>({
         missed_share_pct: z.number().nullable(),
         pending: z.number(),
       })
+      .optional(),
+    facilities: z
+      .looseObject({
+        rows: z.array(
+          z.looseObject({
+            category: z.string(),
+            found: z.number(),
+            circle: z.number(),
+            walk: z.number(),
+            nearest_min: z.number().nullable(),
+          }),
+        ),
+      })
+      .nullable()
+      .optional(),
+    gray_areas: z
+      .array(
+        z.looseObject({ kind: z.enum(['gap', 'pseudo']), min_missing: z.number(), area_km2: z.number() }),
+      )
       .optional(),
   }),
   annotations: { readOnlyHint: true, openWorldHint: true },
@@ -194,6 +235,11 @@ export const analyzeLifeCircle = defineTool<typeof analyzeSchema, AnalyzeData>({
     const o = overview(stored.result, stored.id);
     const book = new FactBook();
     const summary = analysisSummary(o, book, note);
-    return { summary, data: { status: 'ok' as const, ...o, ...(note ? { note } : {}) }, facts: book.facts };
+    return {
+      summary,
+      data: { status: 'ok' as const, ...o, ...(note ? { note } : {}) },
+      facts: book.facts,
+      anchors: overviewAnchors(stored.result, stored.id, o),
+    };
   },
 });

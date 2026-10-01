@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { checkGrounding, extractNumbers, unitKey, type NumberSource } from '../src/grounding.js';
+import {
+  checkGrounding,
+  completeCitations,
+  extractNumbers,
+  unitKey,
+  type NumberSource,
+} from '../src/grounding.js';
 
 const tokens = (text: string) => extractNumbers(text).map((t) => [t.kind, t.value, t.unit]);
 
@@ -54,7 +60,7 @@ describe('extractNumbers', () => {
   });
 
   it('keeps dates and standard codes whole', () => {
-    expect(tokens('2026-09-26 实测，按 GB 50180-2018，2026年9月3日复核')).toEqual([
+    expect(tokens('2026-09-26 实测，按 GB 12345-2020，2026年9月3日复核')).toEqual([
       ['date', 2026, ''],
       ['code', 0, ''],
       ['date', 2026, ''],
@@ -131,13 +137,12 @@ describe('checkGrounding', () => {
   });
 
   it('allows the domain constants only with their units', () => {
-    const ok = check(
-      '15 分钟生活圈按步行 1 km 判定，国标 500 m 与 300 米，临界 50 m，百度按 1.17 m/s 计时，依据 GB 50180-2018。',
-    );
+    const ok = check('15 分钟生活圈按步行 1 km 判定，临界 50 m，百度按 1.17 m/s 计时，老年人按 0.9 m/s。');
     expect(ok.unsupported).toEqual([]);
     expect(ok.uncited).toEqual([]);
     expect(check('一共 15 项。', []).unsupported).toEqual(['15 项']);
     expect(check('依据 GB 12345-2020。', []).unsupported).toEqual(['GB 12345-2020']);
+    expect(check('药店按 300 m 判定。', []).unsupported).toEqual(['300 m']);
   });
 
   it('accepts the user’s own numbers and dates found in tool data', () => {
@@ -163,5 +168,51 @@ describe('checkGrounding', () => {
     expect(check(`画圆高估 1.88 倍。[T1]\n${table}`).uncited).toEqual([]);
     // semicolons do not end a sentence
     expect(check('面积 1.857 km²；高估 1.88 倍 [T1]。').uncited).toEqual([]);
+  });
+
+  it('knows both walking speeds as constants, with their unit only', () => {
+    expect(check('老年人按 0.9 m/s、成人按 1.17 m/s 计算。', [])).toMatchObject({ ok: true, uncited: [] });
+    expect(check('约 0.9 倍。', []).unsupported).toEqual(['0.9 倍']);
+  });
+
+  it('offers the tool value a rounded number came from, and nothing for a computed one', () => {
+    // real drafts: 23.9 → 24 分钟, 1,676 m → 1.7 公里, and a difference 1,676 − 1,000 = 676 m
+    const g = check('步行约 24 分钟 [T1]。步行 1.7 公里 [T1]。多走了 676 m [T1]。高估约 1.9 倍 [T1]。');
+    expect(g.unsupported).toEqual(['24 分钟', '1.7 公里', '676 m', '1.9 倍']);
+    const near = Object.fromEntries(g.details.filter((d) => !d.supported).map((d) => [d.token, d.near]));
+    expect(near).toEqual({
+      '24 分钟': ['23.9 分钟（T1）'],
+      '1.7 公里': ['1.676 公里（T1）'],
+      '676 m': undefined,
+      '1.9 倍': ['1.88 倍（T1）'],
+    });
+    // counts are exact or wrong: no hint
+    expect(check('共 11 个缺口 [T1]。').details[0]!.near).toBeUndefined();
+  });
+});
+
+describe('completeCitations', () => {
+  const T2: NumberSource = { id: 'T2', facts: [{ label: '小学伪覆盖数', value: 5, unit: '个' }] };
+
+  it('appends the id of the result that holds each uncited number, before the full stop', () => {
+    const r = completeCitations(
+      '结论：画圆高估 1.88 倍。[T2]\n- 漏掉的缺口里，5 个是小学伪覆盖 [T1]。\n- 面积 1.857 km²',
+      [T1, T2],
+    );
+    expect(r.text).toBe(
+      '结论：画圆高估 1.88 倍 [T1]。[T2]\n- 漏掉的缺口里，5 个是小学伪覆盖 [T1][T2]。\n- 面积 1.857 km² [T1]',
+    );
+    expect(r.added).toEqual(['1.88 倍 → T1', '5 个 → T2', '1.857 km2 → T1']);
+    expect(checkGrounding(r.text, [T1, T2])).toMatchObject({ ok: true, uncited: [] });
+  });
+
+  it('leaves sentences with unsupported numbers, cited sentences and tables alone', () => {
+    const text = ['高估 1.88 倍，另有 9 个。', '面积 1.857 km² [T1]。', '| 高估 | 1.88 倍 |'].join('\n');
+    expect(completeCitations(text, [T1])).toEqual({ text, added: [] });
+  });
+
+  it('counts markers right after the full stop for the sentence before them', () => {
+    const T2b: NumberSource = { id: 'T2', facts: [{ label: '缺口', value: 7, unit: '个' }] };
+    expect(check('高估 1.88 倍，漏掉 7 个。[T1][T2]', [T1, T2b]).uncited).toEqual([]);
   });
 });

@@ -7,6 +7,7 @@
  */
 import { resolve } from 'node:path';
 import { BaiduConfigError } from './errors.js';
+import { quotaDay } from './ledger.js';
 import { BAIDU_SERVICES, SERVICE_LABEL, type AuthMode, type BaiduService, type BaiduTier } from './types.js';
 
 export type AkVar = 'BAIDU_SERVER_AK' | 'BAIDU_MATRIX_AK';
@@ -31,6 +32,11 @@ export interface BaiduConfig {
   readonly live: boolean;
   /** SQLite file shared by the cache and the quota ledger. */
   readonly cachePath: string;
+  /**
+   * Daily limits Baidu raised for this account (BAIDU_DAILY_LIMITS, e.g. after a work order), in force
+   * until their `until` day; absent services keep the tier's limit. Empty once the raise has ended.
+   */
+  readonly limits: Readonly<Partial<Record<BaiduService, number>>>;
   readonly issues: readonly ConfigIssue[];
 }
 
@@ -70,6 +76,53 @@ function readTier(env: Env, issues: ConfigIssue[]): BaiduTier {
 export interface LoadConfigOptions {
   /** Base for a relative BAIDU_CACHE_PATH (default: process.cwd()). */
   cwd?: string;
+  /** Clock for the end of a raised quota (default Date.now). */
+  now?: () => number;
+}
+
+/**
+ * BAIDU_DAILY_LIMITS: daily limits Baidu granted beyond the tier, `service=limit` pairs and an optional
+ * `until=YYYY-MM-DD` (the raise's last day, Beijing time), e.g.
+ * `place=5000,reverse_geocoding=5000,until=2026-10-11`. Past that day the tier's limits apply again,
+ * so a forgotten line never overspends. Unknown services and malformed values are skipped with a warning.
+ */
+function readLimits(env: Env, nowMs: number, issues: ConfigIssue[]): Partial<Record<BaiduService, number>> {
+  const raw = env.BAIDU_DAILY_LIMITS?.trim();
+  if (!raw) return {};
+  const out: Partial<Record<BaiduService, number>> = {};
+  let until: string | null = null;
+  for (const part of raw.split(/[,;\s]+/).filter(Boolean)) {
+    const [key = '', value = ''] = part.split('=').map((x) => x.trim());
+    if (key === 'until') {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) until = value;
+      else
+        issues.push({
+          level: 'warn',
+          key: 'BAIDU_DAILY_LIMITS',
+          message: `until=${value} 不是 YYYY-MM-DD 日期，已忽略`,
+        });
+      continue;
+    }
+    const n = Number(value);
+    if (!(BAIDU_SERVICES as readonly string[]).includes(key)) {
+      issues.push({ level: 'warn', key: 'BAIDU_DAILY_LIMITS', message: `${key} 不是可识别的服务名，已忽略` });
+    } else if (!Number.isInteger(n) || n <= 0) {
+      issues.push({
+        level: 'warn',
+        key: 'BAIDU_DAILY_LIMITS',
+        message: `${key}=${value} 不是正整数，已忽略`,
+      });
+    } else out[key as BaiduService] = n;
+  }
+  if (until && quotaDay(nowMs) > until) {
+    issues.push({
+      level: 'warn',
+      key: 'BAIDU_DAILY_LIMITS',
+      message: `提额已于 ${until} 到期，按账号档位的默认额度记账`,
+    });
+    return {};
+  }
+  return out;
 }
 
 export function loadBaiduConfig(env: Env = process.env, opts: LoadConfigOptions = {}): BaiduConfig {
@@ -78,6 +131,7 @@ export function loadBaiduConfig(env: Env = process.env, opts: LoadConfigOptions 
   const sk = readKey(env, 'BAIDU_SERVER_SK', issues);
   const matrixAk = readKey(env, 'BAIDU_MATRIX_AK', issues);
   const tier = readTier(env, issues);
+  const limits = readLimits(env, (opts.now ?? Date.now)(), issues);
 
   const authRaw = env.BAIDU_SERVER_AUTH?.trim().toLowerCase() ?? '';
   let mode: AuthMode | null = null;
@@ -139,6 +193,7 @@ export function loadBaiduConfig(env: Env = process.env, opts: LoadConfigOptions 
     auth,
     live: server !== null,
     cachePath: resolve(opts.cwd ?? process.cwd(), env.BAIDU_CACHE_PATH?.trim() || DEFAULT_CACHE_PATH),
+    limits,
     issues,
   };
 }
@@ -166,5 +221,5 @@ export function authModes(config: BaiduConfig): Record<BaiduService, AuthMode | 
 export function replayConfig(tier: BaiduTier = 'personal', cachePath = ':memory:'): BaiduConfig {
   const fake: ServiceAuth = { mode: 'ip', ak: 'replay', akVar: 'BAIDU_SERVER_AK' };
   const auth = Object.fromEntries(BAIDU_SERVICES.map((s) => [s, fake])) as Record<BaiduService, ServiceAuth>;
-  return { tier, serverAuth: 'ip', auth, live: false, cachePath, issues: [] };
+  return { tier, serverAuth: 'ip', auth, live: false, cachePath, limits: {}, issues: [] };
 }

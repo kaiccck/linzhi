@@ -26,6 +26,20 @@ export const DEMAND_RADIUS_M = 1100;
  */
 export const FACILITY_BUFFER_M = 1000;
 export const PLACE_PAGE_SIZE = 20;
+/**
+ * The other 民生设施 (社区卫生, 养老, 地铁, 公园, 超市, 公交) are counted for the circle being tested,
+ * not for demand points near the edge: searched within the 15-minute circle plus 50 m, which lets the
+ * page limit reach much further into it than the 2.1 km facility radius would.
+ */
+export const LIVELIHOOD_RADIUS_M = DEMAND_RADIUS_M;
+/** Place pages of the 民生设施 union (the rest of the 40 rows it can return is the bus-stop tail). */
+export const LIVELIHOOD_PAGES = 2;
+/**
+ * A 民生设施 row with the name of a facility already in the inventory (another source or query) is
+ * that facility when this close; stations get more room (platforms, exits, OSM station outlines).
+ */
+export const LIVELIHOOD_DEDUPE_M = 150;
+export const STATION_DEDUPE_M = 300;
 
 /** Fewer usable seed routes than this and the field is not worth drawing. */
 export const MIN_SEED_SAMPLES = 16;

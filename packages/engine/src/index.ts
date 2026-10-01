@@ -15,42 +15,84 @@ export {
   TIER_BUDGETS,
 } from './budget.js';
 export type { QuotaPlanEstimate, QuotaPlanItem, Step } from './budget.js';
+export { BROWSER_KEYWORDS, detailBrowserPois, withBrowserRows } from './browser.js';
+export type { BrowserDetail, BrowserPoiStats } from './browser.js';
 export * from './constants.js';
 export { EngineError, toEngineError } from './errors.js';
 export type { EngineErrorCode } from './errors.js';
-export { facilityGroups, groupIndex, inventoryOf, knownRadius, toPlaceResult } from './facilities.js';
+export {
+  facilityGroups,
+  groupIndex,
+  inventoryOf,
+  knownRadius,
+  LIVELIHOOD_CATEGORIES,
+  LIVELIHOOD_GROUPS,
+  LIVELIHOOD_KEYWORDS,
+  livelihoodPois,
+  searchLivelihood,
+  toPlaceResult,
+} from './facilities.js';
 export type {
   FacilityGroup,
   FacilitySearch,
+  FreshGroupKey,
   GroupKey,
   Inventory,
   InventoryInfo,
+  LivelihoodKey,
+  LivelihoodSearch,
   PlaceQueryLog,
 } from './facilities.js';
-export { validateInput } from './input.js';
+export { FRESH_GROUPS, FRESH_KEYWORDS, freshPool, runFreshAlternatives } from './fresh.js';
+export type { FreshCounts, FreshOutcome } from './fresh.js';
+export { BROWSER_POIS_MAX, browserPois, validateInput } from './input.js';
+export { abortable, Meter } from './meter.js';
 export {
   branchToken,
   fuseOfficial,
   OFFICIAL_MATCH_M,
   OFFICIAL_MATCH_MAX_M,
+  OFFICIAL_MATCH_RADII,
+  officialNameKey,
+  radiiOf,
+  sameStreet,
   streetAddress,
 } from './official.js';
-export type { FusionResult, OfficialEntry, OfficialList, OfficialSummary } from './official.js';
+export type { FusionResult, MatchRadii, OfficialEntry, OfficialList, OfficialSummary } from './official.js';
+export { runCatchment } from './catchment.js';
+export type { CatchmentOutcome, CatchmentStats } from './catchment.js';
 export type { Job } from './input.js';
-export { statusCounts, worstStatus } from './coverage.js';
-export type { LiveCommunity } from './coverage.js';
+export { runCoverage, statusCounts, worstStatus } from './coverage.js';
+export type { CheckSet, CoverageOutcome, LiveCommunity, MatrixFn } from './coverage.js';
 export {
   areaName,
   beijingDate,
+  browserNote,
   buildMeta,
   centerLabel,
+  exclusionNote,
+  freshNote,
   isochroneNotes,
   liveNotes,
   profileSpeed,
+  residentialNote,
 } from './report.js';
-export type { LiveMeta } from './report.js';
-export { baseName, residentialDemand } from './residential.js';
-export type { DemandSite, GateSource, ResidentialOptions, ResidentialResult } from './residential.js';
+export type { LiveMeta, LivelihoodNote } from './report.js';
+export {
+  ALIAS_RADIUS_M,
+  baseName,
+  compoundKey,
+  MISPLACED_RADIUS_M,
+  residentialDemand,
+} from './residential.js';
+export type {
+  DedupeItem,
+  DemandSite,
+  GateSource,
+  ResidentialDedupe,
+  ResidentialOptions,
+  ResidentialResult,
+} from './residential.js';
 export { matrixSample, pathLabel, SampleSet, walkedRoute } from './samples.js';
 export type { LiveWalkPath } from './samples.js';
 export { direction8, pathCandidates } from './siting.js';

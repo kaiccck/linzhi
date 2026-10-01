@@ -1,0 +1,207 @@
+{
+ "_about": "百度地图 Web 服务步行批量算路（routematrix/v2/walking），经 @zoudedao/baidu 客户端的缓存与配额账本调用，不含任何 Key。样例 zj-a 赛题口径判定的最近设施补算：研究阶段只从各小区算到离片区中心最近的 3–4 家候选设施（bv_blind_A_*.json），这里补算每个判定中入口直线距离比已算最短步行更近、却从未算过路的设施（core planNearestTopUp），起点同为 OSM 小区轮廓几何中心，终点为设施出入口（navi_location）；距离 m，耗时 s = 距离 / 1.17。由 apps/server/scripts/augment-zj-a.ts 写入（答案变化时才重写），--offline 时读取。",
+ "date": "2026-09-29",
+ "routes": [
+  {
+   "community": "川杨新苑三期",
+   "to": [
+    {
+     "uid": "202f3669a65b2eeac7f0256f",
+     "name": "雷允上(川杨新苑三期店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 287,
+     "duration_s": 242
+    },
+    {
+     "uid": "cbd273a8c6482fe807026f10",
+     "name": "益丰大药房(川杨店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 375,
+     "duration_s": 320
+    },
+    {
+     "uid": "1615ed8d421936b22efaa703",
+     "name": "益丰大药房(孙桥路店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 1006,
+     "duration_s": 859
+    },
+    {
+     "uid": "881a28e7b494fd5ef942b257",
+     "name": "养和堂药业连锁(孙桥店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 1063,
+     "duration_s": 909
+    }
+   ]
+  },
+  {
+   "community": "孙桥花苑",
+   "to": [
+    {
+     "uid": "bba873886b62c9a1bca82200",
+     "name": "好药师大药房(孙桥店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 331,
+     "duration_s": 282
+    },
+    {
+     "uid": "44a0ae1ef9a8d0eda2046490",
+     "name": "叮当智慧药房(孙宇路店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 285,
+     "duration_s": 243
+    },
+    {
+     "uid": "881a28e7b494fd5ef942b257",
+     "name": "养和堂药业连锁(孙桥店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 321,
+     "duration_s": 274
+    },
+    {
+     "uid": "1615ed8d421936b22efaa703",
+     "name": "益丰大药房(孙桥路店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 374,
+     "duration_s": 319
+    },
+    {
+     "uid": "0c496357ef19c1f61e580098",
+     "name": "同祺智慧大药房(孙农路店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 810,
+     "duration_s": 692
+    }
+   ]
+  },
+  {
+   "community": "川杨新苑四期",
+   "to": [
+    {
+     "uid": "cbd273a8c6482fe807026f10",
+     "name": "益丰大药房(川杨店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 192,
+     "duration_s": 163
+    },
+    {
+     "uid": "202f3669a65b2eeac7f0256f",
+     "name": "雷允上(川杨新苑三期店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 355,
+     "duration_s": 303
+    },
+    {
+     "uid": "1615ed8d421936b22efaa703",
+     "name": "益丰大药房(孙桥路店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 1535,
+     "duration_s": 1312
+    }
+   ]
+  },
+  {
+   "community": "孙桥黄浦花园",
+   "to": [
+    {
+     "uid": "1615ed8d421936b22efaa703",
+     "name": "益丰大药房(孙桥路店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 102,
+     "duration_s": 86
+    },
+    {
+     "uid": "881a28e7b494fd5ef942b257",
+     "name": "养和堂药业连锁(孙桥店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 106,
+     "duration_s": 89
+    },
+    {
+     "uid": "bba873886b62c9a1bca82200",
+     "name": "好药师大药房(孙桥店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 493,
+     "duration_s": 420
+    },
+    {
+     "uid": "44a0ae1ef9a8d0eda2046490",
+     "name": "叮当智慧药房(孙宇路店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 705,
+     "duration_s": 603
+    }
+   ]
+  },
+  {
+   "community": "虹御公寓",
+   "to": [
+    {
+     "uid": "1615ed8d421936b22efaa703",
+     "name": "益丰大药房(孙桥路店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 797,
+     "duration_s": 681
+    },
+    {
+     "uid": "202f3669a65b2eeac7f0256f",
+     "name": "雷允上(川杨新苑三期店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 858,
+     "duration_s": 735
+    },
+    {
+     "uid": "881a28e7b494fd5ef942b257",
+     "name": "养和堂药业连锁(孙桥店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 834,
+     "duration_s": 714
+    },
+    {
+     "uid": "cbd273a8c6482fe807026f10",
+     "name": "益丰大药房(川杨店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 1022,
+     "duration_s": 875
+    },
+    {
+     "uid": "44a0ae1ef9a8d0eda2046490",
+     "name": "叮当智慧药房(孙宇路店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 1433,
+     "duration_s": 1227
+    },
+    {
+     "uid": "bba873886b62c9a1bca82200",
+     "name": "好药师大药房(孙桥店)",
+     "category": "药店",
+     "status": "ok",
+     "distance_m": 1221,
+     "duration_s": 1044
+    }
+   ]
+  }
+ ]
+}

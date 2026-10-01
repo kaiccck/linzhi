@@ -146,6 +146,32 @@ export class FakeClient implements EngineClient {
     };
   };
 
+  /** place/v3/detail: every city POI by uid, hidden ones too; one billed request per 10 uids. */
+  placeDetail: NonNullable<EngineClient['placeDetail']> = async (uids, opts = {}) => {
+    const list = [...new Set(uids)];
+    const pois: PlacePoi[] = [];
+    let requests = 0;
+    for (let i = 0; i < list.length; i += 10) {
+      const err = this.begin('place', 1, opts);
+      if (err) throw err;
+      this.bill('place', 1, opts);
+      requests++;
+      for (const uid of list.slice(i, i + 10)) {
+        const p = this.city.pois.find((x) => x.uid === uid);
+        if (p) pois.push({ ...this.placePoi(p, this.city.toLngLat([0, 0])), distanceM: null });
+      }
+    }
+    const found = new Set(pois.map((p) => p.uid));
+    return {
+      uids: list,
+      pois,
+      missing: list.filter((u) => !found.has(u)),
+      requests,
+      apiCalls: requests,
+      via: 'api',
+    };
+  };
+
   private placePoi(p: CityPoi, center: LngLat): PlacePoi {
     const c = this.city.toXY(center);
     return {

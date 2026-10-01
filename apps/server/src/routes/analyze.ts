@@ -1,5 +1,6 @@
 import { PassThrough } from 'node:stream';
 import { BaiduError, toApiError } from '@zoudedao/baidu';
+import { browserPois } from '@zoudedao/engine';
 import type { FastifyInstance, FastifySchemaValidationError } from 'fastify';
 import { untilAborted } from '../abort.js';
 import {
@@ -34,8 +35,16 @@ const bodySchema = {
     },
     label: { type: 'string', maxLength: 80 },
     profile: { type: 'string', enum: ['adult', 'elder'], default: 'adult' },
+    // items are checked one by one in the handler (engine browserPois): a bad one is dropped, not fatal
+    browser_pois: { type: 'array' },
   },
 } as const;
+
+/**
+ * Up to 400 browser POIs of ~250 bytes each (a 60-character name and an escaped one stay well inside).
+ * Everything else of the body is a few hundred bytes.
+ */
+export const ANALYZE_BODY_LIMIT = 192 * 1024;
 
 function describeInvalid(errors: FastifySchemaValidationError[]): string {
   const first = errors[0];
@@ -48,6 +57,8 @@ function describeInvalid(errors: FastifySchemaValidationError[]): string {
       return 'profile 只能是 adult（成人）或 elder（老年人）';
     case 'label':
       return 'label 须为不超过 80 个字符的文本';
+    case 'browser_pois':
+      return 'browser_pois 须为数组：[{ uid, name, keyword, bd09 }]（地图前端检索到的设施）';
     default:
       return '请求体须为 JSON 对象，例如 {"center_bd09": [121.644195, 31.19007], "profile": "adult"}';
   }
@@ -70,7 +81,10 @@ export interface AnalyzeRouteOptions {
   perHour: number;
   maxConcurrent: number;
   timeoutMs: number;
-  /** Keeps each result for POST /api/ask and stamps meta.analysis_id on what is sent. */
+  /**
+   * Keeps each result (memory and the persistent history) for POST /api/ask, GET /api/analysis/:id and
+   * GET /api/history, and stamps meta.analysis_id on what is sent.
+   */
   live?: LiveResults;
 }
 
@@ -99,7 +113,7 @@ export function registerAnalyzeRoute(app: FastifyInstance, opts: AnalyzeRouteOpt
   app.post<{ Body: AnalyzeInput }>(
     '/api/analyze',
     {
-      bodyLimit: 4096,
+      bodyLimit: ANALYZE_BODY_LIMIT,
       schema: { body: bodySchema },
       schemaErrorFormatter: (errors) => new ApiError(400, 'invalid_input', describeInvalid(errors)),
       config: {
@@ -132,6 +146,14 @@ export function registerAnalyzeRoute(app: FastifyInstance, opts: AnalyzeRouteOpt
         throw new ApiError(503, 'busy', '当前分析任务较多，请稍后再试');
       }
 
+      // Browser POIs: the valid items only, the field left out when none is. No result is ever served
+      // from a cache here: every request runs the analyzer, whose Baidu cache is per request (a detail
+      // request is keyed by its uids), and AnalysisStore.liveId includes meta.generated, so a result
+      // computed without browser_pois never stands in for one with them. Nothing to add to any key.
+      const { browser_pois: raw, ...rest } = req.body;
+      const found = raw === undefined ? [] : browserPois(raw);
+      const input: AnalyzeInput = found.length ? { ...rest, browser_pois: found } : rest;
+
       const controller = new AbortController();
       const { signal } = controller;
       running.add(controller);
@@ -150,8 +172,12 @@ export function registerAnalyzeRoute(app: FastifyInstance, opts: AnalyzeRouteOpt
 
       void (async () => {
         try {
-          const result = await untilAborted(analyzer.analyze(req.body, emit, signal), signal);
-          write(sseEvent('result', opts.live ? opts.live.put(result) : result));
+          const result = await untilAborted(analyzer.analyze(input, emit, signal), signal);
+          const { label, profile } = input;
+          const sent = opts.live
+            ? opts.live.put(result, { ...(label === undefined ? {} : { label }), profile })
+            : result;
+          write(sseEvent('result', sent));
         } catch (err) {
           if (signal.reason === CLIENT_GONE) {
             req.log.info('客户端已断开，分析中止');

@@ -25,6 +25,11 @@ export interface ServerConfig {
   officialDir: string;
   /** Built web app; served statically only when it contains index.html. */
   webDistDir: string;
+  /**
+   * SQLite file of the history (live analyses 30 days, what-if branches, walking routes forever):
+   * ZDD_HISTORY_PATH, relative to the repo root; null = in memory only (ZDD_HISTORY_PATH=off).
+   */
+  historyPath: string | null;
   /** Fastify trustProxy: needed behind a reverse proxy, otherwise every client shares the proxy's IP. */
   trustProxy: boolean | number | string;
   /** Exact origins allowed to call /api cross-origin; empty = same-origin only. */
@@ -33,14 +38,22 @@ export interface ServerConfig {
     globalPerMinute: number;
     analyzePerHour: number;
     locatePerMinute: number;
-    /** POST /api/ask per IP per 10 minutes; absent = 30 in template mode, 12 with an LLM. */
+    /** POST /api/ask per IP per 10 minutes; absent = 30 (template and LLM mode alike). */
     askPer10Min?: number;
+    /** POST /api/whatif per IP per 10 minutes (each spends up to 30 routematrix routes); absent = 10. */
+    whatifPer10Min?: number;
+    /** GET /api/route lookups that need Baidu (one directionlite call each) per IP per 10 minutes; absent = 30. */
+    routePer10Min?: number;
   };
   maxConcurrentAnalyses: number;
   analyzeTimeoutMs: number;
   locateTimeoutMs: number;
   /** Whole answer of POST /api/ask, LLM calls and tools included. */
   askTimeoutMs: number;
+  /** One POST /api/whatif (one routematrix request); absent = 20 s. */
+  whatifTimeoutMs?: number;
+  /** One GET /api/route (one directionlite request); absent = 20 s. */
+  routeTimeoutMs?: number;
   maxConcurrentAsks: number;
   /** Delay multiplier for the sample replay analyzer: 1 = realistic pacing, 0 = instant. */
   replayPace: number;
@@ -116,6 +129,14 @@ function readTrustProxy(env: Env): boolean | number | string {
   return raw; // comma-separated addresses / CIDRs
 }
 
+/** ZDD_HISTORY_PATH: a file (relative to the repo root), or off / none / memory for no file. */
+function readHistoryPath(env: Env, root: string): string | null {
+  const raw = str(env, 'ZDD_HISTORY_PATH');
+  if (raw === undefined) return join(root, 'data/cache/analyses.sqlite');
+  if (/^(off|none|memory|false)$/i.test(raw)) return null;
+  return resolve(root, raw);
+}
+
 function readPace(env: Env): number {
   const raw = str(env, 'ZDD_REPLAY_PACE');
   if (raw === undefined) return 1;
@@ -139,6 +160,7 @@ export function loadConfig(env: Env = process.env, root: string = findRepoRoot()
     samplesDir: path('ZDD_SAMPLES_DIR', join(root, 'data/samples')),
     officialDir: path('ZDD_OFFICIAL_DIR', join(root, 'data/official')),
     webDistDir: path('ZDD_WEB_DIST', join(root, 'apps/web/dist')),
+    historyPath: readHistoryPath(env, root),
     trustProxy: readTrustProxy(env),
     corsOrigins: (str(env, 'ZDD_CORS_ORIGINS') ?? '')
       .split(',')
@@ -151,11 +173,23 @@ export function loadConfig(env: Env = process.env, root: string = findRepoRoot()
       ...(str(env, 'ZDD_ASK_PER_10MIN') === undefined
         ? {}
         : { askPer10Min: int(env, 'ZDD_ASK_PER_10MIN', 30, 1, 10_000) }),
+      ...(str(env, 'ZDD_WHATIF_PER_10MIN') === undefined
+        ? {}
+        : { whatifPer10Min: int(env, 'ZDD_WHATIF_PER_10MIN', 10, 1, 10_000) }),
+      ...(str(env, 'ZDD_ROUTE_PER_10MIN') === undefined
+        ? {}
+        : { routePer10Min: int(env, 'ZDD_ROUTE_PER_10MIN', 30, 1, 10_000) }),
     },
     maxConcurrentAnalyses: int(env, 'ZDD_MAX_CONCURRENT_ANALYSES', 2, 1, 100),
     analyzeTimeoutMs: int(env, 'ZDD_ANALYZE_TIMEOUT_S', 180, 5, 3600) * 1000,
     locateTimeoutMs: int(env, 'ZDD_LOCATE_TIMEOUT_S', 20, 1, 300) * 1000,
     askTimeoutMs: int(env, 'ZDD_ASK_TIMEOUT_S', 60, 5, 600) * 1000,
+    ...(str(env, 'ZDD_WHATIF_TIMEOUT_S') === undefined
+      ? {}
+      : { whatifTimeoutMs: int(env, 'ZDD_WHATIF_TIMEOUT_S', 20, 1, 300) * 1000 }),
+    ...(str(env, 'ZDD_ROUTE_TIMEOUT_S') === undefined
+      ? {}
+      : { routeTimeoutMs: int(env, 'ZDD_ROUTE_TIMEOUT_S', 20, 1, 300) * 1000 }),
     maxConcurrentAsks: int(env, 'ZDD_MAX_CONCURRENT_ASKS', 8, 1, 1000),
     replayPace: readPace(env),
     logLevel: str(env, 'LOG_LEVEL') ?? 'info',

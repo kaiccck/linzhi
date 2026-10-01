@@ -19,6 +19,59 @@ export function localCtx(): ToolContext {
   return { backend: new LocalBackend({ samplesDir: SAMPLES_DIR }), store: new AnalysisStore() };
 }
 
+/**
+ * zj-a with its pharmacy checks at 川杨新苑四期 and 虹御公寓 as they were before the nearest top-up
+ * (augment-zj-a.ts, 2026-09-29): 待核实, a nearer pharmacy never routed. The sample has no pending
+ * check any more; the tools' pending paths are tested on this copy.
+ */
+export function zjAWithPending(): AnalysisResult {
+  const r = structuredClone(zjA());
+  const pharmacy = (name: string) => r.communities.find((c) => c.name === name)!.checks['药店'];
+  const nearer = (list: [string, string, number][]) =>
+    list.map(([n, uid, straight_m]) => ({ name: n, uid, straight_m }));
+  Object.assign(pharmacy('川杨新苑四期'), {
+    route_m: 1031,
+    dur_s: 881,
+    via: '益丰大药房(铭康店)',
+    via_uid: '46cdd39f831a37fefc0eb09f',
+    via_straight_m: 488,
+    status: '临界',
+    status_main: '伪覆盖',
+    borderline: true,
+    route_upper_bound: true,
+    verified: false,
+    unrouted_nearer: nearer([
+      ['益丰大药房(川杨店)', 'cbd273a8c6482fe807026f10', 177.9],
+      ['雷允上(川杨新苑三期店)', '202f3669a65b2eeac7f0256f', 341.3],
+      ['益丰大药房(孙桥路店)', '1615ed8d421936b22efaa703', 995],
+    ]),
+  });
+  Object.assign(pharmacy('虹御公寓'), {
+    route_m: 1124,
+    dur_s: 962,
+    via: '益丰大药房(高木桥店)',
+    via_uid: 'ab6b2565b635c6ff3904b141',
+    via_straight_m: 741.4,
+    status: '伪覆盖',
+    status_main: '伪覆盖',
+    route_upper_bound: true,
+    verified: false,
+    unrouted_nearer: nearer([
+      ['益丰大药房(孙桥路店)', '1615ed8d421936b22efaa703', 582.5],
+      ['雷允上(川杨新苑三期店)', '202f3669a65b2eeac7f0256f', 603.4],
+      ['养和堂药业连锁(孙桥店)', '881a28e7b494fd5ef942b257', 629.7],
+    ]),
+  });
+  return r;
+}
+
+/** localCtx() whose zj-a is zjAWithPending(). */
+export function pendingCtx(): ToolContext {
+  const ctx = localCtx();
+  ctx.store.put(zjAWithPending(), { id: 'zj-a', source: 'sample' });
+  return ctx;
+}
+
 /** Shanghai, generously (all of the municipality). */
 export const SHANGHAI = { minLng: 120.85, maxLng: 122.2, minLat: 30.66, maxLat: 31.88 };
 

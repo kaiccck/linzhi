@@ -241,6 +241,7 @@ const NAME_KEYS = new Set([
   'title',
   'community',
   'via',
+  'nearest',
   'nearest_straight',
   'stall_of',
   'market_name',
@@ -299,18 +300,20 @@ const SKIP_KEYS = new Set([
 ]);
 const MAX_ENTRIES = 50_000;
 
-/** Domain constants any answer may use (with a unit of the right kind). */
+/**
+ * Domain constants any answer may use (with a unit of the right kind): the 5/10/15-minute levels,
+ * the task's 1 km rule, the 50 m borderline band, and the two walking speeds (adult 1.17 m/s from
+ * Baidu's routes, elderly 0.9 m/s, 技术设计文档 §5.7).
+ */
 const CONSTANTS: { v: number; unit: string }[] = [
   { v: 5, unit: 'min' },
   { v: 10, unit: 'min' },
   { v: 15, unit: 'min' },
-  { v: 300, unit: 'm' },
-  { v: 500, unit: 'm' },
   { v: 1000, unit: 'm' },
   { v: 50, unit: 'm' },
   { v: 1.17, unit: 'm/s' },
+  { v: 0.9, unit: 'm/s' },
 ];
-const CONSTANT_CODES = ['GB 50180-2018', 'GB 50180', 'GB50180-2018', 'GB50180'];
 
 function addText(pool: Pool, text: string, src: string): void {
   for (const t of extractNumbers(text)) {
@@ -370,7 +373,6 @@ function buildPool(sources: readonly NumberSource[], constants: boolean): Pool {
   }
   if (constants) {
     for (const c of CONSTANTS) pool.entries.push({ v: c.v, unit: c.unit, src: 'constant' });
-    for (const c of CONSTANT_CODES) addMark(pool.codes, normCode(c), 'constant');
   }
   return pool;
 }
@@ -400,6 +402,41 @@ function matches(token: NumberToken, w: number): boolean {
   const half = 0.5 * 10 ** -token.decimals;
   if (Math.abs(x - w) > half + 1e-9 * Math.max(1, Math.abs(w))) return false;
   return token.sig >= Math.min(3, sigOfValue(w));
+}
+
+/**
+ * Tool values an unsupported number is a rounding of ("24 分钟" for 23.9 分钟, "1.9 倍" for 1.88 倍),
+ * written in the token's unit with the tool's precision: what the repair prompt offers the model to
+ * copy instead. A number that is no rounding of any tool value (a sum, a difference, a guess) gets
+ * none, so the model is never nudged towards an unrelated value.
+ */
+function nearOf(token: NumberToken, pool: Pool, max = 3): string[] {
+  if (token.kind !== 'number' || familyOf(token.unit) === 'count' || familyOf(token.unit) === 'none')
+    return [];
+  const unitText = token.text.slice(token.text.indexOf(token.literal) + token.literal.length);
+  const half = 0.5 * 10 ** -token.decimals;
+  const out = new Map<string, Set<string>>();
+  for (const e of pool.entries) {
+    if (!isTool(e.src) || familyOf(e.unit) === 'none') continue;
+    for (const w of presentations(e, token.unit)) {
+      if (Math.abs(token.value - w) > half + 1e-9 * Math.max(1, Math.abs(w))) continue;
+      const shown = `${fmtValue(w)}${unitText}`;
+      const srcs = out.get(shown) ?? new Set<string>();
+      srcs.add(e.src);
+      out.set(shown, srcs);
+    }
+  }
+  return [...out].slice(0, max).map(([shown, srcs]) => `${shown}（${[...srcs].sort().join('、')}）`);
+}
+
+/** A tool value as a person would copy it: thousands separators, at most 3 decimals. */
+function fmtValue(v: number): string {
+  const fixed = Math.abs(v)
+    .toFixed(3)
+    .replace(/\.?0+$/, '');
+  const [int = '0', frac] = fixed.split('.');
+  const grouped = int.length > 3 ? int.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : int;
+  return grouped + (frac ? `.${frac}` : '');
 }
 
 function supportOf(token: NumberToken, pool: Pool): Set<string> {
@@ -457,9 +494,10 @@ function citationScopes(text: string): { start: number; end: number; ids: Set<st
     const scope = scopes[k];
     if (!scope) continue;
     for (const id of ids) scope.ids.add(id);
-    // "……80%。[T1]": a marker opening its span belongs to the sentence it follows
+    // "……80%。[T1]" and "……80%。[T1][T2]": markers opening their span belong to the sentence they follow
     const prev = scopes[k - 1];
-    if (prev && !text.slice(scope.start, m.index).trim()) for (const id of ids) prev.ids.add(id);
+    const before = text.slice(scope.start, m.index).replace(CITE_RE, '').trim();
+    if (prev && !before) for (const id of ids) prev.ids.add(id);
   }
   // a table's citation may sit in the line right before or after it
   scopes.forEach((sc, i) => {
@@ -479,6 +517,8 @@ export interface TokenCheck {
   sources: string[];
   /** Tool-backed numbers only: was a supporting result cited in the same sentence? */
   cited?: boolean;
+  /** Unsupported numbers only: tool values it is a less precise rounding of, e.g. "23.9 分钟（T2）". */
+  near?: string[];
 }
 
 export interface GroundingReport {
@@ -518,6 +558,10 @@ export function checkGrounding(
   const details: TokenCheck[] = tokens.map((t) => {
     const srcs = [...supportOf(t, pool)];
     const check: TokenCheck = { token: t.text, kind: t.kind, supported: srcs.length > 0, sources: srcs };
+    if (!srcs.length) {
+      const near = nearOf(t, pool);
+      if (near.length) check.near = near;
+    }
     if (opts.citations !== false && srcs.length && srcs.every(isTool)) {
       const scope = scopes.find((sc) => t.index >= sc.start && t.index < sc.end);
       check.cited = !!scope && srcs.some((s) => scope.ids.has(s));
@@ -527,4 +571,58 @@ export function checkGrounding(
   const unsupported = [...new Set(details.filter((d) => !d.supported).map((d) => d.token))];
   const uncited = [...new Set(details.filter((d) => d.cited === false).map((d) => d.token))];
   return { ok: unsupported.length === 0, unsupported, checked: details.length, uncited, details };
+}
+
+// ------------------------------------------------------------------------------- completion
+
+const idNum = (id: string) => Number(id.slice(1));
+const SENTENCE = /[^。！？!?]*(?:[。！？!?]+(?:\s*[[【]\s*T\d+(?:\s*[,，、]\s*T?\d+)*\s*[\]】])*|$)/g;
+const TRAILING =
+  /((?:\s*[[【]\s*T\d+(?:\s*[,，、]\s*T?\d+)*\s*[\]】])*)\s*([。！？!?]*(?:\s*[[【]\s*T\d+(?:\s*[,，、]\s*T?\d+)*\s*[\]】])*)\s*$/;
+
+export interface CitationCompletion {
+  text: string;
+  /** "5 个 → T1": numbers whose sentence now cites the result that contains them. */
+  added: string[];
+}
+
+/**
+ * Citation completion: every sentence whose numbers are all real but not cited there (the model cited
+ * another result, or none) gets the id of the result that contains each such number, before its full
+ * stop — "…5 个是小学伪覆盖 [T2]。" becomes "…[T2][T1]。". Provenance is unchanged (the numbers were
+ * already found in those results); the reader just gets the pointer the model left out, without a
+ * rewrite round. Sentences with unsupported numbers and Markdown tables are left alone.
+ */
+export function completeCitations(
+  text: string,
+  sources: readonly NumberSource[],
+  opts: GroundingOptions = {},
+): CitationCompletion {
+  const added: string[] = [];
+  const lines = text.split('\n').map((line) => {
+    if (/^\s*\|/.test(line)) return line;
+    return (line.match(SENTENCE) ?? [line])
+      .map((sentence) => {
+        if (!sentence.trim()) return sentence;
+        const g = checkGrounding(sentence, sources, opts);
+        if (!g.ok || !g.uncited.length) return sentence;
+        const ids = new Set<string>();
+        for (const d of g.details) {
+          if (d.cited !== false) continue;
+          const id = [...d.sources].sort((a, b) => idNum(a) - idNum(b))[0];
+          if (!id) continue;
+          ids.add(id);
+          added.push(`${d.token} → ${id}`);
+        }
+        if (!ids.size) return sentence;
+        const tag = [...ids].map((id) => `[${id}]`).join('');
+        const m = TRAILING.exec(sentence)!;
+        const body = sentence.slice(0, m.index);
+        const markers = m[1] ?? '';
+        const space = markers || /\s$/.test(body) ? '' : ' ';
+        return `${body}${markers}${space}${tag}${m[2] ?? ''}`;
+      })
+      .join('');
+  });
+  return { text: lines.join('\n'), added };
 }

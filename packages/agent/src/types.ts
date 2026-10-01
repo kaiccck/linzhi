@@ -2,7 +2,7 @@
  * Types shared by the backend, the tools, the advisor and the MCP server. Wire objects keep the
  * snake_case of docs/api.md and data/samples/*.json.
  */
-import type { AnalysisMeta, AnalysisResult, HardCategory, LngLat, RuleSet } from '@zoudedao/core';
+import type { AnalysisMeta, AnalysisResult, HardCategory, LngLat } from '@zoudedao/core';
 
 /** Walking profile (技术设计文档 §5.7). Route distances never change with the profile, only times do. */
 export type Profile = 'adult' | 'elder';
@@ -68,8 +68,6 @@ export interface ProfileMeta {
   profile?: Profile;
   /** Walking speed behind field, contours and stats; meta.walk_speed_mps stays Baidu's 1.17. */
   profile_speed_mps?: number;
-  /** Distance rule of the facility checks; absent = task (1 km). */
-  rules?: RuleSet;
   /** Rule distance per hard category, metres. */
   rule_m?: Partial<Record<HardCategory, number>>;
   /** Chinese notes and warnings of a live run (samples carry English build notes instead). */

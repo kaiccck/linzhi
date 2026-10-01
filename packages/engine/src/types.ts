@@ -3,7 +3,7 @@
  * (apps/server/src/analyzer.ts) structurally, so the server passes its own emit and AbortSignal in.
  */
 import type { BaiduClient, BaiduService, BaiduTier, QuotaLedger } from '@zoudedao/baidu';
-import type { AnalysisResult, LngLat, RuleSet } from '@zoudedao/core';
+import type { AnalysisResult, CatchmentList, FacilityExclusion, LngLat } from '@zoudedao/core';
 
 import type { OfficialList } from './official.js';
 
@@ -17,8 +17,22 @@ export interface EngineInput {
   label?: string;
   /** Default adult (Baidu's 1.17 m/s); elder walks at 0.9 m/s on the same routes. */
   profile?: Profile;
-  /** Distance rule of the facility checks: task = 1 km (default), gb50180 = GB 50180-2018 radii. */
-  rules?: RuleSet;
+  /**
+   * POIs the browser's JSAPI LocalSearch found around the centre, which place/v3/around may omit
+   * (POST /api/analyze). Invalid items are dropped, at most BROWSER_POIS_MAX are kept (input.ts); new
+   * ones within the facility radius are read with place/v3/detail and cleaned like search rows.
+   */
+  browser_pois?: readonly BrowserPoi[];
+}
+
+/** One POI of the browser's JSAPI LocalSearch.searchNearby: no tags, only what the map shows. */
+export interface BrowserPoi {
+  /** Baidu uid, 24 hex characters. */
+  uid: string;
+  name: string;
+  /** The keyword that found it (小学, 菜市场, 超市 …). */
+  keyword: string;
+  bd09: LngLat;
 }
 
 export type Stage = 'locate' | 'facilities' | 'seed' | 'paths' | 'refine' | 'reach' | 'coverage' | 'report';
@@ -82,7 +96,9 @@ export type EngineLedger = Pick<QuotaLedger, 'reserve' | 'usage' | 'blockedBy'> 
 export type EngineClient = Pick<
   BaiduClient,
   'reverseGeocode' | 'placeAround' | 'routeMatrixWalking' | 'walkingRoute'
-> & { readonly ledger?: EngineLedger };
+> &
+  /** Needed only for `browser_pois`: a client without it leaves them out. */
+  Partial<Pick<BaiduClient, 'placeDetail'>> & { readonly ledger?: EngineLedger };
 
 export interface EngineDeps {
   client: EngineClient;
@@ -93,6 +109,14 @@ export interface EngineDeps {
    * they confirm, re-classify or add facilities of their category within the search radius.
    */
   official?: readonly OfficialList[];
+  /**
+   * Primary-school catchment tables (对口地段, data/official/*.json kind 'catchment'). When the centre's
+   * reverse-geocoded district and town are covered, compounds are matched to their assigned school and
+   * routed to its gate (communities[].catchment).
+   */
+  catchment?: readonly CatchmentList[];
+  /** Curated exclusions (data/official/exclusions.json), applied after cleaning and fusion. */
+  exclusions?: readonly FacilityExclusion[];
 }
 
 /**
@@ -100,10 +124,27 @@ export interface EngineDeps {
  * what Baidu bills) for routematrix. Defaults per tier in TIER_BUDGETS.
  */
 export interface EngineBudget {
-  /** place/v3 pages for the whole run (facilities + residential). */
+  /** place/v3 pages for the whole run (facilities + 民生设施 + residential + 买菜替代). */
   place: number;
   /** Of `place`, pages kept for the residential (demand point) search. */
   residentialPages: number;
+  /**
+   * Of `place`, pages kept for the 民生设施 union (社区卫生, 养老, 地铁, 公园, 超市, 公交) behind
+   * stats.facility_stats; 0 skips it. The hard-category search gets the rest.
+   */
+  livelihoodPages: number;
+  /**
+   * Of `place`, pages kept for the 买菜替代 search (shops that sell vegetables, for 菜市场 checks that are
+   * a gap), spent only when a 菜市场 check is one; 0 skips it. It only gets what `place` leaves beyond
+   * the hard-category search's share of the tier (resolveBudget).
+   */
+  freshPages: number;
+  /**
+   * place/v3/detail requests (10 uids each) for the browser's POIs that the searches did not return,
+   * on top of `place`; spent only when the input has `browser_pois` with new ones, and the first thing
+   * given up when the day's place quota is short.
+   */
+  detailCalls: number;
   reverse_geocoding: number;
   /** directionlite requests, spares included (a probe without a route is replaced by the next one). */
   directionlite_walking: number;
@@ -115,6 +156,8 @@ export interface EngineBudget {
   coverage: number;
   /** Routes to verify siting suggestions. */
   siting: number;
+  /** Routes from compounds to their assigned school (对口小学) that the coverage check did not already measure. */
+  catchment: number;
   /** Demand points (residential compounds) checked. */
   communities: number;
 }

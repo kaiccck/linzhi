@@ -1,7 +1,14 @@
 import { BaiduError, locate, toApiError, type LocateCandidate, type LocateClient } from '@zoudedao/baidu';
-import { haversine, type LngLat } from '@zoudedao/core';
+import {
+  CHINA_BOX,
+  haversine,
+  parseCoordinateText,
+  type LngLat,
+  type TypedCoordinates,
+} from '@zoudedao/core';
 import type { FastifyInstance, FastifySchemaValidationError } from 'fastify';
 import { untilAborted } from '../abort.js';
+import { CRS_VALUES, toBd09, type ConvertedVia, type Crs, type GeoconvClient } from '../coordinates.js';
 import { ApiError, ERROR_STATUS } from '../errors.js';
 import { formatWait } from '../rate-limit.js';
 import { forClient } from '../redact.js';
@@ -15,8 +22,9 @@ export interface PlaceCandidate {
   name: string;
   address?: string;
   center_bd09: LngLat;
-  source: 'geocoding' | 'place_region' | 'sample';
-  /** 0–1; ≥ 0.6 can be used without asking (sample hits are 1). */
+  /** `coordinate`: q was a typed point, no text geocoding (see crs / converted_via). */
+  source: 'geocoding' | 'place_region' | 'sample' | 'coordinate';
+  /** 0–1; ≥ 0.6 can be used without asking (sample hits and typed coordinates are 1). */
   confidence: number;
   /** Why this candidate, in Chinese. */
   reason: string;
@@ -24,7 +32,12 @@ export interface PlaceCandidate {
   distance_to_best_m?: number;
   /** Baidu POI uid (place search hits). */
   uid?: string;
+  /** Sample mode hits; for typed coordinates, a sample whose centre lies within 100 m. */
   sample_id?: string;
+  /** Typed coordinates only: the datum they were read in. */
+  crs?: Crs;
+  /** Typed coordinates only: Baidu geoconv, the local formula (fallback, sample mode), or none (BD-09). */
+  converted_via?: ConvertedVia;
 }
 
 export interface LocateResponse {
@@ -95,18 +108,82 @@ function describeInvalid(errors: FastifySchemaValidationError[]): string {
   const first = errors[0];
   const field =
     first?.keyword === 'required' ? first.params.missingProperty : first?.instancePath.split('/')[1];
-  return field === 'city' ? 'city 须为不超过 20 个字符的城市名' : 'q 须为 1–60 个字符的地址或地名';
+  if (field === 'city') return 'city 须为不超过 20 个字符的城市名';
+  if (field === 'crs') return 'crs 只能是 bd09（百度）、gcj02（高德、腾讯）或 wgs84（GPS）';
+  return 'q 须为 1–60 个字符的地址、地名或坐标';
 }
 
 const querySchema = {
   type: 'object',
   required: ['q'],
-  properties: { q: { type: 'string', maxLength: 200 }, city: { type: 'string', maxLength: 200 } },
+  properties: {
+    q: { type: 'string', maxLength: 200 },
+    city: { type: 'string', maxLength: 200 },
+    crs: { type: 'string', enum: [...CRS_VALUES] },
+  },
 } as const;
+
+/** A sample centred this close to a typed point is offered with it (opening it costs no quota). */
+export const SAMPLE_NEAR_M = 100;
+
+const OUT_OF_CHINA =
+  `坐标不在中国范围内：经度须在 ${CHINA_BOX.minLng}–${CHINA_BOX.maxLng}、纬度须在 ${CHINA_BOX.minLat}–${CHINA_BOX.maxLat} 之间` +
+  '（可以写成“经度,纬度”或“纬度,经度”，例如 121.644195,31.19007）';
+
+/**
+ * q typed as coordinates: no geocoding, one conversion at most (geoconv, or the local formula in sample
+ * mode and when geoconv fails). Always a single candidate that needs no confirmation.
+ */
+async function fromCoordinates(args: {
+  query: string;
+  city: string;
+  typed: TypedCoordinates;
+  crs: Crs;
+  baidu: GeoconvClient | undefined;
+  samples: SampleStore;
+  timeoutMs: number;
+}): Promise<LocateResponse> {
+  const { typed, crs } = args;
+  if (!typed.inChina) throw new ApiError(400, 'invalid_input', OUT_OF_CHINA);
+  const conv = await toBd09([typed.lng, typed.lat], crs, args.baidu, AbortSignal.timeout(args.timeoutMs));
+  const [lng, lat] = conv.center_bd09;
+  const near = (await args.samples.list())
+    .map((s) => ({ s, d: haversine(lng, lat, s.center_bd09[0], s.center_bd09[1]) }))
+    .filter((x) => x.d <= SAMPLE_NEAR_M)
+    .sort((a, b) => a.d - b.d)[0];
+  const reason = [
+    conv.reason,
+    typed.swapped ? '按“纬度, 经度”的顺序识别' : '',
+    near ? `中心点 ${Math.round(near.d)} 米内有样例“${near.s.name}”（${near.s.id}），可以直接查看` : '',
+  ]
+    .filter(Boolean)
+    .join('；');
+  const candidate: PlaceCandidate = {
+    name: `坐标 ${typed.lng.toFixed(6)}, ${typed.lat.toFixed(6)}`,
+    center_bd09: conv.center_bd09,
+    source: 'coordinate',
+    confidence: 1,
+    reason,
+    crs,
+    converted_via: conv.converted_via,
+    ...(near ? { sample_id: near.s.id } : {}),
+  };
+  const warnings = [...conv.warnings];
+  if (!args.baidu)
+    warnings.push('当前为样例模式：不调用百度接口，只能查看样例社区；实时体检需要配置百度服务端 Key');
+  return {
+    query: args.query,
+    city: args.city,
+    best: candidate,
+    candidates: [candidate],
+    needs_confirmation: false,
+    warnings,
+  };
+}
 
 export interface LocateRouteOptions {
   /** Present when live calls are possible; otherwise the samples are searched. */
-  baidu: LocateClient | undefined;
+  baidu: (LocateClient & GeoconvClient) | undefined;
   samples: SampleStore;
   perMinute: number;
   /** Deadline of one lookup; Baidu retries and back-off could otherwise hold a search box for a minute. */
@@ -154,7 +231,7 @@ export function registerLocateRoute(
     return response;
   };
 
-  app.get<{ Querystring: { q: string; city?: string } }>(
+  app.get<{ Querystring: { q: string; city?: string; crs?: Crs } }>(
     '/api/locate',
     {
       schema: { querystring: querySchema },
@@ -172,10 +249,17 @@ export function registerLocateRoute(
       const query = req.query.q.trim();
       const city = req.query.city?.trim() || DEFAULT_CITY;
       if ([...query].length === 0 || [...query].length > 60) {
-        throw new ApiError(400, 'invalid_input', 'q 须为 1–60 个字符的地址或地名');
+        throw new ApiError(400, 'invalid_input', 'q 须为 1–60 个字符的地址、地名或坐标');
       }
       if ([...city].length > 20)
         throw new ApiError(400, 'invalid_input', 'city 须为不超过 20 个字符的城市名');
+
+      // "121.644195,31.19007" and the like: a point, not an address
+      const typed = parseCoordinateText(query);
+      if (typed) {
+        const crs = req.query.crs ?? 'bd09';
+        return fromCoordinates({ query, city, typed, crs, baidu, samples, timeoutMs });
+      }
 
       if (!baidu) return { query, city, ...fromSamples(query, await samples.list()) };
       try {

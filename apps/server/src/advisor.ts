@@ -23,6 +23,7 @@ import {
 } from '@zoudedao/agent';
 import type { AnalysisResult } from '@zoudedao/core';
 import { untilAborted } from './abort.js';
+import type { HistoryStore } from './history.js';
 import type { SampleStore } from './samples.js';
 
 /** Live results kept for the advisor; older ones must be analysed again. */
@@ -44,21 +45,53 @@ function isStorable(result: AnalysisResult): boolean {
   );
 }
 
+/** Ids of live results: AnalysisStore.liveId (or a random fallback), `live-<8 hex>`. */
+export const LIVE_ID = /^live-[0-9a-f]{8}$/;
+
+export interface LiveResultsOptions {
+  /**
+   * The persistent history (history.ts): results are looked up there after they leave memory or after
+   * a restart, and — with `persist` — every stored result is written there too.
+   */
+  history?: HistoryStore;
+  /** Write results to `history` (off for the replay analyzer, whose results are the zj-a sample). */
+  persist?: boolean;
+  /** A result could not be written to the history (the analysis itself still succeeds). */
+  warn?: (message: string, err: unknown) => void;
+}
+
 /**
  * The last results of POST /api/analyze by id (`live-<8 hex>`, AnalysisStore.liveId: same centre,
- * profile and generation time → same id), least recently used evicted first. In memory only: a
- * restart forgets them, and the advisor then asks the user to run the check again.
+ * profile and generation time → same id), least recently used evicted first, in front of the
+ * persistent history: with one, ids resolve for 30 days and across restarts; without, a restart
+ * forgets them and the advisor asks the user to run the check again.
  */
 export class LiveResults {
   readonly max: number;
   readonly #entries = new Map<string, StoredResult>();
+  readonly #history: HistoryStore | undefined;
+  readonly #persist: boolean;
+  readonly #warn: LiveResultsOptions['warn'];
 
-  constructor(max = LIVE_RESULTS_MAX) {
+  constructor(max = LIVE_RESULTS_MAX, opts: LiveResultsOptions = {}) {
     this.max = max;
+    this.#history = opts.history;
+    this.#persist = opts.persist ?? true;
+    this.#warn = opts.warn;
   }
 
-  /** Keeps the result and returns the copy to send, with meta.analysis_id; malformed results pass through. */
-  put(result: AnalysisResult): AnalysisResult {
+  /** How live results are kept, for messages after “服务端”: 保存 30 天, or 只保留最近 20 个（重启后清空）. */
+  retention(): string {
+    return this.#history?.persistent
+      ? `保存 ${this.#history.retentionDays} 天`
+      : `只保留最近 ${this.max} 个（重启后清空）`;
+  }
+
+  /**
+   * Keeps the result, writes it to the history, and returns the copy to send, with
+   * meta.analysis_id; malformed results pass through. `input` is the POST /api/analyze body.
+   */
+  put(result: AnalysisResult, input: { label?: string; profile?: string } = {}): AnalysisResult {
     if (!isStorable(result)) return result;
     let id: string;
     try {
@@ -67,28 +100,67 @@ export class LiveResults {
       id = `live-${randomBytes(4).toString('hex')}`;
     }
     const stored = { ...result, meta: { ...result.meta, analysis_id: id } } as StoredResult;
+    this.#remember(id, stored);
+    if (this.#history && this.#persist) {
+      try {
+        this.#history.saveAnalysis(id, stored, {
+          ...(input.label !== undefined ? { label: input.label } : {}),
+          ...(input.profile !== undefined ? { profile: input.profile } : {}),
+        });
+      } catch (err) {
+        this.#warn?.('体检结果未能写入历史记录', err);
+      }
+    }
+    return stored;
+  }
+
+  #remember(id: string, stored: StoredResult): void {
     this.#entries.delete(id);
     this.#entries.set(id, stored);
     for (const oldest of this.#entries.keys()) {
       if (this.#entries.size <= this.max) break;
       this.#entries.delete(oldest);
     }
-    return stored;
   }
 
+  /** In memory, else from the history (kept in memory again). */
   get(id: string): StoredResult | undefined {
     const hit = this.#entries.get(id);
     if (hit) {
       this.#entries.delete(id);
       this.#entries.set(id, hit);
+      return hit;
     }
-    return hit;
+    if (!this.#history || !LIVE_ID.test(id)) return undefined;
+    let found: AnalysisResult | undefined;
+    try {
+      found = this.#history.getAnalysis(id);
+    } catch (err) {
+      this.#warn?.('历史记录读取失败', err);
+      return undefined;
+    }
+    if (!found || !isStorable(found)) return undefined;
+    const stored = { ...found, meta: { ...found.meta, analysis_id: id } } as StoredResult;
+    this.#remember(id, stored);
+    return stored;
+  }
+
+  /** In memory only: the result object without touching the history. */
+  peek(id: string): StoredResult | undefined {
+    return this.#entries.get(id);
   }
 
   has(id: string): boolean {
-    return this.#entries.has(id);
+    if (this.#entries.has(id)) return true;
+    if (!this.#history || !LIVE_ID.test(id)) return false;
+    try {
+      return this.#history.hasAnalysis(id);
+    } catch {
+      return false;
+    }
   }
 
+  /** Results in memory. */
   get size(): number {
     return this.#entries.size;
   }

@@ -13,12 +13,16 @@ import {
   type PlacePoi,
   type PlaceSearchResult,
 } from '@zoudedao/baidu';
+import { gcj02ToBd09, haversine, wgs84ToBd09 } from '@zoudedao/core';
 import { afterAll, describe, expect, it, vi } from 'vitest';
 import type { LocateResponse } from '../src/routes/locate.js';
 import { makeApp } from './helpers.js';
 
 const url = (q: string, city?: string) =>
   `/api/locate?q=${encodeURIComponent(q)}${city === undefined ? '' : `&city=${encodeURIComponent(city)}`}`;
+const coords = (q: string, crs?: string) =>
+  `/api/locate?q=${encodeURIComponent(q)}${crs === undefined ? '' : `&crs=${crs}`}`;
+const round6 = (p: readonly number[]) => [Number(p[0]!.toFixed(6)), Number(p[1]!.toFixed(6))];
 
 /** Real client (fake keys, memory store) whose three network methods are stubbed per test. */
 function stubbedClient() {
@@ -32,6 +36,7 @@ function stubbedClient() {
     geocode: vi.spyOn(client, 'geocode'),
     reverseGeocode: vi.spyOn(client, 'reverseGeocode').mockResolvedValue(null as never),
     placeRegion: vi.spyOn(client, 'placeRegion'),
+    geoconv: vi.spyOn(client, 'geoconv'),
   };
 }
 
@@ -265,5 +270,157 @@ describe('GET /api/locate in live mode', () => {
       error: 'rate_limited',
       message: expect.stringContaining('地址搜索过于频繁'),
     });
+  });
+});
+
+describe('GET /api/locate with typed coordinates', () => {
+  const apps: { close(): Promise<unknown> }[] = [];
+  afterAll(async () => {
+    for (const app of apps) await app.close();
+  });
+  async function sampleApp() {
+    const app = await makeApp();
+    apps.push(app);
+    return app;
+  }
+  async function liveApp(stub: ReturnType<typeof stubbedClient>, locateTimeoutMs = 20_000) {
+    const app = await makeApp(
+      {
+        mode: 'live',
+        rateLimit: { globalPerMinute: 1000, analyzePerHour: 6, locatePerMinute: 100 },
+        locateTimeoutMs,
+      },
+      { baidu: stub.client },
+    );
+    apps.push(app);
+    return app;
+  }
+  // a WGS84 point 1.3 km west of 申城佳苑 (outside every sample's 100 m)
+  const WGS: [number, number] = [121.62, 31.187];
+
+  it('takes BD-09 as is, in either order and with full-width punctuation, and offers the sample there', async () => {
+    const app = await sampleApp();
+    for (const q of [
+      '121.644195,31.19007',
+      '121.644195 31.19007',
+      '31.19007，121.644195',
+      '（121.644195，31.19007）',
+    ]) {
+      const res = await app.inject(coords(q));
+      expect(res.statusCode, q).toBe(200);
+      const body = res.json<LocateResponse>();
+      expect(body).toMatchObject({
+        query: q,
+        city: '上海市',
+        needs_confirmation: false,
+        best: {
+          name: '坐标 121.644195, 31.190070',
+          center_bd09: [121.644195, 31.19007],
+          source: 'coordinate',
+          crs: 'bd09',
+          converted_via: 'none',
+          confidence: 1,
+          sample_id: 'zj-a',
+        },
+      });
+      expect(body.candidates).toEqual([body.best]);
+      expect(body.best!.reason).toContain('BD-09');
+      expect(body.best!.reason).toContain('样例“申城佳苑片区”（zj-a）');
+      if (q.startsWith('31.')) expect(body.best!.reason).toContain('按“纬度, 经度”的顺序识别');
+      expect(body.warnings).toEqual([expect.stringContaining('样例模式')]);
+    }
+  });
+
+  it('converts GCJ-02 and WGS84 with the local formulas in sample mode', async () => {
+    const app = await sampleApp();
+    const wgs = (await app.inject(coords(WGS.join(','), 'wgs84'))).json<LocateResponse>();
+    expect(wgs.best).toMatchObject({
+      name: '坐标 121.620000, 31.187000',
+      center_bd09: round6(wgs84ToBd09(...WGS)),
+      crs: 'wgs84',
+      converted_via: 'local',
+    });
+    expect(wgs.best!.sample_id).toBeUndefined();
+    const gcj = (await app.inject(coords(WGS.join(' '), 'gcj02'))).json<LocateResponse>();
+    expect(gcj.best).toMatchObject({
+      center_bd09: round6(gcj02ToBd09(...WGS)),
+      crs: 'gcj02',
+      converted_via: 'local',
+    });
+  });
+
+  it('rejects points outside China and unknown datums with 400 invalid_input in Chinese', async () => {
+    const app = await sampleApp();
+    const far = await app.inject(coords('2.35, 48.85'));
+    expect(far.statusCode).toBe(400);
+    expect(far.json()).toEqual({
+      error: 'invalid_input',
+      message: expect.stringContaining('坐标不在中国范围内'),
+    });
+    const crs = await app.inject(coords('121.644195,31.19007', 'utm'));
+    expect(crs.statusCode).toBe(400);
+    expect(crs.json()).toEqual({ error: 'invalid_input', message: expect.stringContaining('crs 只能是') });
+  });
+
+  it('converts through Baidu geoconv in live mode and cross-checks the local formula', async () => {
+    const stub = stubbedClient();
+    const formula = gcj02ToBd09(...WGS);
+    stub.geoconv.mockResolvedValue([[formula[0] + 2e-6, formula[1]]]);
+    const app = await liveApp(stub);
+    const res = (await app.inject(coords(WGS.join(','), 'gcj02'))).json<LocateResponse>();
+    expect(res.best).toMatchObject({
+      source: 'coordinate',
+      crs: 'gcj02',
+      converted_via: 'baidu_geoconv',
+      center_bd09: round6([formula[0] + 2e-6, formula[1]]),
+    });
+    expect(res.best!.reason).toMatch(/经百度坐标转换服务转为 BD-09，与本地公式相差 0\.2 米/);
+    expect(res.warnings).toEqual([]);
+    expect(stub.geoconv).toHaveBeenCalledWith([WGS], expect.objectContaining({ model: 1 }));
+    // no text geocoding for a typed point, and BD-09 needs no call at all
+    await app.inject(coords('121.644195,31.19007'));
+    expect(stub.geoconv).toHaveBeenCalledTimes(1);
+    expect(stub.geocode).not.toHaveBeenCalled();
+    expect(stub.placeRegion).not.toHaveBeenCalled();
+  });
+
+  it('warns when geoconv and the formula disagree by more than 10 m', async () => {
+    const stub = stubbedClient();
+    const formula = wgs84ToBd09(...WGS);
+    stub.geoconv.mockResolvedValue([[formula[0] + 0.0005, formula[1]]]); // ≈ 48 m east
+    const app = await liveApp(stub);
+    const res = (await app.inject(coords(WGS.join(','), 'wgs84'))).json<LocateResponse>();
+    expect(res.best).toMatchObject({ converted_via: 'baidu_geoconv', crs: 'wgs84' });
+    const d = haversine(res.best!.center_bd09[0], res.best!.center_bd09[1], formula[0], formula[1]);
+    expect(d).toBeGreaterThan(40);
+    expect(res.warnings).toEqual([expect.stringMatching(/相差 \d+ 米（超过 10 米），已采用百度的结果/)]);
+    expect(stub.geoconv).toHaveBeenCalledWith([WGS], expect.objectContaining({ model: 2 }));
+  });
+
+  it('falls back to the local formula when geoconv fails or hangs, and says so', async () => {
+    const quota = stubbedClient();
+    quota.geoconv.mockRejectedValue(
+      new BaiduQuotaError('坐标转换今日配额已用到 90%（4500/5000），拒绝新的实时调用', { scope: 'soft' }),
+    );
+    const a = (await (await liveApp(quota)).inject(coords(WGS.join(','), 'wgs84'))).json<LocateResponse>();
+    expect(a.best).toMatchObject({ converted_via: 'local', center_bd09: round6(wgs84ToBd09(...WGS)) });
+    expect(a.warnings).toEqual([expect.stringContaining('百度坐标转换暂不可用（坐标转换今日配额已用到 90%')]);
+
+    const slow = stubbedClient();
+    slow.geoconv.mockReturnValue(new Promise(() => {}));
+    const res = await (await liveApp(slow, 50)).inject(coords(WGS.join(','), 'gcj02'));
+    expect(res.statusCode).toBe(200);
+    expect(res.json<LocateResponse>().best).toMatchObject({ converted_via: 'local' });
+    expect(res.json<LocateResponse>().warnings).toEqual([
+      expect.stringContaining('百度坐标转换暂不可用（超时）'),
+    ]);
+  });
+
+  it('answers 500 without details when the conversion fails for a reason that is not Baidu', async () => {
+    const stub = stubbedClient();
+    stub.geoconv.mockRejectedValue(new TypeError('boom'));
+    const res = await (await liveApp(stub)).inject(coords(WGS.join(','), 'wgs84'));
+    expect(res.statusCode).toBe(500);
+    expect(res.json()).toEqual({ error: 'internal', message: '服务器内部错误，请稍后再试' });
   });
 });

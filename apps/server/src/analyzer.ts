@@ -8,11 +8,26 @@ import type { AnalysisResult, LngLat } from '@zoudedao/core';
 /** Walking-speed profile (docs/技术设计文档.md §5.7). */
 export type Profile = 'adult' | 'elder';
 
+/** One POI the browser's JSAPI LocalSearch found around the centre (no tags). */
+export interface BrowserPoi {
+  /** Baidu uid, 24 hex characters. */
+  uid: string;
+  name: string;
+  /** The keyword that found it (小学, 菜市场, 超市 …). */
+  keyword: string;
+  bd09: LngLat;
+}
+
 /** Validated body of POST /api/analyze. */
 export interface AnalyzeInput {
   center_bd09: LngLat;
   label?: string;
   profile: Profile;
+  /**
+   * Valid items only (invalid ones are dropped, at most 400 kept); absent when the request had none.
+   * The engine details the ones place search did not return (docs/api.md).
+   */
+  browser_pois?: BrowserPoi[];
 }
 
 export type Stage = 'locate' | 'facilities' | 'seed' | 'paths' | 'refine' | 'reach' | 'coverage' | 'report';

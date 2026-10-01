@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "noEmit": true, "types": ["node"] },
-  "include": ["src", "test", "vitest.config.ts"]
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    // scripts/ runs under Node's type stripping, which needs explicit .ts import paths
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src", "test", "scripts", "vitest.config.ts"]
 }

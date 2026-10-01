@@ -9,7 +9,8 @@
 // for, so this drives Chrome over the DevTools protocol and waits in real time until the app sets
 // <html data-zdd-ready="baidu|offline"> (tiles, overlays and web fonts in place). `auto` height grows
 // the frame to the page's full scroll height (stacked phone layout). An optional script runs inside
-// the frame before the capture, e.g. "document.querySelector('.play').click()".
+// the frame before the capture, e.g. "document.querySelector('.play').click()". SHOT_CLIP="x,y,w,h"
+// (CSS px) keeps only that part of the frame, for close-ups.
 // Needs Google Chrome and Node ≥ 22 (built-in WebSocket); no npm dependencies.
 import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -125,14 +126,29 @@ if (hArg === 'auto') {
   await waitReady(8000);
 }
 await sleep(SETTLE_MS);
+// a full-page capture starts at the page's top, wherever the app scrolled itself to (scrollIntoView
+// moves every scrolling ancestor, the frame's parent page too)
+if (hArg === 'auto') {
+  const top = 'window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0';
+  await inFrame(top).catch(() => {});
+  await page('Runtime.evaluate', { expression: top });
+  await sleep(150);
+}
+// SHOT_CLIP="x,y,w,h" (CSS px) captures a close-up of the frame instead of all of it
+const [cx, cy, cw, ch] = (process.env.SHOT_CLIP ?? `0,0,${W},${H}`).split(',').map(Number);
 const shot = await page('Page.captureScreenshot', {
   format: 'png',
-  clip: { x: 0, y: 0, width: W, height: H, scale: 1 },
+  clip: { x: cx, y: cy, width: cw, height: ch, scale: 1 },
 });
 writeFileSync(out, Buffer.from(shot.data, 'base64'));
 console.log(`wrote ${out} (${W}×${H} CSS px @${S}x)`);
 ws.close();
 chrome.kill();
 await sleep(200);
-rmSync(dir, { recursive: true, force: true });
+// Chrome may still be flushing its profile as it exits: retry, and never fail a capture on cleanup
+try {
+  rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+} catch {
+  // a leftover temp directory is harmless
+}
 process.exit(ready ? 0 : 1);

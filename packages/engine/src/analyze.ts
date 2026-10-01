@@ -10,6 +10,7 @@
 import {
   BaiduConfigError,
   BaiduQuotaError,
+  type PlacePoi,
   type QuotaBudget,
   type QuotaPlan,
   type ReverseGeocodeResult,
@@ -17,11 +18,13 @@ import {
   type WalkingRoute,
 } from '@zoudedao/baidu';
 import {
-  acceptedCategories,
+  applyExclusions,
   barrierPieces,
   buildIsochrone,
   detectBarriers,
+  excludedByPattern,
   facilitiesFor,
+  facilityStats,
   fieldEstimator,
   HARD_CATEGORIES,
   localFrame,
@@ -35,6 +38,9 @@ import {
   type AnalysisStats,
   type Barriers,
   type BarrierPiece,
+  type CatchmentList,
+  type ExcludedPoi,
+  type FacilityExclusion,
   type HardCategory,
   type IsochroneResult,
   type Poi,
@@ -49,20 +55,41 @@ import {
   FACILITY_BUFFER_M,
   FINAL_CELL_M,
   LIMIT_S,
+  LIVELIHOOD_RADIUS_M,
   MIN_BARRIER_SAMPLES,
   MIN_SEED_SAMPLES,
   PLACE_PAGE_SIZE,
   R15_M,
   WALK_SPEED,
 } from './constants.js';
-import { runCoverage, statusCounts, type CoverageOutcome, type MatrixFn } from './coverage.js';
+import { detailBrowserPois, withBrowserRows, type BrowserPoiStats } from './browser.js';
+import { runCatchment, type CatchmentOutcome } from './catchment.js';
+import { runCoverage, statusCounts, type CheckSet, type CoverageOutcome, type MatrixFn } from './coverage.js';
 import { describeError, EngineError, isDegradable, toEngineError } from './errors.js';
-import { facilityCounts, knownRadius, searchFacilities, type FacilitySearch } from './facilities.js';
+import {
+  facilityCounts,
+  knownRadius,
+  LIVELIHOOD_CATEGORIES,
+  searchFacilities,
+  searchLivelihood,
+  type FacilitySearch,
+  type LivelihoodSearch,
+} from './facilities.js';
 import { validateInput, type Job } from './input.js';
+import { runFreshAlternatives } from './fresh.js';
 import { fuseOfficial, type FusionResult, type OfficialList } from './official.js';
 import { Meter } from './meter.js';
-import { buildMeta, isochroneNotes, liveNotes, profileSpeed } from './report.js';
-import { residentialDemand, type DemandSite } from './residential.js';
+import {
+  buildMeta,
+  exclusionNote,
+  freshNote,
+  isochroneNotes,
+  liveNotes,
+  profileSpeed,
+  browserNote,
+  residentialNote,
+} from './report.js';
+import { residentialDemand, type DemandSite, type ResidentialDedupe } from './residential.js';
 import { r3 } from './round.js';
 import { matrixSample, pathLabel, SampleSet, walkedRoute, type LiveWalkPath } from './samples.js';
 import { runSiting } from './siting.js';
@@ -101,6 +128,7 @@ export async function analyze(
     const budget = scopedBudget(
       resolveBudget(opts.tier ?? client.ledger?.tier ?? 'personal', opts.budget),
       scope,
+      { browserPois: job.browserPois.length > 0 },
     );
     if (budget.seed < MIN_SEED_SAMPLES) {
       throw new EngineError(
@@ -122,6 +150,39 @@ export async function analyze(
         caps.locate = svcCaps.reverse_geocoding = 0;
         warnings.push('逆地理编码今日配额接近上限：本次不查询街道与小区名称');
       }
+      // so are the browser POIs' details, the 买菜替代 search and the 民生设施 union, given up in that
+      // order: a place quota that fits the checks without them skips them, not the run
+      if (client.ledger.blockedBy(plan).includes('place')) {
+        const optional = [
+          {
+            step: 'detail' as const,
+            warning: '地点检索今日配额接近上限：本次不查询地图前端补充的设施详情，设施清单只用服务端检索结果',
+          },
+          {
+            step: 'fresh' as const,
+            warning:
+              '地点检索今日配额接近上限：本次不检索买菜替代（能买菜的超市、果蔬店），菜市场缺口只用已找到的超市与生鲜超市找替代',
+          },
+          {
+            step: 'livelihood' as const,
+            warning:
+              '地点检索今日配额接近上限：本次不检索社区卫生、养老、地铁、公园、超市、公交，圈内设施统计只含小学、菜市场、药店等',
+          },
+        ].filter((o) => caps[o.step] > 0);
+        let place = svcCaps.place;
+        for (const [i, o] of optional.entries()) {
+          place -= caps[o.step];
+          if (client.ledger.blockedBy({ ...plan, place }).includes('place')) continue;
+          for (const skipped of optional.slice(0, i + 1)) {
+            caps[skipped.step] = 0;
+            warnings.push(skipped.warning);
+          }
+          svcCaps.place = place;
+          if (place > 0) plan.place = place;
+          else delete plan.place;
+          break;
+        }
+      }
       reservation = client.ledger.reserve(plan); // BaiduQuotaError (soft) when anything else is short
     }
     const out = emitter(emit, signal);
@@ -138,6 +199,8 @@ export async function analyze(
       job,
       client,
       official: deps.official ?? [],
+      catchment: deps.catchment ?? [],
+      exclusions: deps.exclusions ?? [],
       now: deps.now?.() ?? new Date(),
       budget,
       meter,
@@ -218,6 +281,8 @@ async function pipeline(r: {
   job: Job;
   client: EngineClient;
   official: readonly OfficialList[];
+  catchment: readonly CatchmentList[];
+  exclusions: readonly FacilityExclusion[];
   now: Date;
   budget: ReturnType<typeof resolveBudget>;
   meter: Meter;
@@ -239,9 +304,10 @@ async function pipeline(r: {
   const speed = profileSpeed(job.profile);
   // refinement works in routematrix (adult) seconds: the profile's 15 minutes sit at 900 · v / 1.17
   const target = (LIMIT_S * speed) / WALK_SPEED;
-  const rule = Object.fromEntries(
-    HARD_CATEGORIES.map((c) => [c, ruleDistance(c, job.rules) ?? 1000]),
-  ) as Record<HardCategory, number>;
+  const rule = Object.fromEntries(HARD_CATEGORIES.map((c) => [c, ruleDistance(c) ?? 1000])) as Record<
+    HardCategory,
+    number
+  >;
   const facilityRadius = DEMAND_RADIUS_M + FACILITY_BUFFER_M;
 
   const matrix: MatrixFn = async (step, origins, destinations) => {
@@ -282,7 +348,6 @@ async function pipeline(r: {
     label: job.label,
     reverse,
     profile: job.profile,
-    rules: job.rules,
     rule_m: rule,
     facility_radius_m: facilityRadius,
     now: r.now,
@@ -290,41 +355,130 @@ async function pipeline(r: {
   out.partial({ meta: buildMeta({ ...metaArgs, warnings: warnings.slice() }) });
 
   // 2. facilities (an isochrone-only run skips them and never calls place search)
-  let facilityStage: { fac: FacilitySearch; fused: FusionResult; counts: Record<string, number> } | null =
-    null;
+  let facilityStage: {
+    fac: FacilitySearch;
+    browser: BrowserPoiStats | null;
+    fused: FusionResult;
+    livelihood: LivelihoodSearch | null;
+    pois: Poi[];
+    counts: Record<string, number>;
+    excluded: ExcludedPoi[];
+  } | null = null;
   if (full) {
     out.stage(
       'facilities',
       `设施检索：小学、菜市场、药店，半径 ${(facilityRadius / 1000).toFixed(1)} 公里`,
       0.05,
     );
-    const fac = await searchFacilities({
+    let fac = await searchFacilities({
       meter,
       client,
       center,
       frame,
-      rules: job.rules,
       radius_m: facilityRadius,
       warn: (m) => warnings.push(m),
     });
+    // POIs the browser's map found and the searches did not return: their details, cleaned in
+    let browser: BrowserPoiStats | null = null;
+    if (job.browserPois.length) {
+      const known = new Set([
+        ...fac.rows.flatMap((row) => (row.uid ? [row.uid] : [])),
+        ...fac.pois.flatMap((p) => [p.uid, ...(p.merged_uids ?? [])]),
+      ]);
+      const found = await detailBrowserPois({
+        meter,
+        client,
+        frame,
+        radius_m: facilityRadius,
+        offered: job.browserPois,
+        known,
+        exclusions: r.exclusions,
+        onDetail: (fresh, asked) =>
+          out.stage(
+            'facilities',
+            `设施补充：地图前端找到 ${fresh} 处服务端检索没有返回的设施，查询其中 ${asked} 处的地点详情，与检索结果一起清洗`,
+            0.07,
+          ),
+        warn: (m) => warnings.push(m),
+      });
+      fac = withBrowserRows(fac, found.rows, frame);
+      browser = found.stats;
+    }
+    // curated exclusions go first (and their rows leave the pool, so no list can bring them back) and
+    // last (a list entry of the same name loses to the exclusion)
+    const excluded: ExcludedPoi[] = [];
+    const exclude = (list: readonly Poi[]) => {
+      const x = applyExclusions(list, r.exclusions);
+      for (const e of x.excluded) if (!excluded.some((y) => y.uid === e.uid)) excluded.push(e);
+      return x.pois;
+    };
+    const excludedUids = new Set(r.exclusions.flatMap((x) => (x.uid ? [x.uid] : [])));
+    // name patterns too (a delivery warehouse at a market's address must not be "confirmed" as it)
+    const pool = (rows: readonly PlacePoi[]) =>
+      rows.filter(
+        (row) => !(row.uid && excludedUids.has(row.uid)) && !excludedByPattern(row.name, r.exclusions),
+      );
+    const district = reverse?.district ?? undefined;
+    const counted = (l: OfficialList) => LIVELIHOOD_CATEGORIES.includes(l.category);
     // official lists: confirm, re-classify or add facilities Baidu mis-tags or misses
-    const fused = fuseOfficial({
-      lists: r.official,
-      pois: fac.pois,
+    const hard = fuseOfficial({
+      lists: r.official.filter((l) => !counted(l)),
+      pois: exclude(fac.pois),
       dropped: fac.dropped,
-      pool: fac.rows,
+      pool: pool(fac.rows),
       frame,
       radius_m: facilityRadius,
+      district,
     });
+    const checked = exclude(hard.pois);
+    // the other 民生设施, for the 圈内设施统计 (counted, never checked per community)
+    if (meter.room('livelihood') >= 1) {
+      out.stage('facilities', '设施检索：社区卫生、养老、地铁、公园、超市、公交', 0.08);
+    }
+    const livelihood = await searchLivelihood({
+      meter,
+      client,
+      center,
+      frame,
+      existing: checked,
+      warn: (m) => warnings.push(m),
+    });
+    // lists of counted categories (社区卫生 …) match the 民生设施 rows, within that search's radius
+    const soft = fuseOfficial({
+      lists: r.official.filter(counted),
+      pois: livelihood ? [...checked, ...livelihood.pois] : checked,
+      dropped: hard.dropped,
+      pool: pool([...(livelihood?.rows ?? []), ...fac.rows]),
+      frame,
+      radius_m: LIVELIHOOD_RADIUS_M,
+      district,
+    });
+    const pois = exclude(soft.pois);
+    const fused: FusionResult = {
+      pois,
+      dropped: [
+        ...soft.dropped,
+        ...excluded.map((e) => ({ uid: e.uid, name: e.name, reason: `excluded:${e.reason}` })),
+      ],
+      summaries: [...hard.summaries, ...soft.summaries],
+      notes: [...hard.notes, ...soft.notes],
+      attribution: [...hard.attribution, ...soft.attribution],
+      warnings: [...hard.warnings, ...soft.warnings],
+    };
     warnings.push(...fused.warnings);
-    const counts = facilityCounts(fused.pois);
-    out.partial({ pois: fused.pois });
+    const counts = facilityCounts(pois);
+    if (browser) browser.kept = pois.filter((p) => p.found_by === 'jsapi').length;
+    out.partial({ pois });
+    const others = livelihood
+      ? `；社区卫生、养老、地铁、公园、超市、公交共 ${livelihood.pois.length} 处`
+      : '';
+    const fromBrowser = browser?.kept ? `；其中 ${browser.kept} 处由地图前端补充` : '';
     out.stage(
       'facilities',
-      `设施：小学 ${counts['小学']} 所、菜市场 ${counts['菜市场']} 个、药店 ${counts['药店']} 家（菜场摊位已并入菜市场）`,
+      `设施：小学 ${counts['小学']} 所、菜市场 ${counts['菜市场']} 个、药店 ${counts['药店']} 家（菜场摊位已并入菜市场）${others}${fromBrowser}`,
       0.1,
     );
-    facilityStage = { fac, fused, counts };
+    facilityStage = { fac, browser, fused, livelihood, pois, counts, excluded };
   }
 
   // 3. seed: 16 bearings × 3 rings in one request; first field as soon as it is back
@@ -455,6 +609,14 @@ async function pipeline(r: {
   });
   const pieces = piecesOf(barriers);
   const isoStats: AnalysisStats = { ...reach.stats };
+  // 圈内设施统计 needs only the POIs and the final field: it goes out with the isochrone
+  if (facilityStage) {
+    isoStats.facility_stats = facilityStats({
+      pois: facilityStage.pois,
+      field: reach.field,
+      meta: buildMeta(metaArgs),
+    });
+  }
   out.partial({ ...fieldPart(reach), stats: isoStats, barriers: pieces });
   const refineStats = {
     refine_rounds: rounds,
@@ -472,13 +634,7 @@ async function pipeline(r: {
         }
       : {};
   const ruleRadius = Math.max(...HARD_CATEGORIES.map((c) => rule[c]));
-  const baseline = {
-    ...reach.baseline,
-    rule_radius_m: ruleRadius,
-    ...(job.rules === 'gb50180'
-      ? { note: `${reach.baseline.note}; rules = GB 50180-2018: 小学/菜市场 500 m, 药店 300 m` }
-      : {}),
-  };
+  const baseline = { ...reach.baseline, rule_radius_m: ruleRadius };
 
   if (!facilityStage) {
     // isochrone scope: the result ends with the field; no facilities, demand points or verdicts
@@ -506,13 +662,13 @@ async function pipeline(r: {
       site_suggestions: {},
     };
   }
-  const { fac, fused, counts } = facilityStage;
-  const pois = fused.pois;
+  const { fac, browser, fused, livelihood, pois, counts, excluded } = facilityStage;
 
   // 7. coverage: residential gates × candidate facilities
   out.stage('coverage', '盲区判定：检索住宅小区及其出入口', 0.66);
   let demand: DemandSite[] = [];
   let demandFound = 0;
+  let dedupe: ResidentialDedupe | null = null;
   const resPages = meter.room('residential');
   if (resPages >= 1) {
     try {
@@ -532,6 +688,7 @@ async function pipeline(r: {
       const found = residentialDemand(res.pois, { frame, extent_m: DEMAND_RADIUS_M, max: b.communities });
       demand = found.demand;
       demandFound = found.found;
+      dedupe = found.dedupe;
     } catch (err) {
       if (!isDegradable(err)) throw err;
       warnings.push(`小区检索失败，本次不做盲区判定：${describeError(err)}`);
@@ -539,19 +696,26 @@ async function pipeline(r: {
   } else {
     warnings.push('本次分析没有留出小区检索的预算，不做盲区判定');
   }
-  const facilities = Object.fromEntries(
-    HARD_CATEGORIES.map((c) => [c, facilitiesFor(pois, acceptedCategories(c, job.rules))]),
-  ) as Record<HardCategory, Poi[]>;
-  const known = Object.fromEntries(
-    HARD_CATEGORIES.map((c) => [c, knownRadius(fac.inventory, c, job.rules)]),
-  ) as Record<HardCategory, number>;
+  const set: CheckSet = {
+    rule,
+    facilities: Object.fromEntries(HARD_CATEGORIES.map((c) => [c, facilitiesFor(pois, [c])])) as Record<
+      HardCategory,
+      Poi[]
+    >,
+    knownRadius: Object.fromEntries(HARD_CATEGORIES.map((c) => [c, knownRadius(fac.inventory, c)])) as Record<
+      HardCategory,
+      number
+    >,
+  };
   let cov: CoverageOutcome = {
     communities: [],
     gray_areas: [],
     rounds: 0,
     budget_limited: false,
+    nearest_routes: 0,
     failed_cells: 0,
     unverified_by_inventory: 0,
+    routes: [],
   };
   if (demand.length) {
     out.stage('coverage', `盲区判定：${demand.length} 个小区 × 3 类设施，逐轮算路，找到覆盖即停`, 0.7);
@@ -560,15 +724,76 @@ async function pipeline(r: {
       frame,
       matrix,
       demand,
-      facilities,
-      rule,
-      knownRadius: known,
+      set,
       onRound: (round, routes) =>
         out.stage('coverage', `盲区判定第 ${round} 轮：${routes} 条小区到设施的路线`, 0.7 + 0.04 * round),
+      onNearest: (routes) =>
+        out.stage('coverage', `盲区判定补算：${routes} 条到直线更近设施的路线，取实际步行最近的一处`, 0.86),
       warn: (m) => warnings.push(m),
     });
   }
   out.partial({ communities: cov.communities, gray_areas: cov.gray_areas });
+
+  // 7a. 买菜替代: for each 菜市场 check that is a gap, the nearest shop within the rule on foot where
+  // vegetables can be bought (informational: verdicts and counts stay)
+  const fresh = await runFreshAlternatives({
+    meter,
+    client,
+    center,
+    frame,
+    matrix,
+    radius_m: facilityRadius,
+    demand,
+    communities: cov.communities,
+    pois,
+    rows: [...fac.rows, ...(livelihood?.rows ?? [])],
+    set,
+    routes: cov.routes,
+    exclusions: r.exclusions,
+    onSearch: (gaps) =>
+      out.stage(
+        'coverage',
+        `买菜替代：${gaps} 个小区的菜市场有缺口，检索判定距离内能买菜的超市、果蔬店（只作参考，不改变判定）`,
+        0.862,
+      ),
+    onRoutes: (routes) => out.stage('coverage', `买菜替代：${routes} 条到最近几家能买菜的店的路线`, 0.865),
+    warn: (m) => warnings.push(m),
+  });
+  if (fresh.counts.gaps) out.partial({ communities: cov.communities });
+
+  // 7b. 对口小学: where an official catchment table covers the centre, route each matched compound to
+  // its assigned school's gate
+  let catchment: CatchmentOutcome = { stats: null, notes: [] };
+  if (cov.communities.length && r.catchment.length) {
+    const region = reverse
+      ? {
+          ...(reverse.city ? { city: reverse.city } : {}),
+          ...(reverse.district ? { district: reverse.district } : {}),
+          ...(reverse.town ? { town: reverse.town } : {}),
+        }
+      : undefined;
+    catchment = await runCatchment({
+      meter,
+      frame,
+      matrix,
+      lists: r.catchment,
+      region,
+      demand,
+      communities: cov.communities,
+      pois,
+      official: r.official,
+      routes: cov.routes,
+      warn: (m) => warnings.push(m),
+    });
+    if (catchment.stats) {
+      out.stage(
+        'coverage',
+        `对口小学：${catchment.stats.matched} 个小区匹配到官方对口地段，算到对口学校校门的步行距离`,
+        0.87,
+      );
+      out.partial({ communities: cov.communities });
+    }
+  }
 
   // 8. siting: candidates along the walked routes, the top ones verified with measured routes
   out.stage('coverage', '规划建议：在步行路线沿线为有缺口的设施类别选址', 0.88);
@@ -593,16 +818,29 @@ async function pipeline(r: {
     facility_counts: counts,
     pois_dropped: fused.dropped.length,
     official: fused.summaries,
-    facility_inventory: fac.inventory,
-    place_queries: fac.queries,
+    excluded,
+    facility_inventory: { ...fac.inventory, ...livelihood?.inventory },
+    place_queries: [
+      ...fac.queries,
+      ...(livelihood ? [livelihood.query] : []),
+      ...(fresh.query ? [fresh.query] : []),
+    ],
     demand_points: demand.length,
     demand_found: demandFound,
+    ...(dedupe ? { residential_dedupe: dedupe } : {}),
+    ...(browser ? { browser_pois: browser } : {}),
     ...refineStats,
     coverage_rounds: cov.rounds,
     coverage_budget_limited: cov.budget_limited,
+    coverage_nearest_routes: cov.nearest_routes,
     coverage_failed_cells: cov.failed_cells,
     unverified_by_inventory: cov.unverified_by_inventory,
+    fresh_alternatives: fresh.counts,
+    fresh_alt_routes: fresh.routes,
+    fresh_alt_budget_limited: fresh.budget_limited,
+    fresh_alt_failed_cells: fresh.failed_cells,
     siting_verified_sites: siting.verified_sites,
+    ...(catchment.stats ? { catchment: catchment.stats } : {}),
     quota_used: { ...meter.used },
     quota_by_step: { ...meter.byStep },
     ...requestedStats(),
@@ -611,12 +849,19 @@ async function pipeline(r: {
     ...metaArgs,
     notes: liveNotes({
       profile: job.profile,
-      rules: job.rules,
       facility_radius_m: facilityRadius,
       demand: demand.length,
       demand_found: demandFound,
       communities_max: b.communities,
-    }).concat(fused.notes),
+      livelihood: livelihood && { found: livelihood.pois.length, inventory: livelihood.inventory },
+    }).concat(
+      residentialNote(dedupe),
+      browserNote(browser, facilityRadius),
+      fused.notes,
+      exclusionNote(excluded),
+      freshNote(fresh, { radius_m: facilityRadius }),
+      catchment.notes,
+    ),
     warnings,
     sources: fused.attribution,
   });

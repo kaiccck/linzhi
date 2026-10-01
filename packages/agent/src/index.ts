@@ -9,6 +9,7 @@ export * from './analysis.js';
 export * from './summary.js';
 export * from './rows.js';
 export * from './geo.js';
+export * from './anchors.js';
 export * from './siting.js';
 export * from './report.js';
 export * from './backend.js';

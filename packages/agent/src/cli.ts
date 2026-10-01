@@ -20,7 +20,7 @@ const HELP = `走得到 · 体检顾问（命令行）
 选项：
   --analysis <id>   当前查看的分析（如 zj-a、zj-a~elder、live-xxxx）
   --samples <目录>  样例目录，默认仓库的 data/samples（或环境变量 ZDD_SAMPLES_DIR）
-  --api <地址>      连接运行中的走得到服务（同环境变量 ZDD_API_URL）
+  --api <地址>      连接运行中的邻至服务（同环境变量 ZDD_API_URL）
   --out <目录>      保存 export_report 生成的报告文件
   --json            输出完整的 JSON（回答、引用、数字核验）
   -h, --help        显示本帮助

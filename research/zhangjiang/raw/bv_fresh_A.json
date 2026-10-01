@@ -1,0 +1,283 @@
+{
+ "_about": "百度地图 Web 服务地点检索（place/v3/around）与步行批量算路（routematrix/v2/walking），经 @zoudedao/baidu 客户端的缓存与配额账本调用，不含任何 Key。样例 zj-a 的买菜替代：实时引擎在同一中心的“蔬菜$果蔬$超市”检索，candidates 是样例自己的 POI 之外、按 core freshKind 算作能买菜的店（局部坐标，米），routes 是菜市场判定为缺口的小区（赛题口径或国标口径）到候选的全部步行路线，起点为 OSM 小区轮廓几何中心，终点为店的出入口（navi_location）；距离 m，耗时 s = 距离 / 1.17。由 apps/server/scripts/augment-zj-a.ts 写入（内容变化时才重写），--offline 时读取。",
+ "date": "2026-09-29",
+ "query": {
+  "keywords": "蔬菜$果蔬$超市",
+  "radius_m": 2100,
+  "max_pages": 2,
+  "pages": 2,
+  "total": 40,
+  "complete": true,
+  "known_m": null
+ },
+ "candidates": [
+  {
+   "uid": "3606639dd0b36c5cf32d83fb",
+   "name": "百姓生鲜蔬果(益江路店)",
+   "cat": "其他",
+   "tag": "购物;水果店",
+   "xy": [
+    -323.6,
+    1685
+   ],
+   "navi_xy": [
+    -315.5,
+    1688.3
+   ]
+  },
+  {
+   "uid": "488ad4fc2b5a6a5f8f1a89e9",
+   "name": "联华超市(勤政路店)",
+   "cat": "超市",
+   "tag": "购物;超市",
+   "xy": [
+    -1268.1,
+    -1326.4
+   ],
+   "navi_xy": [
+    -1262.5,
+    -1344.2
+   ]
+  },
+  {
+   "uid": "49d9593886e15d5ac71e519d",
+   "name": "联华超市(玉兰香苑店)",
+   "cat": "超市",
+   "tag": "购物;超市",
+   "xy": [
+    -942.5,
+    1331.4
+   ],
+   "navi_xy": [
+    -953.6,
+    1320.4
+   ]
+  },
+  {
+   "uid": "9f97b1c58df2b51fb74f549d",
+   "name": "联华超市(益江店)",
+   "cat": "超市",
+   "tag": "购物;超市;大型超市",
+   "xy": [
+    -639,
+    1682.6
+   ],
+   "navi_xy": [
+    -632.8,
+    1663.3
+   ]
+  },
+  {
+   "uid": "a3d22455760a960620026278",
+   "name": "百姓蔬菜",
+   "cat": "超市",
+   "tag": "购物;超市;果蔬超市",
+   "xy": [
+    136,
+    1332.5
+   ],
+   "navi_xy": [
+    135.3,
+    1334.5
+   ]
+  },
+  {
+   "uid": "bf89c03e630bce9d59bbbc24",
+   "name": "百联(茂春路店)",
+   "cat": "超市",
+   "tag": "购物;超市",
+   "xy": [
+    -1263.8,
+    -1312.7
+   ],
+   "navi_xy": [
+    -1255,
+    -1340.9
+   ]
+  },
+  {
+   "uid": "c72929f7d1ecccd6c72ba18c",
+   "name": "世纪华联超市(张江店)",
+   "cat": "超市",
+   "tag": "购物;超市",
+   "xy": [
+    -877.7,
+    1213
+   ],
+   "navi_xy": [
+    -887,
+    1208.2
+   ]
+  },
+  {
+   "uid": "e0aa685ec771d5874354d7c8",
+   "name": "猪肉蔬菜店",
+   "cat": "其他",
+   "tag": "购物;商铺",
+   "xy": [
+    354.1,
+    1448
+   ],
+   "navi_xy": [
+    356,
+    1442.1
+   ]
+  },
+  {
+   "uid": "e7d4b30ccf92380cf7b916e9",
+   "name": "如海生鲜超市(益江路店)",
+   "cat": "超市",
+   "tag": "购物;超市",
+   "xy": [
+    -973.2,
+    1547.5
+   ],
+   "navi_xy": [
+    -969.3,
+    1529.3
+   ]
+  }
+ ],
+ "routes": [
+  {
+   "community": "川杨新苑三期",
+   "to": [
+    {
+     "uid": "acd4e90fc55be9f17f29bd23",
+     "name": "如海生鲜超市(中科路店)",
+     "status": "ok",
+     "distance_m": 445,
+     "duration_s": 380
+    },
+    {
+     "uid": "fc146442942e638ba2d23049",
+     "name": "华联超市(虹御公寓店)",
+     "status": "ok",
+     "distance_m": 756,
+     "duration_s": 645
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑一期B块",
+   "to": [
+    {
+     "uid": "acd4e90fc55be9f17f29bd23",
+     "name": "如海生鲜超市(中科路店)",
+     "status": "ok",
+     "distance_m": 990,
+     "duration_s": 846
+    },
+    {
+     "uid": "e7f1734fae423d759222e010",
+     "name": "联华超市(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 358,
+     "duration_s": 305
+    }
+   ]
+  },
+  {
+   "community": "川杨新苑四期",
+   "to": [
+    {
+     "uid": "acd4e90fc55be9f17f29bd23",
+     "name": "如海生鲜超市(中科路店)",
+     "status": "ok",
+     "distance_m": 122,
+     "duration_s": 103
+    },
+    {
+     "uid": "e7f1734fae423d759222e010",
+     "name": "联华超市(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 1208,
+     "duration_s": 1032
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑三期B块",
+   "to": [
+    {
+     "uid": "e7f1734fae423d759222e010",
+     "name": "联华超市(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 793,
+     "duration_s": 677
+    }
+   ]
+  },
+  {
+   "community": "虹御公寓",
+   "to": [
+    {
+     "uid": "1cea15a9ae3cd5bb06fef5b3",
+     "name": "联华超市(文月店)",
+     "status": "ok",
+     "distance_m": 546,
+     "duration_s": 465
+    },
+    {
+     "uid": "acd4e90fc55be9f17f29bd23",
+     "name": "如海生鲜超市(中科路店)",
+     "status": "ok",
+     "distance_m": 1092,
+     "duration_s": 935
+    },
+    {
+     "uid": "fc146442942e638ba2d23049",
+     "name": "华联超市(虹御公寓店)",
+     "status": "ok",
+     "distance_m": 143,
+     "duration_s": 122
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑一期A块",
+   "to": [
+    {
+     "uid": "acd4e90fc55be9f17f29bd23",
+     "name": "如海生鲜超市(中科路店)",
+     "status": "ok",
+     "distance_m": 680,
+     "duration_s": 582
+    },
+    {
+     "uid": "e7f1734fae423d759222e010",
+     "name": "联华超市(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 669,
+     "duration_s": 572
+    }
+   ]
+  },
+  {
+   "community": "申城佳苑一期C块",
+   "to": [
+    {
+     "uid": "acd4e90fc55be9f17f29bd23",
+     "name": "如海生鲜超市(中科路店)",
+     "status": "ok",
+     "distance_m": 856,
+     "duration_s": 731
+    },
+    {
+     "uid": "e7f1734fae423d759222e010",
+     "name": "联华超市(申城佳苑店)",
+     "status": "ok",
+     "distance_m": 298,
+     "duration_s": 254
+    },
+    {
+     "uid": "fc146442942e638ba2d23049",
+     "name": "华联超市(虹御公寓店)",
+     "status": "ok",
+     "distance_m": 825,
+     "duration_s": 704
+    }
+   ]
+  }
+ ]
+}

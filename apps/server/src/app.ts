@@ -1,21 +1,27 @@
 import type { LlmConfig } from '@zoudedao/agent';
 import type { BaiduClient } from '@zoudedao/baidu';
 import Fastify, { type FastifyInstance } from 'fastify';
-import { advisorInfo, LiveResults, ServerBackend } from './advisor.js';
+import { join } from 'node:path';
+import { advisorInfo, LIVE_RESULTS_MAX, LiveResults, ServerBackend } from './advisor.js';
 import type { Analyzer } from './analyzer.js';
 import type { ServerConfig } from './config.js';
 import { ApiError, registerErrorHandler } from './errors.js';
+import { HistoryStore } from './history.js';
 import { emptyQuota, type QuotaProvider } from './quota.js';
 import { registerRateLimit } from './rate-limit.js';
 import { logSerializers } from './redact.js';
 import { REPLAY_SAMPLE_ID, SampleReplayAnalyzer } from './replay.js';
+import { loadSampleRoutes, RouteBook, type RouteWalker } from './route.js';
 import { registerAnalyzeRoute } from './routes/analyze.js';
-import { registerHealthRoute, registerSampleRoutes } from './routes/api.js';
-import { registerAskRoute } from './routes/ask.js';
+import { registerHealthRoute, registerHistoryRoutes, registerSampleRoutes } from './routes/api.js';
+import { ASK_PER_10MIN, registerAskRoute } from './routes/ask.js';
 import { registerLocateRoute } from './routes/locate.js';
+import { registerRouteRoute } from './routes/route.js';
+import { registerWhatIfRoute } from './routes/whatif.js';
 import { SampleStore } from './samples.js';
 import { registerCors, registerSecurityHeaders } from './security.js';
 import { registerNotFound, registerWebApp } from './web.js';
+import type { WhatIfRouter } from './whatif.js';
 
 export interface AppOptions {
   config: ServerConfig;
@@ -23,6 +29,15 @@ export interface AppOptions {
   baidu?: BaiduClient;
   /** Live-mode engine; defaults to SampleReplayAnalyzer until the Baidu-backed one is wired in. */
   analyzer?: Analyzer;
+  /** Routematrix for POST /api/whatif; defaults to the Baidu client (tests inject a fake). */
+  router?: WhatIfRouter;
+  /** Walking routes (directionlite) for GET /api/route; defaults to the Baidu client (tests inject a fake). */
+  walker?: RouteWalker;
+  /**
+   * The persistent history (live analyses, what-if branches, walking routes); default: opened at
+   * config.historyPath (in memory when null) and closed together with the app.
+   */
+  history?: HistoryStore;
   /** Quota block of /api/health; defaults to the Baidu ledger, else the replay ledger (live) or {} (sample). */
   quota?: QuotaProvider;
   /**
@@ -38,6 +53,9 @@ export async function buildApp({
   config,
   baidu,
   analyzer,
+  router,
+  walker,
+  history,
   quota,
   llm = null,
   logStream,
@@ -94,10 +112,22 @@ export async function buildApp({
     );
   }
 
-  // Results of POST /api/analyze that the advisor can still answer about (meta.analysis_id).
-  const live = new LiveResults();
+  // The history: every live result for 30 days, what-if branches, walking routes (history.ts).
+  if (!history) {
+    const own = new HistoryStore({ path: config.historyPath, onWarning: (m) => app.log.warn(m) });
+    app.addHook('onClose', async () => own.close());
+    history = own;
+  }
+  // Results of POST /api/analyze by meta.analysis_id: in memory, then from the history (after a
+  // restart too). Replayed results are the zj-a sample and are not written to the history.
+  const live = new LiveResults(LIVE_RESULTS_MAX, {
+    history,
+    persist: analyzer?.name !== 'replay',
+    warn: (message, err) => app.log.warn({ err }, message),
+  });
   registerHealthRoute(app, { config, quota: quota ?? emptyQuota, analyzer, advisor: advisorInfo(llm) });
-  registerSampleRoutes(app, samples);
+  registerSampleRoutes(app, { samples, live, history });
+  registerHistoryRoutes(app, { samples, live, history });
   registerLocateRoute(app, {
     baidu,
     samples,
@@ -112,12 +142,36 @@ export async function buildApp({
     timeoutMs: config.analyzeTimeoutMs,
     live,
   });
+  const backend = new ServerBackend(samples, live);
+  const resolve = (id: string) => backend.getAnalysis(id).catch(() => undefined);
+  registerWhatIfRoute(app, {
+    mode: config.mode,
+    router: router ?? baidu,
+    resolve,
+    history,
+    retention: live.retention(),
+    per10Min: config.rateLimit.whatifPer10Min ?? 10,
+    timeoutMs: config.whatifTimeoutMs ?? 20_000,
+  });
+  registerRouteRoute(app, {
+    // Baidu only in live mode with a client; stored routes (samples, history) in every mode
+    walker: config.mode === 'live' ? (walker ?? baidu) : undefined,
+    routes: new RouteBook(
+      loadSampleRoutes(join(config.samplesDir, 'routes'), (m) => app.log.warn(m)),
+      history,
+      (message, err) => app.log.warn({ err }, message),
+    ),
+    resolve,
+    retention: live.retention(),
+    per10Min: config.rateLimit.routePer10Min ?? 30,
+    timeoutMs: config.routeTimeoutMs ?? 20_000,
+  });
   registerAskRoute(app, {
-    backend: new ServerBackend(samples, live),
+    backend,
     live,
     llm,
-    // an LLM answer costs money and up to a minute of a model's time: fewer per visitor
-    per10Min: config.rateLimit.askPer10Min ?? (llm ? 12 : 30),
+    // 30 in both modes: judges at the venue share one IP; ZDD_ASK_PER_10MIN tightens it
+    per10Min: config.rateLimit.askPer10Min ?? ASK_PER_10MIN,
     maxConcurrent: config.maxConcurrentAsks,
     timeoutMs: config.askTimeoutMs,
   });

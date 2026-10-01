@@ -1,5 +1,5 @@
 /**
- * Where the MCP server gets its analyses: a running 走得到 server (ZDD_API_URL, live analyses when it
+ * Where the MCP server gets its analyses: a running 邻至 server (ZDD_API_URL, live analyses when it
  * has Baidu keys) or the repository's sample files (no server, no keys).
  */
 import { readFileSync, statSync } from 'node:fs';
@@ -42,7 +42,7 @@ export function createBackend(
 ): BackendChoice {
   const api = opts.api ?? env.ZDD_API_URL?.trim();
   if (api) {
-    return { backend: new HttpBackend(api), describe: `走得到服务 ${api.replace(/\/+$/, '')}` };
+    return { backend: new HttpBackend(api), describe: `邻至服务 ${api.replace(/\/+$/, '')}` };
   }
   const dir = resolveSamplesDir(opts.samples, env);
   return { backend: new LocalBackend({ samplesDir: dir }), describe: `本地样例目录 ${dir}` };

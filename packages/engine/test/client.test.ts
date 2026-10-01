@@ -45,7 +45,7 @@ describe('engine on the real BaiduClient', () => {
       expect(u.in_flight, s).toBe(0);
     }
     expect(ledger.usage('routematrix_walking').used).toBeLessThanOrEqual(700);
-    expect(ledger.usage('place').used).toBeLessThanOrEqual(6);
+    expect(ledger.usage('place').used).toBeLessThanOrEqual(8);
     expect(ledger.usage('directionlite_walking').used).toBeLessThanOrEqual(6);
     expect(ledger.usage('reverse_geocoding').used).toBe(1);
     // quota events carry the ledger's day totals and tier limits

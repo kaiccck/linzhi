@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { readRaw, zjA, zjFrame } from '../test/fixtures.js';
+import { readJson, readRaw, zjA, zjFrame } from '../test/fixtures.js';
 import type { BaiduPlaceResult } from './poi.js';
 import {
   categorize,
@@ -11,7 +11,6 @@ import {
   routingPoint,
   stallMarketName,
 } from './poi.js';
-import { acceptedCategories } from './standards.js';
 
 const frame = zjFrame();
 const project = frame.toXY;
@@ -83,10 +82,16 @@ describe('cleaning real Baidu place search results', () => {
     expect(countFacilities(pois, '菜市场')).toBe(1);
   });
 
-  it('agrees with the POIs stored in the zj-a sample', () => {
+  it('agrees with the POIs stored in the zj-a sample (minus the curated exclusions)', () => {
     const { pois } = cleanPois([...yaodian, ...multi], { project });
     const stored = zjA().pois.filter((p) => p.source === 'baidu');
+    const excluded = new Set(
+      readJson<{ entries: { uid?: string }[] }>('data/official/exclusions.json').entries.map((e) => e.uid),
+    );
+    const gone = pois.filter((p) => !stored.some((q) => q.uid === p.uid));
+    expect(gone.map((p) => p.name)).toEqual(['上海市浦东新区育华学校(雪英校区)']);
     for (const p of pois) {
+      if (excluded.has(p.uid)) continue;
       const s = stored.find((q) => q.uid === p.uid)!;
       expect([p.name, p.cat, p.stall_of ?? null, p.market_name ?? null]).toEqual([
         s.name,
@@ -99,13 +104,12 @@ describe('cleaning real Baidu place search results', () => {
     }
   });
 
-  it('builds facility sets per rule: stalls are market entrances, fresh supermarkets count only under GB 50180', () => {
+  it('builds the 菜市场 facility set: stalls are market entrances, fresh supermarkets never count', () => {
     const { pois } = cleanPois([...multi, place('fx', '盒马鲜生(张江店)', '购物;超市;生鲜超市', 100, 100)], {
       project,
     });
-    const task = facilitiesFor(pois, acceptedCategories('菜市场', 'task'));
-    const gb = facilitiesFor(pois, acceptedCategories('菜市场', 'gb50180'));
-    expect(task.map((p) => p.name).sort()).toEqual(
+    const market = facilitiesFor(pois, ['菜市场']);
+    expect(market.map((p) => p.name).sort()).toEqual(
       [
         '优品生鲜(孙桥菜场店)',
         '浦商邻里荟(孙桥店)',
@@ -113,8 +117,7 @@ describe('cleaning real Baidu place search results', () => {
         '雨润生鲜精选(孙桥菜市场店)',
       ].sort(),
     );
-    expect(gb).toHaveLength(task.length + 1);
-    expect(gb.some((p) => p.name === '盒马鲜生(张江店)')).toBe(true);
+    expect(pois.some((p) => p.name === '盒马鲜生(张江店)' && p.cat === '生鲜超市')).toBe(true);
   });
 });
 
@@ -127,6 +130,33 @@ describe('categories and blacklists', () => {
     expect(categorize('优品生鲜', '购物;超市;生鲜超市')).toEqual({ cat: '生鲜超市' });
     expect(categorize('联华超市', '购物;超市')).toEqual({ cat: '超市' });
     expect(categorize('某某咖啡', '美食;咖啡厅')).toEqual({ cat: '其他' });
+  });
+
+  it('files the other 民生设施 under 社区卫生, 养老, 地铁, 公交, 公园 and 超市', () => {
+    expect(categorize('张江社区卫生服务中心', '医疗;综合医院')).toEqual({ cat: '社区卫生' });
+    expect(categorize('孙桥社区卫生服务站', '医疗;诊所')).toEqual({ cat: '社区卫生' });
+    expect(categorize('合庆镇卫生院', '医疗;综合医院')).toEqual({ cat: '社区卫生' });
+    expect(categorize('公利医院', '医疗;综合医院')).toEqual({ cat: '其他' });
+    expect(categorize('张江镇敬老院', '生活服务;养老院')).toEqual({ cat: '养老' });
+    expect(categorize('孙桥社区老年人日间照料中心', '生活服务;其他')).toEqual({ cat: '养老' });
+    expect(categorize('张江镇长者照护之家', '生活服务;其他')).toEqual({ cat: '养老' });
+    expect(categorize('孙桥社区长者食堂', '美食;中餐厅')).toEqual({ cat: '养老' });
+    expect(categorize('金钱豹自助餐', '美食;自助餐')).toEqual({ cat: '其他' });
+    expect(categorize('鹏海绿地公园', '旅游景点;公园')).toEqual({ cat: '公园' });
+    expect(categorize('万科翡翠公园', '房地产;住宅区')).toEqual({ cat: '其他' });
+
+    // a recorded union of the same kinds (社区卫生服务中心$养老院$幼儿园$超市$公交站$地铁站$公园$菜场)
+    const mix = search('06d_place_v3_around_community_mix_p0.json');
+    const { pois, dropped } = cleanPois(mix, { project });
+    const cats = (cat: string) => pois.filter((p) => p.cat === cat).map((p) => p.name);
+    expect(cats('公交')).toHaveLength(11);
+    expect(cats('地铁')).toEqual(['华夏中路']);
+    expect(cats('公园')).toEqual(['鹏海绿地公园']);
+    expect(cats('幼儿园')).toEqual(['民办兴满幼儿园']);
+    // station exits (出入口;其他) and the lift are entrances, not facilities of their own
+    expect(dropped.filter((d) => d.reason === 'uncategorized').map((d) => d.name)).toEqual(
+      expect.arrayContaining(['华夏中路地铁站-1口', '无障碍电梯(华夏中路地铁站1号口)']),
+    );
   });
 
   it('drops tutoring and pet or device shops that look like schools and pharmacies', () => {

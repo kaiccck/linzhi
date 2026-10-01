@@ -312,7 +312,7 @@ export function formatPlan(plan: AreaPlan, relDir = plan.dir): string {
       .join('  ')
       .trimEnd();
   const lines = [
-    `走得到 · 精度–配额评测计划（只读本地产物文件，不调用任何接口）`,
+    `邻至 · 精度–配额评测计划（只读本地产物文件，不调用任何接口）`,
     `区域 ${a.id}：${a.name}（${a.label}），中心 BD-09 ${a.center_bd09.join(', ')}`,
     `产物目录：${relDir}`,
     `参考网格：${plan.reference.spacing_m} 米格点、${plan.reference.radius_m} 米圆内共 ${n(plan.reference.points)} 点，待测 ${n(plan.reference.pending)} 点`,

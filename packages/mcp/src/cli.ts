@@ -10,7 +10,7 @@ import { createBackend, packageVersion } from './config.js';
 import { startHttp } from './http.js';
 import { createServerFactory } from './server.js';
 
-const HELP = `走得到 MCP Server：15 分钟步行生活圈体检工具（定位、体检、等时圈、服务缺口、新增设施估算、社区对比、体检报告）
+const HELP = `邻至 MCP Server：15 分钟步行生活圈体检工具（定位、体检、等时圈、服务缺口、新增设施估算、社区对比、体检报告）
 
 用法：
   zoudedao-mcp                                   stdio（默认），由 MCP 客户端启动
@@ -19,7 +19,7 @@ const HELP = `走得到 MCP Server：15 分钟步行生活圈体检工具（定�
 
 选项：
   --samples <目录>  样例目录。默认依次取环境变量 ZDD_SAMPLES_DIR、仓库的 data/samples、./data/samples
-  --api <地址>      连接运行中的走得到服务（同环境变量 ZDD_API_URL，如 http://localhost:8787）；
+  --api <地址>      连接运行中的邻至服务（同环境变量 ZDD_API_URL，如 http://localhost:8787）；
                     服务端配置了百度 Key 时可以体检任意地点，否则只能查看样例
   --port <端口>     HTTP 端口，默认 8788（或环境变量 ZDD_MCP_PORT）
   --host <地址>     HTTP 监听地址，默认 127.0.0.1；改成 0.0.0.0 会对局域网开放，请自行评估
@@ -63,7 +63,7 @@ async function main(): Promise<void> {
     return [];
   });
   if (!samples.length && backend.kind === 'local') {
-    log(`警告：${describe} 里没有样例。请用 --samples 指定 data/samples 目录，或用 --api 连接走得到服务。`);
+    log(`警告：${describe} 里没有样例。请用 --samples 指定 data/samples 目录，或用 --api 连接邻至服务。`);
   }
   const factory = createServerFactory({ backend, version });
   const onError = (err: Error) => log(`错误：${err.message}`);

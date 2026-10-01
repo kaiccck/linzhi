@@ -4,14 +4,15 @@
  * a network or an LLM, so every tool answer can be reproduced from the result alone.
  */
 import {
-  GB50180_RADIUS_M,
   HARD_CATEGORIES,
   ISO_LEVELS,
   TASK_RULE_M,
   WALK_SPEED_MPS,
   bearingDeg,
+  facilityStats,
   fieldEstimator,
   fieldFromGrid,
+  gapCount,
   gridFromField,
   levelContours,
   localFrame,
@@ -24,7 +25,10 @@ import {
   type AnalysisResult,
   type Community,
   type ContourMeta,
+  type FacilityCategory,
   type FacilityCheck,
+  type FacilityStat,
+  type GrayArea,
   type HardCategory,
   type IsoLevel,
   type LocalFrame,
@@ -120,19 +124,14 @@ export const isWalkGap = (c: FacilityCheck): boolean => !isPending(c) && c.statu
 export const isStraightGap = (c: FacilityCheck, rule_m: number): boolean =>
   !(c.straight_m >= 0) || c.straight_m > rule_m;
 
-/** 'gb50180' when the checks were made with GB 50180-2018 radii (live engine option), else 'task'. */
-export function rulesOf(result: AnalysisResult): 'task' | 'gb50180' {
-  return (result.meta as ZddMeta).rules === 'gb50180' ? 'gb50180' : 'task';
-}
-
 /** Rule distance the result's checks used for a category (meta.rule_m of live results, else 1 km). */
 export function ruleOf(result: AnalysisResult, category: HardCategory): number {
   const given = (result.meta as ZddMeta).rule_m?.[category];
   if (typeof given === 'number' && given > 0) return given;
-  return rulesOf(result) === 'gb50180' ? GB_RADIUS_M[category] : TASK_RULE_M[category];
+  return TASK_RULE_M[category];
 }
 
-/** How the rule reads in a sentence: "1 km" for the task rule, the GB radii otherwise. */
+/** How the rule reads in a sentence: "1 km" for the task rule, else the distances per category. */
 export function ruleText(result: AnalysisResult): string {
   const rules = HARD_CATEGORIES.map((c) => ruleOf(result, c));
   if (rules.every((r) => r === 1000)) return '1 km';
@@ -173,7 +172,6 @@ export function categoryCounts(result: AnalysisResult): Record<HardCategory, Cat
  * pending.
  */
 export interface Headline {
-  rules: 'task' | 'gb50180';
   rule_m: Record<HardCategory, number>;
   communities: number;
   categories: number;
@@ -209,7 +207,6 @@ export function headline(result: AnalysisResult): Headline {
   }
   const walking = pseudo + blind;
   return {
-    rules: rulesOf(result),
     rule_m: Object.fromEntries(HARD_CATEGORIES.map((c) => [c, ruleOf(result, c)])) as Record<
       HardCategory,
       number
@@ -271,8 +268,7 @@ export function within15(
 export type RuleStatus = '达标' | '未达标' | '待核实';
 
 /**
- * A check under another distance rule (e.g. GB 50180-2018's 300/500 m), using only what was
- * measured: walking is never shorter than the straight line, and an unrouted facility nearer than
+ * A check under a given distance rule, using only what was measured: walking is never shorter than the straight line, and an unrouted facility nearer than
  * the shortest routed walk (unrouted_nearer) could still bring it within the rule.
  */
 export function statusUnderRule(check: FacilityCheck, rule_m: number): RuleStatus {
@@ -284,12 +280,6 @@ export function statusUnderRule(check: FacilityCheck, rule_m: number): RuleStatu
   if (routed && !nearer && !isPending(check)) return '未达标';
   return '待核实';
 }
-
-export const GB_RADIUS_M: Record<HardCategory, number> = {
-  小学: GB50180_RADIUS_M.小学 ?? 500,
-  菜市场: GB50180_RADIUS_M.菜市场 ?? 500,
-  药店: GB50180_RADIUS_M.药店 ?? 300,
-};
 
 // --------------------------------------------------------------------- elderly profile
 
@@ -333,6 +323,9 @@ export function deriveProfile(
     profile_speed_mps: speed,
     ...(opts.baseId !== undefined ? { derived_from: opts.baseId } : {}),
   };
+  // 圈内设施统计 at the new speed, from the base's own (adult-second) field: the same numbers the web
+  // derives with facilityStats(result, { scale: 1.17 / 0.9 })
+  const facility_stats = facilityStats(base, { scale: k });
   return {
     ...base,
     meta,
@@ -345,7 +338,14 @@ export function deriveProfile(
       checks: Object.fromEntries(
         Object.entries(c.checks).map(([cat, check]) => [
           cat,
-          { ...check, dur_s: scaleDur(check.route_m, check.dur_s) },
+          {
+            ...check,
+            dur_s: scaleDur(check.route_m, check.dur_s),
+            // the 买菜替代 walk is timed like the check's own
+            ...(check.alt
+              ? { alt: { ...check.alt, dur_s: scaleDur(check.alt.route_m, check.alt.dur_s) } }
+              : {}),
+          },
         ]),
       ) as Community['checks'],
     })),
@@ -360,9 +360,103 @@ export function deriveProfile(
       reach_share: r3(area15 / circle15),
       areas_km2: areas,
       reach_by_bearing: reachByBearing(grid, extent, 5),
+      facility_stats,
     },
   };
 }
+
+// ------------------------------------------------------------------ 圈内设施 and 灰色区域
+
+/** How one inventory group was fetched (live results: stats.facility_inventory, keyed by category). */
+export interface InventoryInfo {
+  complete: boolean;
+  radius_m: number;
+  fetched?: number;
+}
+
+export function inventoryOf(result: AnalysisResult): Partial<Record<string, InventoryInfo>> {
+  const inv = result.stats.facility_inventory;
+  return inv && typeof inv === 'object' ? (inv as Partial<Record<string, InventoryInfo>>) : {};
+}
+
+/**
+ * 圈内设施统计 at the result's own profile. Adult results and profiles derived here carry their own
+ * stats.facility_stats; a live elder result stores adult numbers over an adult-second field, and older
+ * results store none, so those are computed with core's facilityStats (scaled for the elder profile).
+ */
+export function facilityStatsOf(result: AnalysisResult): FacilityStat[] {
+  const meta = result.meta as ZddMeta;
+  const derived = meta.derived_from !== undefined;
+  const elder = profileOf(result) === 'elder';
+  const stored = result.stats.facility_stats;
+  if (Array.isArray(stored) && (derived || !elder)) return stored;
+  if (derived) {
+    // the field is re-timed already: only the circle needs the profile speed
+    return facilityStats({ ...result, meta: { ...result.meta, walk_speed_mps: speedOf(result) } });
+  }
+  return facilityStats(result, { scale: elder ? sampleSpeedOf(result) / speedOf(result) : 1 });
+}
+
+/**
+ * Walking time from the centre to a facility's entrance at the result's profile (seconds), null
+ * outside the field — the same numbers facilityStatsOf counts.
+ */
+export function facilityTimer(result: AnalysisResult): (xy: XY) => number | null {
+  const meta = result.meta as ZddMeta;
+  const grid = gridFromField(result.field);
+  const scale =
+    meta.derived_from === undefined && profileOf(result) === 'elder'
+      ? sampleSpeedOf(result) / speedOf(result)
+      : 1;
+  return (xy) => {
+    const t = sampleGrid(grid, xy[0], xy[1]) * scale;
+    return Number.isFinite(t) ? t : null;
+  };
+}
+
+/** Straight 15-minute radius at the result's profile, metres. */
+export const circleRadius = (result: AnalysisResult): number => LIMIT_S * speedOf(result);
+
+/** One layer of 灰色区域 in plain numbers, with the communities whose own checks put them in it. */
+export interface GrayLayer {
+  kind: GrayArea['kind'];
+  min_missing: number;
+  /** Separate polygons (outer rings). */
+  polygons: number;
+  area_m2: number;
+  communities: string[];
+}
+
+/** The 灰色区域 layers (gap ≥ 1, ≥ 2 …, then 伪覆盖), as stored in result.gray_areas. */
+export function grayLayers(result: AnalysisResult): GrayLayer[] {
+  const status = result.communities.map((c) => ({ name: c.name, ...gapCount(c.checks) }));
+  return (result.gray_areas ?? []).map((g) => ({
+    kind: g.kind,
+    min_missing: g.min_missing,
+    polygons: g.meta.filter((m) => !m.hole).length,
+    area_m2: g.area_m2,
+    communities: status
+      .filter((s) => (g.kind === 'pseudo' ? s.pseudo : s.missing >= g.min_missing))
+      .map((s) => s.name),
+  }));
+}
+
+/** Counting word of a category: 所 for schools, 个 for markets and stations, 家 for shops, 处 otherwise. */
+export const FACILITY_UNIT: Readonly<Partial<Record<FacilityCategory, string>>> = {
+  小学: '所',
+  幼儿园: '所',
+  菜市场: '个',
+  生鲜超市: '家',
+  超市: '家',
+  药店: '家',
+  社区卫生: '处',
+  养老: '处',
+  公交: '个',
+  地铁: '个',
+  公园: '个',
+};
+
+export const unitOfCategory = (c: FacilityCategory): string => FACILITY_UNIT[c] ?? '处';
 
 // ------------------------------------------------------------------------- route estimator
 

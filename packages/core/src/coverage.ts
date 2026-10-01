@@ -8,6 +8,8 @@
  *   loop:  want = planCoverageRound(demand, facilitiesByCategory, routes)   // early stop inside
  *          if want is empty: break
  *          for batch of planMatrixBatches(demand, want): routes.push(...matrixPairs(batch, answer))
+ *   once:  want = planNearestTopUp(demand, facilitiesByCategory, routes)    // the nearest walk, not any
+ *          for batch of planMatrixBatches(demand, want): routes.push(...)
  *   checks = mergeMatrixResults(demand, facilities, routes)                 // per category
  */
 import type { XY } from './coords.js';
@@ -15,7 +17,15 @@ import { chaikin, isoRings, nestRings } from './contour.js';
 import type { Grid } from './field.js';
 import { routingPoint } from './poi.js';
 import { BORDERLINE_M } from './standards.js';
-import type { CheckStatus, ContourMeta, FacilityCheck, GrayArea, MainStatus, Poi } from './types.js';
+import type {
+  CheckStatus,
+  ContourMeta,
+  FacilityCheck,
+  GrayArea,
+  MainStatus,
+  Poi,
+  RouteBasis,
+} from './types.js';
 
 const r1 = (v: number) => Math.round(v * 10) / 10;
 const dist = (a: XY, b: XY) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -43,6 +53,15 @@ export interface CheckVerdict {
   borderline: boolean;
   verified: boolean;
   route_upper_bound: boolean;
+}
+
+/**
+ * The facility a check reached, as people name it: a stall's market (the route ends at 雨润生鲜精选(孙桥
+ * 菜市场店) or at a restaurant inside the market, and the resident has walked to 孙桥菜市场), else the POI
+ * itself. For every label, card, answer and report; `via` stays the point the route ends at.
+ */
+export function viaName(check: Pick<FacilityCheck, 'via' | 'via_stall_of'>): string | undefined {
+  return check.via_stall_of ?? check.via;
 }
 
 /**
@@ -117,6 +136,8 @@ interface Assessment {
   open: CoverageCandidate[];
   /** Proven covered, or nothing left that could cover it. */
   resolved: boolean;
+  /** Candidates without a measured route whose entrance is nearer than the best walk (it may not be the nearest). */
+  nearer: CoverageCandidate[];
 }
 
 function routesByOrigin(routes: readonly RoutedPair[]): Map<string, Map<string, RoutedPair>> {
@@ -154,7 +175,9 @@ function assess(
   }
   const open = pruneCandidates(ranked, rule).filter((c) => !succeeded.has(c.poi.uid));
   const resolved = (best !== null && best.route_m <= rule) || open.length === 0;
-  return { ranked, best, succeeded, attempted, open, resolved };
+  const walk = best?.route_m ?? -Infinity;
+  const nearer = ranked.filter((c) => !succeeded.has(c.poi.uid) && c.bound_m < walk);
+  return { ranked, best, succeeded, attempted, open, resolved, nearer };
 }
 
 /** A routematrix endpoint: an id plus whatever the caller needs to send it (local XY here). */
@@ -195,6 +218,35 @@ export function planCoverageRound(
       if (a.resolved) continue;
       for (const c of a.open.filter((c) => !a.attempted.has(c.poi.uid)).slice(0, k)) {
         want.set(c.poi.uid, { id: c.poi.uid, xy: routingPoint(c.poi), poi: c.poi });
+      }
+    }
+    if (want.size) out.set(o.id, [...want.values()]);
+  }
+  return out;
+}
+
+/**
+ * After the rounds: per demand point, every candidate never tried whose entrance is nearer by straight
+ * line than the category's best measured walk (mergeMatrixResults' unrouted_nearer, less the pairs
+ * Baidu answered without a route). The rounds stop as soon as a verdict is proven, so that walk may pass
+ * a nearer facility; with these routed too, via and route_m are the nearest walk among the known
+ * facilities. Needs no rule; points without a measured walk get nothing (the rounds decide those).
+ */
+export function planNearestTopUp(
+  demand: readonly DemandPoint[],
+  facilitiesByCategory: Readonly<Record<string, readonly Poi[]>>,
+  routes: readonly RoutedPair[],
+): Map<string, OdDestination[]> {
+  const byOrigin = routesByOrigin(routes);
+  const out = new Map<string, OdDestination[]>();
+  for (const o of demand) {
+    const want = new Map<string, OdDestination>();
+    for (const facilities of Object.values(facilitiesByCategory)) {
+      const a = assess(o, facilities, byOrigin.get(o.id), Infinity);
+      for (const c of a.nearer) {
+        if (!a.attempted.has(c.poi.uid)) {
+          want.set(c.poi.uid, { id: c.poi.uid, xy: routingPoint(c.poi), poi: c.poi });
+        }
       }
     }
     if (want.size) out.set(o.id, [...want.values()]);
@@ -373,7 +425,7 @@ export function mergeMatrixResults(
     if (a.best) {
       const { cand, route_m, dur_s } = a.best;
       // facilities never routed from here whose entrance is closer than the best walk might beat it
-      const nearer = a.ranked.filter((c) => !a.succeeded.has(c.poi.uid) && c.bound_m < route_m);
+      const { nearer } = a;
       const v = classifyCheck({
         straight_m: nearest.straight_m,
         route_m,
@@ -432,6 +484,87 @@ export function mergeMatrixResults(
     out.set(o.id, { ...base, route_m: est, dur_s: Math.round(est / speed), ...v, route_basis: 'estimated' });
   }
   return out;
+}
+
+// ------------------------------------------------------------------------------------- what-if
+
+/** What a reader is shown for a check: its four-state status, or 待核实 while it is not verified. */
+export type ShownStatus = CheckStatus | '待核实';
+
+export function shownStatus(v: Pick<CheckVerdict, 'status' | 'verified'>): ShownStatus {
+  return v.verified ? v.status : '待核实';
+}
+
+export interface NewFacilityWalk {
+  /** Straight line from the community to the new facility. */
+  straight_m: number;
+  /** Measured walk to it; null = Baidu found no route (or the route failed). */
+  route_m: number | null;
+}
+
+export interface WhatIfVerdict extends CheckVerdict {
+  /** Nearest facility by straight line, the new one included. */
+  straight_m: number;
+  /** Shortest measured walk, the new one included; null when none was measured. */
+  route_m: number | null;
+}
+
+/**
+ * A community's check after a facility of the category opens at a site it walks `walk` to (what-if with
+ * a measured route). A measured walk within the rule covers it; otherwise the verdict keeps what the
+ * check proved (an unverified check stays unverified, a lower bound stays a bound) and only the straight
+ * line can shrink (盲区 → 伪覆盖 when the site lies within the rule by straight line).
+ */
+export function withNewFacility(
+  check: FacilityCheck | undefined,
+  walk: NewFacilityWalk,
+  rule_m: number,
+  edge_m = BORDERLINE_M,
+): WhatIfVerdict {
+  const basis: RouteBasis = check ? (check.route_basis ?? 'routed') : 'none';
+  const straight = Math.min(check && check.straight_m >= 0 ? check.straight_m : Infinity, walk.straight_m);
+  const own = check && basis === 'routed' && check.route_m > 0 ? check.route_m : null;
+  const measured = [own, walk.route_m].filter((v): v is number => v !== null && v > 0);
+  const best = measured.length ? Math.min(...measured) : null;
+  const base = { straight_m: r1(straight), route_m: best };
+  if (best !== null && best <= rule_m) {
+    return { ...classifyCheck({ straight_m: straight, route_m: best, rule_m, edge_m }), ...base };
+  }
+  if (basis === 'routed' && check) {
+    const v = classifyCheck({
+      straight_m: straight,
+      route_m: best ?? check.route_m,
+      rule_m,
+      edge_m,
+      verified: check.verified,
+      upperBound: check.route_upper_bound,
+    });
+    return { ...v, ...base };
+  }
+  if (basis === 'estimated' && check) {
+    // candidates that could still cover the community were never routed: no verdict either way
+    const v = classifyCheck({
+      straight_m: straight,
+      route_m: check.route_m,
+      rule_m,
+      edge_m,
+      verified: false,
+    });
+    return { ...v, ...base };
+  }
+  // before: nothing within the rule (a lower bound) or no facility at all
+  const bound = Math.min(
+    check && basis === 'lower_bound' ? check.route_m : Infinity,
+    walk.route_m ?? walk.straight_m,
+  );
+  const v = classifyCheck({
+    straight_m: straight,
+    route_m: bound,
+    rule_m,
+    edge_m,
+    lowerBound: walk.route_m === null || (basis === 'lower_bound' && bound === check?.route_m),
+  });
+  return { ...v, ...base };
 }
 
 // ------------------------------------------------------------------------------------ 灰色区域

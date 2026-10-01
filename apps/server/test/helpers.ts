@@ -26,6 +26,7 @@ export function testConfig(overrides: Partial<ServerConfig> = {}): ServerConfig 
     ...loadConfig({ ZDD_MODE: 'sample' }, REPO_ROOT),
     samplesDir: SAMPLES_DIR,
     webDistDir: resolve('/nonexistent/zdd-web-dist'), // deterministic even after the web app is built
+    historyPath: null, // never the repo's data/cache/analyses.sqlite; history tests use a temp file
     logLevel: 'silent',
     replayPace: 0,
     ...overrides,

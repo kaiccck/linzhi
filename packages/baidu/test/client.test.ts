@@ -309,6 +309,62 @@ describe('place search', () => {
     expect(r.keywords).toHaveLength(12);
   });
 
+  it('place/v3/detail: 10 uids per request, cached per request, billed to the place quota', async () => {
+    const uid = (i: number) => i.toString(16).padStart(24, 'a');
+    // Baidu answers the uids it knows, in its own order; 盒马 as measured on 2026-09-29
+    const t = spyTransport((u) => {
+      const asked = (u.searchParams.get('uids') ?? '').split(',');
+      const results = asked
+        .filter((x) => x !== uid(7))
+        .reverse()
+        .map((x) => ({
+          uid: x,
+          name: x === uid(0) ? '盒马鲜生(陆悦天地店)' : `店${x.slice(-2)}`,
+          location: { lat: 31.18876182784504, lng: 121.62276604445195 },
+          address: '上海市浦东新区中科路1600号陆悦天地B1',
+          detail_info: {
+            classified_poi_tag: '购物;超市;生鲜超市',
+            tag: '购物;超市',
+            navi_location: { lat: 31.188046904954746, lng: 121.6230490106876 },
+            parent_id: '84219a655514873209a8d4f1',
+            shop_hours: '09:00-22:00',
+          },
+        }));
+      return baiduJson({ status: 0, message: 'ok', results });
+    });
+    const client = testClient(t);
+    const uids = Array.from({ length: 23 }, (_, i) => uid(i));
+    const r = await client.placeDetail([...uids, ` ${uid(3)} `]);
+    expect(t.urls.map((x) => new URL(x).pathname)).toEqual(Array(3).fill('/place/v3/detail'));
+    const sent = t.urls.map((x) => new URL(x).searchParams);
+    expect(sent.map((p) => (p.get('uids') ?? '').split(',').length)).toEqual([10, 10, 3]);
+    expect(sent.every((p) => p.get('scope') === '2')).toBe(true);
+    expect(r).toMatchObject({ requests: 3, apiCalls: 3, via: 'api', missing: [uid(7)] });
+    expect(r.uids).toEqual(uids);
+    expect(r.pois).toHaveLength(22);
+    // in request order, whatever order Baidu answered in
+    expect(r.pois.map((p) => p.uid)).toEqual(uids.filter((u) => u !== uid(7)));
+    expect(r.pois[0]).toMatchObject({
+      name: '盒马鲜生(陆悦天地店)',
+      address: '上海市浦东新区中科路1600号陆悦天地B1',
+      classifiedTag: '购物;超市;生鲜超市',
+      naviLocation: [121.6230490106876, 31.188046904954746],
+      parentId: '84219a655514873209a8d4f1',
+    });
+    expect(r.pois[0]?.extra.shop_hours).toBe('09:00-22:00');
+    expect(client.ledger.usage('place').used).toBe(3);
+
+    // the same requests again: from the cache, no quota
+    const again = await client.placeDetail(uids);
+    expect(again).toMatchObject({ requests: 3, apiCalls: 0, via: 'cache' });
+    expect(t.urls).toHaveLength(3);
+    expect(client.ledger.usage('place').used).toBe(3);
+
+    // nothing to ask: no request
+    expect(await client.placeDetail([])).toMatchObject({ requests: 0, pois: [], missing: [] });
+    await expect(client.placeDetail(['a,b'])).rejects.toBeInstanceOf(BaiduInputError);
+  });
+
   it('place/v3/region answers an address with address_type (recorded)', async () => {
     const { transport } = spyReplay([fixture('api-probe/raw/08f_v3_region_haike1650.json')]);
     const r = await testClient(transport).placeRegion('海科路1650号', '上海');

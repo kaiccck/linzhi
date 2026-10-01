@@ -4,6 +4,7 @@
  * number the tool asserts is listed in `facts`.
  */
 import type * as z from 'zod';
+import type { Anchor } from '../anchors.js';
 import type { AnalysisStore, ZddBackend } from '../backend.js';
 import type { Fact } from '../format.js';
 import type { AnalyzeEvent } from '../types.js';
@@ -24,6 +25,11 @@ export interface ToolResult<D = unknown> {
   data: D;
   /** Every number the tool asserts. */
   facts: Fact[];
+  /**
+   * The places the result talks about (communities, facilities, 灰色区域, a simulated site), for the
+   * map to highlight next to a citation; never shown to the model.
+   */
+  anchors?: Anchor[];
 }
 
 export interface ToolContext {

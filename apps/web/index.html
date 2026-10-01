@@ -3,18 +3,28 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#1446b0" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="color-scheme" content="light" />
     <meta
       name="description"
-      content="走得到：按百度地图实测步行路线体检 15 分钟生活圈，找出画圈看不到的服务缺口。"
+      content="邻至：按百度地图实测步行路线体检 15 分钟生活圈，找出画圈看不到的服务缺口。"
     />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>走得到 · 15 分钟生活圈体检</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/linzhi-mark-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/brand/linzhi-mark-64.png" />
+    <link rel="apple-touch-icon" href="/brand/linzhi-mark-180.png" />
+    <title>邻至 · 15 分钟生活圈体检</title>
   </head>
   <body>
+    <!--
+THESIS: 安静的规划工作台。白面、发丝线、一支钴蓝，整屏只让"画圈"和"走一遍"的差说话；拒绝满屏钴蓝导视牌、处处粗体的标签、默认全开的图层和 KPI 瓷砖。
+OWN-WORLD: 页面 #F4F6F8，白色面板 + 1px #E6EAF0 发丝线，圆角 12/10/8，影子几乎看不见；墨色 #1F2A37 / #5B6675 / #6B7585；钴蓝 #1446B0 只给标志、当前标签、选中、你在这里、走一遍、焦点。状态平涂浅色 + 1.5px 边：伪覆盖 #E0483E、盲区 #3F4A5A、覆盖 #1F9A8C、临界琥珀点线、待核灰虚线。百度底图重编码为浅灰地、白街道；步行时间场是低饱和暖沙色，15′ 边 #A27B47；直线圈是灰色细虚线。Noto Sans SC 400/500/700，Barlow 写数字。
+STORY: 先读结论句（画圈 1 个缺口，走一遍 8 个，漏掉 7 个），再用类别卡选中小学，体检单里每个小区一根从直线到步行的哑铃跨过 1 公里线，地图上按所选类别着色的小区和两张带实测数字的注记说明原因；规划、报告、问询在顶栏。
+FIRST VIEWPORT: 60px 白顶栏（标志、体检/规划/报告/问询、片区名切换、地址或坐标搜索）；左 400px 白面板：片区名 + 口径、结论句、三张类别卡、体检单 | 圈内设施；右侧百度地图占满：暖沙色 15′ 可达区、灰虚线直线圈、按类别着色的小区编号和名称、你在这里、两张注记；左上图例，右上图层开关，左下"走一遍"卡是主操作。
+FORM: 用户批准的样稿 design/mockups/c-light（安静工作台），在真实百度底图上实现；seed key: none（brief-pinned）。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+    -->
     <div id="root"></div>
-    <noscript>走得到需要启用 JavaScript。</noscript>
+    <noscript>邻至需要启用 JavaScript。</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

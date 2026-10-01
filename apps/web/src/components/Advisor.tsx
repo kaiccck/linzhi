@@ -21,7 +21,6 @@ import {
   formatName,
   historyOf,
   makeInliner,
-  NUMBER_RE,
   parseAnswer,
   suggestionsFor,
   tokenizeBlocks,
@@ -40,7 +39,9 @@ import {
 } from '../data/ask.js';
 import type { SampleInfo } from '../data/loadAnalysis.js';
 import type { Model } from '../model/derive.js';
+import { spotOf, spotWords, type MapSpot } from '../model/spots.js';
 import { Pg } from './Icons.js';
+import { NumText } from './NumText.js';
 
 type Exchange = { key: number; question: string } & (
   | { status: 'pending'; steps: AskStep[] }
@@ -58,10 +59,11 @@ export interface AdvisorProps {
   advisor: Health['advisor'];
   samples: SampleInfo[];
   hidden: boolean;
-  /** bumped each time the visitor opens the desk: the question field takes focus */
-  opened: number;
-  onBack(): void;
   onHot(code: string | null): void;
+  /** the places lit on the map now (the screen owns them: the map's chip can clear a pinned one) */
+  spot?: { spot: MapSpot; pinned: boolean } | null;
+  /** a citation pointed at (hover) or opened (click): its places on the map */
+  onSpot?(s: { spot: MapSpot; pinned: boolean } | null): void;
 }
 
 /** A tool that has started replaces nothing; its result replaces the started line of the same tool. */
@@ -75,36 +77,11 @@ function mergeStep(steps: AskStep[], step: AskStep): AskStep[] {
 
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const NUMBER = new RegExp(`(${NUMBER_RE})`);
-
-/** Text with every number (and its unit) in the numeral face: notes and cards, where no plates belong. */
-function NumText({ text }: { text: string }) {
-  const parts = text.split(NUMBER);
-  return (
-    <>
-      {parts.map((p, k) =>
-        k % 2 ? (
-          <span key={k} className="num n">
-            {p}
-          </span>
-        ) : (
-          <Fragment key={k}>{p}</Fragment>
-        ),
-      )}
-    </>
-  );
-}
-
-/** L̂ with a drawn hat: the combining circumflex floats off the sign face's L. */
-const LHat = () => (
-  <span className="lhat">
-    L
-    <svg viewBox="0 0 10 5" aria-hidden="true" focusable="false">
-      <path d="M1 4.4 5 1l4 3.4" />
-    </svg>
-    <span className="sr-only">（估计值）</span>
-  </span>
-);
+/**
+ * L̂ (the siting estimator's symbol in the tools' text) read out in words: planners read “估算步行”,
+ * not a statistics hat; the sentence keeps its meaning (估算步行 ≈ 354 m).
+ */
+const LHat = () => <span className="lhat">估算步行</span>;
 
 // ------------------------------------------------------------------------------ citations
 
@@ -112,9 +89,11 @@ interface Pop {
   cite: AskCitation;
   rect: DOMRect;
   pinned: boolean;
+  /** the exchange the citation belongs to (T1 of one answer is not T1 of the next) */
+  x: number;
 }
 
-interface RenderCtx {
+export interface RenderCtx {
   /** id prefix of this answer's citation descriptions */
   prefix: string;
   cites: Map<string, AskCitation>;
@@ -178,37 +157,62 @@ function UnitRef({
   );
 }
 
-function Inlines({ parts, ctx }: { parts: Inline[]; ctx: RenderCtx }): ReactNode {
-  return parts.map((p, k) => {
-    switch (p.t) {
-      case 'text':
-        return <Fragment key={k}>{p.s}</Fragment>;
-      case 'num':
-        return (
-          <span key={k} className="num n">
-            {p.s}
-          </span>
-        );
-      case 'cite':
-        return (
-          <span key={k} className="cites">
-            {p.ids.map((id) => (
-              <CitePlate key={id} id={id} ctx={ctx} />
-            ))}
-          </span>
-        );
-      case 'unit':
-        return <UnitRef key={k} code={p.code} name={p.name} repeat={!!p.repeat} ctx={ctx} />;
-      case 'lhat':
-        return <LHat key={k} />;
-      case 'strong':
-        return (
-          <strong key={k}>
-            <Inlines parts={p.parts} ctx={ctx} />
-          </strong>
-        );
+/** closing punctuation that must not start a line after a citation plate */
+const CLOSING = /^[。，、；：！？）」』”’,.;:!?)]+/;
+
+function inline(p: Inline, k: number | string, ctx: RenderCtx): ReactNode {
+  switch (p.t) {
+    case 'text':
+      return <Fragment key={k}>{p.s}</Fragment>;
+    case 'num':
+      return (
+        <span key={k} className="num n">
+          {p.s}
+        </span>
+      );
+    case 'cite':
+      return (
+        <span key={k} className="cites">
+          {p.ids.map((id) => (
+            <CitePlate key={id} id={id} ctx={ctx} />
+          ))}
+        </span>
+      );
+    case 'unit':
+      return <UnitRef key={k} code={p.code} name={p.name} repeat={!!p.repeat} ctx={ctx} />;
+    case 'lhat':
+      return <LHat key={k} />;
+    case 'strong':
+      return (
+        <strong key={k}>
+          <Inlines parts={p.parts} ctx={ctx} />
+        </strong>
+      );
+  }
+}
+
+export function Inlines({ parts, ctx }: { parts: Inline[]; ctx: RenderCtx }): ReactNode {
+  const out: ReactNode[] = [];
+  for (let k = 0; k < parts.length; k++) {
+    const p = parts[k]!;
+    const next = parts[k + 1];
+    const stop = p.t === 'cite' && next?.t === 'text' ? CLOSING.exec(next.s) : null;
+    if (stop && next?.t === 'text') {
+      // the full stop after a citation stays on the citation's line
+      out.push(
+        <span key={k} className="nw">
+          {inline(p, 'c', ctx)}
+          {stop[0]}
+        </span>,
+      );
+      const rest = next.s.slice(stop[0].length);
+      if (rest) out.push(<Fragment key={`${k}r`}>{rest}</Fragment>);
+      k++;
+      continue;
     }
-  });
+    out.push(inline(p, k, ctx));
+  }
+  return out;
 }
 
 function Lines({ lines, ctx }: { lines: Inline[][]; ctx: RenderCtx }) {
@@ -319,6 +323,12 @@ function FilePlate({ att }: { att: AskAttachment }) {
   );
 }
 
+/** The source card's controller: `x` is the exchange the citation belongs to. */
+interface PopCtl {
+  show(cite: AskCitation, el: HTMLElement, pin: boolean | undefined, x: number): void;
+  hide(): void;
+}
+
 /** How the answer was made and whether its numbers were checked, in plain words. */
 function AnswerMeta({ a, ctx, aboutOther }: { a: AskAnswer; ctx: RenderCtx; aboutOther: string | null }) {
   const g = a.grounding;
@@ -401,7 +411,17 @@ function AnswerMeta({ a, ctx, aboutOther }: { a: AskAnswer; ctx: RenderCtx; abou
         <span className="tick" aria-hidden="true">
           {ok ? <Pg id="pg-check" /> : null}
         </span>
-        <span>{ground}</span>
+        <span>
+          {ground}
+          {a.citations_added?.length ? (
+            // the model's numbers were all traceable; the server only added a missing source mark
+            <span className="added" title={`系统补标的出处：${a.citations_added.join('；')}`}>
+              {' '}
+              · 已补标出处
+              <span className="sr-only">：{a.citations_added.join('；')}</span>
+            </span>
+          ) : null}
+        </span>
       </p>
       {a.citations.map((c) => (
         <span key={c.id} id={`${ctx.prefix}-${c.id}`} className="sr-only">
@@ -414,6 +434,7 @@ function AnswerMeta({ a, ctx, aboutOther }: { a: AskAnswer; ctx: RenderCtx; abou
 
 function AnswerView({
   a,
+  x,
   units,
   unitNames,
   aboutOther,
@@ -421,10 +442,11 @@ function AnswerView({
   onHot,
 }: {
   a: AskAnswer;
+  x: number;
   units: { code: string; name: string }[];
   unitNames: Map<string, string>;
   aboutOther: string | null;
-  pop: Pick<RenderCtx, 'show' | 'hide'>;
+  pop: PopCtl;
   onHot(code: string | null): void;
 }) {
   const prefix = useId().replace(/:/g, '');
@@ -444,7 +466,8 @@ function AnswerView({
     cites: new Map(a.citations.map((c) => [c.id, c])),
     units: unitNames,
     onHot,
-    ...pop,
+    show: (cite, el, pin) => pop.show(cite, el, pin, x),
+    hide: pop.hide,
   };
   return (
     <div className="ask-body">
@@ -498,6 +521,20 @@ function SuggestionText({ s, model }: { s: string; model: Model }) {
 
 // ---------------------------------------------------------------------------------- panel
 
+/**
+ * The server's tools know communities by name, not by the codes the map prints: a bare code in the
+ * question goes out with its name ("A-11" → "A-11（申城佳苑三期B块）"); the log keeps what was typed.
+ */
+export function withNames(question: string, model: Model): string {
+  const byCode = new Map(model.units.map((u) => [u.code, u.name]));
+  return question.replace(/[A-Z]-\d{2}/g, (code, at: number) => {
+    const name = byCode.get(code);
+    if (!name) return code;
+    const rest = question.slice(at + code.length).replace(/^[\s（(]+/, '');
+    return rest.startsWith(name) ? code : `${code}（${name}）`;
+  });
+}
+
 export const AdvisorPanel = memo(function AdvisorPanel({
   model,
   analysisId,
@@ -505,9 +542,9 @@ export const AdvisorPanel = memo(function AdvisorPanel({
   advisor,
   samples,
   hidden,
-  opened,
-  onBack,
   onHot,
+  spot = null,
+  onSpot,
 }: AdvisorProps) {
   const [exchanges, setExchanges] = useState<Exchange[]>([]);
   const [draft, setDraft] = useState('');
@@ -543,7 +580,7 @@ export const AdvisorPanel = memo(function AdvisorPanel({
       const c = new AbortController();
       ctl.current = c;
       ask(
-        { question, analysis_id: analysisId, history: historyOf(done) },
+        { question: withNames(question, model), analysis_id: analysisId, history: historyOf(done) },
         (step) =>
           setExchanges((xs) =>
             xs.map((x) =>
@@ -561,27 +598,25 @@ export const AdvisorPanel = memo(function AdvisorPanel({
           if (ctl.current === c) ctl.current = null;
         });
     },
-    [analysisId, busy, disabled, exchanges, update],
+    [analysisId, busy, disabled, exchanges, update, model],
   );
   const stop = useCallback(() => ctl.current?.abort(), []);
   useEffect(() => () => ctl.current?.abort(), []);
 
-  // opened from the 问询 plate: straight to the question field (not on first render)
+  // Esc stops a running answer (and closes a pinned source card, and the places it lit)
+  const spotPinned = !!spot?.pinned;
   useEffect(() => {
-    if (opened && !disabled) inputRef.current?.focus({ preventScroll: true });
-  }, [opened, disabled]);
-
-  // Esc stops a running answer (and closes a pinned source card)
-  useEffect(() => {
-    if (hidden || (!busy && !pop)) return;
+    if (hidden || (!busy && !pop && !spotPinned)) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      if (pop) setPop(null);
-      else stop();
+      if (pop || spotPinned) {
+        setPop(null);
+        onSpot?.(null);
+      } else stop();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [hidden, busy, pop, stop]);
+  }, [hidden, busy, pop, spotPinned, stop, onSpot]);
 
   // a pinned card (touch) closes on the next tap elsewhere; any card closes when the log scrolls
   useEffect(() => {
@@ -601,23 +636,49 @@ export const AdvisorPanel = memo(function AdvisorPanel({
     };
   }, [pop]);
 
-  const popCtl = useMemo<Pick<RenderCtx, 'show' | 'hide'>>(
-    () => ({
-      show(cite, el, pin = false) {
+  // A citation's places on the map (anchors of another analysis have none here): lit while it is
+  // pointed at, kept once it is clicked — until it is clicked again, Esc, or the map's chip clears
+  // it. On a phone the map sits above the answer: a click brings the map into view.
+  const live = useRef({ model, analysisId, onSpot, spot });
+  live.current = { model, analysisId, onSpot, spot };
+  const popCtl = useMemo<PopCtl>(() => {
+    const spotFor = (cite: AskCitation, x: number) =>
+      spotOf(live.current.model, live.current.analysisId, cite, `${x}:${cite.id}`);
+    return {
+      show(cite, el, pin = false, x) {
         window.clearTimeout(hideTimer.current);
         setPop((p) =>
           pin && p?.pinned && p.cite === cite
             ? null
-            : { cite, rect: el.getBoundingClientRect(), pinned: pin || !!p?.pinned },
+            : { cite, rect: el.getBoundingClientRect(), pinned: pin || !!p?.pinned, x },
         );
+        const s = spotFor(cite, x);
+        const { spot: now, onSpot: tell } = live.current;
+        if (pin) {
+          if (now?.pinned && s && now.spot.key === s.key) {
+            tell?.(null);
+            return;
+          }
+          if (!s) return;
+          tell?.({ spot: s, pinned: true });
+          const map = document.querySelector<HTMLElement>('.map');
+          const r = map?.getBoundingClientRect();
+          if (map && r && window.matchMedia('(max-width: 760px)').matches && r.bottom < 120) {
+            map.scrollIntoView({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' });
+            setPop(null);
+          }
+        } else if (!now?.pinned) tell?.(s ? { spot: s, pinned: false } : null);
       },
       hide() {
         window.clearTimeout(hideTimer.current);
-        hideTimer.current = window.setTimeout(() => setPop((p) => (p?.pinned ? p : null)), 140);
+        hideTimer.current = window.setTimeout(() => {
+          setPop((p) => (p?.pinned ? p : null));
+          if (!live.current.spot?.pinned) live.current.onSpot?.(null);
+        }, 140);
       },
-    }),
-    [],
-  );
+    };
+  }, []);
+  useEffect(() => () => live.current.onSpot?.(null), []);
 
   // a new question scrolls into view; the answer then grows below it without moving the page
   const lastKey = exchanges.at(-1)?.key;
@@ -648,34 +709,27 @@ export const AdvisorPanel = memo(function AdvisorPanel({
         : null;
 
   return (
-    <section className="advisor" id="panel-ask" aria-label="问询" hidden={hidden}>
-      <div className="ask-head">
-        <button type="button" className="ask-back" onClick={onBack}>
-          小区目录
-        </button>
-        {modeLine && !disabled ? <span className="ask-mode">{modeLine}</span> : null}
-      </div>
+    <section className="advisor" id="panel-ask" role="tabpanel" aria-labelledby="tab-ask" hidden={hidden}>
+      {modeLine && !disabled ? (
+        <div className="ask-head">
+          <span className="ask-mode">{modeLine}</span>
+        </div>
+      ) : null}
       <div className="ask-scroll" ref={scrollRef}>
         {exchanges.length === 0 ? (
           <div className="ask-intro">
             {disabled ? (
               <p className="ask-lead">
-                <strong>问询需要连接走得到服务端。</strong>
+                <strong>问询需要连接邻至服务端。</strong>
                 {blocked}
               </p>
             ) : (
               <p className="ask-lead">
-                按屏幕上这次体检的结果回答：先给结论，每个数字都标出处
+                每个数字都标出处
                 <span className="cite num static" aria-hidden="true">
                   T1
                 </span>
-                ，悬停或点开可以核对。
-              </p>
-            )}
-            {disabled ? null : (
-              <p className="ask-note">
-                {advisor?.mode === 'llm' ? '数字仍然只来自工具结果。' : ''}
-                问询不发起新的体检，不消耗地图配额。
+                ，悬停可以核对。
               </p>
             )}
             <ul className="ask-suggest" aria-label="可以这样问">
@@ -712,6 +766,7 @@ export const AdvisorPanel = memo(function AdvisorPanel({
                 {x.status === 'done' ? (
                   <AnswerView
                     a={x.answer}
+                    x={x.key}
                     units={units}
                     unitNames={unitNames}
                     aboutOther={aboutOther(x.answer)}
@@ -792,14 +847,29 @@ export const AdvisorPanel = memo(function AdvisorPanel({
         </span>
       </form>
       {pop && !hidden ? (
-        <CitePop pop={pop} onEnter={() => window.clearTimeout(hideTimer.current)} onLeave={popCtl.hide} />
+        <CitePop
+          pop={pop}
+          spot={spotOf(model, analysisId, pop.cite, `${pop.x}:${pop.cite.id}`)}
+          onEnter={() => window.clearTimeout(hideTimer.current)}
+          onLeave={popCtl.hide}
+        />
       ) : null}
     </section>
   );
 });
 
 /** The source card of a citation plate: fixed, so no scrolling box clips it; clamped to the window. */
-function CitePop({ pop, onEnter, onLeave }: { pop: Pop; onEnter(): void; onLeave(): void }) {
+function CitePop({
+  pop,
+  spot,
+  onEnter,
+  onLeave,
+}: {
+  pop: Pop;
+  spot: MapSpot | null;
+  onEnter(): void;
+  onLeave(): void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   useLayoutEffect(() => {
@@ -826,7 +896,13 @@ function CitePop({ pop, onEnter, onLeave }: { pop: Pop; onEnter(): void; onLeave
         <span className="cite num static">{pop.cite.id}</span>
         {pop.cite.title}
       </b>
-      <p>
+      {spot ? (
+        <p className="pop-map">
+          地图上标出 <NumText text={spotWords(spot)} />
+          {pop.pinned ? '' : '（点开可固定）'}
+        </p>
+      ) : null}
+      <p className="pop-sum">
         <NumText text={pop.cite.summary} />
       </p>
     </div>

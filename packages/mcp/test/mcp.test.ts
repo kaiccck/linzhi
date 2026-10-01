@@ -70,7 +70,7 @@ describe('MCP server over an in-memory transport', () => {
     expect(data).toMatchObject({
       status: 'ok',
       analysis_id: 'zj-a',
-      headline: { straight_gaps: 1, walking_gaps: 8, missed_share_pct: 87.5, pending: 2 },
+      headline: { straight_gaps: 1, walking_gaps: 8, missed_share_pct: 87.5, pending: 0 },
       isochrone: { area_iso15_km2: 1.857, area_circle15_km2: 3.483, overstate_x: 1.88 },
     });
     const facts = (r._meta as { 'zoudedao/facts': { label: string; value: number }[] })['zoudedao/facts'];

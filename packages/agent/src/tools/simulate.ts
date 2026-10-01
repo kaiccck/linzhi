@@ -1,14 +1,6 @@
-import {
-  TASK_RULE_M,
-  estimateRoute,
-  siteCoverage,
-  type HardCategory,
-  type LngLat,
-  type XY,
-} from '@zoudedao/core';
+import { estimateRoute, siteCoverage, type HardCategory, type LngLat, type XY } from '@zoudedao/core';
 import * as z from 'zod';
 import {
-  GB_RADIUS_M,
   describePlace,
   findCommunity,
   frameOf,
@@ -18,6 +10,7 @@ import {
   toBd09,
   type RuleStatus,
 } from '../analysis.js';
+import { AnchorBook } from '../anchors.js';
 import { FactBook, fmtNumber, round } from '../format.js';
 import { resolveAnalysis } from './context.js';
 import { ToolError, defineTool } from './types.js';
@@ -79,12 +72,6 @@ export const simulateFacility = defineTool({
       .optional()
       .describe('把新设施放在某个小区旁（按小区名匹配）'),
     label: z.string().trim().max(60).optional().describe('位置的叫法，如“孙环路口”，只用于展示'),
-    rule: z
-      .enum(['task', 'gb50180'])
-      .optional()
-      .describe(
-        '判定口径：task 赛题 1 km；gb50180 国标半径（小学、菜市场 500 m，药店 300 m）；默认沿用本次分析的口径',
-      ),
   }),
   outputSchema: z.looseObject({
     analysis_id: z.string(),
@@ -130,12 +117,7 @@ export const simulateFacility = defineTool({
         '这个位置在本次分析的耗时场范围之外，无法估算；请换一个离分析中心更近的位置，或以该位置为中心重新体检。',
       );
     }
-    const rule_m =
-      args.rule === 'gb50180'
-        ? GB_RADIUS_M[category]
-        : args.rule === 'task'
-          ? TASK_RULE_M[category]
-          : ruleOf(result, category);
+    const rule_m = ruleOf(result, category);
     const estimator = routeEstimator(result);
     const demands = result.communities.map((c) => ({ id: c.name, xy: c.centroid }));
     const cov = siteCoverage({ id: 'what-if', xy }, demands, { category, rule_m, estimator });
@@ -217,6 +199,11 @@ export const simulateFacility = defineTool({
         '小区位置取分析结果中的小区代表点；大型小区不同出入口的步行距离会有差别。',
       ],
     };
-    return { summary, data, facts: book.facts };
+    // the new site, then the communities the summary names (newly covered, pending ones satisfied)
+    const anchors = new AnchorBook(result, id).site(label ?? place, xy);
+    for (const r of rows) {
+      if (r.change === 'newly_covered' || r.change === 'pending_covered') anchors.community(r.community);
+    }
+    return { summary, data, facts: book.facts, anchors: anchors.anchors };
   },
 });

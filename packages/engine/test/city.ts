@@ -18,6 +18,8 @@ export interface CityPoi {
   xy: XY;
   navi?: XY;
   parent?: string;
+  /** In Baidu's database but never returned by place search (only the browser JSAPI and detail know it). */
+  hidden?: boolean;
 }
 
 interface Snap {
@@ -222,7 +224,9 @@ export class City {
     const d = (p: CityPoi) => Math.hypot(p.xy[0] - center[0], p.xy[1] - center[1]);
     for (const k of keywords) {
       const group = this.pois
-        .filter((p) => !seen.has(p.uid) && (p.name.includes(k) || p.tag.includes(k)) && d(p) <= radius)
+        .filter(
+          (p) => !p.hidden && !seen.has(p.uid) && (p.name.includes(k) || p.tag.includes(k)) && d(p) <= radius,
+        )
         .sort((p, q) => d(p) - d(q));
       for (const p of group) seen.add(p.uid);
       out.push(...group);
@@ -412,7 +416,46 @@ export function cityPois(): CityPoi[] {
     // noise the 小区 keyword brings along
     { uid: 'x-jwh', name: '河西小区居委会', tag: '政府机构;居民委员会', xy: [-60, 300] },
     { uid: 'x-park', name: '北苑小区停车场', tag: '交通设施;停车场', xy: [-420, 880] },
+    // the other 民生设施 (counted for the circle, never checked): 河东社区卫生服务站 lies just outside the
+    // straight circle, 东岸路 station inside it but a 1,980 m walk away (the bridge); the metro exits
+    // and a lift are no facilities of their own; a 生鲜超市-named 超市 is already found by the
+    // 生鲜超市 group
+    {
+      uid: 'c1',
+      name: '临河社区卫生服务中心',
+      tag: '医疗;综合医院',
+      xy: [-420, -80],
+      navi: [-400, -80],
+    },
+    { uid: 'c2', name: '河东社区卫生服务站', tag: '医疗;诊所', xy: [980, 420], navi: [1000, 420] },
+    { uid: 'e1', name: '滨河养老院', tag: '生活服务;养老院', xy: [250, -250] },
+    { uid: 'e2', name: '临河街道长者食堂', tag: '美食;中餐厅', xy: [-180, 380] },
+    { uid: 't1', name: '河西路', tag: '交通设施;地铁站', xy: [-520, 300], navi: [-500, 300] },
+    { uid: 't1a', name: '河西路地铁站-1口', tag: '出入口;其他', xy: [-500, 290] },
+    { uid: 't1b', name: '无障碍电梯(河西路地铁站2号口)', tag: '生活服务;其他', xy: [-540, 310] },
+    { uid: 't2', name: '东岸路', tag: '交通设施;地铁站', xy: [620, 760] },
+    { uid: 'g1', name: '滨河公园', tag: '旅游景点;公园', xy: [380, 120] },
+    { uid: 'u1', name: '联华超市(河西店)', tag: '购物;超市', xy: [100, 200], navi: [100, 180] },
+    { uid: 'u2', name: '家乐福超市', tag: '购物;超市', xy: [-800, -500] },
+    { uid: 'u3', name: '盒马生鲜超市', tag: '购物;超市', xy: [-300, 600] },
+    // one stop per direction: the same name twice, 85 m apart
+    { uid: 'b1', name: '河西路滨河路', tag: '交通设施;公交车站', xy: [0, 60] },
+    { uid: 'b2', name: '河西路滨河路', tag: '交通设施;公交车站', xy: [60, 0] },
   ];
+  // bus stops at the street corners of a 300 m lattice: more than the 民生设施 union's two pages hold,
+  // so the page limit trims their far tail
+  for (let gy = -900; gy <= 900; gy += 300) {
+    for (let gx = -900; gx <= 900; gx += 300) {
+      const xy: XY = [gx + 50, gy + 50];
+      if (Math.hypot(xy[0], xy[1]) > 1050 || Math.abs(xy[0] - 450) < 60) continue;
+      pois.push({
+        uid: `bus${gx}_${gy}`,
+        name: `横${gx / 300 + 4}路纵${gy / 300 + 4}路`,
+        tag: '交通设施;公交车站',
+        xy,
+      });
+    }
+  }
   // the other compounds on a jittered 270 m lattice inside the demand radius, clear of the ones above
   // and of the river. The nearest 28 are kept: with the placed ones, 33 gates lie within 1100 m, so
   // the cap of 30 bites, and the 住宅区 group fills 36 of the two residential pages' 40 rows, leaving

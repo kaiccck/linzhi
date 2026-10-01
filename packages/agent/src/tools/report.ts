@@ -31,8 +31,8 @@ export const exportReport = defineTool({
   name: 'export_report',
   title: '导出体检报告',
   description:
-    '导出一次体检的报告：markdown（结论先行的中文体检报告：关键数字、各类设施缺口表、待核实清单、伪覆盖解释、GB 50180-2018 国标对照、规划建议、方法与局限）；' +
-    'geojson（等时圈、直线圆、小区检查结果、设施点、灰色区域、规划建议点，WGS84，可在 geojson.io 或 QGIS 打开）；json（报告的结构化数据）。' +
+    '导出一次体检的报告：markdown（结论先行的中文体检报告：关键数字、圈内设施统计（15 分钟步行可达 vs 直线圆内 vs 清单、最近一处的步行分钟）、各类设施缺口表、灰色区域、待核实清单、伪覆盖解释、规划建议、方法与局限）；' +
+    'geojson（等时圈、直线圆、小区检查结果、设施点（含 walk_min 步行分钟、within_walk15、within_circle15）、灰色区域（面积、涉及小区）、规划建议点，圈内设施统计在 facility_stats 中，WGS84，可在 geojson.io 或 QGIS 打开）；json（报告的结构化数据）。' +
     '报告完全由分析结果确定性生成，不含模型生成的内容。用户要“报告”“导出”“下载”时使用。',
   inputSchema: z.object({
     analysis_id: z.string().trim().min(1).max(80).describe('analyze_life_circle 返回的 analysis_id'),
@@ -97,10 +97,17 @@ export const exportReport = defineTool({
       };
     }
     const book = new FactBook();
-    let summary = `已生成《${model.title}》（${FORMAT_ZH[args.format]}，文件名 ${data.filename}）。结论：${gapSentence(model.overview, book)}`;
+    const o = model.overview;
+    let summary = `已生成《${model.title}》（${FORMAT_ZH[args.format]}，文件名 ${data.filename}）。结论：${gapSentence(o, book)}`;
+    const extras = [
+      o.facilities ? `圈内设施统计（${book.add('统计的设施类别数', o.facilities.rows.length, '类')}）` : '',
+      o.gray_areas.length ? `灰色区域（${book.add('灰色区域图层数', o.gray_areas.length, '层')}）` : '',
+    ].filter(Boolean);
     if (args.format === 'geojson') {
       const fc = data.content as FeatureCollection;
-      summary += `共 ${book.add('GeoJSON 要素数', fc.features.length, '个')}要素：等时圈、直线圆、小区检查结果、设施点${result.gray_areas?.length ? '、灰色区域' : ''}、规划建议点。`;
+      summary += `共 ${book.add('GeoJSON 要素数', fc.features.length, '个')}要素：等时圈、直线圆、小区检查结果、设施点（含 15 分钟步行时间）${result.gray_areas?.length ? '、灰色区域' : ''}、规划建议点${o.facilities ? '；圈内设施统计在 facility_stats 中' : ''}。`;
+    } else if (extras.length) {
+      summary += `报告含${extras.join('与')}。`;
     }
     return { summary, data, facts: book.facts };
   },

@@ -1,9 +1,12 @@
 /**
  * Service-gap check of the live mode (技术设计文档 §7.2–7.4) on core's coverage functions:
  *
- *   loop  planCoverageRound per category (the k nearest open candidates within the rule; covered points
- *         and points with nothing in range get nothing more) → planMatrixBatches (≤ 50 routes, no route
- *         nobody asked for) → routematrix, within the coverage budget
+ *   loop  planCoverageRound per category (the k nearest open candidates within the rule; covered
+ *         points and points with nothing in range get nothing more) → planMatrixBatches (≤ 50 routes,
+ *         no route nobody asked for) → routematrix, within the coverage budget
+ *   once  planNearestTopUp: the early stop proves a verdict with any walk within the rule, which may
+ *         pass a nearer facility never routed; those are routed too, so via / route_m are the nearest
+ *         walk (what the budget cannot cover keeps route_upper_bound and unrouted_nearer)
  *   then  mergeMatrixResults per category → four-state checks → 灰色区域
  */
 import type { RouteMatrix } from '@zoudedao/baidu';
@@ -14,6 +17,7 @@ import {
   mergeMatrixResults,
   planCoverageRound,
   planMatrixBatches,
+  planNearestTopUp,
   statusRaster,
   type CheckStatus,
   type Community,
@@ -36,7 +40,7 @@ import type { DemandSite, GateSource } from './residential.js';
 
 /** Routematrix call of one step: origins × destinations, fatal errors already thrown. */
 export type MatrixFn = (
-  step: 'seed' | 'refine' | 'coverage' | 'siting',
+  step: 'seed' | 'refine' | 'coverage' | 'siting' | 'catchment',
   origins: readonly LngLat[],
   destinations: readonly LngLat[],
 ) => Promise<RouteMatrix>;
@@ -48,55 +52,143 @@ export interface LiveCommunity extends Community {
   gate: GateSource;
 }
 
+/** What the check needs: distances, the facilities that answer each category, inventory limits. */
+export interface CheckSet {
+  rule: Readonly<Record<HardCategory, number>>;
+  facilities: Readonly<Record<HardCategory, readonly Poi[]>>;
+  /** Distance from the centre within which each category's facilities are all known. */
+  knownRadius: Readonly<Record<HardCategory, number>>;
+}
+
 export interface CoverageOutcome {
   communities: LiveCommunity[];
   gray_areas: GrayArea[];
   rounds: number;
-  /** Routes a round wanted but the budget did not allow. */
+  /** Routes a round or the nearest top-up wanted but the budget did not allow. */
   budget_limited: boolean;
+  /** Routes the nearest top-up measured, cached or not. */
+  nearest_routes: number;
   failed_cells: number;
   /** Non-covered checks left unverified because the facility list may be incomplete that far out. */
   unverified_by_inventory: number;
+  /** Every route measured (community gate → facility uid), for reuse by later steps. */
+  routes: RoutedPair[];
 }
 
 const RANK: Record<CheckStatus, number> = { 盲区: 0, 伪覆盖: 1, 临界: 2, 覆盖: 3 };
+
+function planSet(
+  points: readonly DemandPoint[],
+  set: CheckSet,
+  routes: readonly RoutedPair[],
+): Map<string, OdDestination[]> {
+  const want = new Map<string, OdDestination[]>();
+  for (const cat of HARD_CATEGORIES) {
+    const w = planCoverageRound(points, { [cat]: set.facilities[cat] }, routes, {
+      rule_m: set.rule[cat],
+      k: COVERAGE_K,
+    });
+    for (const [id, dests] of w) {
+      const list = want.get(id) ?? [];
+      for (const d of dests) if (!list.some((x) => x.id === d.id)) list.push(d);
+      want.set(id, list);
+    }
+  }
+  return want;
+}
+
+function mergeSet(
+  points: readonly DemandPoint[],
+  demand: readonly DemandSite[],
+  set: CheckSet,
+  routes: readonly RoutedPair[],
+): { checks: Record<HardCategory, Map<string, FacilityCheck>>; unverified: number } {
+  let unverified = 0;
+  const checks = {} as Record<HardCategory, Map<string, FacilityCheck>>;
+  for (const cat of HARD_CATEGORIES) {
+    const merged = mergeMatrixResults(points, set.facilities[cat], routes, {
+      rule_m: set.rule[cat],
+      speed: WALK_SPEED,
+    });
+    for (const d of demand) {
+      const c = merged.get(d.id);
+      // a gap is only proven if every facility that could serve the point was in the search results
+      if (
+        c &&
+        c.verified &&
+        c.status_main !== '覆盖' &&
+        d.straight_m + set.rule[cat] > set.knownRadius[cat]
+      ) {
+        c.verified = false;
+        unverified++;
+      }
+    }
+    checks[cat] = merged;
+  }
+  return { checks, unverified };
+}
 
 export async function runCoverage(args: {
   meter: Meter;
   frame: LocalFrame;
   matrix: MatrixFn;
   demand: readonly DemandSite[];
-  facilities: Readonly<Record<HardCategory, readonly Poi[]>>;
-  rule: Readonly<Record<HardCategory, number>>;
-  /** Distance from the centre within which each category's facilities are all known. */
-  knownRadius: Readonly<Record<HardCategory, number>>;
+  /** communities[].checks, gray areas and siting. */
+  set: CheckSet;
   onRound?: (round: number, routes: number) => void;
+  /** Before the nearest top-up spends anything. */
+  onNearest?: (routes: number) => void;
   warn?: (message: string) => void;
 }): Promise<CoverageOutcome> {
-  const { meter, frame, matrix, demand, facilities, rule } = args;
+  const { meter, frame, matrix, demand, set } = args;
   const points: DemandPoint[] = demand.map((d) => ({ id: d.id, name: d.name, xy: d.xy }));
   const site = new Map(demand.map((d) => [d.id, d]));
   const routes: RoutedPair[] = [];
   let rounds = 0;
   let budgetLimited = false;
   let failed = 0;
+  let nearest = 0;
+
+  /** Routes one batch into `routes`; false when it failed in a way the result can do without. */
+  async function measure(b: OdBatch<DemandPoint, OdDestination>, failure: string): Promise<boolean> {
+    let m: RouteMatrix;
+    try {
+      m = await matrix(
+        'coverage',
+        b.origins.map((o) => site.get(o.id)!.bd09),
+        b.destinations.map((d) => frame.toLngLat(d.xy[0], d.xy[1])),
+      );
+    } catch (err) {
+      if (!isDegradable(err)) throw err;
+      failed += b.routes;
+      args.warn?.(`${failure}：${describeError(err)}`);
+      return false;
+    }
+    b.origins.forEach((o, i) =>
+      b.destinations.forEach((d, j) => {
+        const cell = m.cells[i]?.[j];
+        // a failed cell proves nothing; leaving it out lets a later round ask again
+        if (!cell || cell.status === 'failed') {
+          failed++;
+          return;
+        }
+        const ok = cell.status === 'ok';
+        routes.push({
+          origin_id: o.id,
+          dest_id: d.id,
+          route_m: ok ? cell.distanceM : null,
+          dur_s: ok ? cell.durationS : null,
+        });
+      }),
+    );
+    return true;
+  }
 
   for (let round = 1; round <= COVERAGE_MAX_ROUNDS && points.length; round++) {
-    const want = new Map<string, OdDestination[]>();
-    for (const cat of HARD_CATEGORIES) {
-      const w = planCoverageRound(points, { [cat]: facilities[cat] }, routes, {
-        rule_m: rule[cat],
-        k: COVERAGE_K,
-      });
-      for (const [id, dests] of w) {
-        const list = want.get(id) ?? [];
-        for (const d of dests) if (!list.some((x) => x.id === d.id)) list.push(d);
-        want.set(id, list);
-      }
-    }
-    if (!want.size) break;
     let room = meter.room('coverage');
     const chosen: OdBatch<DemandPoint, OdDestination>[] = [];
+    const want = planSet(points, set, routes);
+    if (!want.size) break;
     for (const b of planMatrixBatches(points, want)) {
       if (b.routes <= room) {
         chosen.push(b);
@@ -118,64 +210,50 @@ export async function runCoverage(args: {
       round,
       chosen.reduce((n, b) => n + b.routes, 0),
     );
-    for (const b of chosen) {
-      let m: RouteMatrix;
-      try {
-        m = await matrix(
-          'coverage',
-          b.origins.map((o) => site.get(o.id)!.bd09),
-          b.destinations.map((d) => frame.toLngLat(d.xy[0], d.xy[1])),
-        );
-      } catch (err) {
-        if (!isDegradable(err)) throw err;
-        failed += b.routes;
-        args.warn?.(`盲区判定有一批路线失败，涉及的判定按未核实处理：${describeError(err)}`);
+    for (const b of chosen) await measure(b, '盲区判定有一批路线失败，涉及的判定按未核实处理');
+  }
+
+  // nearest top-up: whole batches while the budget lasts; a skipped one only leaves its checks'
+  // upper-bound flags standing
+  const topUp = planNearestTopUp(points, set.facilities, routes);
+  if (topUp.size) {
+    let room = meter.room('coverage');
+    const chosen: OdBatch<DemandPoint, OdDestination>[] = [];
+    for (const b of planMatrixBatches(points, topUp)) {
+      if (b.routes > room) {
+        budgetLimited = true;
         continue;
       }
-      b.origins.forEach((o, i) =>
-        b.destinations.forEach((d, j) => {
-          const cell = m.cells[i]?.[j];
-          // a failed cell proves nothing; leaving it out lets the next round ask again
-          if (!cell || cell.status === 'failed') {
-            failed++;
-            return;
-          }
-          const ok = cell.status === 'ok';
-          routes.push({
-            origin_id: o.id,
-            dest_id: d.id,
-            route_m: ok ? cell.distanceM : null,
-            dur_s: ok ? cell.durationS : null,
-          });
-        }),
-      );
+      chosen.push(b);
+      room -= b.routes;
     }
-  }
-
-  let unverifiedByInventory = 0;
-  const checks = {} as Record<HardCategory, Map<string, FacilityCheck>>;
-  for (const cat of HARD_CATEGORIES) {
-    const merged = mergeMatrixResults(points, facilities[cat], routes, {
-      rule_m: rule[cat],
-      speed: WALK_SPEED,
-    });
-    for (const d of demand) {
-      const c = merged.get(d.id);
-      // a gap is only proven if every facility that could serve the point was in the search results
-      if (c && c.verified && c.status_main !== '覆盖' && d.straight_m + rule[cat] > args.knownRadius[cat]) {
-        c.verified = false;
-        unverifiedByInventory++;
+    if (chosen.length) {
+      args.onNearest?.(chosen.reduce((n, b) => n + b.routes, 0));
+      for (const b of chosen) {
+        if (await measure(b, '最近设施补算有一批路线失败，涉及的判定仍按已测路线给出（上界）'))
+          nearest += b.routes;
       }
     }
-    checks[cat] = merged;
   }
 
+  const main = mergeSet(points, demand, set, routes);
+
   const communities: LiveCommunity[] = demand.map((d) => {
-    const c = Object.fromEntries(HARD_CATEGORIES.map((cat) => [cat, checks[cat].get(d.id)!])) as Record<
-      HardCategory,
-      FacilityCheck
-    >;
-    const out: LiveCommunity = { name: d.name, pts: [], centroid: d.xy, checks: c, gate: d.gate };
+    const pick = (set: typeof main) =>
+      Object.fromEntries(HARD_CATEGORIES.map((cat) => [cat, set.checks[cat].get(d.id)!])) as Record<
+        HardCategory,
+        FacilityCheck
+      >;
+    const c = pick(main);
+    // centroid is the gate (every walk starts there); label_xy where the compound sits on the map
+    const out: LiveCommunity = {
+      name: d.name,
+      pts: [],
+      centroid: d.xy,
+      ...(d.label_xy ? { label_xy: d.label_xy } : {}),
+      checks: c,
+      gate: d.gate,
+    };
     const worst = worstStatus(Object.values(c));
     if (worst) out.worst_status = worst;
     if (d.uid) out.uid = d.uid;
@@ -192,8 +270,10 @@ export async function runCoverage(args: {
     gray_areas,
     rounds,
     budget_limited: budgetLimited,
+    nearest_routes: nearest,
     failed_cells: failed,
-    unverified_by_inventory: unverifiedByInventory,
+    unverified_by_inventory: main.unverified,
+    routes,
   };
 }
 
@@ -220,8 +300,9 @@ export function statusCounts(communities: readonly Community[]) {
   let upper = 0;
   let total = 0;
   for (const c of communities) {
+    const checks = c.checks;
     for (const cat of HARD_CATEGORIES) {
-      const k = c.checks[cat];
+      const k = checks[cat];
       all[k.status]++;
       main[k.status_main]++;
       by_category[cat][k.status]++;

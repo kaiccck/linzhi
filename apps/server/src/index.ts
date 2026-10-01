@@ -3,7 +3,7 @@ import { createBaiduClient, loadBaiduConfig, type BaiduClient } from '@zoudedao/
 import { buildApp } from './app.js';
 import { ConfigError, findRepoRoot, loadConfig, loadEnvFiles, type ServerConfig } from './config.js';
 import { createLiveAnalyzer } from './live.js';
-import { loadOfficialLists } from './official.js';
+import { loadOfficialData } from './official.js';
 
 const root = findRepoRoot();
 const envFiles = loadEnvFiles(root);
@@ -32,7 +32,9 @@ if (config.mode === 'live' && config.baidu.live) {
   });
 }
 
-const official = baidu ? loadOfficialLists(config.officialDir, (message) => warn(message)) : [];
+const official = baidu
+  ? loadOfficialData(config.officialDir, (message) => warn(message))
+  : { lists: [], catchments: [], exclusions: [] };
 const app = await buildApp({
   config,
   baidu,
@@ -50,7 +52,13 @@ app.log.info(
     // "model @ host" only: the key and the rest of the URL never reach the log
     advisor: llm ? { mode: 'llm', model: describeLlm(llm) } : { mode: 'template' },
     samplesDir: config.samplesDir,
-    official: official.map((l) => `${l.id}（${l.entries.length} 条）`),
+    // live results (30 days), what-if branches and walking routes; 'memory' = gone on restart
+    history: config.historyPath ?? 'memory',
+    official: [
+      ...official.lists.map((l) => `${l.id}（${l.entries.length} 条）`),
+      ...official.catchments.map((c) => `${c.id}（对口地段，${c.schools.length} 所学校）`),
+      ...(official.exclusions.length ? [`exclusions（${official.exclusions.length} 条）`] : []),
+    ],
     webDistDir: config.webDistDir,
     trustProxy: config.trustProxy,
   },

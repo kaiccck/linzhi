@@ -1,5 +1,5 @@
 /**
- * 走得到 · 精度–配额评测 CLI, run with tsx through the package scripts `eval` and `eval:live` (only `run`
+ * 邻至 · 精度–配额评测 CLI, run with tsx through the package scripts `eval` and `eval:live` (only `run`
  * needs Baidu keys; eval:live loads them from the repository's .env.local)
  *
  *   plan  <区域> [--json]                       expected calls per step; reads local files only

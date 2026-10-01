@@ -1,62 +1,50 @@
 /**
- * Custom Baidu basemap style for the sign map (DESIGN.md "Basemap" tokens).
+ * Custom Baidu basemap style for the light map (DESIGN.md "Basemap"): a pale grey ground, white
+ * streets on a light casing, water and parks as the only colour, the elevated roads and the S20 a quiet
+ * grey band, and every name — streets, places, compounds, buildings — in a muted grey on a white halo.
+ * Baidu's own POI icons stay off: the map's facility marks are the only icons.
  *
- * The Baidu layer is composited with CSS `mix-blend-mode: hard-light` over our own paper + time-field
- * canvas, which restores the mockup's print order — paper, graded yellow, then white streets on top:
- *   - 50% grey is neutral: land lets the paper (or the yellow reach) through unchanged;
- *   - white stays white: streets and label halos knock out the yellow, as in the mockup;
- *   - darker colours multiply (×2) and lighter ones screen.
- * Every colour below is therefore *encoded*: `ink(token)` solves for the Baidu colour that prints as the
- * design token over Map Paper, so outside the reach the basemap shows exactly the DESIGN.md colours.
+ * The Baidu layer is left untouched (no CSS blending), so its streets and label glyphs stay crisp; the
+ * warm walking-time field is our own canvas above it, multiplied in (paint.ts). The colours here are
+ * therefore plain design tokens.
  *
- * Feature types were checked against this area (张江, zoom 16–17) on JSAPI 4.0: manmade = residential
+ * Feature types were checked against this area (张江, zoom 15–17) on JSAPI 4.0: manmade = residential
  * and built blocks, education = school grounds, entertainment = commercial, scenicspots/green = parks,
  * highway = S20, cityhighway = 华夏高架, tertiary/fourlevel/provincial/nationalway = the street grid.
  */
 
 type Styler = Record<string, string | number>;
-interface StyleRule {
+export interface StyleRule {
   featureType: string;
   elementType: string;
   stylers: Styler;
 }
 
-/** Map Paper, the ground the Baidu layer is blended over. */
-export const PAPER = '#eceee9';
+/** The map's ground (Baidu's land, and the offline map's paper). */
+export const GROUND = '#eef0f1';
 
-const hex = (h: string) =>
-  [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255) as [number, number, number];
-const toHex = (c: number[]) =>
-  '#' +
-  c
-    .map((v) =>
-      Math.round(Math.max(0, Math.min(1, v)) * 255)
-        .toString(16)
-        .padStart(2, '0'),
-    )
-    .join('') +
-  'ff';
+/** Street, place and POI name inks: muted, a step apart, all readable on the ground with their halo. */
+export const LABEL_INK = {
+  road: '#5b6675',
+  wall: '#4d5866',
+  place: '#5b6675',
+  poi: '#66707e',
+  water: '#4f7ea6',
+  park: '#5c8a57',
+} as const;
 
-/** Baidu colour that prints as `target` when hard-light blended over Map Paper. */
-export function ink(target: string): string {
-  const b = hex(PAPER);
-  const t = hex(target);
-  return toHex(
-    t.map((tc, i) => {
-      const bc = b[i]!;
-      // hard-light: S ≤ ½ → 2·B·S (multiply); S > ½ → screen(B, 2S − 1)
-      return tc <= bc ? tc / (2 * bc) : 0.5 + (0.5 * (tc - bc)) / (1 - bc);
-    }),
-  );
-}
+const WHITE = '#ffffff';
 
-const NEUTRAL = '#808080ff';
-const WHITE = '#ffffffff';
+/** Baidu's style editor writes colours as #rrggbbaa: every colour here goes out opaque that way. */
+const opaque = (stylers: Styler): Styler =>
+  typeof stylers.color === 'string' && /^#[0-9a-f]{6}$/i.test(stylers.color)
+    ? { ...stylers, color: `${stylers.color}ff` }
+    : stylers;
 
 const rule = (featureType: string, elementType: string, stylers: Styler): StyleRule => ({
   featureType,
   elementType,
-  stylers,
+  stylers: opaque(stylers),
 });
 
 const STREETS = [
@@ -71,30 +59,40 @@ const STREETS = [
   'vacationway',
 ];
 const WALLS = ['highway', 'cityhighway'];
-const AREAS: [string, string][] = [
-  ['manmade', '#dfe3de'],
-  ['estate', '#dfe3de'],
-  ['education', '#e7e1cc'],
-  ['medical', '#e4ddd6'],
-  ['entertainment', '#e4ddd6'],
-  ['shopping', '#e4ddd6'],
-  ['transportation', '#e2e4df'],
-  ['building', '#e2e4df'],
-  ['green', '#c7e0ba'],
-  ['scenicspots', '#c7e0ba'],
+/** Land use, a whisper apart from the ground; parks and water carry the only colour. */
+export const AREAS: [string, string][] = [
+  ['manmade', '#e6e9ec'],
+  ['estate', '#e6e9ec'],
+  ['education', '#ebe9e3'],
+  ['medical', '#ebe7e8'],
+  ['entertainment', '#ebe7e8'],
+  ['shopping', '#ebe7e8'],
+  ['transportation', '#e8eaeb'],
+  ['building', '#e3e6ea'],
+  ['green', '#d9e9d4'],
+  ['scenicspots', '#d9e9d4'],
 ];
-const HIDDEN_LABELS = [
-  'poilabel',
-  'districtlabel',
-  'town',
-  'village',
-  'estatelabel',
-  'businesstowerlabel',
+/** Place names (地名): kept on, in the muted voice. */
+export const PLACE_NAMES = ['districtlabel', 'town', 'airportlabel'];
+const POI_NAMES = [
+  'transportationlabel',
+  // area names drawn on the blocks themselves
+  ...AREAS.map(([t]) => t),
+];
+/**
+ * Off: everyday clutter — firms, office towers, offices, venues and the hamlets (…家宅) that fill the
+ * map's edges and say nothing about walking — and the facility classes the map marks and names itself
+ * (schools, clinics and pharmacies, markets and shops): Baidu's copy of 孙桥小学 would print beside the
+ * app's own; metro stations are the map's own marks too (lines under construction print orange).
+ */
+export const QUIET = [
   'companylabel',
+  'businesstowerlabel',
   'governmentlabel',
+  'entertainmentlabel',
+  'village',
   'educationlabel',
   'medicallabel',
-  'entertainmentlabel',
   'shoppinglabel',
   'restaurantlabel',
   'hotellabel',
@@ -102,38 +100,68 @@ const HIDDEN_LABELS = [
   'carservicelabel',
   'financelabel',
   'otherlabel',
-  'transportationlabel',
-  'scenicspotslabel',
-  'airportlabel',
   'subwaylabel',
-  // area names (小区, 公司, 公园 …): the sign's own codes and pictograms name places
-  ...AREAS.map(([t]) => t),
+  'subway',
 ];
 
-export const SIGN_MAP_STYLE: StyleRule[] = [
-  rule('land', 'geometry', { color: NEUTRAL }),
-  ...AREAS.map(([t, token]) => rule(t, 'geometry', { color: ink(token) })),
-  rule('water', 'geometry', { color: ink('#a8cbe6') }),
-  rule('water', 'labels.text.fill', { color: ink('#2f6fae') }),
-  rule('water', 'labels.text.stroke', { color: ink('#eaf3fb') }),
+/**
+ * Baidu's compound names (estatelabel: 川杨新苑-北区 beside the map's A-02 川杨新苑 三期) and the names
+ * it prints on the blocks themselves (manmade area labels: firms, depots, hamlets, compounds again —
+ * these ignore the label blockers). Off at every level: the map names the compounds it checks, the
+ * streets and the water name the rest. Every label part, or the ink and halo rules above show them again.
+ */
+export const BLOCK_NAMES = ['estatelabel', 'manmade'];
+
+const LABEL_PARTS = ['labels', 'labels.text', 'labels.text.fill', 'labels.text.stroke'];
+
+export const LIGHT_MAP_STYLE: StyleRule[] = [
+  rule('land', 'geometry', { color: GROUND }),
+  ...AREAS.map(([t, token]) => rule(t, 'geometry', { color: token })),
+  // zoomed in, the buildings stand up: pale roofs, walls a shade darker so the blocks read in 3D
+  rule('building', 'geometry.topfill', { color: '#eceef1' }),
+  rule('building', 'geometry.sidefill', { color: '#d2d8df' }),
+  rule('water', 'geometry', { color: '#c9dcec' }),
+  rule('water', 'labels.text.fill', { color: LABEL_INK.water }),
+  rule('water', 'labels.text.stroke', { color: WHITE }),
   ...STREETS.flatMap((t) => [
     rule(t, 'geometry.fill', { color: WHITE }),
-    rule(t, 'geometry.stroke', { color: ink('#b9c0bb') }),
-    rule(t, 'labels.text.fill', { color: ink('#4d555b') }),
+    rule(t, 'geometry.stroke', { color: '#d3d9e0' }),
+    rule(t, 'labels.text.fill', { color: LABEL_INK.road }),
     rule(t, 'labels.text.stroke', { color: WHITE }),
     rule(t, 'labels.icon', { visibility: 'off' }),
   ]),
-  // elevated expressways are charcoal walls with charcoal label plates
+  // elevated roads and the S20: a quiet grey band (they are the barriers the findings name)
   ...WALLS.flatMap((t) => [
-    rule(t, 'geometry.fill', { color: ink('#4a5058') }),
-    rule(t, 'geometry.stroke', { color: ink('#1f2429') }),
-    rule(t, 'labels.text.fill', { color: WHITE }),
-    rule(t, 'labels.text.stroke', { color: ink('#2b3137') }),
+    rule(t, 'geometry.fill', { color: '#dde2e8' }),
+    rule(t, 'geometry.stroke', { color: '#b3bcc7' }),
+    rule(t, 'labels.text.fill', { color: LABEL_INK.wall }),
+    rule(t, 'labels.text.stroke', { color: WHITE }),
+    rule(t, 'labels.icon', { visibility: 'off' }),
   ]),
-  rule('railway', 'geometry', { color: ink('#d3d6d1') }),
-  rule('subway', 'geometry', { visibility: 'off' }),
+  rule('railway', 'geometry', { color: '#d3d8de' }),
   rule('subwaystation', 'geometry', { visibility: 'off' }),
   rule('boundary', 'geometry', { visibility: 'off' }),
-  ...HIDDEN_LABELS.map((t) => rule(t, 'labels', { visibility: 'off' })),
+  // no Baidu icons anywhere; any name a rule below does not reach still prints grey (Baidu colours
+  // some kinds on its own)
   rule('poilabel', 'labels.icon', { visibility: 'off' }),
+  rule('poilabel', 'labels.text.fill', { color: LABEL_INK.poi }),
+  rule('poilabel', 'labels.text.stroke', { color: WHITE }),
+  rule('scenicspotslabel', 'labels.text.fill', { color: LABEL_INK.park }),
+  rule('scenicspotslabel', 'labels.text.stroke', { color: WHITE }),
+  rule('scenicspotslabel', 'labels.icon', { visibility: 'off' }),
+  ...PLACE_NAMES.flatMap((t) => [
+    rule(t, 'labels.text', { fontsize: 22 }),
+    rule(t, 'labels.text.fill', { color: LABEL_INK.place }),
+    rule(t, 'labels.text.stroke', { color: WHITE }),
+    rule(t, 'labels.icon', { visibility: 'off' }),
+  ]),
+  ...POI_NAMES.flatMap((t) => [
+    rule(t, 'labels.text', { fontsize: 22 }),
+    rule(t, 'labels.text.fill', { color: LABEL_INK.poi }),
+    rule(t, 'labels.text.stroke', { color: WHITE }),
+    rule(t, 'labels.icon', { visibility: 'off' }),
+  ]),
+  ...QUIET.map((t) => rule(t, 'labels', { visibility: 'off' })),
+  rule('subway', 'geometry', { visibility: 'off' }),
+  ...BLOCK_NAMES.flatMap((t) => LABEL_PARTS.map((element) => rule(t, element, { visibility: 'off' }))),
 ];

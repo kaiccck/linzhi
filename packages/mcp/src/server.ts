@@ -1,5 +1,5 @@
 /**
- * The MCP server of 走得到: the same tool registry as the 体检顾问 advisor (@zoudedao/agent), plus
+ * The MCP server of 邻至: the same tool registry as the 体检顾问 advisor (@zoudedao/agent), plus
  * resources for samples, analyses and reports, and a prompt that walks a client model through a
  * health check. One factory builds a fresh McpServer per connection (stdio) or per request (HTTP);
  * the analysis store is shared, so ids from one call work in the next.
@@ -31,10 +31,11 @@ import * as z from 'zod';
 export const SERVER_NAME = 'zoudedao';
 
 export const INSTRUCTIONS = [
-  '走得到：15 分钟步行生活圈体检。可达范围和设施距离来自百度地图的实测步行路线，而不是以小区为圆心画圆。',
+  '邻至：15 分钟步行生活圈体检。可达范围和设施距离来自百度地图的实测步行路线，而不是以小区为圆心画圆。',
   '典型流程：locate_place（地名 → 候选）→ analyze_life_circle（体检，得到 analysis_id 和核心数字）→ list_service_gaps（服务缺口）→ simulate_facility（新增设施的估算）或 compare_sites → export_report（Markdown / GeoJSON 报告）。',
-  '内置样例 zj-a（上海张江申城佳苑片区）可直接体检，不消耗地图配额；问到老人时用 profile=elder。',
-  '回答规则：数字一律原样引用工具结果，不要自己计算或换算；verified=false 的检查是“待核实”，不是缺口；simulate_facility 的结果是估算，必须注明“估算”。',
+  '内置样例（如 zj-a 上海张江申城佳苑片区，完整列表见资源 zoudedao://samples）可直接体检，不消耗地图配额；问到老人时用 profile=elder，或直接使用 <analysis_id>~elder。',
+  '想知道哪些小区都方便：list_service_gaps 的 by_community 每个小区一行，给出各类设施的判定与步行分钟。',
+  '回答规则：数字一律原样引用工具结果，不要自己计算、换算或四舍五入；verified=false 的检查是“待核实”，不是缺口；simulate_facility 的结果是估算，必须注明“估算”。',
 ].join('\n');
 
 export interface ZddMcpOptions {
@@ -119,7 +120,7 @@ export function createZddMcpServer(
 ): McpServer {
   const { backend, store, registry } = opts;
   const server = new McpServer(
-    { name: SERVER_NAME, title: '走得到 · 15 分钟生活圈体检', version: opts.version ?? '0.1.0' },
+    { name: SERVER_NAME, title: '邻至 · 15 分钟生活圈体检', version: opts.version ?? '0.1.0' },
     { capabilities: { tools: {}, resources: {}, prompts: {} }, instructions: INSTRUCTIONS },
   );
 
@@ -249,7 +250,7 @@ export function createZddMcpServer(
     {
       title: '15 分钟生活圈体检',
       description:
-        '引导模型用走得到的工具为一个地点做完整体检：定位 → 体检 → 服务缺口 → 报告，数字必须引用工具结果',
+        '引导模型用邻至的工具为一个地点做完整体检：定位 → 体检 → 服务缺口 → 报告，数字必须引用工具结果',
       argsSchema: z.object({
         place: z.string().min(1).max(60).describe('要体检的地名、地址或样例 id，例如“申城佳苑”'),
       }),
@@ -261,7 +262,7 @@ export function createZddMcpServer(
           content: {
             type: 'text',
             text: [
-              `请用走得到的工具为“${place}”做一次 15 分钟步行生活圈体检，并用中文向街道规划人员汇报。`,
+              `请用邻至的工具为“${place}”做一次 15 分钟步行生活圈体检，并用中文向街道规划人员汇报。`,
               '',
               '步骤：',
               `1. 调用 locate_place 定位“${place}”。候选带 sample_id 就直接用它；needs_confirmation 为 true 时先把候选列给我确认，不要替我选。`,

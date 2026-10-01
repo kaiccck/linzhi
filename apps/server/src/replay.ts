@@ -106,7 +106,8 @@ export class SampleReplayAnalyzer implements Analyzer {
     stage('coverage', 0.88, `判定 ${r.communities.length} 个小区 × 3 类设施的步行覆盖`);
     await wait(1500);
     charge('routematrix_walking', r.communities.length * 3 * 2);
-    emit('partial', { communities: r.communities });
+    // like the engine: the 灰色区域 come with the checks they are drawn from
+    emit('partial', { communities: r.communities, ...(r.gray_areas ? { gray_areas: r.gray_areas } : {}) });
     await wait(300);
 
     stage('report', 0.96, '汇总体检报告');

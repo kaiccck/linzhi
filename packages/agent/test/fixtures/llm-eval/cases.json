@@ -1,0 +1,146 @@
+{
+  "description": "体检顾问真实模型评测集：街道规划人员和评委会问的问题，覆盖 4 个张江样例（zj-a 申城佳苑片区、zj-b 玉兰香苑片区、zj-c 万科翡翠公园片区、zj-v AI小镇服务中心周边）。analysis_id 是屏幕上正在看的分析；history 与 Web 发送的一致（去掉了模板的脚注）。",
+  "cases": [
+    {
+      "id": "q01",
+      "analysis_id": "zj-a",
+      "question": "申城佳苑片区的老人买菜方便吗？",
+      "tags": ["老人", "买菜"]
+    },
+    {
+      "id": "q02",
+      "analysis_id": "zj-a",
+      "question": "申城佳苑三期B块的孩子上学方便吗？",
+      "tags": ["上学", "小区"]
+    },
+    {
+      "id": "q03",
+      "analysis_id": "zj-a",
+      "question": "画圆法和实际步行的结论差在哪？漏掉了哪些缺口？",
+      "tags": ["画圆对比"]
+    },
+    {
+      "id": "q04",
+      "analysis_id": "zj-a",
+      "question": "如果在申城佳苑三期A块旁边新建一所小学，能补上几个缺口？",
+      "tags": ["假如新增"],
+      "expect": { "estimate": true }
+    },
+    {
+      "id": "q05",
+      "analysis_id": "zj-a",
+      "question": "导出这个片区的体检报告",
+      "tags": ["导出报告"],
+      "expect": { "attachment": true }
+    },
+    {
+      "id": "q06",
+      "analysis_id": "zj-a",
+      "question": "陆家嘴怎么样？",
+      "tags": ["超出范围"],
+      "expect": { "outOfScope": "陆家嘴" }
+    },
+    {
+      "id": "q07",
+      "analysis_id": "zj-a",
+      "question": "那三期A块呢？",
+      "history": [
+        { "role": "user", "content": "申城佳苑的孩子上学方便吗？" },
+        {
+          "role": "assistant",
+          "content": "结论：不太方便：申城佳苑片区 12 个小区中，有 6 个步行 1,000 m 内走不到小学（伪覆盖 5、盲区 1）[T1]。\n\n- 申城佳苑三期B块：到小学直线 818.5 m，实际步行 1,676 m，约 23.9 分钟（伪覆盖）[T1]。\n- 申城佳苑三期A块：到小学直线 1,043.8 m，实际步行 1,652 m，约 23.5 分钟（盲区）[T1]。\n- 申城佳苑二期A块：到小学直线 898.1 m，实际步行 1,412 m，约 20.1 分钟（伪覆盖）[T1]。"
+        }
+      ],
+      "tags": ["追问", "上学"]
+    },
+    {
+      "id": "q08",
+      "analysis_id": "zj-a",
+      "question": "老人和成人比，15分钟能走到的范围小了多少？",
+      "tags": ["老人", "对比", "陷阱：求差"]
+    },
+    {
+      "id": "q09",
+      "analysis_id": "zj-b",
+      "question": "玉兰香苑这边哪些小区买药不方便？",
+      "tags": ["药店"]
+    },
+    {
+      "id": "q10",
+      "analysis_id": "zj-b",
+      "question": "圈里有几家菜市场？最近的走过去要多久？",
+      "tags": ["附近设施", "买菜"]
+    },
+    {
+      "id": "q11",
+      "analysis_id": "zj-b",
+      "question": "玉兰香苑片区的15分钟生活圈能打几分？",
+      "tags": ["陷阱：评分"],
+      "expect": { "noScore": true }
+    },
+    {
+      "id": "q12",
+      "analysis_id": "zj-b",
+      "question": "按老年人的步速，有几个小区15分钟内走得到菜市场？",
+      "tags": ["老人", "买菜"]
+    },
+    {
+      "id": "q13",
+      "analysis_id": "zj-c",
+      "question": "万科翡翠公园片区为什么买菜这么难？",
+      "tags": ["买菜"]
+    },
+    {
+      "id": "q14",
+      "analysis_id": "zj-c",
+      "question": "要是在万科翡翠公园-四期旁边建一个菜市场，能解决多少小区的买菜问题？",
+      "tags": ["假如新增", "买菜"],
+      "expect": { "estimate": true }
+    },
+    {
+      "id": "q15",
+      "analysis_id": "zj-c",
+      "question": "附近有地铁站和公园吗？走过去要多久？",
+      "tags": ["附近设施"]
+    },
+    {
+      "id": "q16",
+      "analysis_id": "zj-c",
+      "question": "那药店和小学呢？",
+      "history": [
+        { "role": "user", "content": "万科翡翠公园片区买菜方便吗？" },
+        {
+          "role": "assistant",
+          "content": "结论：不方便：万科翡翠公园片区 15 个小区到菜市场都是盲区，步行 1,000 m 内都走不到菜市场 [T1]。\n\n- 15 分钟步行能走到的菜市场 0 个，直线 15 分钟圆内也是 0 个 [T2]。\n- 最远的绿地MTOWN到菜市场直线 2,690.3 m，判定距离内没有这类设施 [T1]。"
+        }
+      ],
+      "tags": ["追问", "药店", "上学"]
+    },
+    {
+      "id": "q17",
+      "analysis_id": "zj-v",
+      "question": "AI小镇服务中心周边15分钟步行实际能走多远？画圆高估了多少？",
+      "tags": ["可达范围"]
+    },
+    {
+      "id": "q18",
+      "analysis_id": "zj-v",
+      "question": "导出这里的 GeoJSON 地图数据",
+      "tags": ["导出报告"],
+      "expect": { "attachment": true }
+    },
+    {
+      "id": "q19",
+      "analysis_id": "zj-v",
+      "question": "帮我看看徐家汇那边老人看病方便吗",
+      "tags": ["超出范围", "老人"],
+      "expect": { "outOfScope": "徐家汇" }
+    },
+    {
+      "id": "q20",
+      "analysis_id": "zj-a",
+      "question": "对比一下申城佳苑和玉兰香苑，哪个片区的服务缺口更多？",
+      "tags": ["对比"]
+    }
+  ]
+}

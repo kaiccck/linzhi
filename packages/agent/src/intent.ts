@@ -3,16 +3,19 @@
  * get a useful answer. It only decides which tools to call; the words of the answer come from the
  * tool results.
  */
-import type { AnalysisResult, HardCategory, LngLat } from '@zoudedao/core';
+import type { AnalysisResult, FacilityCategory, HardCategory, LngLat } from '@zoudedao/core';
 import { findCommunity, normName, toBd09 } from './analysis.js';
 import type { Profile } from './types.js';
 
-export type IntentKind = 'simulate' | 'compare' | 'report' | 'isochrone' | 'reach' | 'gaps' | 'overview';
+export type IntentKind =
+  'simulate' | 'compare' | 'report' | 'isochrone' | 'reach' | 'facilities' | 'gaps' | 'overview';
 
 export interface Intent {
   /** Main thing asked for. */
   kind: IntentKind;
   categories: HardCategory[];
+  /** Every facility category the question names (the checked ones and the other 民生设施). */
+  facilityCategories: FacilityCategory[];
   profile: Profile;
   /** Adult vs elder comparison ("老人和成人比"). */
   profileCompare: boolean;
@@ -28,6 +31,22 @@ const CATEGORY_WORDS: [RegExp, HardCategory][] = [
   [/买菜|菜场|菜市场|菜市|农贸|生鲜|买肉|买鱼|买水果/, '菜市场'],
   [/药店|药房|买药|配药|拿药|药/, '药店'],
 ];
+/** The other 民生设施, counted by the 圈内设施统计 (never checked per community). */
+const FACILITY_WORDS: [RegExp, FacilityCategory][] = [
+  [/幼儿园|托儿所|托班/, '幼儿园'],
+  [/生鲜超市/, '生鲜超市'],
+  [/(?<!生鲜)超市|便利店|商超/, '超市'],
+  [/社区卫生|卫生服务|卫生站|卫生院|诊所|看病|医院|门诊/, '社区卫生'],
+  [/养老|敬老|日间照料|长者照护|长者食堂|助餐/, '养老'],
+  [/公交|巴士/, '公交'],
+  [/地铁|轨交|轨道交通/, '地铁'],
+  [/公园|绿地|遛弯/, '公园'],
+];
+/** "圈里有几家药店", "附近有什么设施": a count of facilities, not a community's gaps. */
+const FACILITY_COUNT =
+  /(?:几|多少)\s*[家个所处座间条站]|(?:有|是)(?:什么|哪些)设施|什么设施|哪些设施|设施(?:有哪些|情况|统计|清单|数量|多不多|全不全|怎么样)|(?:附近|周边|圈[里内]|15\s*分钟内?|十五分钟内?)都?有(?:什么|哪些|几)/;
+/** Questions about communities stay with the gap tools. */
+const ABOUT_COMMUNITIES = /小区|缺口|盲区|伪覆盖/;
 const ELDER = /老人|老年|长者|爷爷|奶奶|外公|外婆|银发|老龄|腿脚不便/;
 const ADULT = /成人|成年|年轻人|上班族/;
 const SIMULATE =
@@ -38,13 +57,25 @@ const ISOCHRONE = /等时圈|geojson|多边形|边界/i;
 const REACH =
   /可达范围|走多远|能走到哪|多远的?范围|多大范围|可达面积|有效半径|15\s*分钟.{0,4}范围|十五分钟.{0,4}范围|高估/;
 
-export function parseIntent(question: string): Intent {
-  const q = question.normalize('NFKC');
+/**
+ * `names`: places the question may name (the analysis, its centre label, its communities). They are
+ * blanked before the topic words are read, so 万科翡翠公园 is not a question about parks; the place
+ * and the site are still read from the question as written.
+ */
+export function parseIntent(question: string, names: readonly string[] = []): Intent {
+  const raw = question.normalize('NFKC');
+  let q = raw;
+  for (const name of [...names].map((n) => n.normalize('NFKC')).sort((a, b) => b.length - a.length)) {
+    if (name.length >= 2) q = q.split(name).join('　');
+  }
   const categories = CATEGORY_WORDS.filter(([re]) => re.test(q)).map(([, c]) => c);
-  const elder = ELDER.test(q);
+  const others = FACILITY_WORDS.filter(([re]) => re.test(q)).map(([, c]) => c);
+  // an elder's 长者食堂 is 养老, not the elderly profile's reason alone; 老人 still switches the profile
+  const elder = ELDER.test(q.replace(/长者(?:照护|食堂)/g, ''));
   const intent: Intent = {
     kind: 'overview',
     categories,
+    facilityCategories: [...categories, ...others],
     profile: elder ? 'elder' : 'adult',
     profileCompare: elder && (ADULT.test(q) || COMPARE.test(q)),
     format: /geojson|地图(?:文件|数据)/i.test(q)
@@ -58,17 +89,19 @@ export function parseIntent(question: string): Intent {
   else if (COMPARE.test(q)) intent.kind = 'compare';
   else if (ISOCHRONE.test(q)) intent.kind = 'isochrone';
   else if (REACH.test(q)) intent.kind = 'reach';
-  else if (
+  else if (!ABOUT_COMMUNITIES.test(q) && (FACILITY_COUNT.test(q) || others.length > 0)) {
+    intent.kind = 'facilities';
+  } else if (
     categories.length ||
     /盲区|缺口|走不到|伪覆盖|缺什么|缺少|方便|够不够|能不能|有没有|远不远|近不近|走得到/.test(q)
   ) {
     intent.kind = 'gaps';
   }
   if (intent.kind === 'simulate') {
-    const site = siteTextOf(q);
+    const site = siteTextOf(raw);
     if (site) intent.siteText = site;
   }
-  const place = placeTextOf(q);
+  const place = placeTextOf(raw);
   if (place) intent.placeText = place;
   return intent;
 }
@@ -90,7 +123,7 @@ const PLACE_STOP =
 /** The area the question is about, when it names one before the topic words. */
 export function placeTextOf(q: string): string | undefined {
   const m =
-    /^(?:请问|帮我|帮忙|麻烦|看看|查查|查一下|分析一下|分析|评估一下|评估|体检一下|给)?\s*(.{2,20}?)(?:这边|那边|附近|周边|一带|这里|那里)?(?:的话|的)?(?:老人|老年人|孩子|小孩|居民|买菜|上学|看病|买药|生活圈|体检|怎么样|方便|能不能|能|有没有|缺|步行|15\s*分钟|十五分钟|等时圈|盲区|是否|吗|[？?，,])/.exec(
+    /^(?:(?:请问|帮我|帮忙|麻烦你?|看看|看一下|查查|查一下|分析一下|分析|评估一下|评估|体检一下|给我?)\s*)*(.{2,20}?)(?:这边|那边|附近|周边|一带|这里|那里)?(?:的话|的)?(?:老人|老年人|孩子|小孩|居民|买菜|上学|看病|买药|生活圈|体检|怎么样|方便|能不能|能|有没有|缺|步行|15\s*分钟|十五分钟|等时圈|盲区|是否|吗|[？?，,])/.exec(
       q,
     );
   const text = m?.[1]?.trim();

@@ -1,14 +1,15 @@
 import { BaiduConfigError, BaiduQuotaError, BaiduUpstreamError, QuotaLedger } from '@zoudedao/baidu';
 import {
-  acceptedCategories,
   buildIsochrone,
   detectBarriers,
   facilitiesFor,
+  facilityStats,
   HARD_CATEGORIES,
   routingPoint,
   visibilityFilter,
   type AnalysisResult,
-  type FacilityCategory,
+  type CatchmentList,
+  type HardCategory,
   type LngLat,
   type XY,
 } from '@zoudedao/core';
@@ -21,16 +22,20 @@ import {
   EngineError,
   ENGINE_SERVICES,
   FACILITY_BUFFER_M,
+  FRESH_KEYWORDS,
+  LIVELIHOOD_KEYWORDS,
   planQuota,
   STAGES,
   type Emit,
   type EngineDeps,
   type EngineInput,
   type EngineOptions,
+  type CatchmentStats,
   type LiveMeta,
+  type OfficialList,
   type OfficialSummary,
 } from '../src/index.js';
-import { City, CITY_ORIGIN, officialMarkets } from './city.js';
+import { City, CITY_ORIGIN, cityPois, officialMarkets } from './city.js';
 import { FakeClient, type FakeOptions } from './fakeClient.js';
 
 interface Ev {
@@ -46,7 +51,7 @@ const NOW = () => new Date('2026-09-27T02:00:00Z');
 const INPUT: EngineInput = { center_bd09: CITY_ORIGIN, label: '河西路 × 滨河路', profile: 'adult' };
 const dist = (a: XY, b: XY) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
-type Extra = Pick<EngineDeps, 'official'>;
+type Extra = Pick<EngineDeps, 'official' | 'catchment' | 'exclusions'>;
 
 function start(
   input: EngineInput = INPUT,
@@ -71,16 +76,19 @@ async function run(
   return { ...s, result: await s.promise };
 }
 
+/**
+ * The street graph's shortest walk from a gate to a facility of the category the engine kept (the
+ * engine's own answer can differ by 1 m: its routes go through BD-09 and back).
+ */
+function nearestWalk(r: AnalysisResult, gate: XY, cat: HardCategory) {
+  const fac = facilitiesFor(r.pois, [cat]);
+  return Math.min(...fac.map((p) => Math.round(city.walk(gate, routingPoint(p)))));
+}
+
 /** Four-state verdict from the street graph itself, over the facilities the engine kept. */
-function truth(
-  r: AnalysisResult,
-  gate: XY,
-  cat: (typeof HARD_CATEGORIES)[number],
-  rule: number,
-  rules: 'task' | 'gb50180',
-) {
-  const fac = facilitiesFor(r.pois, acceptedCategories(cat, rules) as FacilityCategory[]);
-  const walk = Math.min(...fac.map((p) => Math.round(city.walk(gate, routingPoint(p)))));
+function truth(r: AnalysisResult, gate: XY, cat: HardCategory, rule: number) {
+  const fac = facilitiesFor(r.pois, [cat]);
+  const walk = nearestWalk(r, gate, cat);
   const straight = Math.min(...fac.map((p) => dist(gate, p.xy)));
   return walk <= rule ? '覆盖' : straight <= rule ? '伪覆盖' : '盲区';
 }
@@ -125,8 +133,8 @@ describe('live analysis of a synthetic river city', () => {
   it('stays inside the personal budget, hands budget and signal to every call and releases the reservation', () => {
     const { client, result } = main;
     const billed = client.billed;
-    expect(billed.routematrix_walking).toBeLessThanOrEqual(700);
-    expect(billed.place).toBeLessThanOrEqual(6);
+    expect(billed.routematrix_walking).toBeLessThanOrEqual(740);
+    expect(billed.place).toBeLessThanOrEqual(10);
     expect(billed.directionlite_walking).toBeLessThanOrEqual(6);
     expect(billed.reverse_geocoding).toBe(1);
     const byStep = result.stats.quota_by_step as Record<string, number>;
@@ -135,7 +143,11 @@ describe('live analysis of a synthetic river city', () => {
     expect(byStep.coverage).toBeGreaterThan(0);
     expect(byStep.coverage).toBeLessThanOrEqual(400);
     expect(byStep.siting).toBeLessThanOrEqual(60);
-    expect(byStep.facilities! + byStep.residential!).toBe(billed.place);
+    expect(byStep.facilities!).toBeLessThanOrEqual(4);
+    expect(byStep.livelihood).toBe(2);
+    // the 买菜替代 search: the city's shops fit one page
+    expect(byStep.fresh).toBe(1);
+    expect(byStep.facilities! + byStep.livelihood! + byStep.residential! + byStep.fresh!).toBe(billed.place);
     // the engine's own count is what the client billed
     expect(result.stats.quota_used).toEqual({
       reverse_geocoding: billed.reverse_geocoding,
@@ -206,7 +218,12 @@ describe('live analysis of a synthetic river city', () => {
     const school = byName.get('滨河花园')!.checks['小学'];
     expect(school).toMatchObject({ status_main: '伪覆盖', verified: true, nearest_straight: '河东实验小学' });
     expect(school.straight_m).toBeLessThan(500);
-    expect(school.route_m).toBeGreaterThan(1500);
+    // across the bridge 河东实验小学 is over 1.5 km on foot; 临河第一小学 on this bank, more than 1 km away
+    // even in a straight line (so the rule's early stop never routed it), is the nearest walk
+    expect(school).toMatchObject({ via: '临河第一小学', route_upper_bound: false });
+    expect(school.route_m).toBeGreaterThan(1200);
+    const walk = nearestWalk(r, byName.get('滨河花园')!.centroid, '小学');
+    expect(Math.abs(school.route_m - walk)).toBeLessThanOrEqual(1);
     const market = byName.get('东岸新村')!.checks['菜市场'];
     expect(market).toMatchObject({ status_main: '伪覆盖', verified: true, nearest_straight: '河西生鲜市场' });
     let n = 0;
@@ -214,7 +231,7 @@ describe('live analysis of a synthetic river city', () => {
       for (const cat of HARD_CATEGORIES) {
         const k = c.checks[cat];
         expect(k.verified, `${c.name} ${cat}`).toBe(true);
-        expect(k.status_main, `${c.name} ${cat}`).toBe(truth(r, c.centroid, cat, 1000, 'task'));
+        expect(k.status_main, `${c.name} ${cat}`).toBe(truth(r, c.centroid, cat, 1000));
         n++;
       }
     }
@@ -223,6 +240,94 @@ describe('live analysis of a synthetic river city', () => {
     expect(counts.total).toBe(90);
     expect(counts.main['伪覆盖']).toBeGreaterThanOrEqual(3);
     expect(r.gray_areas!.some((g) => g.kind === 'pseudo')).toBe(true);
+  });
+
+  it('walks to the nearest facility in every check: what the early stop left nearer is routed after', () => {
+    const r = main.result;
+    let routed = 0;
+    for (const c of r.communities) {
+      for (const cat of HARD_CATEGORIES) {
+        const k = c.checks[cat];
+        const what = `${c.name} ${cat}`;
+        expect(k.unrouted_nearer, what).toBeUndefined();
+        expect(k.route_upper_bound, what).toBe(false);
+        if (k.route_basis !== 'routed') continue;
+        expect(Math.abs(k.route_m - nearestWalk(r, c.centroid, cat)), what).toBeLessThanOrEqual(1);
+        routed++;
+      }
+    }
+    expect(routed).toBeGreaterThan(75);
+    const nearest = r.stats.coverage_nearest_routes as number;
+    expect(nearest).toBeGreaterThan(0);
+    expect(nearest).toBeLessThan((r.stats.quota_by_step as Record<string, number>).coverage! / 2);
+    expect(main.events.some((e) => e.event === 'stage' && /盲区判定补算/.test(e.data.message))).toBe(true);
+  });
+
+  it('gives 菜市场 gaps a 买菜替代 within the rule on foot, like the street graph, and only them', () => {
+    const r = main.result;
+    const counts = { gaps: 0, with_alt: 0, none: 0, not_looked: 0 };
+    for (const c of r.communities) {
+      expect(c.checks_gb, c.name).toBeUndefined();
+      for (const cat of HARD_CATEGORIES) {
+        const k = c.checks[cat];
+        const what = `${c.name} ${cat}`;
+        if (cat !== '菜市场' || !k.verified || k.status_main === '覆盖') {
+          expect(k.alt, what).toBeUndefined();
+          continue;
+        }
+        counts.gaps++;
+        if (k.alt === undefined) counts.not_looked++;
+        else if (k.alt === null) counts.none++;
+        else {
+          counts.with_alt++;
+          // a measured walk within the rule to the shop's entrance, as the street graph walks it
+          expect(k.alt.route_m, what).toBeLessThanOrEqual(1000);
+          expect(
+            Math.abs(k.alt.route_m - Math.round(city.walk(c.centroid, k.alt.xy))),
+            what,
+          ).toBeLessThanOrEqual(1);
+          // stalls of 临河菜市场 are the market itself
+          expect(['鲜丰生鲜(临河菜场店)', '王记肉铺(临河菜市场店)']).not.toContain(k.alt.name);
+        }
+      }
+    }
+    // the whole budget was there: every gap was looked at
+    expect(counts.not_looked).toBe(0);
+    expect(r.stats.fresh_alternatives).toEqual(counts);
+    expect(r.stats.fresh_alternatives_gb).toBeUndefined();
+    expect(counts.with_alt).toBeGreaterThan(0);
+    expect(r.stats).toMatchObject({ fresh_alt_budget_limited: false, fresh_alt_failed_cells: 0 });
+    expect(r.stats.fresh_alt_routes as number).toBeGreaterThan(0);
+    expect(main.events.some((e) => e.event === 'stage' && /买菜替代/.test(e.data.message))).toBe(true);
+    expect((r.meta as LiveMeta).notes.join('\n')).toMatch(/买菜替代（checks\.菜市场\.alt）/);
+  });
+
+  it('keeps the upper-bound flags when the coverage budget runs out before the top-up', async () => {
+    const byStep = main.result.stats.quota_by_step as Record<string, number>;
+    const rounds =
+      byStep.coverage! -
+      (main.result.stats.coverage_nearest_routes as number) -
+      (main.result.stats.fresh_alt_routes as number);
+    const { result: r } = await run(INPUT, {}, { budget: { coverage: rounds } });
+    expect(r.stats).toMatchObject({
+      coverage_nearest_routes: 0,
+      coverage_budget_limited: true,
+      fresh_alt_routes: 0,
+    });
+    expect((r.stats.quota_by_step as Record<string, number>).coverage).toBe(rounds);
+    const was = new Map(main.result.communities.map((c) => [c.name, c.checks]));
+    let flagged = 0;
+    for (const c of r.communities) {
+      for (const cat of HARD_CATEGORIES) {
+        const k = c.checks[cat];
+        if (k.unrouted_nearer) flagged++;
+        expect(k.route_upper_bound).toBe(!!k.unrouted_nearer);
+        // the top-up only shortens walks: the verdicts are the same without it
+        expect(k.status_main, `${c.name} ${cat}`).toBe(was.get(c.name)![cat].status_main);
+        expect(k.route_m).toBeGreaterThanOrEqual(was.get(c.name)![cat].route_m);
+      }
+    }
+    expect(flagged).toBeGreaterThan(0);
   });
 
   it('cleans the facility list: stalls fold into their market, copies and blacklisted names never count', () => {
@@ -237,9 +342,79 @@ describe('live analysis of a synthetic river city', () => {
     expect(r.stats.facility_counts).toMatchObject({ 小学: 5, 菜市场: 4, 药店: 10 });
     expect(r.stats.pois_dropped).toBe(4);
     // every place page came from the budget: the union, then 生鲜超市 / 幼儿园 with the page left
+    // (the 民生设施 union and the 买菜替代 search after them have budget lines and completeness of
+    // their own)
     const queries = r.stats.place_queries as { keywords: string; complete: boolean }[];
     expect(queries[0]!.keywords.startsWith('小学$菜市场')).toBe(true);
-    expect(queries.every((q) => q.complete)).toBe(true);
+    expect(queries.slice(0, -2).every((q) => q.complete)).toBe(true);
+    expect(queries.slice(-2).map((q) => q.keywords)).toEqual([
+      LIVELIHOOD_KEYWORDS.join('$'),
+      FRESH_KEYWORDS.join('$'),
+    ]);
+  });
+
+  it('adds the other 民生设施 from one union and counts what the 15-minute walk reaches (圈内设施统计)', () => {
+    const r = main.result;
+    const queries = r.stats.place_queries as {
+      keywords: string;
+      max_pages: number;
+      pages: number;
+      complete: boolean;
+    }[];
+    const union = queries.find((q) => q.keywords === LIVELIHOOD_KEYWORDS.join('$'))!;
+    expect(LIVELIHOOD_KEYWORDS).toHaveLength(10);
+    // 49 rows within 1.1 km: two pages, the bus stops' far tail cut
+    expect(union).toMatchObject({ max_pages: 2, pages: 2, complete: false });
+    const inventory = r.stats.facility_inventory as Record<string, { complete: boolean; radius_m: number }>;
+    for (const cat of ['社区卫生', '养老', '地铁', '公园', '超市'])
+      expect(inventory[cat]!.complete, cat).toBe(true);
+    expect(inventory['公交']!.complete).toBe(false);
+    expect(inventory['公交']!.radius_m).toBeLessThan(DEMAND_RADIUS_M);
+    expect((r.meta as LiveMeta).notes.join('\n')).toMatch(/公交只统计到离中心 \d+ 米/);
+
+    const names = (cat: string) =>
+      r.pois
+        .filter((p) => p.cat === cat)
+        .map((p) => p.name)
+        .sort();
+    expect(names('社区卫生')).toEqual(['临河社区卫生服务中心', '河东社区卫生服务站']);
+    expect(names('养老')).toEqual(['临河街道长者食堂', '滨河养老院']);
+    expect(names('地铁')).toEqual(['东岸路', '河西路']);
+    expect(names('公园')).toEqual(['滨河公园']);
+    // 盒马生鲜超市 came with the 生鲜超市 group already and is not counted twice
+    expect(names('超市')).toEqual(['家乐福超市', '盒马生鲜超市', '联华超市(河西店)']);
+    expect(names('公交').length).toBeGreaterThan(10);
+    expect(new Set(r.pois.map((p) => p.uid)).size).toBe(r.pois.length);
+    for (const gone of ['河西路地铁站-1口', '无障碍电梯(河西路地铁站2号口)']) {
+      expect(r.pois.map((p) => p.name)).not.toContain(gone);
+    }
+    // the union adds counted facilities only: no school, market or pharmacy enters the checks through it
+    expect(r.stats.facility_counts).toMatchObject({ 小学: 5, 菜市场: 4, 药店: 10, 社区卫生: 2, 地铁: 2 });
+
+    // stats.facility_stats is core's facilityStats over the result, at the stored adult speed
+    const stats = r.stats.facility_stats!;
+    expect(stats).toEqual(facilityStats(r));
+    const by = new Map(stats.map((s) => [s.category, s]));
+    expect(stats.map((s) => s.category)).toEqual(
+      expect.arrayContaining(['小学', '菜市场', '药店', '社区卫生', '养老', '公交', '地铁', '公园', '超市']),
+    );
+    // 东岸路 station lies inside the straight circle, but the walk needs the bridge
+    expect(by.get('地铁')).toMatchObject({ found: 2, walk: 1, circle: 2, nearest: '河西路' });
+    expect(by.get('社区卫生')).toMatchObject({
+      found: 2,
+      walk: 1,
+      circle: 1,
+      nearest: '临河社区卫生服务中心',
+    });
+    // one stop per name, both directions folded
+    expect(by.get('公交')!.found).toBe(names('公交').length - 1);
+    for (const s of stats) {
+      expect(s.walk).toBeLessThanOrEqual(s.found);
+      expect(s.nearest_s === null || s.nearest_s > 0).toBe(true);
+    }
+    // it goes out with the isochrone, before the coverage stage
+    const reachPartial = main.events.find((e) => e.event === 'partial' && e.data.stats?.facility_stats);
+    expect(reachPartial!.data.stats.facility_stats).toEqual(stats);
   });
 
   it('uses residential gates as demand points: sub-POIs merged, the nearest 30 inside the 15-minute circle', () => {
@@ -252,10 +427,22 @@ describe('live analysis of a synthetic river city', () => {
     expect(names).toEqual(expect.arrayContaining(['锦绣苑', '锦绣苑（2）', '临河小区']));
     for (const gone of ['远郊花园', '河西小区居委会', '北苑小区停车场']) expect(names).not.toContain(gone);
     const byName = new Map(r.communities.map((c) => [c.name, c]));
-    expect(byName.get('滨河花园')).toMatchObject({ pts: [], centroid: [400, 470], gate: 'navi' });
-    expect(byName.get('临河小区')).toMatchObject({ pts: [], centroid: [-200, 250], gate: 'gate_poi' });
+    // centroid is the gate every walk starts from; label_xy the compound's own POI, for the map
+    expect(byName.get('滨河花园')).toMatchObject({
+      pts: [],
+      centroid: [400, 470],
+      label_xy: [360, 470],
+      gate: 'navi',
+    });
+    expect(byName.get('临河小区')).toMatchObject({
+      pts: [],
+      centroid: [-200, 250],
+      label_xy: [-250, 250],
+      gate: 'gate_poi',
+    });
     for (const c of r.communities) {
       expect(c.pts).toEqual([]);
+      expect(c.label_xy).toHaveLength(2);
       expect(Math.hypot(...c.centroid)).toBeLessThanOrEqual(DEMAND_RADIUS_M);
     }
     // compounds are searched within the demand radius, facilities 1 km beyond it; the field keeps 1600 m
@@ -351,9 +538,9 @@ describe('live analysis of a synthetic river city', () => {
     const plan = planQuota(INPUT);
     expect(plan.max).toEqual({
       reverse_geocoding: 1,
-      place: 6,
+      place: 10,
       directionlite_walking: 6,
-      routematrix_walking: 700,
+      routematrix_walking: 740,
     });
     for (const s of ENGINE_SERVICES) {
       const actual = main.client.billed[s] ?? 0;
@@ -365,13 +552,30 @@ describe('live analysis of a synthetic river city', () => {
     expect(plan.steps.map((s) => s.step)).toEqual([
       'locate',
       'facilities',
+      'livelihood',
       'residential',
+      'fresh',
+      'detail',
       'paths',
       'seed',
       'refine',
       'coverage',
       'siting',
+      'catchment',
     ]);
+    // browser POIs' details only when the input has some
+    expect(plan.steps.find((s) => s.step === 'detail')).toMatchObject({ expected: 0, max: 0 });
+    const withBrowser = planQuota({
+      ...INPUT,
+      browser_pois: [{ uid: 'a'.repeat(24), name: '某超市', keyword: '超市', bd09: INPUT.center_bd09 }],
+    });
+    expect(withBrowser.max.place).toBe(15);
+    expect(withBrowser.steps.find((s) => s.step === 'detail')).toMatchObject({
+      stage: 'facilities',
+      service: 'place',
+      expected: 2,
+      max: 5,
+    });
   });
 });
 
@@ -430,7 +634,7 @@ describe('official lists: multi-source POI fusion', () => {
       for (const cat of HARD_CATEGORIES) {
         const k = c.checks[cat];
         expect(k.verified, `${c.name} ${cat}`).toBe(true);
-        expect(k.status_main, `${c.name} ${cat}`).toBe(truth(fused.result, c.centroid, cat, 1000, 'task'));
+        expect(k.status_main, `${c.name} ${cat}`).toBe(truth(fused.result, c.centroid, cat, 1000));
       }
     }
     const gaps = (r: AnalysisResult) =>
@@ -465,10 +669,13 @@ describe('official lists: multi-source POI fusion', () => {
       } satisfies OfficialSummary,
     ]);
     expect((base.result.meta as LiveMeta).notes.join('\n')).not.toMatch(/名录/);
-    for (const s of ['place', 'directionlite_walking', 'reverse_geocoding'] as const) {
+    for (const s of ['directionlite_walking', 'reverse_geocoding'] as const) {
       expect(fused.client.billed[s]).toBe(base.client.billed[s]);
     }
-    expect(fused.client.billed.routematrix_walking).toBeLessThanOrEqual(700);
+    // the market the list adds closes the last 菜市场 gap: the 买菜替代 search is not needed any more
+    expect(fused.result.stats.fresh_alternatives).toMatchObject({ gaps: 0 });
+    expect(fused.client.billed.place).toBeLessThanOrEqual(base.client.billed.place!);
+    expect(fused.client.billed.routematrix_walking).toBeLessThanOrEqual(740);
   });
 });
 
@@ -542,7 +749,6 @@ describe('cancellation and failures', () => {
       { center_bd09: [2.35, 48.85] as LngLat },
       { center_bd09: [31.2, 121.5] as LngLat },
       { ...INPUT, profile: 'child' as never },
-      { ...INPUT, rules: 'iso' as never },
       { ...INPUT, label: 42 as never },
     ]) {
       const b = start(bad);
@@ -587,10 +793,40 @@ describe('cancellation and failures', () => {
     expect((b.result.meta as LiveMeta).warnings.join('\n')).toMatch(/生鲜超市、幼儿园检索失败/);
     expect(b.result.stats.facility_counts).toMatchObject({ 小学: 5, 菜市场: 4, 药店: 10, 幼儿园: 0 });
     expect(b.result.communities).toHaveLength(30);
+    // so does a failed 民生设施 union (the 4th place call): the checks and their routes are unchanged
+    const c = await run(INPUT, { onCall: (x) => (x.service === 'place' && x.n === 4 ? net : undefined) });
+    const meta = c.result.meta as LiveMeta;
+    expect(meta.warnings.join('\n')).toMatch(/社区卫生、养老、地铁、公园、超市、公交检索失败/);
+    expect(meta.notes.join('\n')).toMatch(/本次没有检索社区卫生、养老、地铁、公园、超市、公交/);
+    expect(c.result.pois.some((p) => p.cat === '公交' || p.cat === '社区卫生')).toBe(false);
+    expect(c.result.stats.facility_stats!.map((s) => s.category)).toEqual([
+      '小学',
+      '幼儿园',
+      '菜市场',
+      '生鲜超市',
+      '超市',
+      '药店',
+    ]);
+    expect(c.result.communities).toEqual(a.result.communities);
+  });
+
+  it('skips the 民生设施 union up front when the place quota only fits the checks', async () => {
+    // personal soft limit 90 %: 7 of 8 pages — the 6 pages without the union still fit
+    const ledger = new QuotaLedger({ tier: 'personal', limits: { place: 8 } });
+    const r = await run(INPUT, { ledger });
+    const meta = r.result.meta as LiveMeta;
+    expect(meta.warnings.join('\n')).toMatch(/地点检索今日配额接近上限：本次不检索社区卫生/);
+    expect((r.result.stats.quota_by_step as Record<string, number>).livelihood).toBe(0);
+    expect(r.client.billed.place).toBeLessThanOrEqual(6);
+    expect(r.result.communities).toHaveLength(30);
+    expect(ledger.usage('place').reserved).toBe(0);
+    // a quota too short for the checks themselves still refuses the run
+    const tight = new QuotaLedger({ tier: 'personal', limits: { place: 6 } });
+    await expect(run(INPUT, { ledger: tight })).rejects.toMatchObject({ code: 'quota_exhausted' });
   });
 });
 
-describe('profiles, rules and clients', () => {
+describe('profiles and clients', () => {
   it('elder profile: one canonical adult-speed result, refined for the elder boundary, no extra reach calls', async () => {
     const e = await run({ ...INPUT, profile: 'elder' });
     expect(e.result.meta).toMatchObject({ profile: 'elder', profile_speed_mps: 0.9, walk_speed_mps: 1.17 });
@@ -599,7 +835,7 @@ describe('profiles, rules and clients', () => {
     expect(coverage.calls).toBe(reach.calls);
     // stored in routematrix (adult) seconds: clients scale by 1.17 / 0.9 for the elder view
     expect(e.result.baseline.circle_r15_m).toBe(1053);
-    expect(e.client.billed.routematrix_walking).toBeLessThanOrEqual(700);
+    expect(e.client.billed.routematrix_walking).toBeLessThanOrEqual(740);
     const timed = e.result.samples.filter((s) => s.straight_m >= 30);
     const opts = {
       extent_m: 1600,
@@ -617,26 +853,6 @@ describe('profiles, rules and clients', () => {
     expect(byName.get('滨河花园')!.checks['小学'].status_main).toBe('伪覆盖');
   });
 
-  it('GB 50180 rules: 500 / 300 m radii and 生鲜超市 standing in for a market', async () => {
-    const g = await run({ ...INPUT, rules: 'gb50180' });
-    const meta = g.result.meta as LiveMeta;
-    expect(meta.rule_m).toEqual({ 小学: 500, 菜市场: 500, 药店: 300 });
-    expect(g.result.baseline.rule_radius_m).toBe(500);
-    const queries = g.result.stats.place_queries as { keywords: string }[];
-    expect(queries[0]!.keywords).toContain('生鲜超市');
-    for (const c of g.result.communities) {
-      for (const cat of HARD_CATEGORIES) {
-        const k = c.checks[cat];
-        if (!k.verified) continue;
-        expect(k.status_main, `${c.name} ${cat}`).toBe(
-          truth(g.result, c.centroid, cat, meta.rule_m[cat], 'gb50180'),
-        );
-      }
-    }
-    // 叮咚生鲜超市 (east bank, near the bridge) serves as a market under GB 50180
-    expect(g.result.communities.some((c) => c.checks['菜市场'].via === '叮咚生鲜超市')).toBe(true);
-  });
-
   it('runs without a ledger: quota events count this run against its caps', async () => {
     const r = await run(INPUT, { ledger: null });
     expect(r.client.calls.every((c) => c.opts.budget === undefined)).toBe(true);
@@ -646,7 +862,7 @@ describe('profiles, rules and clients', () => {
     expect(last.data).toEqual({
       service: 'routematrix_walking',
       used: r.client.billed.routematrix_walking,
-      limit: 700,
+      limit: 740,
     });
     expect(r.result.communities).toHaveLength(30);
   });
@@ -683,5 +899,401 @@ describe('profiles, rules and clients', () => {
     await expect(
       analyzer.analyze({ center_bd09: CITY_ORIGIN, profile: 'adult' }, () => {}, stopped.signal),
     ).rejects.toBe(reason);
+  });
+});
+
+describe('curated exclusions by name pattern', () => {
+  let task: Awaited<ReturnType<typeof run>>;
+  beforeAll(async () => {
+    task = await run();
+  });
+
+  it('drops delivery warehouses by name pattern: never a facility, never a 买菜替代', async () => {
+    const pattern = '^叮咚';
+    const x = await run(
+      INPUT,
+      {},
+      {},
+      {
+        exclusions: [
+          {
+            category: ['生鲜超市', '超市', '菜市场'],
+            name_pattern: pattern,
+            reason: '测试：前置仓，线上下单、配送到家',
+            source: 'https://www.linhe.example.gov.cn/y.html',
+            date: '2026-09-28',
+          },
+        ],
+      },
+    );
+    const r = x.result;
+    expect(r.pois.some((p) => p.name.startsWith('叮咚'))).toBe(false);
+    expect(r.stats.excluded).toEqual([
+      expect.objectContaining({ uid: 'f2', name: '叮咚生鲜超市', category: '生鲜超市', pattern }),
+    ]);
+    expect((r.stats.facility_counts as Record<string, number>)['生鲜超市']).toBe(
+      (task.result.stats.facility_counts as Record<string, number>)['生鲜超市']! - 1,
+    );
+    expect((r.meta as LiveMeta).notes.join('\n')).toMatch(/排除清单.*叮咚生鲜超市（生鲜超市：测试：前置仓/);
+    let verified = 0;
+    for (const c of r.communities) {
+      // the warehouse the 买菜替代 search finds again stays excluded there too
+      expect(c.checks['菜市场'].alt?.name).not.toBe('叮咚生鲜超市');
+      for (const cat of HARD_CATEGORIES) {
+        const k = c.checks[cat];
+        expect(k.via).not.toBe('叮咚生鲜超市');
+        if (!k.verified) continue;
+        verified++;
+        expect(k.status_main, `${c.name} ${cat}`).toBe(truth(r, c.centroid, cat, 1000));
+      }
+    }
+    expect(verified).toBeGreaterThan(80);
+  });
+});
+
+describe('对口小学, exclusions and school / health lists in a live run', () => {
+  // a second campus of 临河第一小学 north of the river bend
+  const campusCity = new City([
+    ...cityPois(),
+    { uid: 's1n', name: '临河第一小学(北校区)', tag: '教育培训;小学', xy: [-310, 690], navi: [-300, 700] },
+  ]);
+  const table: CatchmentList = {
+    id: 'linhe-catchment-2026',
+    kind: 'catchment',
+    title: '2026年临河区公办小学招生地段公示',
+    publisher: '测试市临河区教育局',
+    published: '2026-04-01',
+    url: 'https://www.linhe.example.gov.cn/catchment.html',
+    region: { city: '测试市', district: '临河区' },
+    coverage: { towns: ['滨河街道'] },
+    schools: [
+      {
+        school: '临河第一小学',
+        entries: [
+          { lane: '河西路1弄', compound: '滨河花园' },
+          { lane: '河西路3弄', compound: '临河小区' },
+          { lane: '河西路5弄', compound: '枫林苑一期' },
+        ],
+      },
+      { school: '河东实验小学', entries: [{ lane: '东岸路2弄', compound: '东岸新村' }] },
+      { school: '南苑小学', entries: [{ lane: '南街8弄', compound: '枫林苑二期' }] },
+      { school: '北城小学', entries: [{ lane: '北街9弄', compound: '桂花园' }] },
+      {
+        school: '已撤并小学',
+        entries: [
+          { lane: '西街1弄', compound: '梧桐里' },
+          { lane: '旧村', note: '已动迁' },
+        ],
+      },
+    ],
+  };
+  let r: AnalysisResult;
+  let client: FakeClient;
+  beforeAll(async () => {
+    client = new FakeClient({ city: campusCity });
+    r = await analyze(INPUT, { client, now: NOW, catchment: [table] }, () => {});
+  });
+  const byName = (name: string) => r.communities.find((c) => c.name === name)!;
+
+  it('assigns matched compounds their school, routed to its gate, the nearer campus when the table names none', () => {
+    const binhe = byName('滨河花园').catchment!;
+    const gate = byName('滨河花园').centroid;
+    const west = Math.round(campusCity.walk(gate, [-700, 330]));
+    const north = Math.round(campusCity.walk(gate, [-300, 700]));
+    expect(north).toBeLessThan(west);
+    expect(binhe).toMatchObject({
+      school: '临河第一小学（北校区）',
+      school_uid: 's1n',
+      route_m: north,
+      source: 'linhe-catchment-2026',
+      matched_by: 'name:滨河花园',
+    });
+    expect(binhe.note).toBe(
+      `对口表未写校区，找到 2 个校区，取步行较近的一个（另：临河第一小学 步行 ${west} 米）`,
+    );
+    expect(byName('东岸新村').catchment).toMatchObject({
+      school: '河东实验小学',
+      route_m: Math.round(campusCity.walk(byName('东岸新村').centroid, [700, 330])),
+    });
+    // the school is nowhere in the inventory: matched, but no walk
+    expect(byName('梧桐里').catchment).toMatchObject({ school: '已撤并小学', route_m: null, straight_m: -1 });
+    // two rows, two schools: no guess
+    expect(byName('枫林苑').catchment).toBeUndefined();
+    const stats = r.stats.catchment as CatchmentStats;
+    expect(stats).toMatchObject({
+      list: 'linhe-catchment-2026',
+      communities: 30,
+      matched: 5,
+      ambiguous: ['枫林苑'],
+    });
+    expect(stats.unmatched).toHaveLength(24);
+    expect(stats.routed).toBe(4);
+    expect(stats.school_not_found).toBe(1);
+    // routes the coverage check measured are reused; the rest come from the catchment budget line
+    const byStep = r.stats.quota_by_step as Record<string, number>;
+    expect(byStep.catchment).toBe(stats.new_routes);
+    expect(stats.new_routes).toBeGreaterThan(0);
+    expect(stats.new_routes).toBeLessThan(2 * stats.matched);
+    const note = (r.meta as LiveMeta).notes.find((n) => n.startsWith('对口小学'))!;
+    expect(note).toContain(
+      '30 个小区中 5 个按官方地段表匹配到对口学校（小区名 5），25 个未匹配（其中 1 个的同名条目对口不同学校，未判定）',
+    );
+  });
+
+  it('skips the table outside its district, and runs dry without budget', async () => {
+    const other = await analyze(
+      INPUT,
+      {
+        client: new FakeClient({ city: campusCity }),
+        now: NOW,
+        catchment: [{ ...table, region: { city: '测试市', district: '别的区' } }],
+      },
+      () => {},
+    );
+    expect(other.communities.every((c) => c.catchment === undefined)).toBe(true);
+    expect((other.meta as LiveMeta).notes.join('\n')).toMatch(/不做对口匹配/);
+    const dry = await analyze(
+      INPUT,
+      { client: new FakeClient({ city: campusCity }), now: NOW, catchment: [table] },
+      () => {},
+      { budget: { catchment: 0 } },
+    );
+    expect((dry.stats.quota_by_step as Record<string, number>).catchment).toBe(0);
+    const ck = dry.communities.find((c) => c.name === '滨河花园')!.catchment!;
+    // the nearer campus was never routed: straight lines only, and the note says why
+    expect(ck.note).toMatch(/预算已用完/);
+  });
+
+  it('applies curated exclusions after cleaning and fusion, and says so', async () => {
+    const x = await run(
+      INPUT,
+      {},
+      {},
+      {
+        exclusions: [
+          {
+            category: '小学',
+            uid: 's3',
+            name: '南苑小学',
+            reason: '测试：已停办',
+            source: 'https://www.linhe.example.gov.cn/x.html',
+            date: '2026-09-28',
+          },
+        ],
+      },
+    );
+    const res = x.result;
+    expect(res.pois.some((p) => p.name === '南苑小学')).toBe(false);
+    expect(res.stats.excluded).toEqual([
+      expect.objectContaining({ uid: 's3', name: '南苑小学', category: '小学', reason: '测试：已停办' }),
+    ]);
+    expect(res.stats.facility_counts).toMatchObject({ 小学: 4 });
+    expect((res.meta as LiveMeta).notes.join('\n')).toMatch(
+      /排除清单.*南苑小学（小学：测试：已停办，2026-09-28 核实）/,
+    );
+    for (const c of res.communities) {
+      for (const cat of HARD_CATEGORIES) {
+        expect(c.checks[cat].via).not.toBe('南苑小学');
+        if (c.checks[cat].verified) expect(c.checks[cat].status_main).toBe(truth(res, c.centroid, cat, 1000));
+      }
+    }
+  });
+
+  it('fuses school and health lists: the health list matches the 民生设施 rows (two-phase fusion)', async () => {
+    const ll = (xy: XY) => city.toLngLat(xy).map((v) => Number(v.toFixed(6))) as LngLat;
+    const door = { precise: true, confidence: 80, level: '门址' };
+    const base = {
+      publisher: '测试市临河区教育局',
+      published: '2026-04-01',
+      url: 'https://www.linhe.example.gov.cn/l.html',
+      region: { city: '测试市', district: '临河区' },
+    };
+    const schools: OfficialList = {
+      ...base,
+      id: 'linhe-schools-2026',
+      category: '小学',
+      title: '2026年临河区小学招生信息公示',
+      entries: [
+        { name: '北城小学', address: '北街1号', status: 'active', bd09: ll([-540, 1230]), geocode: door },
+        {
+          name: '河西新村小学',
+          address: '河西路99号',
+          status: 'active',
+          bd09: ll([-200, 610]),
+          geocode: door,
+        },
+      ],
+    };
+    const health: OfficialList = {
+      ...base,
+      id: 'linhe-health',
+      category: '社区卫生',
+      title: '临河区社区卫生服务中心信息',
+      entries: [
+        {
+          name: '临河社区卫生服务中心',
+          address: '河西路10号',
+          status: 'active',
+          bd09: ll([-410, -90]),
+          geocode: door,
+        },
+        {
+          name: '滨河社区卫生服务中心',
+          address: '滨河路20号',
+          status: 'active',
+          bd09: ll([300, 300]),
+          geocode: door,
+        },
+      ],
+    };
+    const f = await run(INPUT, {}, {}, { official: [schools, health] });
+    const res = f.result;
+    const poi = (name: string) => res.pois.find((p) => p.name === name);
+    expect(poi('北城小学')).toMatchObject({
+      source: 'baidu',
+      official: { list: 'linhe-schools-2026', name: '北城小学' },
+    });
+    expect(poi('河西新村小学')).toMatchObject({
+      source: 'gov',
+      cat: '小学',
+      uid: 'gov:linhe-schools-2026:1',
+    });
+    // the added school is a candidate of the checks, and the verdicts still follow the street graph
+    expect(res.communities.some((c) => c.checks['小学'].via === '河西新村小学')).toBe(true);
+    for (const c of res.communities) {
+      for (const cat of HARD_CATEGORIES) {
+        if (c.checks[cat].verified) expect(c.checks[cat].status_main).toBe(truth(res, c.centroid, cat, 1000));
+      }
+    }
+    // Baidu's centre came from the 民生设施 union, after the checked categories were fused
+    expect(poi('临河社区卫生服务中心')).toMatchObject({
+      source: 'baidu',
+      official: { list: 'linhe-health' },
+    });
+    expect(poi('滨河社区卫生服务中心')).toMatchObject({ source: 'gov', cat: '社区卫生' });
+    expect(res.stats.official).toEqual([
+      expect.objectContaining({ list: 'linhe-schools-2026', category: '小学', confirmed: 1, added: 1 }),
+      expect.objectContaining({ list: 'linhe-health', category: '社区卫生', confirmed: 1, added: 1 }),
+    ]);
+    expect(res.stats.facility_stats!.find((s) => s.category === '社区卫生')!.found).toBe(3);
+  });
+});
+
+describe('browser POIs: what place search omits, detailed and cleaned like search rows', () => {
+  const hex = (n: number) => n.toString(16).padStart(24, 'b');
+  const HIDDEN = [
+    // Baidu has them, place search never returns them (as 盒马鲜生(陆悦天地店) around 万科翡翠公园)
+    {
+      uid: hex(1),
+      name: '鲜果多生鲜超市(东岸店)',
+      tag: '购物;超市;生鲜超市',
+      xy: [620, 600],
+      navi: [600, 600],
+    },
+    { uid: hex(2), name: '惠康大药房(东岸店)', tag: '医疗;药店', xy: [700, 500] },
+    // a produce chain Baidu files under 美食: no facility, but a 买菜替代 for 东岸新村
+    { uid: hex(3), name: '清美生鲜(东岸店)', tag: '美食', xy: [520, 690] },
+    // what the browser lists under 生鲜 but sells no vegetables
+    { uid: hex(4), name: '生鲜火锅(东岸店)', tag: '美食;火锅店', xy: [540, 640] },
+    { uid: hex(5), name: '百果园(东岸店)', tag: '购物;水果店', xy: [505, 655] },
+    // beyond the facility radius
+    { uid: hex(6), name: '远郊超市', tag: '购物;超市', xy: [2500, 0] },
+  ].map((p) => ({ ...p, xy: p.xy as XY, navi: p.navi as XY | undefined, hidden: true }));
+  // one the searches do return
+  const SEARCHED = { uid: hex(7), name: '河西便民药房', tag: '医疗;药店', xy: [-100, 100] as XY };
+  const bcity = new City([...cityPois(), ...HIDDEN, SEARCHED]);
+  const keyword = (tag: string) => (tag.includes('药') ? '药店' : tag.includes('超市') ? '超市' : '生鲜');
+  const BROWSER = [
+    ...[...HIDDEN, SEARCHED].map((p) => ({
+      uid: p.uid,
+      name: p.name,
+      keyword: keyword(p.tag),
+      bd09: bcity.toLngLat(p.xy),
+    })),
+    // invalid items are dropped, not fatal
+    { uid: 'not-a-uid', name: '坏数据', keyword: '超市', bd09: bcity.toLngLat([0, 0]) },
+    { uid: hex(8), name: '境外', keyword: '超市', bd09: [0, 0] as LngLat },
+  ];
+  const WITH = { ...INPUT, browser_pois: BROWSER };
+  let r: Awaited<ReturnType<typeof run>>;
+  beforeAll(async () => {
+    r = await run(WITH, { city: bcity });
+  });
+
+  it('details the new ones within the radius in one request and counts what the tags make facilities', () => {
+    const res = r.result;
+    expect(res.stats.browser_pois).toEqual({
+      offered: 7,
+      new: 5,
+      detailed: 5,
+      kept: 2,
+      budget_limited: false,
+    });
+    expect((res.stats.quota_by_step as Record<string, number>).detail).toBe(1);
+    const byName = new Map(res.pois.map((p) => [p.name, p]));
+    expect(byName.get('鲜果多生鲜超市(东岸店)')).toMatchObject({
+      cat: '生鲜超市',
+      found_by: 'jsapi',
+      uid: hex(1),
+    });
+    expect(byName.get('惠康大药房(东岸店)')).toMatchObject({ cat: '药店', found_by: 'jsapi' });
+    // found by the search as well: no provenance mark
+    expect(byName.get('河西便民药房')).toBeDefined();
+    expect(byName.get('河西便民药房')!.found_by).toBeUndefined();
+    for (const name of ['清美生鲜(东岸店)', '生鲜火锅(东岸店)', '百果园(东岸店)', '远郊超市']) {
+      expect(byName.has(name), name).toBe(false);
+    }
+    expect(res.pois.filter((p) => p.found_by === 'jsapi')).toHaveLength(2);
+    const notes = (res.meta as LiveMeta).notes.join('\n');
+    expect(notes).toMatch(/地图前端补充：浏览器地图检索（JSAPI）列出 7 处设施，其中 5 处.*计入 2 处/);
+    expect(
+      r.events.some(
+        (e) =>
+          e.event === 'stage' &&
+          /地图前端找到 5 处服务端检索没有返回的设施，查询其中 5 处/.test(e.data.message),
+      ),
+    ).toBe(true);
+  });
+
+  it('feeds the detail rows to the 买菜替代 pool: a produce chain tagged 美食 stands in, a fruit shop does not', () => {
+    const dongan = r.result.communities.find((c) => c.name === '东岸新村')!;
+    const k = dongan.checks['菜市场'];
+    expect(k.status_main).not.toBe('覆盖');
+    expect(k.alt).toMatchObject({ name: '清美生鲜(东岸店)', kind: '生鲜超市' });
+  });
+
+  it('gives way without budget: nothing detailed, a warning, the run goes on', async () => {
+    const x = await run(WITH, { city: bcity }, { budget: { detailCalls: 0 } });
+    expect(x.result.stats.browser_pois).toEqual({
+      offered: 7,
+      new: 5,
+      detailed: 0,
+      kept: 0,
+      budget_limited: true,
+    });
+    expect((x.result.stats.quota_by_step as Record<string, number>).detail).toBe(0);
+    expect(x.result.pois.some((p) => p.found_by)).toBe(false);
+    expect((x.result.meta as LiveMeta).warnings.join('\n')).toMatch(/没有详情查询预算/);
+  });
+
+  it('is the first thing given up when the day’s place quota is short', async () => {
+    // personal soft limit 90 %: 10 of 12 pages — the run fits without the 5 detail requests
+    const ledger = new QuotaLedger({ tier: 'personal', limits: { place: 12 } });
+    const x = await run(WITH, { city: bcity, ledger });
+    const meta = x.result.meta as LiveMeta;
+    expect(meta.warnings.join('\n')).toMatch(/本次不查询地图前端补充的设施详情/);
+    expect(meta.warnings.join('\n')).not.toMatch(/本次不检索/);
+    const byStep = x.result.stats.quota_by_step as Record<string, number>;
+    expect(byStep.detail).toBe(0);
+    expect(byStep.livelihood).toBeGreaterThan(0);
+    expect(x.result.stats.browser_pois).toMatchObject({ new: 5, detailed: 0, budget_limited: true });
+    expect(ledger.usage('place').reserved).toBe(0);
+  });
+
+  it('spends nothing and adds no stats without browser POIs', async () => {
+    const x = await run(INPUT, { city: bcity });
+    expect(x.result.stats.browser_pois).toBeUndefined();
+    expect((x.result.stats.quota_by_step as Record<string, number>).detail).toBe(0);
+    expect(x.result.pois.some((p) => p.name === '惠康大药房(东岸店)')).toBe(false);
   });
 });

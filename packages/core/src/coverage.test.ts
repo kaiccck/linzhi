@@ -11,14 +11,17 @@ import {
   mergeMatrixResults,
   planCoverageRound,
   planMatrixBatches,
+  planNearestTopUp,
   pruneCandidates,
   rankCandidates,
+  shownStatus,
   statusRaster,
+  withNewFacility,
 } from './coverage.js';
 import { pointInRing, ringSignedArea } from './geom.js';
 import { facilitiesFor, routingPoint } from './poi.js';
 import { HARD_CATEGORIES } from './standards.js';
-import type { HardCategory, Poi } from './types.js';
+import type { FacilityCheck, HardCategory, Poi } from './types.js';
 
 const zj = zjA();
 const baiduPois = zj.pois.filter((p) => p.source === 'baidu');
@@ -100,10 +103,13 @@ function researchRoutes(cat: HardCategory): RoutedPair[] {
     const xy = f.toXY(lng, lat);
     return { id: demand.find((d) => near(d.xy, xy, 0.2))!.id };
   });
-  const destinations = latLngList(url.searchParams.get('destinations')).map(([lng, lat]) => {
+  // a destination without a POI is a facility data/official/exclusions.json removed from the sample
+  // (上海市浦东新区育华学校(雪英校区)): its routes stay in the answer but never reach a check
+  const destinations = latLngList(url.searchParams.get('destinations')).map(([lng, lat], j) => {
     const xy = f.toXY(lng, lat);
-    return { id: baiduPois.find((p) => near(routingPoint(p), xy, 1.5))!.uid };
+    return { id: baiduPois.find((p) => near(routingPoint(p), xy, 1.5))?.uid ?? `excluded:${j}` };
   });
+  expect(destinations.filter((d) => d.id.startsWith('excluded:'))).toHaveLength(cat === '小学' ? 1 : 0);
   const batch = { origins, destinations, routes: origins.length * destinations.length, wanted: 0 };
   return matrixPairs(batch, raw.response.result);
 }
@@ -134,11 +140,28 @@ function officialMarketRoutes(): RoutedPair[] {
   );
 }
 
+/**
+ * The nearest top-up of zj-a (apps/server/scripts/augment-zj-a.ts): routematrix from the same centroids
+ * to every facility nearer by straight line than a check's best research walk.
+ */
+function nearestRoutes(): RoutedPair[] {
+  const raw = readJson<{
+    routes: {
+      community: string;
+      to: { uid: string; distance_m: number | null; duration_s: number | null }[];
+    }[];
+  }>('research/zhangjiang/raw/bv_nearest_A.json');
+  return raw.routes.flatMap((r) =>
+    r.to.map((t) => ({ origin_id: r.community, dest_id: t.uid, route_m: t.distance_m, dur_s: t.duration_s })),
+  );
+}
+
 describe('merging routematrix answers into FacilityChecks', () => {
   it('rebuilds the 36 zj-a checks from the raw Baidu answers, flags included', () => {
     for (const cat of HARD_CATEGORIES) {
-      const routes =
+      const research =
         cat === '菜市场' ? [...researchRoutes(cat), ...officialMarketRoutes()] : researchRoutes(cat);
+      const routes = [...research, ...nearestRoutes()];
       const checks = mergeMatrixResults(demand, facilitiesByCategory[cat], routes);
       for (const c of zj.communities) {
         const got = checks.get(c.name)!;
@@ -161,6 +184,8 @@ describe('merging routematrix answers into FacilityChecks', () => {
         ];
         expect([c.name, cat, ...pick(got)]).toEqual([c.name, cat, ...pick(want)]);
         expect(got.route_basis).toBe('routed');
+        // with the top-up, every check walks to the nearest known facility
+        expect(got.unrouted_nearer).toBeUndefined();
       }
     }
   });
@@ -270,6 +295,83 @@ describe('candidate pruning, rounds and early stop', () => {
       }
     }
   });
+
+  it('then routes what could beat the best walk, so via is the nearest walk of all known facilities', () => {
+    let routes: RoutedPair[] = [];
+    const ask = (want: ReadonlyMap<string, readonly OdPoint[]>) => {
+      let n = 0;
+      for (const batch of planMatrixBatches(demand, want)) {
+        n += batch.routes;
+        routes = routes.concat(matrixPairs(batch, route(batch)));
+      }
+      return n;
+    };
+    // nothing measured yet: the rounds decide those points, the top-up has nothing to beat
+    expect(planNearestTopUp(demand, facilitiesByCategory, routes).size).toBe(0);
+    while (ask(planCoverageRound(demand, facilitiesByCategory, routes, { k: 2 })) > 0);
+    const checks = () =>
+      HARD_CATEGORIES.flatMap((cat) =>
+        [...mergeMatrixResults(demand, facilitiesByCategory[cat], routes)].map(([id, c]) => ({ id, cat, c })),
+      );
+    const early = checks();
+    // the early stop proves every verdict, but some walks pass a nearer facility never routed
+    expect(early.every(({ c }) => c.verified)).toBe(true);
+    const flagged = early.filter(({ c }) => c.unrouted_nearer);
+    expect(flagged.length).toBeGreaterThan(0);
+    const want = planNearestTopUp(demand, facilitiesByCategory, routes);
+    for (const { id, c } of flagged) {
+      const ids = want.get(id)!.map((d) => d.id);
+      for (const u of c.unrouted_nearer!) expect(ids).toContain(u.uid);
+    }
+    expect(ask(want)).toBeGreaterThan(0);
+    // one pass is enough: walks only got shorter, so nothing left can beat them
+    expect(planNearestTopUp(demand, facilitiesByCategory, routes).size).toBe(0);
+    for (const { id, cat, c } of checks()) {
+      expect(c).toMatchObject({ verified: true, route_upper_bound: false });
+      expect(c.unrouted_nearer).toBeUndefined();
+      if (c.route_basis !== 'routed') continue;
+      const xy = demand.find((d) => d.id === id)!.xy;
+      const nearest = Math.min(...facilitiesByCategory[cat].map((p) => walk(xy, routingPoint(p))));
+      expect([id, cat, c.route_m]).toEqual([id, cat, nearest]);
+    }
+    // the verdicts were proven already: the walks got shorter, the statuses stayed
+    const before = new Map(early.map(({ id, cat, c }) => [`${id} ${cat}`, c.status_main]));
+    for (const { id, cat, c } of checks()) expect(c.status_main).toBe(before.get(`${id} ${cat}`));
+  });
+
+  it('tops up the zj-a pharmacies the research left unrouted, and never asks a pair Baidu answered', () => {
+    const pharmacy = facilitiesByCategory.药店;
+    const research = researchRoutes('药店');
+    const want = planNearestTopUp(demand, { 药店: pharmacy }, research);
+    const merged = mergeMatrixResults(demand, pharmacy, research);
+    for (const d of demand) {
+      const c = merged.get(d.id)!;
+      expect(c.route_basis).toBe('routed');
+      const tried = new Set(research.filter((r) => r.origin_id === d.id).map((r) => r.dest_id));
+      const nearer = rankCandidates(d.xy, pharmacy).filter(
+        (x) => !tried.has(x.poi.uid) && x.bound_m < c.route_m,
+      );
+      expect([d.id, (want.get(d.id) ?? []).map((x) => x.id)]).toEqual([d.id, nearer.map((x) => x.poi.uid)]);
+      expect([d.id, !!c.unrouted_nearer]).toEqual([d.id, nearer.length > 0]);
+    }
+    // the five research checks that name an unrouted nearer pharmacy (two of them 待核实)
+    expect(want.size).toBe(5);
+    // 孙桥黄浦花园 walks 649 m to 益丰大药房(高木桥店) with two pharmacies ~97 m away never routed
+    const sq = want.get('孙桥黄浦花园')!.map((x) => x.poi.name);
+    expect(sq.slice(0, 2)).toEqual(['益丰大药房(孙桥路店)', '养和堂药业连锁(孙桥店)']);
+    // a pair Baidu answered without a route is not asked again, but still keeps the bound open
+    const first = rankCandidates(demand.find((d) => d.id === '孙桥黄浦花园')!.xy, pharmacy)[0]!;
+    const noRoute: RoutedPair = {
+      origin_id: '孙桥黄浦花园',
+      dest_id: first.poi.uid,
+      route_m: null,
+      dur_s: null,
+    };
+    const again = planNearestTopUp(demand, { 药店: pharmacy }, [...research, noRoute]).get('孙桥黄浦花园')!;
+    expect(again.map((x) => x.id)).not.toContain(first.poi.uid);
+    const c = mergeMatrixResults(demand, pharmacy, [...research, noRoute]).get('孙桥黄浦花园')!;
+    expect(c.unrouted_nearer!.map((u) => u.uid)).toContain(first.poi.uid);
+  });
 });
 
 describe('routematrix batches', () => {
@@ -333,9 +435,16 @@ describe('灰色区域', () => {
 
   it('counts only verified gaps', () => {
     const c = zj.communities.find((x) => x.name === '川杨新苑四期')!;
-    // 小学 伪覆盖 and 菜市场 盲区 are verified; the 药店 伪覆盖 is not
+    // 小学 and 菜市场 are verified 伪覆盖; the pharmacy is 192 m away on foot
     expect(gapCount(c.checks)).toEqual({ missing: 2, pseudo: true });
-    // 虹御公寓's only gap (药店) is unverified, so 7 of the 12 communities show up
+    // an unverified gap is left out, not guessed
+    const open = { ...c.checks, 药店: { ...c.checks.药店, status_main: '伪覆盖' as const, verified: false } };
+    expect(gapCount(open)).toEqual({ missing: 2, pseudo: true });
+    expect(gapCount({ ...open, 药店: { ...open.药店, verified: true } })).toEqual({
+      missing: 3,
+      pseudo: true,
+    });
+    // 7 of the 12 communities have a gap
     expect(points.filter((p) => p.missing > 0)).toHaveLength(7);
   });
 
@@ -375,5 +484,65 @@ describe('灰色区域', () => {
       const x = raster.missing.x0 + (i % raster.missing.nx) * raster.missing.cell;
       if (x >= 0) expect(raster.missing.values[i]).toBeNaN();
     }
+  });
+});
+
+describe('what-if with a measured route to a new facility', () => {
+  const check = (over: Partial<FacilityCheck>): FacilityCheck => ({
+    straight_m: 700,
+    route_m: 1300,
+    dur_s: 1111,
+    status: '伪覆盖',
+    status_main: '伪覆盖',
+    borderline: false,
+    route_upper_bound: false,
+    verified: true,
+    ...over,
+  });
+
+  it('covers with a walk within the rule, and keeps the better of old and new walks', () => {
+    const v = withNewFacility(check({}), { straight_m: 300, route_m: 420 }, 1000);
+    expect(v).toMatchObject({ status: '覆盖', verified: true, straight_m: 300, route_m: 420 });
+    const near = withNewFacility(
+      check({ route_m: 380, status: '覆盖', status_main: '覆盖' }),
+      { straight_m: 200, route_m: 600 },
+      1000,
+    );
+    expect(near.route_m).toBe(380);
+    expect(withNewFacility(check({}), { straight_m: 300, route_m: 980 }, 1000).status).toBe('临界');
+  });
+
+  it('keeps what the old check proved when the new walk misses the rule', () => {
+    // a 盲区 becomes 伪覆盖 once the new facility lies within the rule by straight line
+    const blind = check({
+      straight_m: 1200,
+      route_m: 1250,
+      route_basis: 'lower_bound',
+      status: '盲区',
+      status_main: '盲区',
+    });
+    const v = withNewFacility(blind, { straight_m: 800, route_m: 1400 }, 1000);
+    expect(v).toMatchObject({ status: '伪覆盖', verified: true, straight_m: 800, route_m: 1400 });
+    // an unverified check stays unverified: a nearer facility was never routed
+    const open = check({ verified: false, route_upper_bound: true });
+    expect(shownStatus(withNewFacility(open, { straight_m: 900, route_m: 1500 }, 1000))).toBe('待核实');
+    const estimated = check({
+      route_basis: 'estimated',
+      route_m: 950,
+      verified: false,
+      status: '覆盖',
+      status_main: '覆盖',
+    });
+    expect(withNewFacility(estimated, { straight_m: 900, route_m: 1500 }, 1000).verified).toBe(false);
+    // no route found to a site within the rule by straight line proves nothing
+    expect(withNewFacility(undefined, { straight_m: 600, route_m: null }, 1000)).toMatchObject({
+      verified: false,
+      route_m: null,
+    });
+    expect(withNewFacility(undefined, { straight_m: 1600, route_m: null }, 1000)).toMatchObject({
+      status: '盲区',
+      verified: true,
+    });
+    expect(shownStatus(check({}))).toBe('伪覆盖');
   });
 });

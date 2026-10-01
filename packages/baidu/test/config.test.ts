@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { authModes, BaiduConfigError, loadBaiduConfig, replayConfig, requireAuth } from '../src/index.js';
+import {
+  authModes,
+  BaiduConfigError,
+  loadBaiduConfig,
+  QuotaLedger,
+  replayConfig,
+  requireAuth,
+} from '../src/index.js';
 import { FAKE_ENV } from './helpers.js';
 
 const AK = FAKE_ENV.BAIDU_SERVER_AK;
@@ -88,6 +95,31 @@ describe('loadBaiduConfig', () => {
     const cfg = loadBaiduConfig({ BAIDU_SERVER_AK: 'abc-def', BAIDU_SERVER_AUTH: 'ip' });
     expect(cfg.live).toBe(true);
     expect(cfg.issues[0]).toMatchObject({ level: 'warn', key: 'BAIDU_SERVER_AK' });
+  });
+
+  it('reads the limits Baidu raised (BAIDU_DAILY_LIMITS) until their last day, Beijing time', () => {
+    const env = { BAIDU_DAILY_LIMITS: 'place=5000, reverse_geocoding=5000, until=2026-10-11' };
+    // 2026-10-11 23:30 in Beijing is still the raise's last day
+    const lastDay = Date.parse('2026-10-11T15:30:00Z');
+    const cfg = loadBaiduConfig(env, { now: () => lastDay });
+    expect(cfg.limits).toEqual({ place: 5000, reverse_geocoding: 5000 });
+    expect(cfg.issues).toEqual([]);
+    expect(new QuotaLedger({ tier: cfg.tier, limits: cfg.limits }).limit('place')).toBe(5000);
+    // the next day the tier's limits are back, and the config says why
+    const after = loadBaiduConfig(env, { now: () => Date.parse('2026-10-11T16:30:00Z') });
+    expect(after.limits).toEqual({});
+    expect(after.issues[0]).toMatchObject({ level: 'warn', key: 'BAIDU_DAILY_LIMITS' });
+    expect(loadBaiduConfig({}).limits).toEqual({});
+  });
+
+  it('skips unknown services and malformed values of BAIDU_DAILY_LIMITS with a warning', () => {
+    const cfg = loadBaiduConfig({ BAIDU_DAILY_LIMITS: 'place=5000;isochrone=10;geocoding=lots;until=soon' });
+    expect(cfg.limits).toEqual({ place: 5000 });
+    expect(cfg.issues.map((i) => i.key)).toEqual([
+      'BAIDU_DAILY_LIMITS',
+      'BAIDU_DAILY_LIMITS',
+      'BAIDU_DAILY_LIMITS',
+    ]);
   });
 
   it('replay config carries fake keys only', () => {

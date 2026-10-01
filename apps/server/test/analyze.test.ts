@@ -4,6 +4,7 @@ import type { AnalysisResult } from '@zoudedao/core';
 import { describe, expect, it } from 'vitest';
 import {
   AnalyzeError,
+  type AnalyzeInput,
   type Analyzer,
   type PartialResult,
   type QuotaEvent,
@@ -94,7 +95,17 @@ describe('POST /api/analyze with the sample replay analyzer', () => {
     const partialKeys = new Set(
       events.filter((e) => e.event === 'partial').flatMap((e) => Object.keys(e.data as PartialResult)),
     );
-    for (const key of ['meta', 'pois', 'samples', 'paths', 'field', 'contours', 'communities', 'stats']) {
+    for (const key of [
+      'meta',
+      'pois',
+      'samples',
+      'paths',
+      'field',
+      'contours',
+      'communities',
+      'gray_areas',
+      'stats',
+    ]) {
       expect(partialKeys).toContain(key);
     }
 
@@ -191,7 +202,7 @@ describe('POST /api/analyze body validation', () => {
     expect(xml.statusCode).toBe(415);
     expect(xml.json()).toMatchObject({ error: 'unsupported_media_type' });
 
-    const huge = await app.inject(post({ ...ANALYZE_BODY, label: 'x'.repeat(5000) }));
+    const huge = await app.inject(post({ ...ANALYZE_BODY, label: 'x'.repeat(200_000) }));
     expect(huge.statusCode).toBe(413);
     expect(huge.json()).toMatchObject({ error: 'payload_too_large' });
     await app.close();
@@ -212,6 +223,66 @@ describe('POST /api/analyze body validation', () => {
     );
     await app.inject(post({ center_bd09: [121.644195, 31.19007], extra: 'dropped' }));
     expect(seen).toEqual({ center_bd09: [121.644195, 31.19007], profile: 'adult' });
+    await app.close();
+  });
+
+  it('passes the valid browser POIs on and drops the invalid ones without failing', async () => {
+    let seen: AnalyzeInput | undefined;
+    const app = await makeApp(
+      { mode: 'live' },
+      {
+        analyzer: {
+          analyze: async (input) => {
+            seen = input;
+            return STUB_RESULT;
+          },
+        },
+      },
+    );
+    const hema = {
+      uid: '8EE16C67BBAA20C4220262DE',
+      name: '盒马鲜生(陆悦天地店)',
+      keyword: '生鲜超市',
+      bd09: [121.62276604445195, 31.18876182784504],
+    };
+    const res = await app.inject(
+      post({
+        ...ANALYZE_BODY,
+        browser_pois: [
+          hema,
+          { ...hema, uid: 'short' },
+          { ...hema, uid: '0123456789abcdef01234567', name: 'x'.repeat(61) },
+          { ...hema, uid: '0123456789abcdef01234568', keyword: '超过十个字符的关键词啊' },
+          { ...hema, uid: '0123456789abcdef01234569', bd09: [2.35, 48.85] },
+          { ...hema, uid: '0123456789abcdef0123456a', bd09: 'nope' },
+          'not an object',
+          null,
+        ],
+      }),
+    );
+    expect(res.statusCode).toBe(200);
+    expect(seen?.browser_pois).toEqual([{ ...hema, uid: '8ee16c67bbaa20c4220262de' }]);
+
+    // nothing valid: the field is left out
+    await app.inject(post({ ...ANALYZE_BODY, browser_pois: [{ uid: 'bad' }] }));
+    expect(seen).not.toHaveProperty('browser_pois');
+
+    // not an array at all: the request is wrong
+    const bad = await app.inject(post({ ...ANALYZE_BODY, browser_pois: 'none' }));
+    expect(bad.statusCode).toBe(400);
+    expect(bad.json()).toEqual({ error: 'invalid_input', message: expect.stringContaining('browser_pois') });
+
+    // 400 items with long names fit the body limit; more are cut at 400
+    const many = Array.from({ length: 450 }, (_, i) => ({
+      ...hema,
+      uid: i.toString(16).padStart(24, '0'),
+      name: `${'超'.repeat(50)}(${i}店)`,
+    }));
+    const full = await app.inject(post({ ...ANALYZE_BODY, browser_pois: many.slice(0, 400) }));
+    expect(full.statusCode).toBe(200);
+    expect(seen?.browser_pois).toHaveLength(400);
+    await app.inject(post({ ...ANALYZE_BODY, browser_pois: many }));
+    expect(seen?.browser_pois).toHaveLength(400);
     await app.close();
   });
 });

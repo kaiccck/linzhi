@@ -35,6 +35,8 @@ export const MAX_ROUTES_PER_REQUEST = 50;
 export const PLACE_TOTAL_CAP = 150;
 export const PLACE_MAX_KEYWORDS = 10;
 export const PLACE_MAX_PAGE_SIZE = 20;
+/** place/v3/detail takes up to 10 comma-separated uids per request (measured 2026-09-29). */
+export const PLACE_DETAIL_MAX_UIDS = 10;
 export const GEOCONV_MAX_POINTS = 100;
 /** Measured: routematrix walking duration is exactly distance / 1.17 m/s (300+ routes, 2026-09-26). */
 export const BAIDU_WALK_SPEED_MPS = 1.17;
@@ -142,6 +144,20 @@ export interface PlaceSearchResult {
   resultType: string | null;
   queryType: string | null;
   pois: PlacePoi[];
+  via: Via;
+}
+
+export interface PlaceDetailResult {
+  /** The uids asked for (trimmed, deduplicated, in order). */
+  uids: string[];
+  /** Full records in request order; the same fields as a place search row (scope 2). */
+  pois: PlacePoi[];
+  /** Uids Baidu returned nothing for. */
+  missing: string[];
+  /** Requests made, cached or not (PLACE_DETAIL_MAX_UIDS uids each). */
+  requests: number;
+  /** Requests that cost a Baidu call (others came from the cache). */
+  apiCalls: number;
   via: Via;
 }
 
@@ -334,7 +350,13 @@ export class BaiduClient {
         ? opts.cache
         : new BaiduCache({ store: this.store, now: this.now, enabled: opts.cache !== false });
     this.ledger =
-      opts.ledger ?? new QuotaLedger({ tier: this.config.tier, store: this.store, now: this.now });
+      opts.ledger ??
+      new QuotaLedger({
+        tier: this.config.tier,
+        store: this.store,
+        now: this.now,
+        limits: this.config.limits,
+      });
     this.scheduler =
       opts.scheduler ??
       new Scheduler({
@@ -526,6 +548,48 @@ export class BaiduClient {
       ['scope', opts.scope ?? 2],
     ];
     return this.placePaged('/place/v3/region', base, [q], { pageSize: 10, maxPages: 1, ...opts });
+  }
+
+  /**
+   * place/v3/detail with scope 2 (tags, navi_location, parent_id): the full record of POIs known by uid,
+   * e.g. ones the browser JSAPI found and place/v3/around omits. PLACE_DETAIL_MAX_UIDS uids per request
+   * (one unit of the `place` quota each), in the order given, each request cached on its own. Uids are
+   * trimmed and deduplicated; one Baidu does not know is listed in `missing`.
+   */
+  async placeDetail(uids: readonly string[], opts: CallOptions = {}): Promise<PlaceDetailResult> {
+    const list = [...new Set(uids.map((u) => (typeof u === 'string' ? u.trim() : '')))];
+    if (list.some((u) => !u || /[,;|\s]/.test(u))) throw new BaiduInputError('uid 不能为空或包含分隔符');
+    const pois: PlacePoi[] = [];
+    let requests = 0;
+    let apiCalls = 0;
+    for (let i = 0; i < list.length; i += PLACE_DETAIL_MAX_UIDS) {
+      const batch = list.slice(i, i + PLACE_DETAIL_MAX_UIDS);
+      const params: QueryParams = [
+        ['uids', batch.join(',')],
+        ['scope', 2],
+        ['output', 'json'],
+      ];
+      const { json, via } = await this.request({ service: 'place', path: '/place/v3/detail', params }, opts);
+      requests++;
+      if (via === 'api') apiCalls++;
+      // several uids answer with `results`; v2 and single uids with `result` (an object)
+      const raw = json.results ?? json.result;
+      for (const row of Array.isArray(raw) ? raw : raw ? [raw] : []) {
+        const poi = parsePoi(row);
+        if (poi?.uid && batch.includes(poi.uid) && !pois.some((p) => p.uid === poi.uid)) pois.push(poi);
+      }
+    }
+    const order = new Map(list.map((u, i) => [u, i]));
+    pois.sort((a, b) => order.get(a.uid!)! - order.get(b.uid!)!);
+    const found = new Set(pois.map((p) => p.uid));
+    return {
+      uids: list,
+      pois,
+      missing: list.filter((u) => !found.has(u)),
+      requests,
+      apiCalls,
+      via: apiCalls > 0 ? 'api' : 'cache',
+    };
   }
 
   private async placePaged(

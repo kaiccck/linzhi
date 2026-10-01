@@ -30,12 +30,16 @@ const zeroServices = (): Record<EngineService, number> => ({
 const zeroSteps = (): Record<Step, number> => ({
   locate: 0,
   facilities: 0,
+  livelihood: 0,
   residential: 0,
+  fresh: 0,
+  detail: 0,
   paths: 0,
   seed: 0,
   refine: 0,
   coverage: 0,
   siting: 0,
+  catchment: 0,
 });
 
 export class Meter {

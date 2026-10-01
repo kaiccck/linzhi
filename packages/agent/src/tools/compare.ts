@@ -30,7 +30,7 @@ export const compareSites = defineTool({
   name: 'compare_sites',
   title: '社区对比',
   description:
-    '并排对比 2–4 个已完成的体检（不同社区，或同一社区的成人/老年人画像）：15 分钟可达面积、画圆高估倍数、有效半径、' +
+    '并排对比 2–4 个已完成的体检（不同社区，或同一社区的成人/老年人画像，如 zj-a 与 zj-a~elder）：15 分钟可达面积、画圆高估倍数、有效半径、' +
     '画圆法缺口数与步行核实缺口数、各类设施缺口数、待核实数，并指出高估最严重、缺口最多的一个。只读取已有结果，不会发起新的分析。',
   inputSchema: z.object({
     analysis_ids: z

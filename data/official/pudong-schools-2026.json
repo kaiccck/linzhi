@@ -1,0 +1,4269 @@
+{
+ "id": "pudong-schools-2026",
+ "category": "小学",
+ "title": "2026年浦东新区义务教育阶段学校招生入学信息公示（小学）",
+ "publisher": "上海市浦东新区教育局",
+ "published": "2026-04-07",
+ "url": "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354049.html",
+ "retrieved": "2026-09-28",
+ "region": {
+  "city": "上海市",
+  "district": "浦东新区"
+ },
+ "note": "浦东新区 2026 年招收一年级的全部小学（公办、民办）及九年一贯制学校，按校区一行（小学表一，267 行）。学校、校区、性质、地址、对口招生范围按网页 HTML 表格逐行转录（附件 xls 未下载），新开办学校或校区记在 opened。辅读学校、特殊教育学校、致立学校为特殊教育学校，status 记为“特殊教育”，不作为普通小学补充或确认。catchment_towns 是该校区在《2025年浦东新区公办小学招生地段公示》中对口地段所属的街镇（按行数从多到少），只用于排地理编码的先后，不是学校所在街镇。bd09 由 apps/server/scripts/geocode-official.ts 用百度地理编码补充，geocode 字段记录精度；尚无 bd09 的条目不参与融合。名录中没有“上海市浦东新区育华学校(雪英校区)”，它已列入 data/official/exclusions.json。",
+ "counts": {
+  "listed": 267,
+  "active": 263,
+  "public": 245,
+  "private": 22
+ },
+ "entries": [
+  {
+   "code": "3101150001",
+   "name": "上海市浦东新区上南实验小学（三林校区）",
+   "school": "上海市浦东新区上南实验小学",
+   "campus": "三林校区",
+   "sector": "公办",
+   "address": "三旋路218号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150001",
+   "name": "上海市浦东新区上南实验小学（昌里校区）",
+   "school": "上海市浦东新区上南实验小学",
+   "campus": "昌里校区",
+   "sector": "公办",
+   "address": "昌里路220号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "上钢新村街道"
+   ]
+  },
+  {
+   "code": "3101150001",
+   "name": "上海市浦东新区上南实验小学（上钢校区）",
+   "school": "上海市浦东新区上南实验小学",
+   "campus": "上钢校区",
+   "sector": "公办",
+   "address": "上钢一村91号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.503873,
+    31.184442
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 70,
+    "level": "地产小区",
+    "query": "上海市浦东新区上钢一村91号"
+   }
+  },
+  {
+   "code": "3101150002",
+   "name": "上海市浦东新区上南二村小学（南校区）",
+   "school": "上海市浦东新区上南二村小学",
+   "campus": "南校区",
+   "sector": "公办",
+   "address": "上南路1251弄28号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周家渡街道"
+   ]
+  },
+  {
+   "code": "3101150002",
+   "name": "上海市浦东新区上南二村小学（总部）",
+   "school": "上海市浦东新区上南二村小学",
+   "campus": "总部",
+   "sector": "公办",
+   "address": "上南路929弄19号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周家渡街道"
+   ]
+  },
+  {
+   "code": "3101150004",
+   "name": "上海市浦东新区上南五村小学",
+   "school": "上海市浦东新区上南五村小学",
+   "sector": "公办",
+   "address": "齐河路99号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周家渡街道"
+   ]
+  },
+  {
+   "code": "3101150005",
+   "name": "上海戏剧学院附属浦东新世界实验小学（昌里校区）",
+   "school": "上海戏剧学院附属浦东新世界实验小学",
+   "campus": "昌里校区",
+   "sector": "公办",
+   "address": "云台路230号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.510785,
+    31.180682
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区云台路230号"
+   }
+  },
+  {
+   "code": "3101150005",
+   "name": "上海戏剧学院附属浦东新世界实验小学（洪山校区）",
+   "school": "上海戏剧学院附属浦东新世界实验小学",
+   "campus": "洪山校区",
+   "sector": "公办",
+   "address": "洪山路753号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150005",
+   "name": "上海戏剧学院附属浦东新世界实验小学（德州校区）",
+   "school": "上海戏剧学院附属浦东新世界实验小学",
+   "campus": "德州校区",
+   "sector": "公办",
+   "address": "成山路248弄36号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.505083,
+    31.174862
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区成山路248弄36号"
+   }
+  },
+  {
+   "code": "3101150007",
+   "name": "上海市浦东新区进才实验小学西校（大华校区）",
+   "school": "上海市浦东新区进才实验小学西校",
+   "campus": "大华校区",
+   "sector": "公办",
+   "address": "华绣路59号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.529806,
+    31.189419
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区华绣路59号"
+   }
+  },
+  {
+   "code": "3101150007",
+   "name": "上海市浦东新区进才实验小学西校（浦三校区）",
+   "school": "上海市浦东新区进才实验小学西校",
+   "campus": "浦三校区",
+   "sector": "公办",
+   "address": "浦三路2859号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150008",
+   "name": "上海市浦东新区德州一村小学",
+   "school": "上海市浦东新区德州一村小学",
+   "sector": "公办",
+   "address": "西营路55号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "上钢新村街道"
+   ]
+  },
+  {
+   "code": "3101150009",
+   "name": "上海市浦东新区德州二村小学",
+   "school": "上海市浦东新区德州二村小学",
+   "sector": "公办",
+   "address": "长清路145路",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "上钢新村街道"
+   ]
+  },
+  {
+   "code": "3101150011",
+   "name": "上海市浦东新区杨思小学",
+   "school": "上海市浦东新区杨思小学",
+   "sector": "公办",
+   "address": "杨南路380号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150012",
+   "name": "上海市浦东新区云台小学",
+   "school": "上海市浦东新区云台小学",
+   "sector": "公办",
+   "address": "昌里东路80弄60号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周家渡街道"
+   ]
+  },
+  {
+   "code": "3101150015",
+   "name": "上海市浦东新区南码头小学（东三校区）",
+   "school": "上海市浦东新区南码头小学",
+   "campus": "东三校区",
+   "sector": "公办",
+   "address": "东三里桥路16号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南码头路街道"
+   ]
+  },
+  {
+   "code": "3101150015",
+   "name": "上海市浦东新区南码头小学（三舒校区）",
+   "school": "上海市浦东新区南码头小学",
+   "campus": "三舒校区",
+   "sector": "公办",
+   "address": "三舒路265号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150016",
+   "name": "上海市浦东新区白玉兰小学（临沂校区）",
+   "school": "上海市浦东新区白玉兰小学",
+   "campus": "临沂校区",
+   "sector": "公办",
+   "address": "临沂路400号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南码头路街道"
+   ]
+  },
+  {
+   "code": "3101150016",
+   "name": "上海市浦东新区白玉兰小学（三杨校区）",
+   "school": "上海市浦东新区白玉兰小学",
+   "campus": "三杨校区",
+   "sector": "公办",
+   "address": "杨思路200号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150017",
+   "name": "上海市浦东新区临沂二村小学",
+   "school": "上海市浦东新区临沂二村小学",
+   "sector": "公办",
+   "address": "南码头路455号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南码头路街道",
+    "周家渡街道"
+   ]
+  },
+  {
+   "code": "3101150018",
+   "name": "上海市浦东新区浦三路小学",
+   "school": "上海市浦东新区浦三路小学",
+   "sector": "公办",
+   "address": "兰陵路21号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南码头路街道"
+   ]
+  },
+  {
+   "code": "3101150019",
+   "name": "上海交通大学附属浦东实验小学北校（浦南校区）",
+   "school": "上海交通大学附属浦东实验小学北校",
+   "campus": "浦南校区",
+   "sector": "公办",
+   "address": "浦东南路2168号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.521347,
+    31.213339
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区浦东南路2168号"
+   }
+  },
+  {
+   "code": "3101150019",
+   "name": "上海交通大学附属浦东实验小学北校（龙阳校区）",
+   "school": "上海交通大学附属浦东实验小学北校",
+   "campus": "龙阳校区",
+   "sector": "公办",
+   "address": "东环龙路251号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.532961,
+    31.207195
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区东环龙路251号"
+   }
+  },
+  {
+   "code": "3101150019",
+   "name": "上海交通大学附属浦东实验小学北校（南泉校区）",
+   "school": "上海交通大学附属浦东实验小学北校",
+   "campus": "南泉校区",
+   "sector": "公办",
+   "address": "浦建路207弄58号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.53078,
+    31.214586
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区浦建路207弄58号"
+   }
+  },
+  {
+   "code": "3101150021",
+   "name": "上海市浦东新区东方小学（蓝村校区）",
+   "school": "上海市浦东新区东方小学",
+   "campus": "蓝村校区",
+   "sector": "公办",
+   "address": "蓝村路30弄11号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "塘桥街道"
+   ]
+  },
+  {
+   "code": "3101150021",
+   "name": "上海市浦东新区东方小学（懿德校区）",
+   "school": "上海市浦东新区东方小学",
+   "campus": "懿德校区",
+   "sector": "公办",
+   "address": "懿行路976号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150022",
+   "name": "上海市浦东新区育童小学",
+   "school": "上海市浦东新区育童小学",
+   "sector": "公办",
+   "address": "下南路400号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.54698,
+    31.177309
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区下南路400号"
+   }
+  },
+  {
+   "code": "3101150029",
+   "name": "上海市浦明师范学校附属小学（锦绣校区）",
+   "school": "上海市浦明师范学校附属小学",
+   "campus": "锦绣校区",
+   "sector": "公办",
+   "address": "银融路87号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.541884,
+    31.214921
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区银融路87号"
+   }
+  },
+  {
+   "code": "3101150029",
+   "name": "上海市浦明师范学校附属小学（潍坊校区）",
+   "school": "上海市浦明师范学校附属小学",
+   "campus": "潍坊校区",
+   "sector": "公办",
+   "address": "浦电路305弄23号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "潍坊新村街道"
+   ]
+  },
+  {
+   "code": "3101150029",
+   "name": "上海市浦明师范学校附属小学（潍坊校区滨江办学点）",
+   "school": "上海市浦明师范学校附属小学",
+   "campus": "潍坊校区滨江办学点",
+   "sector": "公办",
+   "address": "浦东南路1570弄25号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.524383,
+    31.225934
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区浦东南路1570弄25号"
+   }
+  },
+  {
+   "code": "3101150029",
+   "name": "上海市浦明师范学校附属小学（东城校区）",
+   "school": "上海市浦明师范学校附属小学",
+   "campus": "东城校区",
+   "sector": "公办",
+   "address": "东绣路1436号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.537846,
+    31.207913
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区东绣路1436号"
+   }
+  },
+  {
+   "code": "3101150031",
+   "name": "上海市浦东新区明珠小学（A区）",
+   "school": "上海市浦东新区明珠小学",
+   "campus": "A区",
+   "sector": "公办",
+   "address": "南泉北路1019号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "潍坊新村街道"
+   ]
+  },
+  {
+   "code": "3101150031",
+   "name": "上海市浦东新区明珠小学（B区）",
+   "school": "上海市浦东新区明珠小学",
+   "campus": "B区",
+   "sector": "公办",
+   "address": "崂山路638弄1号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "潍坊新村街道"
+   ]
+  },
+  {
+   "code": "3101150031",
+   "name": "上海市浦东新区明珠小学（B区浦电路教学点）",
+   "school": "上海市浦东新区明珠小学",
+   "campus": "B区浦电路教学点",
+   "sector": "公办",
+   "address": "浦电路313号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.53354,
+    31.22594
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区浦电路313号"
+   }
+  },
+  {
+   "code": "3101150031",
+   "name": "上海市浦东新区明珠小学（C区）",
+   "school": "上海市浦东新区明珠小学",
+   "campus": "C区",
+   "sector": "公办",
+   "address": "盛苑路520号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇",
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.532587,
+    31.167215
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区盛苑路520号"
+   }
+  },
+  {
+   "code": "3101150032",
+   "name": "上海市浦东新区竹园小学（张杨校区）",
+   "school": "上海市浦东新区竹园小学",
+   "campus": "张杨校区",
+   "sector": "公办",
+   "address": "张杨路1050弄1号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "潍坊新村街道"
+   ]
+  },
+  {
+   "code": "3101150032",
+   "name": "上海市浦东新区竹园小学（沪东校区A）",
+   "school": "上海市浦东新区竹园小学",
+   "campus": "沪东校区A",
+   "sector": "公办",
+   "address": "长岛路281号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.584313,
+    31.271386
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区长岛路281号"
+   }
+  },
+  {
+   "code": "3101150032",
+   "name": "上海市浦东新区竹园小学（沪东校区B）",
+   "school": "上海市浦东新区竹园小学",
+   "campus": "沪东校区B",
+   "sector": "公办",
+   "address": "柳埠路166号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.588861,
+    31.269664
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区柳埠路166号"
+   }
+  },
+  {
+   "code": "3101150032",
+   "name": "上海市浦东新区竹园小学（龙阳校区）",
+   "school": "上海市浦东新区竹园小学",
+   "campus": "龙阳校区",
+   "sector": "公办",
+   "address": "龙阳路1822弄1号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.558622,
+    31.207458
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 70,
+    "level": "教育",
+    "query": "上海市浦东新区龙阳路1822弄1号"
+   }
+  },
+  {
+   "code": "3101150034",
+   "name": "上海市浦东新区昌邑小学（陆家嘴校区）",
+   "school": "上海市浦东新区昌邑小学",
+   "campus": "陆家嘴校区",
+   "sector": "公办",
+   "address": "崂山路10号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "陆家嘴街道"
+   ]
+  },
+  {
+   "code": "3101150034",
+   "name": "上海市浦东新区昌邑小学（大华校区）",
+   "school": "上海市浦东新区昌邑小学",
+   "campus": "大华校区",
+   "sector": "公办",
+   "address": "下南路879号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.543834,
+    31.18684
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区下南路879号"
+   }
+  },
+  {
+   "code": "3101150035",
+   "name": "上海市浦东新区崂山小学（周浦校区）",
+   "school": "上海市浦东新区崂山小学",
+   "campus": "周浦校区",
+   "sector": "公办",
+   "address": "康浦路111号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇",
+    "康桥镇"
+   ],
+   "bd09": [
+    121.609354,
+    31.123617
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区康浦路111号"
+   }
+  },
+  {
+   "code": "3101150035",
+   "name": "上海市浦东新区崂山小学（陆家嘴校区）",
+   "school": "上海市浦东新区崂山小学",
+   "campus": "陆家嘴校区",
+   "sector": "公办",
+   "address": "南泉北路300号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "陆家嘴街道"
+   ]
+  },
+  {
+   "code": "3101150036",
+   "name": "上海市浦东新区梅园小学",
+   "school": "上海市浦东新区梅园小学",
+   "sector": "公办",
+   "address": "浦东大道650号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "陆家嘴街道"
+   ]
+  },
+  {
+   "code": "3101150039",
+   "name": "上海市浦东新区第二中心小学（巨野校区）",
+   "school": "上海市浦东新区第二中心小学",
+   "campus": "巨野校区",
+   "sector": "公办",
+   "address": "巨野路517号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "洋泾街道"
+   ]
+  },
+  {
+   "code": "3101150039",
+   "name": "上海市浦东新区第二中心小学（张江校区）",
+   "school": "上海市浦东新区第二中心小学",
+   "campus": "张江校区",
+   "sector": "公办",
+   "address": "益江路107号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇"
+   ],
+   "bd09": [
+    121.642329,
+    31.205244
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区益江路107号"
+   }
+  },
+  {
+   "code": "3101150039",
+   "name": "上海市浦东新区第二中心小学（申江校区）",
+   "school": "上海市浦东新区第二中心小学",
+   "campus": "申江校区",
+   "sector": "公办",
+   "address": "茂春路266号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇"
+   ],
+   "bd09": [
+    121.632812,
+    31.177886
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区茂春路266号"
+   }
+  },
+  {
+   "code": "3101150040",
+   "name": "上海市浦东新区华林小学",
+   "school": "上海市浦东新区华林小学",
+   "sector": "公办",
+   "address": "芳芯路568号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.569633,
+    31.198862
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区芳芯路568号"
+   }
+  },
+  {
+   "code": "3101150041",
+   "name": "上海市浦东新区海桐小学（樱花校区）",
+   "school": "上海市浦东新区海桐小学",
+   "campus": "樱花校区",
+   "sector": "公办",
+   "address": "海桐路58号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.559155,
+    31.211484
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区海桐路58号"
+   }
+  },
+  {
+   "code": "3101150041",
+   "name": "上海市浦东新区海桐小学（东城校区）",
+   "school": "上海市浦东新区海桐小学",
+   "campus": "东城校区",
+   "sector": "公办",
+   "address": "东建路680弄60号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.54812,
+    31.207585
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 50,
+    "level": "NoClass",
+    "query": "上海市浦东新区东建路680弄60号"
+   }
+  },
+  {
+   "code": "3101150041",
+   "name": "上海市浦东新区海桐小学（花木校区）",
+   "school": "上海市浦东新区海桐小学",
+   "campus": "花木校区",
+   "sector": "公办",
+   "address": "杜鹃路152号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.555419,
+    31.208587
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区杜鹃路152号"
+   }
+  },
+  {
+   "code": "3101150047",
+   "name": "上海市第六师范学校附属小学（羽山校区）",
+   "school": "上海市第六师范学校附属小学",
+   "campus": "羽山校区",
+   "sector": "公办",
+   "address": "羽山路1476号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "洋泾街道"
+   ]
+  },
+  {
+   "code": "3101150047",
+   "name": "上海市第六师范学校附属小学（羽山校区海防教学点）",
+   "school": "上海市第六师范学校附属小学",
+   "campus": "羽山校区海防教学点",
+   "sector": "公办",
+   "address": "海防新村60号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.559088,
+    31.254701
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 75,
+    "level": "楼号",
+    "query": "上海市浦东新区海防新村60号"
+   }
+  },
+  {
+   "code": "3101150047",
+   "name": "上海市第六师范学校附属小学（芳菲校区）",
+   "school": "上海市第六师范学校附属小学",
+   "campus": "芳菲校区",
+   "sector": "公办",
+   "address": "繁锦路1165号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高行镇"
+   ]
+  },
+  {
+   "code": "3101150047",
+   "name": "上海市第六师范学校附属小学（万德校区）",
+   "school": "上海市第六师范学校附属小学",
+   "campus": "万德校区",
+   "sector": "公办",
+   "address": "栖山路1007号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "金杨新村街道"
+   ]
+  },
+  {
+   "code": "3101150048",
+   "name": "上海大学附属浦东实验小学",
+   "school": "上海大学附属浦东实验小学",
+   "sector": "公办",
+   "address": "定水路93号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "洋泾街道"
+   ]
+  },
+  {
+   "code": "3101150050",
+   "name": "上海市第六师范学校第二附属小学（西校区）",
+   "school": "上海市第六师范学校第二附属小学",
+   "campus": "西校区",
+   "sector": "公办",
+   "address": "浦东大道1588弄20号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "洋泾街道"
+   ]
+  },
+  {
+   "code": "3101150050",
+   "name": "上海市第六师范学校第二附属小学（东校区）",
+   "school": "上海市第六师范学校第二附属小学",
+   "campus": "东校区",
+   "sector": "公办",
+   "address": "浦东大道1797号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "洋泾街道"
+   ]
+  },
+  {
+   "code": "3101150052",
+   "name": "上海市浦东新区罗山小学",
+   "school": "上海市浦东新区罗山小学",
+   "sector": "公办",
+   "address": "德平路100弄96号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "金杨新村街道"
+   ]
+  },
+  {
+   "code": "3101150055",
+   "name": "上海市浦东新区金英小学",
+   "school": "上海市浦东新区金英小学",
+   "sector": "公办",
+   "address": "金口路356号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "金杨新村街道"
+   ]
+  },
+  {
+   "code": "3101150056",
+   "name": "上海市浦东新区金陆小学",
+   "school": "上海市浦东新区金陆小学",
+   "sector": "公办",
+   "address": "枣庄路575号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "金杨新村街道"
+   ]
+  },
+  {
+   "code": "3101150057",
+   "name": "上海市浦东新区香山小学",
+   "school": "上海市浦东新区香山小学",
+   "sector": "公办",
+   "address": "德平路1197弄1号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "金杨新村街道"
+   ]
+  },
+  {
+   "code": "3101150060",
+   "name": "上海市浦东新区沪新小学",
+   "school": "上海市浦东新区沪新小学",
+   "sector": "公办",
+   "address": "兰城路290号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "沪东新村街道"
+   ]
+  },
+  {
+   "code": "3101150061",
+   "name": "上海市浦东新区莱阳小学",
+   "school": "上海市浦东新区莱阳小学",
+   "sector": "公办",
+   "address": "利津路168号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "沪东新村街道"
+   ]
+  },
+  {
+   "code": "3101150062",
+   "name": "上海市浦东新区东荷小学",
+   "school": "上海市浦东新区东荷小学",
+   "sector": "公办",
+   "address": "五莲路1003号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "浦兴路街道"
+   ]
+  },
+  {
+   "code": "3101150064",
+   "name": "上海市浦东新区金新小学",
+   "school": "上海市浦东新区金新小学",
+   "sector": "公办",
+   "address": "长岛路1563号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "浦兴路街道"
+   ]
+  },
+  {
+   "code": "3101150065",
+   "name": "上海市浦东新区金茂小学（碧云校区）",
+   "school": "上海市浦东新区金茂小学",
+   "campus": "碧云校区",
+   "sector": "公办",
+   "address": "台儿庄路96号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "浦兴路街道"
+   ]
+  },
+  {
+   "code": "3101150065",
+   "name": "上海市浦东新区金茂小学（金东名苑校区）",
+   "school": "上海市浦东新区金茂小学",
+   "campus": "金东名苑校区",
+   "sector": "公办",
+   "address": "平度路50号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "浦兴路街道"
+   ]
+  },
+  {
+   "code": "3101150066",
+   "name": "上海市浦东新区华高小学（巨峰路校区）",
+   "school": "上海市浦东新区华高小学",
+   "campus": "巨峰路校区",
+   "sector": "公办",
+   "address": "巨峰路997弄华高二村73号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.622445,
+    31.287067
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 70,
+    "level": "地产小区",
+    "query": "上海市浦东新区巨峰路997弄华高二村73号"
+   }
+  },
+  {
+   "code": "3101150066",
+   "name": "上海市浦东新区华高小学（东靖路校区）",
+   "school": "上海市浦东新区华高小学",
+   "campus": "东靖路校区",
+   "sector": "公办",
+   "address": "高建路40号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.62249,
+    31.298105
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区高建路40号"
+   }
+  },
+  {
+   "code": "3101150070",
+   "name": "上海市浦东新区东波小学（沪东校区）",
+   "school": "上海市浦东新区东波小学",
+   "campus": "沪东校区",
+   "sector": "公办",
+   "address": "兴运路9号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "沪东新村街道"
+   ]
+  },
+  {
+   "code": "3101150071",
+   "name": "上海市浦东新区凌桥小学（江东路校区）",
+   "school": "上海市浦东新区凌桥小学",
+   "campus": "江东路校区",
+   "sector": "公办",
+   "address": "江东路1380弄78号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高桥镇"
+   ]
+  },
+  {
+   "code": "3101150071",
+   "name": "上海市浦东新区凌桥小学（新益校区）",
+   "school": "上海市浦东新区凌桥小学",
+   "campus": "新益校区",
+   "sector": "公办",
+   "address": "凌桥新益一队15号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高桥镇"
+   ]
+  },
+  {
+   "code": "3101150072",
+   "name": "上海市浦东新区高行镇高行小学",
+   "school": "上海市浦东新区高行镇高行小学",
+   "sector": "公办",
+   "address": "高行街399号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.614892,
+    31.303994
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区高行街399号"
+   }
+  },
+  {
+   "code": "3101150073",
+   "name": "上海市浦东新区建平永宁小学",
+   "school": "上海市浦东新区建平永宁小学",
+   "sector": "公办",
+   "address": "永宁路114号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "金桥镇"
+   ],
+   "bd09": [
+    121.618445,
+    31.272826
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区永宁路114号"
+   }
+  },
+  {
+   "code": "3101150074",
+   "name": "上海市浦东新区高行镇东沟小学",
+   "school": "上海市浦东新区高行镇东沟小学",
+   "sector": "公办",
+   "address": "东沟北路67号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高行镇"
+   ]
+  },
+  {
+   "code": "3101150076",
+   "name": "上海市浦东新区金桥镇中心小学（菏泽校区）",
+   "school": "上海市浦东新区金桥镇中心小学",
+   "campus": "菏泽校区",
+   "sector": "公办",
+   "address": "菏泽路785弄100号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "浦兴路街道"
+   ]
+  },
+  {
+   "code": "3101150076",
+   "name": "上海市浦东新区金桥镇中心小学（金粤校区）",
+   "school": "上海市浦东新区金桥镇中心小学",
+   "campus": "金粤校区",
+   "sector": "公办",
+   "address": "金槐路899号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "金桥镇"
+   ],
+   "bd09": [
+    121.636671,
+    31.24226
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金槐路899号"
+   }
+  },
+  {
+   "code": "3101150077",
+   "name": "上海市浦东新区高行镇高南小学",
+   "school": "上海市浦东新区高行镇高南小学",
+   "sector": "公办",
+   "address": "莱阳路3382号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高行镇"
+   ]
+  },
+  {
+   "code": "3101150078",
+   "name": "上海市外高桥保税区实验小学",
+   "school": "上海市外高桥保税区实验小学",
+   "sector": "公办",
+   "address": "季景路40号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高桥镇"
+   ]
+  },
+  {
+   "code": "3101150080",
+   "name": "上海市浦东新区顾路小学（北校区）",
+   "school": "上海市浦东新区顾路小学",
+   "campus": "北校区",
+   "sector": "公办",
+   "address": "水洞港路301号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "曹路镇"
+   ]
+  },
+  {
+   "code": "3101150080",
+   "name": "上海市浦东新区顾路小学（南校区）",
+   "school": "上海市浦东新区顾路小学",
+   "campus": "南校区",
+   "sector": "公办",
+   "address": "金晓路133号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "曹路镇"
+   ]
+  },
+  {
+   "code": "3101150081",
+   "name": "上海市浦东新区潼港小学（清溪路校区）",
+   "school": "上海市浦东新区潼港小学",
+   "campus": "清溪路校区",
+   "sector": "公办",
+   "address": "清溪路425号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高桥镇"
+   ]
+  },
+  {
+   "code": "3101150081",
+   "name": "上海市浦东新区潼港小学（大同路校区）",
+   "school": "上海市浦东新区潼港小学",
+   "campus": "大同路校区",
+   "sector": "公办",
+   "address": "大同路1010弄81号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高桥镇"
+   ]
+  },
+  {
+   "code": "3101150082",
+   "name": "上海市浦东新区杨园中心小学",
+   "school": "上海市浦东新区杨园中心小学",
+   "sector": "公办",
+   "address": "园一路199号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高东镇"
+   ]
+  },
+  {
+   "code": "3101150083",
+   "name": "上海市浦东新区学前小学",
+   "school": "上海市浦东新区学前小学",
+   "sector": "公办",
+   "address": "海春路86号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高桥镇"
+   ]
+  },
+  {
+   "code": "3101150084",
+   "name": "上海市浦东新区高桥镇小学（花山校区）",
+   "school": "上海市浦东新区高桥镇小学",
+   "campus": "花山校区",
+   "sector": "公办",
+   "address": "花山路789号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高桥镇"
+   ]
+  },
+  {
+   "code": "3101150084",
+   "name": "上海市浦东新区高桥镇小学（高行校区）",
+   "school": "上海市浦东新区高桥镇小学",
+   "campus": "高行校区",
+   "sector": "公办",
+   "address": "兰嵩路330号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高行镇"
+   ]
+  },
+  {
+   "code": "3101150086",
+   "name": "上海市浦东新区高东镇中心小学",
+   "school": "上海市浦东新区高东镇中心小学",
+   "sector": "公办",
+   "address": "光明路558号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高东镇"
+   ]
+  },
+  {
+   "code": "3101150087",
+   "name": "上海市浦东新区北蔡镇中心小学",
+   "school": "上海市浦东新区北蔡镇中心小学",
+   "sector": "公办",
+   "address": "北中路101号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.559463,
+    31.189295
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区北中路101号"
+   }
+  },
+  {
+   "code": "3101150088",
+   "name": "上海市浦东新区莲溪小学（南校区）",
+   "school": "上海市浦东新区莲溪小学",
+   "campus": "南校区",
+   "sector": "公办",
+   "address": "新陈路68号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "北蔡镇",
+    "花木街道"
+   ],
+   "bd09": [
+    121.564981,
+    31.185077
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新陈路68号"
+   }
+  },
+  {
+   "code": "3101150088",
+   "name": "上海市浦东新区莲溪小学（北校区）",
+   "school": "上海市浦东新区莲溪小学",
+   "campus": "北校区",
+   "sector": "公办",
+   "address": "北中路343号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "北蔡镇",
+    "花木街道"
+   ],
+   "bd09": [
+    121.564695,
+    31.190315
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区北中路343号"
+   }
+  },
+  {
+   "code": "3101150089",
+   "name": "上海市浦东新区张江镇中心小学",
+   "school": "上海市浦东新区张江镇中心小学",
+   "sector": "公办",
+   "address": "紫薇路686号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇"
+   ],
+   "bd09": [
+    121.628986,
+    31.212163
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区紫薇路686号"
+   }
+  },
+  {
+   "code": "3101150090",
+   "name": "上海市浦东新区孙桥小学（张江校区）",
+   "school": "上海市浦东新区孙桥小学",
+   "campus": "张江校区",
+   "sector": "公办",
+   "address": "张江路1615号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇"
+   ],
+   "bd09": [
+    121.637515,
+    31.193219
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区张江路1615号"
+   }
+  },
+  {
+   "code": "3101150090",
+   "name": "上海市浦东新区孙桥小学（申江校区）",
+   "school": "上海市浦东新区孙桥小学",
+   "campus": "申江校区",
+   "sector": "公办",
+   "address": "孙宇路289号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇"
+   ],
+   "bd09": [
+    121.635482,
+    31.182543
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区孙宇路289号"
+   }
+  },
+  {
+   "code": "3101150091",
+   "name": "上海市浦东新区凌兆小学",
+   "school": "上海市浦东新区凌兆小学",
+   "sector": "公办",
+   "address": "灵岩南路798号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "东明路街道",
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150092",
+   "name": "上海市浦东新区清源小学",
+   "school": "上海市浦东新区清源小学",
+   "sector": "公办",
+   "address": "凌兆路334弄38号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "东明路街道"
+   ]
+  },
+  {
+   "code": "3101150093",
+   "name": "上海市浦东新区林苑小学",
+   "school": "上海市浦东新区林苑小学",
+   "sector": "公办",
+   "address": "三林路1466弄24号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "东明路街道"
+   ]
+  },
+  {
+   "code": "3101150094",
+   "name": "上海市浦东新区大桥小学",
+   "school": "上海市浦东新区大桥小学",
+   "sector": "公办",
+   "address": "杨思路400号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150096",
+   "name": "上海市浦东新区三林镇中心小学（三林路校区）",
+   "school": "上海市浦东新区三林镇中心小学",
+   "campus": "三林路校区",
+   "sector": "公办",
+   "address": "三林路368号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇",
+    "东明路街道"
+   ]
+  },
+  {
+   "code": "3101150096",
+   "name": "上海市浦东新区三林镇中心小学（云台路校区）",
+   "school": "上海市浦东新区三林镇中心小学",
+   "campus": "云台路校区",
+   "sector": "公办",
+   "address": "云台路2280号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇",
+    "东明路街道"
+   ]
+  },
+  {
+   "code": "3101150097",
+   "name": "上海市浦东新区观澜小学（新川校区）",
+   "school": "上海市浦东新区观澜小学",
+   "campus": "新川校区",
+   "sector": "公办",
+   "address": "新川路171号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.712378,
+    31.20102
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新川路171号"
+   }
+  },
+  {
+   "code": "3101150097",
+   "name": "上海市浦东新区观澜小学（川周校区）",
+   "school": "上海市浦东新区观澜小学",
+   "campus": "川周校区",
+   "sector": "公办",
+   "address": "川周公路7577号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.703377,
+    31.180483
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区川周公路7577号"
+   }
+  },
+  {
+   "code": "3101150097",
+   "name": "上海市浦东新区观澜小学（新溪校区）",
+   "school": "上海市浦东新区观澜小学",
+   "campus": "新溪校区",
+   "sector": "公办",
+   "address": "北新溪路301号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.716093,
+    31.120141
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区北新溪路301号"
+   }
+  },
+  {
+   "code": "3101150098",
+   "name": "上海市浦东新区园西小学（南桥校区）",
+   "school": "上海市浦东新区园西小学",
+   "campus": "南桥校区",
+   "sector": "公办",
+   "address": "南桥路815号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.700844,
+    31.194289
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区南桥路815号"
+   }
+  },
+  {
+   "code": "3101150098",
+   "name": "上海市浦东新区园西小学（新德校区）",
+   "school": "上海市浦东新区园西小学",
+   "campus": "新德校区",
+   "sector": "公办",
+   "address": "新德西路236号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.679039,
+    31.199318
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新德西路236号"
+   }
+  },
+  {
+   "code": "3101150099",
+   "name": "上海市浦东新区教育学院附属小学",
+   "school": "上海市浦东新区教育学院附属小学",
+   "sector": "公办",
+   "address": "新德路604弄75号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.697684,
+    31.203602
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 50,
+    "level": "NoClass",
+    "query": "上海市浦东新区新德路604弄75号"
+   }
+  },
+  {
+   "code": "3101150100",
+   "name": "上海市浦东新区新城小学",
+   "school": "上海市浦东新区新城小学",
+   "sector": "公办",
+   "address": "新德路439号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇",
+    "合庆镇"
+   ],
+   "bd09": [
+    121.701604,
+    31.203076
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区新德路439号"
+   }
+  },
+  {
+   "code": "3101150101",
+   "name": "上海市浦东新区东港小学",
+   "school": "上海市浦东新区东港小学",
+   "sector": "公办",
+   "address": "航城五路277号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "祝桥镇"
+   ]
+  },
+  {
+   "code": "3101150102",
+   "name": "上海市浦东新区晨阳小学",
+   "school": "上海市浦东新区晨阳小学",
+   "sector": "公办",
+   "address": "江明路150号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "祝桥镇"
+   ]
+  },
+  {
+   "code": "3101150103",
+   "name": "上海市浦东新区实验小学",
+   "school": "上海市浦东新区实验小学",
+   "sector": "公办",
+   "address": "川沙路5413弄78号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.709179,
+    31.192359
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区川沙路5413弄78号"
+   }
+  },
+  {
+   "code": "3101150104",
+   "name": "上海市浦东新区黄楼小学",
+   "school": "上海市浦东新区黄楼小学",
+   "sector": "公办",
+   "address": "迎春街95号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.678691,
+    31.171213
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区迎春街95号"
+   }
+  },
+  {
+   "code": "3101150105",
+   "name": "上海市浦东新区六团小学",
+   "school": "上海市浦东新区六团小学",
+   "sector": "公办",
+   "address": "六团普新路150号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.735849,
+    31.156481
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区六团普新路150号"
+   }
+  },
+  {
+   "code": "3101150106",
+   "name": "上海市浦东新区施湾小学",
+   "school": "上海市浦东新区施湾小学",
+   "sector": "公办",
+   "address": "航城三路572号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "祝桥镇"
+   ]
+  },
+  {
+   "code": "3101150107",
+   "name": "上海市浦东新区江镇中心小学",
+   "school": "上海市浦东新区江镇中心小学",
+   "sector": "公办",
+   "address": "新建路62弄19号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "祝桥镇"
+   ]
+  },
+  {
+   "code": "3101150108",
+   "name": "上海市浦东新区蔡路逸夫小学",
+   "school": "上海市浦东新区蔡路逸夫小学",
+   "sector": "公办",
+   "address": "东川公路7947弄28号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "合庆镇"
+   ]
+  },
+  {
+   "code": "3101150109",
+   "name": "上海市浦东新区合庆镇中心小学",
+   "school": "上海市浦东新区合庆镇中心小学",
+   "sector": "公办",
+   "address": "小白路1378号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "合庆镇"
+   ]
+  },
+  {
+   "code": "3101150110",
+   "name": "上海市浦东新区龚路中心小学（东校区）",
+   "school": "上海市浦东新区龚路中心小学",
+   "campus": "东校区",
+   "sector": "公办",
+   "address": "龚华路69号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "曹路镇"
+   ]
+  },
+  {
+   "code": "3101150110",
+   "name": "上海市浦东新区龚路中心小学（西校区）",
+   "school": "上海市浦东新区龚路中心小学",
+   "campus": "西校区",
+   "sector": "公办",
+   "address": "民雨路300号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "曹路镇"
+   ]
+  },
+  {
+   "code": "3101150111",
+   "name": "上海市浦东新区福山宏雅小学",
+   "school": "上海市浦东新区福山宏雅小学",
+   "sector": "公办",
+   "address": "宏雅路375号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "唐镇"
+   ],
+   "bd09": [
+    121.682952,
+    31.241936
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区宏雅路375号"
+   }
+  },
+  {
+   "code": "3101150112",
+   "name": "上海市浦东新区唐镇小学",
+   "school": "上海市浦东新区唐镇小学",
+   "sector": "公办",
+   "address": "唐兴路439号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "唐镇"
+   ],
+   "bd09": [
+    121.66195,
+    31.212762
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区唐兴路439号"
+   }
+  },
+  {
+   "code": "3101150115",
+   "name": "上海市浦东新区庆华小学",
+   "school": "上海市浦东新区庆华小学",
+   "sector": "公办",
+   "address": "庆荣路512号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "合庆镇"
+   ]
+  },
+  {
+   "code": "3101150119",
+   "name": "上海市浦东新区御桥小学（御山校区）",
+   "school": "上海市浦东新区御桥小学",
+   "campus": "御山校区",
+   "sector": "公办",
+   "address": "御山路381号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.575343,
+    31.161073
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区御山路381号"
+   }
+  },
+  {
+   "code": "3101150119",
+   "name": "上海市浦东新区御桥小学（高青校区）",
+   "school": "上海市浦东新区御桥小学",
+   "campus": "高青校区",
+   "sector": "公办",
+   "address": "莲荣路106号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "康桥镇",
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.574352,
+    31.179817
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区莲荣路106号"
+   }
+  },
+  {
+   "code": "3101150121",
+   "name": "上海市浦东新区福山外国语小学（福山校区）",
+   "school": "上海市浦东新区福山外国语小学",
+   "campus": "福山校区",
+   "sector": "公办",
+   "address": "福山路48弄1号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "陆家嘴街道"
+   ]
+  },
+  {
+   "code": "3101150121",
+   "name": "上海市浦东新区福山外国语小学（瑞华校区）",
+   "school": "上海市浦东新区福山外国语小学",
+   "campus": "瑞华校区",
+   "sector": "公办",
+   "address": "商城路1178弄50号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "陆家嘴街道"
+   ]
+  },
+  {
+   "code": "3101150121",
+   "name": "上海市浦东新区福山外国语小学（振华校区）",
+   "school": "上海市浦东新区福山外国语小学",
+   "campus": "振华校区",
+   "sector": "公办",
+   "address": "商城路1088号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "陆家嘴街道"
+   ]
+  },
+  {
+   "code": "3101150122",
+   "name": "上海市浦东新区绿晨小学",
+   "school": "上海市浦东新区绿晨小学",
+   "sector": "公办",
+   "address": "永泰路1705号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150123",
+   "name": "上海市浦东新区世博家园实验小学",
+   "school": "上海市浦东新区世博家园实验小学",
+   "sector": "公办",
+   "address": "东书房路475号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101150124",
+   "name": "上海市浦东新区张江高科实验小学（香楠校区）",
+   "school": "上海市浦东新区张江高科实验小学",
+   "campus": "香楠校区",
+   "sector": "公办",
+   "address": "香楠路295号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇"
+   ],
+   "bd09": [
+    121.620498,
+    31.221201
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区香楠路295号"
+   }
+  },
+  {
+   "code": "3101150124",
+   "name": "上海市浦东新区张江高科实验小学（藿香校区）",
+   "school": "上海市浦东新区张江高科实验小学",
+   "campus": "藿香校区",
+   "sector": "公办",
+   "address": "藿香路88号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇"
+   ],
+   "bd09": [
+    121.601334,
+    31.207163
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区藿香路88号"
+   }
+  },
+  {
+   "code": "3101150130",
+   "name": "上海市浦东新区建平实验小学（枣庄校区）",
+   "school": "上海市浦东新区建平实验小学",
+   "campus": "枣庄校区",
+   "sector": "公办",
+   "address": "枣庄路199号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "金杨新村街道",
+    "沪东新村街道"
+   ]
+  },
+  {
+   "code": "3101150130",
+   "name": "上海市浦东新区建平实验小学（金业校区）",
+   "school": "上海市浦东新区建平实验小学",
+   "campus": "金业校区",
+   "sector": "公办",
+   "address": "金业路381号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "浦兴路街道",
+    "金桥镇"
+   ],
+   "bd09": [
+    121.599056,
+    31.257926
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区金业路381号"
+   }
+  },
+  {
+   "code": "3101150130",
+   "name": "上海市浦东新区建平实验小学（居家桥校区）",
+   "school": "上海市浦东新区建平实验小学",
+   "campus": "居家桥校区",
+   "sector": "公办",
+   "address": "居家桥路81号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "金杨新村街道",
+    "沪东新村街道"
+   ]
+  },
+  {
+   "code": "3101150168",
+   "name": "上海市浦东新区惠南小学（南校区）",
+   "school": "上海市浦东新区惠南小学",
+   "campus": "南校区",
+   "sector": "公办",
+   "address": "工农南路228号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150168",
+   "name": "上海市浦东新区惠南小学（北校区）",
+   "school": "上海市浦东新区惠南小学",
+   "campus": "北校区",
+   "sector": "公办",
+   "address": "拱秀路38号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150169",
+   "name": "上海市浦东新区逸夫小学（南校区）",
+   "school": "上海市浦东新区逸夫小学",
+   "campus": "南校区",
+   "sector": "公办",
+   "address": "听潮南路933弄33号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150169",
+   "name": "上海市浦东新区逸夫小学（北校区）",
+   "school": "上海市浦东新区逸夫小学",
+   "campus": "北校区",
+   "sector": "公办",
+   "address": "听潮六村66号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150170",
+   "name": "上海市浦东新区荡湾小学（荡湾校区）",
+   "school": "上海市浦东新区荡湾小学",
+   "campus": "荡湾校区",
+   "sector": "公办",
+   "address": "育苗路1号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150170",
+   "name": "上海市浦东新区荡湾小学（拱秀校区）",
+   "school": "上海市浦东新区荡湾小学",
+   "campus": "拱秀校区",
+   "sector": "公办",
+   "address": "拱秀路575号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150171",
+   "name": "上海市浦东新区建平城东小学（靖海校区）",
+   "school": "上海市浦东新区建平城东小学",
+   "campus": "靖海校区",
+   "sector": "公办",
+   "address": "靖海路185弄75号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150171",
+   "name": "上海市浦东新区建平城东小学（听惠校区）",
+   "school": "上海市浦东新区建平城东小学",
+   "campus": "听惠校区",
+   "sector": "公办",
+   "address": "听惠路139号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150172",
+   "name": "上海市浦东新区老港小学",
+   "school": "上海市浦东新区老港小学",
+   "sector": "公办",
+   "address": "建中路38号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "老港镇"
+   ]
+  },
+  {
+   "code": "3101150174",
+   "name": "上海市浦东新区书院小学",
+   "school": "上海市浦东新区书院小学",
+   "sector": "公办",
+   "address": "书塘路38号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "书院镇"
+   ]
+  },
+  {
+   "code": "3101150175",
+   "name": "上海市浦东新区泥城小学（云汉校区）",
+   "school": "上海市浦东新区泥城小学",
+   "campus": "云汉校区",
+   "sector": "公办",
+   "address": "云汉路768号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "泥城镇"
+   ]
+  },
+  {
+   "code": "3101150175",
+   "name": "上海市浦东新区泥城小学（育建校区）",
+   "school": "上海市浦东新区泥城小学",
+   "campus": "育建校区",
+   "sector": "公办",
+   "address": "育建路2号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "泥城镇"
+   ]
+  },
+  {
+   "code": "3101150176",
+   "name": "上海市浦东新区大团小学",
+   "school": "上海市浦东新区大团小学",
+   "sector": "公办",
+   "address": "钦飞路118号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.753434,
+    30.983253
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区钦飞路118号"
+   }
+  },
+  {
+   "code": "3101150180",
+   "name": "上海市浦东新区坦直小学",
+   "school": "上海市浦东新区坦直小学",
+   "sector": "公办",
+   "address": "坦直文院街5号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "新场镇"
+   ]
+  },
+  {
+   "code": "3101150181",
+   "name": "上海市浦东新区周浦小学（文康路校区）",
+   "school": "上海市浦东新区周浦小学",
+   "campus": "文康路校区",
+   "sector": "公办",
+   "address": "太平弄2号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101150181",
+   "name": "上海市浦东新区周浦小学（韵涛路校区）",
+   "school": "上海市浦东新区周浦小学",
+   "campus": "韵涛路校区",
+   "sector": "公办",
+   "address": "韵涛路720号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "bd09": [
+    121.608791,
+    31.112117
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区韵涛路720号"
+   }
+  },
+  {
+   "code": "3101150182",
+   "name": "上海市浦东新区周浦第二小学（公元新村校区）",
+   "school": "上海市浦东新区周浦第二小学",
+   "campus": "公元新村校区",
+   "sector": "公办",
+   "address": "公元新村53号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101150182",
+   "name": "上海市浦东新区周浦第二小学（瑞建路校区）",
+   "school": "上海市浦东新区周浦第二小学",
+   "campus": "瑞建路校区",
+   "sector": "公办",
+   "address": "瑞建路520号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101150182",
+   "name": "上海市浦东新区周浦第二小学（德浦路校区）",
+   "school": "上海市浦东新区周浦第二小学",
+   "campus": "德浦路校区",
+   "sector": "公办",
+   "address": "德浦路110号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "opened": "新开办校区",
+   "bd09": [
+    121.582504,
+    31.129557
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区德浦路110号"
+   }
+  },
+  {
+   "code": "3101150183",
+   "name": "上海市浦东新区周浦第三小学（东南新村校区）",
+   "school": "上海市浦东新区周浦第三小学",
+   "campus": "东南新村校区",
+   "sector": "公办",
+   "address": "周浦镇东南三村150号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101150183",
+   "name": "上海市浦东新区周浦第三小学（鹤洁路校区）",
+   "school": "上海市浦东新区周浦第三小学",
+   "campus": "鹤洁路校区",
+   "sector": "公办",
+   "address": "鹤洁路45号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "航头镇"
+   ]
+  },
+  {
+   "code": "3101150184",
+   "name": "上海市浦东新区澧溪小学（北校区）",
+   "school": "上海市浦东新区澧溪小学",
+   "campus": "北校区",
+   "sector": "公办",
+   "address": "横桥路58号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101150184",
+   "name": "上海市浦东新区澧溪小学（南校区）",
+   "school": "上海市浦东新区澧溪小学",
+   "campus": "南校区",
+   "sector": "公办",
+   "address": "康沈路220号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101150185",
+   "name": "上海市浦东新区康桥小学",
+   "school": "上海市浦东新区康桥小学",
+   "sector": "公办",
+   "address": "梓康路120号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "康桥镇"
+   ],
+   "bd09": [
+    121.579131,
+    31.128966
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区梓康路120号"
+   }
+  },
+  {
+   "code": "3101150186",
+   "name": "上海市浦东新区六灶小学",
+   "school": "上海市浦东新区六灶小学",
+   "sector": "公办",
+   "address": "周祝公路2215号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.700494,
+    31.122185
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区周祝公路2215号"
+   }
+  },
+  {
+   "code": "3101150187",
+   "name": "上海市浦东新区祝桥小学",
+   "school": "上海市浦东新区祝桥小学",
+   "sector": "公办",
+   "address": "南祝公路5212号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "祝桥镇"
+   ]
+  },
+  {
+   "code": "3101150188",
+   "name": "上海市浦东新区盐仓小学",
+   "school": "上海市浦东新区盐仓小学",
+   "sector": "公办",
+   "address": "星勤路388号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "祝桥镇",
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150189",
+   "name": "上海市浦东新区南汇外国语小学（为民校区）",
+   "school": "上海市浦东新区南汇外国语小学",
+   "campus": "为民校区",
+   "sector": "公办",
+   "address": "为民路9号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150189",
+   "name": "上海市浦东新区南汇外国语小学（共川校区）",
+   "school": "上海市浦东新区南汇外国语小学",
+   "campus": "共川校区",
+   "sector": "公办",
+   "address": "和开路115弄35号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150189",
+   "name": "上海市浦东新区南汇外国语小学（拱亮校区）",
+   "school": "上海市浦东新区南汇外国语小学",
+   "campus": "拱亮校区",
+   "sector": "公办",
+   "address": "拱亮路211号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101150190",
+   "name": "上海市浦东新区进才实验小学（联洋校区）",
+   "school": "上海市浦东新区进才实验小学",
+   "campus": "联洋校区",
+   "sector": "公办",
+   "address": "丁香路1289号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.567799,
+    31.235685
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区丁香路1289号"
+   }
+  },
+  {
+   "code": "3101150190",
+   "name": "上海市浦东新区进才实验小学（由由校区）",
+   "school": "上海市浦东新区进才实验小学",
+   "campus": "由由校区",
+   "sector": "公办",
+   "address": "严民路166号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.536366,
+    31.196649
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区严民路166号"
+   }
+  },
+  {
+   "code": "3101150191",
+   "name": "上海市浦东新区临港外国语小学（秋雨校区）",
+   "school": "上海市浦东新区临港外国语小学",
+   "campus": "秋雨校区",
+   "sector": "公办",
+   "address": "秋雨路179号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "泥城镇",
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101150191",
+   "name": "上海市浦东新区临港外国语小学（月环校区）",
+   "school": "上海市浦东新区临港外国语小学",
+   "campus": "月环校区",
+   "sector": "公办",
+   "address": "月环路133号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "泥城镇"
+   ]
+  },
+  {
+   "code": "3101150192",
+   "name": "上海市浦东新区曹路打一小学（西校区）",
+   "school": "上海市浦东新区曹路打一小学",
+   "campus": "西校区",
+   "sector": "公办",
+   "address": "金睦路50号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "曹路镇"
+   ]
+  },
+  {
+   "code": "3101150192",
+   "name": "上海市浦东新区曹路打一小学（东校区）",
+   "school": "上海市浦东新区曹路打一小学",
+   "campus": "东校区",
+   "sector": "公办",
+   "address": "海鹊路58号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "曹路镇"
+   ]
+  },
+  {
+   "code": "3101150194",
+   "name": "上海市浦东新区锦绣小学",
+   "school": "上海市浦东新区锦绣小学",
+   "sector": "公办",
+   "address": "锦绣路2400号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道"
+   ],
+   "bd09": [
+    121.543689,
+    31.201201
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区锦绣路2400号"
+   }
+  },
+  {
+   "code": "3101150195",
+   "name": "上海市浦东新区尚博实验小学（湾流域校区）",
+   "school": "上海市浦东新区尚博实验小学",
+   "campus": "湾流域校区",
+   "sector": "公办",
+   "address": "尚博路371号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "东明路街道"
+   ]
+  },
+  {
+   "code": "3101150195",
+   "name": "上海市浦东新区尚博实验小学（昌里校区）",
+   "school": "上海市浦东新区尚博实验小学",
+   "campus": "昌里校区",
+   "sector": "公办",
+   "address": "南码头路1550弄10号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周家渡街道",
+    "南码头路街道",
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.522711,
+    31.183354
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区南码头路1550弄10号"
+   }
+  },
+  {
+   "code": "3101150196",
+   "name": "上海市浦东新区航城实验小学（鹤驰路校区）",
+   "school": "上海市浦东新区航城实验小学",
+   "campus": "鹤驰路校区",
+   "sector": "公办",
+   "address": "鹤驰路271号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "航头镇"
+   ]
+  },
+  {
+   "code": "3101150196",
+   "name": "上海市浦东新区航城实验小学（航春路校区）",
+   "school": "上海市浦东新区航城实验小学",
+   "campus": "航春路校区",
+   "sector": "公办",
+   "address": "航春路375号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "航头镇"
+   ]
+  },
+  {
+   "code": "3101150197",
+   "name": "上海市浦东新区福山唐城外国语小学（唐龙校区）",
+   "school": "上海市浦东新区福山唐城外国语小学",
+   "campus": "唐龙校区",
+   "sector": "公办",
+   "address": "唐龙路660号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "唐镇"
+   ],
+   "bd09": [
+    121.65976,
+    31.226446
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区唐龙路660号"
+   }
+  },
+  {
+   "code": "3101150197",
+   "name": "上海市浦东新区福山唐城外国语小学（培德校区）",
+   "school": "上海市浦东新区福山唐城外国语小学",
+   "campus": "培德校区",
+   "sector": "公办",
+   "address": "培德路500号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "唐镇"
+   ],
+   "bd09": [
+    121.677142,
+    31.228204
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区培德路500号"
+   }
+  },
+  {
+   "code": "3101150197",
+   "name": "上海市浦东新区福山唐城外国语小学（南曹校区）",
+   "school": "上海市浦东新区福山唐城外国语小学",
+   "campus": "南曹校区",
+   "sector": "公办",
+   "address": "南曹路1600号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "川沙新镇"
+   ],
+   "bd09": [
+    121.681543,
+    31.213837
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区南曹路1600号"
+   }
+  },
+  {
+   "code": "3101150198",
+   "name": "上海市浦东新区明珠森兰小学",
+   "school": "上海市浦东新区明珠森兰小学",
+   "sector": "公办",
+   "address": "兰谷路2250号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "高行镇"
+   ]
+  },
+  {
+   "code": "3101150199",
+   "name": "上海市浦东新区明珠临港小学（茉莉校区）",
+   "school": "上海市浦东新区明珠临港小学",
+   "campus": "茉莉校区",
+   "sector": "公办",
+   "address": "茉莉路760号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101150199",
+   "name": "上海市浦东新区明珠临港小学（夏栎校区）",
+   "school": "上海市浦东新区明珠临港小学",
+   "campus": "夏栎校区",
+   "sector": "公办",
+   "address": "夏栎路395号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101150200",
+   "name": "上海市浦东新区建平临港小学（古棕校区）",
+   "school": "上海市浦东新区建平临港小学",
+   "campus": "古棕校区",
+   "sector": "公办",
+   "address": "马樱丹路56号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇",
+    "洋泾街道"
+   ]
+  },
+  {
+   "code": "3101150200",
+   "name": "上海市浦东新区建平临港小学（茉莉校区）",
+   "school": "上海市浦东新区建平临港小学",
+   "campus": "茉莉校区",
+   "sector": "公办",
+   "address": "茉莉路51号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101150201",
+   "name": "上海市浦东新区万科实验小学（滨江校区）",
+   "school": "上海市浦东新区万科实验小学",
+   "campus": "滨江校区",
+   "sector": "公办",
+   "address": "昌邑路1450号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "洋泾街道"
+   ]
+  },
+  {
+   "code": "3101150201",
+   "name": "上海市浦东新区万科实验小学（张江校区）",
+   "school": "上海市浦东新区万科实验小学",
+   "campus": "张江校区",
+   "sector": "公办",
+   "address": "环科路1000号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇"
+   ],
+   "bd09": [
+    121.621354,
+    31.186044
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区环科路1000号"
+   }
+  },
+  {
+   "code": "3101150202",
+   "name": "上海市浦东新区康桥实验小学（康煦校区）",
+   "school": "上海市浦东新区康桥实验小学",
+   "campus": "康煦校区",
+   "sector": "公办",
+   "address": "上南路6625弄110号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "康桥镇"
+   ],
+   "bd09": [
+    121.560495,
+    31.125712
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区上南路6625弄110号"
+   }
+  },
+  {
+   "code": "3101150202",
+   "name": "上海市浦东新区康桥实验小学（康泽校区）",
+   "school": "上海市浦东新区康桥实验小学",
+   "campus": "康泽校区",
+   "sector": "公办",
+   "address": "曲桥路125号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "康桥镇"
+   ],
+   "bd09": [
+    121.562761,
+    31.123201
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区曲桥路125号"
+   }
+  },
+  {
+   "code": "3101150203",
+   "name": "上海市浦东新区傅雷小学",
+   "school": "上海市浦东新区傅雷小学",
+   "sector": "公办",
+   "address": "周园路450号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101150205",
+   "name": "上海市浦东新区福山花园外国语小学",
+   "school": "上海市浦东新区福山花园外国语小学",
+   "sector": "公办",
+   "address": "桃林路1055号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "洋泾街道"
+   ]
+  },
+  {
+   "code": "3101150206",
+   "name": "上海市浦东新区福山证大外国语小学（五莲路校区）",
+   "school": "上海市浦东新区福山证大外国语小学",
+   "campus": "五莲路校区",
+   "sector": "公办",
+   "address": "五莲路1819号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "浦兴路街道"
+   ]
+  },
+  {
+   "code": "3101150206",
+   "name": "上海市浦东新区福山证大外国语小学（巨峰路校区）",
+   "school": "上海市浦东新区福山证大外国语小学",
+   "campus": "巨峰路校区",
+   "sector": "公办",
+   "address": "巨峰路90弄88号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "浦兴路街道"
+   ]
+  },
+  {
+   "code": "3101150207",
+   "name": "上海市浦东新区三灶实验小学",
+   "school": "上海市浦东新区三灶实验小学",
+   "sector": "公办",
+   "address": "寅旺路88号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "宣桥镇"
+   ]
+  },
+  {
+   "code": "3101150208",
+   "name": "上海市浦东新区新场实验小学（新城校区）",
+   "school": "上海市浦东新区新场实验小学",
+   "campus": "新城校区",
+   "sector": "公办",
+   "address": "众安路1068号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "新场镇"
+   ]
+  },
+  {
+   "code": "3101150208",
+   "name": "上海市浦东新区新场实验小学（古镇校区）",
+   "school": "上海市浦东新区新场实验小学",
+   "campus": "古镇校区",
+   "sector": "公办",
+   "address": "牌楼东路77号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "新场镇"
+   ]
+  },
+  {
+   "code": "3101150211",
+   "name": "上海市浦东新区石笋实验小学（新奉校区）",
+   "school": "上海市浦东新区石笋实验小学",
+   "campus": "新奉校区",
+   "sector": "公办",
+   "address": "新奉公路289号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "新场镇"
+   ]
+  },
+  {
+   "code": "3101150211",
+   "name": "上海市浦东新区石笋实验小学（新环校区）",
+   "school": "上海市浦东新区石笋实验小学",
+   "campus": "新环校区",
+   "sector": "公办",
+   "address": "新环北路1316号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "新场镇"
+   ]
+  },
+  {
+   "code": "3101150212",
+   "name": "上海市浦东新区三林实验小学（联明路校区）",
+   "school": "上海市浦东新区三林实验小学",
+   "campus": "联明路校区",
+   "sector": "公办",
+   "address": "联明路681号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇",
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.526241,
+    31.15975
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区联明路681号"
+   }
+  },
+  {
+   "code": "3101150212",
+   "name": "上海市浦东新区三林实验小学（洪山路校区）",
+   "school": "上海市浦东新区三林实验小学",
+   "campus": "洪山路校区",
+   "sector": "公办",
+   "address": "洪山路1659号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇",
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.515358,
+    31.159525
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区洪山路1659号"
+   }
+  },
+  {
+   "code": "3101150213",
+   "name": "上海市浦东新区龚丰小学",
+   "school": "上海市浦东新区龚丰小学",
+   "sector": "公办",
+   "address": "龚华路675号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "曹路镇"
+   ]
+  },
+  {
+   "code": "3101150214",
+   "name": "上海师范大学附属浦东临港小学",
+   "school": "上海师范大学附属浦东临港小学",
+   "sector": "公办",
+   "address": "芦安路297号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3102250215",
+   "name": "华东师范大学附属浦东临港小学",
+   "school": "华东师范大学附属浦东临港小学",
+   "sector": "公办",
+   "address": "云皓路400号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101150216",
+   "name": "上海市浦东新区明珠迎桥小学",
+   "school": "上海市浦东新区明珠迎桥小学",
+   "sector": "公办",
+   "address": "迎桥路66号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "曹路镇",
+    "高行镇"
+   ]
+  },
+  {
+   "code": "3101150217",
+   "name": "上海师范大学附属浦东临港科创小学",
+   "school": "上海师范大学附属浦东临港科创小学",
+   "sector": "公办",
+   "address": "方竹路1500号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101150218",
+   "name": "上海交通大学附属浦东临港实验小学",
+   "school": "上海交通大学附属浦东临港实验小学",
+   "sector": "公办",
+   "address": "五岭路1201号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "泥城镇"
+   ]
+  },
+  {
+   "code": "3101150219",
+   "name": "上海中医药大学附属浦东实验小学",
+   "school": "上海中医药大学附属浦东实验小学",
+   "sector": "公办",
+   "address": "建中路500号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇"
+   ],
+   "bd09": [
+    121.616166,
+    31.204924
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区建中路500号"
+   }
+  },
+  {
+   "code": "3101150220",
+   "name": "上海财经大学附属浦东临港小学",
+   "school": "上海财经大学附属浦东临港小学",
+   "sector": "公办",
+   "address": "洛神花路599号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101150221",
+   "name": "上海市浦东新区进才实验小学南校",
+   "school": "上海市浦东新区进才实验小学南校",
+   "sector": "公办",
+   "address": "韵涛路186号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101150222",
+   "name": "上海市浦东新区观澜小学东校",
+   "school": "上海市浦东新区观澜小学东校",
+   "sector": "公办",
+   "address": "小营房路155号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "opened": "新开办学校",
+   "bd09": [
+    121.728288,
+    31.209815
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 30,
+    "level": "道路",
+    "query": "上海市浦东新区小营房路155号"
+   }
+  },
+  {
+   "code": "3101150223",
+   "name": "上海市浦东新区福山诚礼小学",
+   "school": "上海市浦东新区福山诚礼小学",
+   "sector": "公办",
+   "address": "诚礼路520号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "opened": "新开办学校"
+  },
+  {
+   "code": "3101155005",
+   "name": "上海立信会计金融学院附属学校（东陆校区）",
+   "school": "上海立信会计金融学院附属学校",
+   "campus": "东陆校区",
+   "sector": "公办",
+   "address": "博兴路1432号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "浦兴路街道"
+   ]
+  },
+  {
+   "code": "3101155005",
+   "name": "上海立信会计金融学院附属学校（思学校区）",
+   "school": "上海立信会计金融学院附属学校",
+   "campus": "思学校区",
+   "sector": "公办",
+   "address": "莱阳路1587号",
+   "catchment": "见公示地段",
+   "status": "active"
+  },
+  {
+   "code": "3101155006",
+   "name": "上海市绿川学校",
+   "school": "上海市绿川学校",
+   "sector": "公办",
+   "address": "绿林路409号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "北蔡镇"
+   ],
+   "bd09": [
+    121.555655,
+    31.174858
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区绿林路409号"
+   }
+  },
+  {
+   "code": "3101155007",
+   "name": "上海市洋泾菊园实验学校（启新路校区）",
+   "school": "上海市洋泾菊园实验学校",
+   "campus": "启新路校区",
+   "sector": "公办",
+   "address": "浦城路333号（启新路1号）",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "陆家嘴街道",
+    "潍坊新村街道"
+   ]
+  },
+  {
+   "code": "3101155009",
+   "name": "上海市川沙中学南校（川环南路校区）",
+   "school": "上海市川沙中学南校",
+   "campus": "川环南路校区",
+   "sector": "公办",
+   "address": "川环南路1295号",
+   "catchment": "见公示地段",
+   "status": "active"
+  },
+  {
+   "code": "3101155019",
+   "name": "上海市实验学校东校",
+   "school": "上海市实验学校东校",
+   "sector": "公办",
+   "address": "黑松路251号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "花木街道",
+    "金桥镇"
+   ],
+   "bd09": [
+    121.580786,
+    31.239026
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区黑松路251号"
+   }
+  },
+  {
+   "code": "3101155025",
+   "name": "上海市浦东新区建平南汇实验学校",
+   "school": "上海市浦东新区建平南汇实验学校",
+   "sector": "公办",
+   "address": "西门路24号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101155026",
+   "name": "上海市三灶学校",
+   "school": "上海市三灶学校",
+   "sector": "公办",
+   "address": "南六公路698号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "宣桥镇",
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101155027",
+   "name": "上海市黄路学校",
+   "school": "上海市黄路学校",
+   "sector": "公办",
+   "address": "观海路61号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "惠南镇"
+   ]
+  },
+  {
+   "code": "3101155029",
+   "name": "上海师范大学附属秋萍学校",
+   "school": "上海师范大学附属秋萍学校",
+   "sector": "公办",
+   "address": "芦云路5号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101155030",
+   "name": "上海市三墩学校（东部）",
+   "school": "上海市三墩学校",
+   "campus": "东部",
+   "sector": "公办",
+   "address": "三宣公路245号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "大团镇"
+   ]
+  },
+  {
+   "code": "3101155031",
+   "name": "上海市浦东新区进才万祥学校（小学部）",
+   "school": "上海市浦东新区进才万祥学校",
+   "campus": "小学部",
+   "sector": "公办",
+   "address": "宝悦路55号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "万祥镇"
+   ]
+  },
+  {
+   "code": "3101155032",
+   "name": "上海市宣桥学校",
+   "school": "上海市宣桥学校",
+   "sector": "公办",
+   "address": "宣镇东路2号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "宣桥镇"
+   ]
+  },
+  {
+   "code": "3101155033",
+   "name": "上海市航头学校（兴城路校区）",
+   "school": "上海市航头学校",
+   "campus": "兴城路校区",
+   "sector": "公办",
+   "address": "兴城路28号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "航头镇"
+   ]
+  },
+  {
+   "code": "3101155033",
+   "name": "上海市航头学校（鹤永路校区）",
+   "school": "上海市航头学校",
+   "campus": "鹤永路校区",
+   "sector": "公办",
+   "address": "鹤永路432号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "航头镇"
+   ]
+  },
+  {
+   "code": "3101155034",
+   "name": "上海市周浦育才学校",
+   "school": "上海市周浦育才学校",
+   "sector": "公办",
+   "address": "瓦屑振兴路2号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101155035",
+   "name": "上海市实验学校附属光明学校（东校区）",
+   "school": "上海市实验学校附属光明学校",
+   "campus": "东校区",
+   "sector": "公办",
+   "address": "千汇路751弄1号",
+   "catchment": "见公示地段",
+   "status": "active"
+  },
+  {
+   "code": "3101155036",
+   "name": "上海市东海学校",
+   "school": "上海市东海学校",
+   "sector": "公办",
+   "address": "东港公路2979号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "祝桥镇"
+   ]
+  },
+  {
+   "code": "3101155037",
+   "name": "上海市今日学校",
+   "school": "上海市今日学校",
+   "sector": "公办",
+   "address": "三三公路4958号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "书院镇"
+   ]
+  },
+  {
+   "code": "3101155039",
+   "name": "上海市康城学校（拯安校区）",
+   "school": "上海市康城学校",
+   "campus": "拯安校区",
+   "sector": "公办",
+   "address": "拯安路30号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "康桥镇"
+   ],
+   "bd09": [
+    121.620813,
+    31.145601
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区拯安路30号"
+   }
+  },
+  {
+   "code": "3101155039",
+   "name": "上海市康城学校（康佳校区）",
+   "school": "上海市康城学校",
+   "campus": "康佳校区",
+   "sector": "公办",
+   "address": "康佳路81号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "康桥镇"
+   ],
+   "bd09": [
+    121.602455,
+    31.133854
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区康佳路81号"
+   }
+  },
+  {
+   "code": "3101155040",
+   "name": "上海中医药大学附属浦东鹤沙学校（沪南校区）",
+   "school": "上海中医药大学附属浦东鹤沙学校",
+   "campus": "沪南校区",
+   "sector": "公办",
+   "address": "沪南公路5248号",
+   "catchment": "见公示地段",
+   "status": "active"
+  },
+  {
+   "code": "3101155046",
+   "name": "上海市周浦实验学校（周园校区）",
+   "school": "上海市周浦实验学校",
+   "campus": "周园校区",
+   "sector": "公办",
+   "address": "周园路2008号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101155046",
+   "name": "上海市周浦实验学校（瑞阳校区）",
+   "school": "上海市周浦实验学校",
+   "campus": "瑞阳校区",
+   "sector": "公办",
+   "address": "瑞阳路261号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101155051",
+   "name": "华东师范大学第二附属中学前滩学校",
+   "school": "华东师范大学第二附属中学前滩学校",
+   "sector": "公办",
+   "address": "晴雪路28号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "三林镇"
+   ]
+  },
+  {
+   "code": "3101155058",
+   "name": "上海市浦东新区进才书院学校",
+   "school": "上海市浦东新区进才书院学校",
+   "sector": "公办",
+   "address": "龙江街1333号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "书院镇"
+   ]
+  },
+  {
+   "code": "3101155059",
+   "name": "复旦大学附属浦东实验学校",
+   "school": "复旦大学附属浦东实验学校",
+   "sector": "公办",
+   "address": "银柳路550号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "张江镇",
+    "金桥镇",
+    "花木街道"
+   ],
+   "bd09": [
+    121.620633,
+    31.230333
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区银柳路550号"
+   }
+  },
+  {
+   "code": "3101155060",
+   "name": "上海市浦东新区建平秀沈学校",
+   "school": "上海市浦东新区建平秀沈学校",
+   "sector": "公办",
+   "address": "秀沈路177号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "康桥镇"
+   ],
+   "bd09": [
+    121.570518,
+    31.14255
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区秀沈路177号"
+   }
+  },
+  {
+   "code": "3101155061",
+   "name": "华东师范大学第二附属中学浦东临港实验学校（西校区）",
+   "school": "华东师范大学第二附属中学浦东临港实验学校",
+   "campus": "西校区",
+   "sector": "公办",
+   "address": "海洋三路685号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101155061",
+   "name": "华东师范大学第二附属中学浦东临港实验学校（东校区）",
+   "school": "华东师范大学第二附属中学浦东临港实验学校",
+   "campus": "东校区",
+   "sector": "公办",
+   "address": "木莲路330弄1号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "opened": "新开办校区",
+   "catchment_towns": [
+    "南汇新城镇"
+   ]
+  },
+  {
+   "code": "3101155063",
+   "name": "上海交通大学附属中学浦东实验学校",
+   "school": "上海交通大学附属中学浦东实验学校",
+   "sector": "公办",
+   "address": "周祝公路1166号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "catchment_towns": [
+    "周浦镇"
+   ]
+  },
+  {
+   "code": "3101155064",
+   "name": "上海市浦东新区宣顺学校",
+   "school": "上海市浦东新区宣顺学校",
+   "sector": "公办",
+   "address": "学顺路233号",
+   "catchment": "见公示地段",
+   "status": "active",
+   "opened": "新开办学校"
+  },
+  {
+   "code": "3101156002",
+   "name": "上海市浦东新区辅读学校（陆家嘴校区）",
+   "school": "上海市浦东新区辅读学校",
+   "campus": "陆家嘴校区",
+   "sector": "公办",
+   "address": "崂山路551弄40号",
+   "catchment": "见公示信息",
+   "status": "特殊教育"
+  },
+  {
+   "code": "3101156002",
+   "name": "上海市浦东新区辅读学校（上南校区）",
+   "school": "上海市浦东新区辅读学校",
+   "campus": "上南校区",
+   "sector": "公办",
+   "address": "成山路349号",
+   "catchment": "见公示信息",
+   "status": "特殊教育"
+  },
+  {
+   "code": "3101156003",
+   "name": "上海市浦东新区特殊教育学校（羽山路校区）",
+   "school": "上海市浦东新区特殊教育学校",
+   "campus": "羽山路校区",
+   "sector": "公办",
+   "address": "羽山路1890号",
+   "catchment": "见公示信息",
+   "status": "特殊教育"
+  },
+  {
+   "code": "3101156004",
+   "name": "上海市浦东新区致立学校",
+   "school": "上海市浦东新区致立学校",
+   "sector": "公办",
+   "address": "东门路85号",
+   "catchment": "见公示信息",
+   "status": "特殊教育"
+  },
+  {
+   "code": "3101150120",
+   "name": "上海浦东新区民办向未来外国语小学",
+   "school": "上海浦东新区民办向未来外国语小学",
+   "sector": "民办",
+   "address": "博兴路1185弄1号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.601613,
+    31.273315
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区博兴路1185弄1号"
+   }
+  },
+  {
+   "code": "3101150167",
+   "name": "上海浦东新区民办正达外国语小学（北校区）",
+   "school": "上海浦东新区民办正达外国语小学",
+   "campus": "北校区",
+   "sector": "民办",
+   "address": "沈家弄路870弄1号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.549731,
+    31.245589
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 75,
+    "level": "楼号",
+    "query": "上海市浦东新区沈家弄路870弄1号"
+   }
+  },
+  {
+   "code": "3101150167",
+   "name": "上海浦东新区民办正达外国语小学（南校区）",
+   "school": "上海浦东新区民办正达外国语小学",
+   "campus": "南校区",
+   "sector": "民办",
+   "address": "沪南公路2061号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.587857,
+    31.076237
+   ],
+   "geocode": {
+    "precise": false,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区沪南公路2061号"
+   }
+  },
+  {
+   "code": "3101150209",
+   "name": "上海浦东新区民办筑桥实验小学",
+   "school": "上海浦东新区民办筑桥实验小学",
+   "sector": "民办",
+   "address": "海科路669号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.607021,
+    31.186877
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区海科路669号"
+   }
+  },
+  {
+   "code": "3101150210",
+   "name": "上海浦东新区民办常青藤小学",
+   "school": "上海浦东新区民办常青藤小学",
+   "sector": "民办",
+   "address": "秀沿路800号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.573037,
+    31.140388
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区秀沿路800号"
+   }
+  },
+  {
+   "code": "3101154038",
+   "name": "上海浦东新区民办正达外国语学校（西校区）",
+   "school": "上海浦东新区民办正达外国语学校",
+   "campus": "西校区",
+   "sector": "民办",
+   "address": "历城路10号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.498729,
+    31.183221
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区历城路10号"
+   }
+  },
+  {
+   "code": "3101154038",
+   "name": "上海浦东新区民办正达外国语学校（东校区）",
+   "school": "上海浦东新区民办正达外国语学校",
+   "campus": "东校区",
+   "sector": "民办",
+   "address": "高西路562弄1-7号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.601764,
+    31.324301
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区高西路562弄1-7号"
+   }
+  },
+  {
+   "code": "3101155008",
+   "name": "上海市民办平和学校",
+   "school": "上海市民办平和学校",
+   "sector": "民办",
+   "address": "黄杨路261号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.595911,
+    31.24574
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区黄杨路261号"
+   }
+  },
+  {
+   "code": "3101155013",
+   "name": "上海市民办金苹果学校",
+   "school": "上海市民办金苹果学校",
+   "sector": "民办",
+   "address": "巨峰路1555号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.626046,
+    31.287656
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区巨峰路1555号"
+   }
+  },
+  {
+   "code": "3101155015",
+   "name": "上海民办启能东方外国语学校",
+   "school": "上海民办启能东方外国语学校",
+   "sector": "民办",
+   "address": "顾唐路2000号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.670415,
+    31.233232
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区顾唐路2000号"
+   }
+  },
+  {
+   "code": "3101155016",
+   "name": "上海市民办中芯学校",
+   "school": "上海市民办中芯学校",
+   "sector": "民办",
+   "address": "青桐路19弄3号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.625012,
+    31.224816
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 70,
+    "level": "教育",
+    "query": "上海市浦东新区青桐路19弄3号"
+   }
+  },
+  {
+   "code": "3101155024",
+   "name": "上海浦东新区民办协和双语学校（康桥校区（过渡校区））",
+   "school": "上海浦东新区民办协和双语学校",
+   "campus": "康桥校区（过渡校区）",
+   "sector": "民办",
+   "address": "康梧路468号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.559313,
+    31.133458
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区康梧路468号"
+   }
+  },
+  {
+   "code": "3101155041",
+   "name": "上海浦东新区民办东鼎外国语学校",
+   "school": "上海浦东新区民办东鼎外国语学校",
+   "sector": "民办",
+   "address": "观海路699号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.787753,
+    31.057802
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区观海路699号"
+   }
+  },
+  {
+   "code": "3101155043",
+   "name": "上海市民办尚德实验学校（航头校区）",
+   "school": "上海市民办尚德实验学校",
+   "campus": "航头校区",
+   "sector": "民办",
+   "address": "航头路1600号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.592317,
+    31.037619
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区航头路1600号"
+   }
+  },
+  {
+   "code": "3101155043",
+   "name": "上海市民办尚德实验学校（秀沿校区）",
+   "school": "上海市民办尚德实验学校",
+   "campus": "秀沿校区",
+   "sector": "民办",
+   "address": "秀沿路1688号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.601769,
+    31.142543
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区秀沿路1688号"
+   }
+  },
+  {
+   "code": "3101155047",
+   "name": "上海浦东新区民办沪港学校",
+   "school": "上海浦东新区民办沪港学校",
+   "sector": "民办",
+   "address": "银莲路2号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.896529,
+    30.889469
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区银莲路2号"
+   }
+  },
+  {
+   "code": "3101155048",
+   "name": "上海浦东新区民办更新学校",
+   "school": "上海浦东新区民办更新学校",
+   "sector": "民办",
+   "address": "唐陆公路2398号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.654387,
+    31.229982
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区唐陆公路2398号"
+   }
+  },
+  {
+   "code": "3101155050",
+   "name": "上海浦东新区民办万科学校",
+   "school": "上海浦东新区民办万科学校",
+   "sector": "民办",
+   "address": "康桥路1700弄2-4号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.578202,
+    31.155667
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区康桥路1700弄2-4号"
+   }
+  },
+  {
+   "code": "3101155052",
+   "name": "上海浦东新区民办惠立学校",
+   "school": "上海浦东新区民办惠立学校",
+   "sector": "民办",
+   "address": "林耀路235号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.484088,
+    31.166024
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区林耀路235号"
+   }
+  },
+  {
+   "code": "3101155053",
+   "name": "上海浦东新区民办宏文学校",
+   "school": "上海浦东新区民办宏文学校",
+   "sector": "民办",
+   "address": "川大路318号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.711406,
+    31.173339
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区川大路318号"
+   }
+  },
+  {
+   "code": "3101155055",
+   "name": "上海浦东民办未来科技学校",
+   "school": "上海浦东民办未来科技学校",
+   "sector": "民办",
+   "address": "沪南公路3768号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.578947,
+    31.103036
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区沪南公路3768号"
+   }
+  },
+  {
+   "code": "3101155056",
+   "name": "上海浦东新区民办康德学校",
+   "school": "上海浦东新区民办康德学校",
+   "sector": "民办",
+   "address": "康恒路70号",
+   "catchment": "/",
+   "status": "active",
+   "bd09": [
+    121.557911,
+    31.163863
+   ],
+   "geocode": {
+    "precise": true,
+    "confidence": 80,
+    "level": "门址",
+    "query": "上海市浦东新区康恒路70号"
+   }
+  }
+ ]
+}

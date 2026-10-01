@@ -1,7 +1,7 @@
 {
   "name": "@zoudedao/mcp",
   "version": "0.1.0",
-  "description": "走得到 MCP Server：把 15 分钟生活圈体检工具（定位、体检、等时圈、盲区、选址模拟、对比、报告）开放给任何支持 MCP 的 AI 助手。支持 stdio 与 Streamable HTTP。",
+  "description": "邻至 MCP Server：把 15 分钟生活圈体检工具（定位、体检、等时圈、盲区、选址模拟、对比、报告）开放给任何支持 MCP 的 AI 助手。支持 stdio 与 Streamable HTTP。",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {
@@ -18,7 +18,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node -e \"require('node:fs').chmodSync('dist/cli.js', 0o755)\"",
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json && node -e \"require('node:fs').chmodSync('dist/cli.js', 0o755)\"",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "start": "node dist/cli.js"

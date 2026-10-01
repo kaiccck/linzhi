@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createAdvisor, type AdvisorEvent } from '../src/advisor.js';
+import { createAdvisor, repairPrompt, type AdvisorEvent } from '../src/advisor.js';
 import { LocalBackend } from '../src/backend.js';
+import { checkGrounding } from '../src/grounding.js';
+import { parseIntent, placeTextOf } from '../src/intent.js';
 import { ChatClient, LlmError, llmConfigFromEnv, scrubSecrets } from '../src/llm.js';
 import { SAMPLES_DIR, scriptedLlm } from './helpers.js';
 
@@ -72,6 +74,72 @@ describe('template mode (no LLM configured)', () => {
     expect(a.grounding.ok).toBe(true);
   });
 
+  it('answers 圈里有几家药店 / 附近有什么设施 from the 圈内设施统计, every number grounded', async () => {
+    const one = await advisor.ask('申城佳苑圈里有几家药店？');
+    expect(one.citations.map((c) => [c.tool, c.args])).toEqual([
+      ['analyze_life_circle', { analysis_id: 'zj-a' }],
+    ]);
+    expect(one.answer.split('\n')[0]).toBe(
+      '结论：申城佳苑片区：15 分钟步行能走到药店 8 家（直线 15 分钟圆内 9 家，清单共 11 家），最近的是医保药店(高木桥路店)，步行约 2.7 分钟 [T1]。',
+    );
+    const all = await advisor.ask('附近有什么设施？', { analysisId: 'zj-a' });
+    expect(all.answer).toContain(
+      '结论：申城佳苑片区的圈内设施（15 分钟步行可达 / 直线 15 分钟圆内）：小学 0 / 1，',
+    );
+    expect(all.answer).toContain('- 15 分钟内一处也走不到：小学、地铁 [T1]。');
+    expect(all.answer).toContain('灰色区域');
+    expect(all.answer).toContain('- 公交的清单只统计到离中心 324 m（检索页数用完），实际可能更多 [T1]。');
+    // the elderly profile at 0.9 m/s, and a category none of which is walkable
+    const elder = await advisor.ask('老人15分钟能走到几家超市', { analysisId: 'zj-a' });
+    expect(elder.citations[0]!.args).toEqual({ analysis_id: 'zj-a', profile: 'elder' });
+    expect(elder.answer).toContain('按老年人步速 0.9 m/s，申城佳苑片区：15 分钟步行能走到超市 3 家');
+    const metro = await advisor.ask('玉兰香苑附近有地铁吗');
+    expect(metro.answer).toContain('玉兰香苑片区：15 分钟内走不到地铁：直线 15 分钟圆内有 1 个');
+    for (const a of [one, all, elder, metro]) {
+      expect(a.grounding).toMatchObject({ ok: true, unsupported: [], uncited: [] });
+      expect(a.grounding.checked).toBeGreaterThan(5);
+    }
+  });
+
+  it('routes facility counts apart from community gaps', () => {
+    const kind = (q: string) => parseIntent(q).kind;
+    expect(kind('圈里有几家药店')).toBe('facilities');
+    expect(kind('附近有什么设施')).toBe('facilities');
+    expect(kind('15分钟能走到几家超市')).toBe('facilities');
+    expect(kind('附近有地铁吗')).toBe('facilities');
+    expect(kind('老人看病方便吗')).toBe('facilities');
+    expect(parseIntent('附近有地铁和公园吗').facilityCategories).toEqual(['地铁', '公园']);
+    expect(parseIntent('长者食堂远吗')).toMatchObject({
+      kind: 'facilities',
+      profile: 'adult',
+      facilityCategories: ['养老'],
+    });
+    // community questions stay with the gap tools
+    expect(kind('有几个小区走不到菜场')).toBe('gaps');
+    expect(kind('申城佳苑的老人买菜方便吗？')).toBe('gaps');
+    expect(kind('申城佳苑三期B块的孩子上学方便吗')).toBe('gaps');
+    expect(kind('15分钟能走多远？')).toBe('reach');
+    expect(kind('如果在孙环路口开一家药店呢？')).toBe('simulate');
+  });
+
+  it('reads the topic apart from place names: 万科翡翠公园 is not a question about parks', async () => {
+    expect(parseIntent('万科翡翠公园片区买菜方便吗？').kind).toBe('facilities');
+    expect(parseIntent('万科翡翠公园片区买菜方便吗？', ['万科翡翠公园片区', '万科翡翠公园']).kind).toBe(
+      'gaps',
+    );
+    expect(parseIntent('万科翡翠公园附近有公园吗', ['万科翡翠公园']).facilityCategories).toEqual(['公园']);
+    expect(placeTextOf('帮我看看徐家汇那边老人看病方便吗')).toBe('徐家汇');
+    for (const q of ['万科翡翠公园片区买菜方便吗？', '万科翡翠公园片区有几个小区走不到菜市场？']) {
+      const a = await advisor.ask(q, { analysisId: 'zj-c' });
+      // the area, not its community named 万科翡翠公园
+      expect(a.citations.map((c) => [c.tool, c.args])).toEqual([
+        ['list_service_gaps', { analysis_id: 'zj-c', category: '菜市场' }],
+      ]);
+      expect(a.answer).toContain('万科翡翠公园片区 12 个小区中，有 12 个步行 1,000 m 内走不到菜市场');
+      expect(a.grounding).toMatchObject({ ok: true, uncited: [] });
+    }
+  });
+
   it('handles communities, unknown places, reach and profile comparison', async () => {
     const school = await advisor.ask('申城佳苑三期B块的孩子上学方便吗');
     expect(school.answer).toContain(
@@ -127,7 +195,8 @@ describe('LLM mode with a scripted OpenAI-compatible endpoint', () => {
       'export_report',
     ]);
     expect(first!.body.messages[0]!.role).toBe('system');
-    expect(first!.body.messages[0]!.content).toContain('不要自己计算');
+    expect(first!.body.messages[0]!.content).toContain('不要四舍五入');
+    expect(first!.body.messages[0]!.content).toContain('不要自己加减乘除');
     const toolMsg = second!.body.messages.find((m) => m.role === 'tool')!;
     expect(toolMsg.tool_call_id).toBe('call_1_0');
     const payload = JSON.parse(toolMsg.content!) as {
@@ -186,17 +255,37 @@ describe('LLM mode with a scripted OpenAI-compatible endpoint', () => {
     expect(events.map((e) => e.type)).toContain('fallback');
   });
 
-  it('keeps a correct answer whose only problem is a missing citation that the rewrite breaks', async () => {
+  it('completes missing or wrong citations of real numbers without a rewrite round', async () => {
     const llm = scriptedLlm([
-      analyzeCall,
-      { content: '画圆高估 1.88 倍。' },
-      { content: '画圆高估 2 倍 [T1]。' },
+      {
+        tool_calls: [
+          { name: 'analyze_life_circle', arguments: { sample_id: 'zj-a' } },
+          { name: 'list_service_gaps', arguments: { analysis_id: 'zj-a', category: '小学' } },
+        ],
+      },
+      // 1.88 倍 uncited; 23.9 分钟 is in T2 but cites T1 (a real draft had this shape)
+      { content: '结论：画圆高估 1.88 倍。\n- 申城佳苑三期B块到小学约 23.9 分钟 [T1]。' },
     ]);
     const a = await createAdvisor({ backend: backend(), llm: { ...LLM, fetch: llm.fetch } }).ask(
       '高估多少？',
     );
-    expect(a).toMatchObject({ mode: 'llm', answer: '画圆高估 1.88 倍。' });
+    expect(a.answer).toBe('结论：画圆高估 1.88 倍 [T1]。\n- 申城佳苑三期B块到小学约 23.9 分钟 [T1][T2]。');
+    expect(a.citationsAdded).toEqual(['1.88 倍 → T1', '23.9 分钟 → T2']);
+    expect(a.grounding).toMatchObject({ ok: true, uncited: [] });
+    expect(a.repaired).toBeUndefined();
+    expect(llm.requests).toHaveLength(2);
+  });
+
+  it('keeps a correct answer whose only problem is a missing citation that the rewrite breaks', async () => {
+    // a table is never completed automatically: its numbers go through the rewrite round
+    const table = ['| 指标 | 数值 |', '| --- | --- |', '| 画圆高估 | 1.88 倍 |'].join('\n');
+    const llm = scriptedLlm([analyzeCall, { content: table }, { content: '画圆高估 2 倍 [T1]。' }]);
+    const a = await createAdvisor({ backend: backend(), llm: { ...LLM, fetch: llm.fetch } }).ask(
+      '高估多少？',
+    );
+    expect(a).toMatchObject({ mode: 'llm', answer: table });
     expect(a.grounding).toMatchObject({ ok: true, uncited: ['1.88 倍'] });
+    expect(a.citationsAdded).toBeUndefined();
   });
 
   it('says so when the question names a place outside the analysis on screen', async () => {
@@ -256,6 +345,25 @@ describe('LLM mode with a scripted OpenAI-compatible endpoint', () => {
     const err = JSON.parse(llm.requests[1]!.body.messages.at(-1)!.content!) as { error: string };
     expect(err.error).toMatch(/参数 crs/);
     expect(a.citations).toHaveLength(1);
+  });
+});
+
+describe('repair prompt', () => {
+  it('tells the model, number by number, what to copy, delete or cite', () => {
+    const g = checkGrounding('结论：步行约 24 分钟，比判定距离多 676 m [T1]。\n- 共 8 个缺口。', [
+      {
+        id: 'T1',
+        facts: [
+          { label: '步行时间', value: 23.9, unit: '分钟' },
+          { label: '已核实缺口数', value: 8, unit: '个' },
+        ],
+      },
+    ]);
+    const p = repairPrompt(g);
+    expect(p).toContain('- 24 分钟：工具结果里的原值是 23.9 分钟（T1），请照抄原值');
+    expect(p).toContain('- 676 m：工具结果里没有这个数，请删掉它');
+    expect(p).toContain('- 8 个：它出现在 T1，请在这一句末尾加上 [T1]');
+    expect(p).toContain('保持“结论：”开头');
   });
 });
 

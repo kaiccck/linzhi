@@ -153,7 +153,7 @@ describe('HttpBackend', () => {
     });
     await expect(new HttpBackend('http://x', { fetch: down.fetch }).listSamples()).rejects.toMatchObject({
       code: 'unreachable',
-      message: expect.stringContaining('无法连接走得到服务'),
+      message: expect.stringContaining('无法连接邻至服务'),
     });
   });
 

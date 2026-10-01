@@ -29,7 +29,8 @@ export const locatePlace = defineTool({
     '把地名或地址解析成候选中心点（BD-09 坐标）。用户只说了地名、还不知道 analysis_id 或坐标时先用它。' +
     '返回候选列表和 needs_confirmation：为 true 时必须把候选列给用户确认，不要替用户挑选。' +
     '候选带 sample_id 时表示它是内置样例，可直接用 analyze_life_circle {sample_id} 体检（不消耗地图配额）。' +
-    '服务端处于样例模式或本地运行时，只能匹配内置样例社区及其中的小区。',
+    '服务端处于样例模式、本地运行或在体检顾问中时，只匹配内置样例社区及其中的小区。' +
+    '没有候选时如实告诉用户这个地点不在已有的分析里，不要改用其他分析的结果回答。',
   inputSchema: z.object({
     query: z.string().trim().min(1).max(60).describe('地名或地址，例如“申城佳苑”“海科路1650号”'),
     city: z.string().trim().min(1).max(20).optional().describe('城市，默认上海市'),

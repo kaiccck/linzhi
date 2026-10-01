@@ -15,9 +15,14 @@ import {
   type ContourMeta,
   type IsoLevel,
   type XY,
+  viaName,
 } from '@zoudedao/core';
 import {
+  LIMIT_S,
+  circleRadius,
+  facilityTimer,
   frameOf,
+  grayLayers,
   isPending,
   isWalkGap,
   profileOf,
@@ -26,7 +31,9 @@ import {
   checkRows,
   describePlace,
 } from './analysis.js';
+import { round } from './format.js';
 import { siteSuggestionsOf } from './siting.js';
+import { facilityOverview, type FacilityRow } from './summary.js';
 
 export type Crs = 'wgs84' | 'gcj02' | 'bd09';
 
@@ -55,6 +62,8 @@ export interface FeatureCollection {
   name: string;
   coordinate_system: Crs;
   attribution: string[];
+  /** Health-check export only: the 圈内设施统计 at the analysis' profile (summary.ts FacilityRow). */
+  facility_stats?: FacilityRow[];
   features: Feature[];
 }
 
@@ -152,7 +161,7 @@ function header(result: AnalysisResult, name: string, crs: Crs): Omit<FeatureCol
     type: 'FeatureCollection',
     name,
     coordinate_system: crs,
-    attribution: [...(result.meta.attribution ?? []), '由走得到（zoudedao）从分析结果确定性生成'],
+    attribution: [...(result.meta.attribution ?? []), '由邻至（zoudedao）从分析结果确定性生成'],
   };
 }
 
@@ -246,7 +255,8 @@ function communityProperties(rows: CheckRow[]): Record<string, unknown> {
     props[`${category}_borderline`] = check.borderline;
     props[`${category}_straight_m`] = check.straight_m;
     props[`${category}_route_m`] = check.route_m;
-    if (check.via) props[`${category}_via`] = check.via;
+    const via = viaName(check);
+    if (via) props[`${category}_via`] = via;
     if (isPending(check)) pending.push(category);
     if (isWalkGap(check)) missing.push(category);
     if ((STATUS_RANK[status] ?? 0) > (STATUS_RANK[worst] ?? 0)) worst = status;
@@ -295,7 +305,11 @@ export function reportCollection(result: AnalysisResult, crs: Crs = 'wgs84'): Fe
     }
   });
 
+  // walking time to each facility's entrance at the analysis' profile, as the 圈内设施统计 counts it
+  const timeTo = facilityTimer(result);
+  const radius = circleRadius(result);
   for (const p of result.pois) {
+    const t = timeTo(p.navi_xy ?? p.xy);
     features.push({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: project(p.xy) },
@@ -306,15 +320,19 @@ export function reportCollection(result: AnalysisResult, crs: Crs = 'wgs84'): Fe
         source: p.source,
         uid: p.uid,
         ...(p.stall_of ? { stall_of: p.stall_of } : {}),
+        walk_min: t === null ? null : round(t / 60, 1),
+        within_walk15: t !== null && t <= LIMIT_S,
+        within_circle15: Math.hypot(p.xy[0], p.xy[1]) <= radius,
         'marker-size': 'small',
         'marker-color': (HARD_CATEGORIES as readonly string[]).includes(p.cat) ? '#0B7A3E' : '#9A9A9A',
       },
     });
   }
 
-  for (const g of result.gray_areas ?? []) {
+  const layers = grayLayers(result);
+  (result.gray_areas ?? []).forEach((g, i) => {
     const coords = multiPolygon(g.rings, g.meta, project);
-    if (!coords.length) continue;
+    if (!coords.length) return;
     features.push({
       type: 'Feature',
       geometry: { type: 'MultiPolygon', coordinates: coords },
@@ -324,11 +342,14 @@ export function reportCollection(result: AnalysisResult, crs: Crs = 'wgs84'): Fe
         gap_kind: g.kind,
         min_missing: g.min_missing,
         area_m2: g.area_m2,
+        area_km2: round(g.area_m2 / 1e6, 3),
+        polygons: layers[i]?.polygons ?? coords.length,
+        communities: layers[i]?.communities.join('、') ?? '',
         fill: g.kind === 'pseudo' ? '#E23A2E' : '#555555',
         'fill-opacity': 0.25,
       },
     });
-  }
+  });
 
   for (const [category, entry] of Object.entries(siteSuggestionsOf(result))) {
     for (const s of entry.list) {
@@ -345,7 +366,7 @@ export function reportCollection(result: AnalysisResult, crs: Crs = 'wgs84'): Fe
           gain: s.gain,
           verified: s.verified,
           estimate: !s.verified,
-          basis: entry.source === 'analysis' ? '分析结果' : '走得到按 L̂ 估算（未经实测核验）',
+          basis: entry.source === 'analysis' ? '分析结果' : '邻至按 L̂ 估算（未经实测核验）',
           'marker-color': '#1446B0',
           'marker-symbol': 'cross',
         },
@@ -353,5 +374,9 @@ export function reportCollection(result: AnalysisResult, crs: Crs = 'wgs84'): Fe
     }
   }
 
-  return { ...header(result, `${result.meta.name} · 15 分钟生活圈体检`, crs), features };
+  return {
+    ...header(result, `${result.meta.name} · 15 分钟生活圈体检`, crs),
+    facility_stats: facilityOverview(result)?.rows ?? [],
+    features,
+  };
 }
