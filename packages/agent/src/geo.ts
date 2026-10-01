@@ -5,9 +5,9 @@
  * GCJ-02 overlays Gaode/Tencent maps.
  */
 import {
-  HARD_CATEGORIES,
   bd09ToGcj02,
   bd09ToWgs84,
+  checkedCategories,
   closeRing,
   nestRings,
   simplifyRing,
@@ -308,6 +308,8 @@ export function reportCollection(result: AnalysisResult, crs: Crs = 'wgs84'): Fe
   // walking time to each facility's entrance at the analysis' profile, as the 圈内设施统计 counts it
   const timeTo = facilityTimer(result);
   const radius = circleRadius(result);
+  // green: a category this analysis checked per community; grey: counted only
+  const checked: readonly string[] = checkedCategories(result);
   for (const p of result.pois) {
     const t = timeTo(p.navi_xy ?? p.xy);
     features.push({
@@ -324,7 +326,7 @@ export function reportCollection(result: AnalysisResult, crs: Crs = 'wgs84'): Fe
         within_walk15: t !== null && t <= LIMIT_S,
         within_circle15: Math.hypot(p.xy[0], p.xy[1]) <= radius,
         'marker-size': 'small',
-        'marker-color': (HARD_CATEGORIES as readonly string[]).includes(p.cat) ? '#0B7A3E' : '#9A9A9A',
+        'marker-color': checked.includes(p.cat) ? '#0B7A3E' : '#9A9A9A',
       },
     });
   }

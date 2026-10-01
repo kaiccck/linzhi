@@ -7,7 +7,18 @@
 import type { HardCategory } from '@zoudedao/core';
 import { viaName } from '@zoudedao/core';
 import { facilitySummary } from './facilities.js';
-import { CATS, circleKm2, circleR, distWords, fmtInt, reachArea, worstUnit, type Model } from './derive.js';
+import {
+  circleKm2,
+  circleR,
+  distWords,
+  fmtInt,
+  listWords,
+  measureOf,
+  newNoun,
+  reachArea,
+  worstUnit,
+  type Model,
+} from './derive.js';
 import { grayLevels } from './gray.js';
 import type { SitePin } from './siting.js';
 
@@ -46,8 +57,6 @@ const n = (v: number | string): Part => ({ n: typeof v === 'number' ? fmtInt(v) 
 export const partsText = (parts: readonly Part[]) =>
   parts.map((p) => (typeof p === 'string' ? p : 'n' in p ? p.n : p.code)).join('');
 
-const MEASURE: Partial<Record<string, string>> = { 小学: '所', 菜市场: '家', 药店: '家', 地铁: '个' };
-
 /** The category with the most gaps on foot (the one the panel opens on). */
 function worstCat(model: Model): HardCategory {
   let best = model.heads[0]!;
@@ -57,7 +66,7 @@ function worstCat(model: Model): HardCategory {
 
 /** The example of step 3: the longest 伪覆盖 walk in the worst category that has one, else a 盲区. */
 function example(model: Model, first: HardCategory) {
-  const order = [first, ...CATS.filter((c) => c !== first)];
+  const order = [first, ...model.cats.filter((c) => c !== first)];
   for (const cat of order) {
     const w = worstUnit(model, cat);
     if (w?.kind === 'pseudo') return { ...w, cat };
@@ -90,6 +99,7 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
   const rule = distWords(model.ruleM);
   const steps: TourStep[] = [];
 
+  const kinds = `${model.cats.length} 类设施`;
   // 1 · 画圈: the straight circle alone, no verdict yet
   steps.push({
     id: 'circle',
@@ -97,8 +107,8 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
     head: ['直线画一个 ', n('15′'), ' 圈：半径 ', n(R), ' m，', n(circle.toFixed(2)), ' km²'],
     body:
       model.circleGaps > 0
-        ? ['圈里 ', n(units), ' 个小区 × 三类设施。按直线距离找缺口，只找到 ', n(model.circleGaps), ' 项。']
-        : ['圈里 ', n(units), ' 个小区 × 三类设施。按直线距离找缺口，一个也找不到。'],
+        ? ['圈里 ', n(units), ` 个小区 × ${kinds}。按直线距离找缺口，只找到 `, n(model.circleGaps), ' 项。']
+        : ['圈里 ', n(units), ` 个小区 × ${kinds}。按直线距离找缺口，一个也找不到。`],
     map: { ...base, T: 0, hold: true },
   });
 
@@ -110,7 +120,7 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
     head: ['沿真实路网走 ', n('15′'), '：只走得到 ', n(reach.toFixed(2)), ' km²，是圈的 ', n(`${share}%`)],
     body:
       walkGaps === 0
-        ? ['逐一实测步行路线：每个小区都走得到三类设施。']
+        ? [`逐一实测步行路线：每个小区都走得到这 ${model.cats.length} 类设施。`]
         : tally.pseudo > 0
           ? [
               '逐一实测步行路线，找到 ',
@@ -164,14 +174,14 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
       id: 'example',
       kicker: '伪覆盖一例',
       head: ['没有伪覆盖'],
-      body: ['每个小区的三类设施，步行也都在规则距离内。'],
+      body: [`每个小区的 ${kinds}，步行也都在规则距离内。`],
       map: base,
     });
   }
 
   // 4 · 圈内设施: what the circle claims and what 15′ reaches
   const fac = facilitySummary(model, scale);
-  const hard = fac.rows.find((r) => (CATS as readonly string[]).includes(r.cat) && r.circle > r.walk);
+  const hard = fac.rows.find((r) => (model.cats as readonly string[]).includes(r.cat) && r.circle > r.walk);
   steps.push({
     id: 'facilities',
     kicker: '圈内设施',
@@ -180,13 +190,13 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
       ? [
           `其中${hard.cat}：圈里 `,
           n(hard.circle),
-          ` ${MEASURE[hard.cat] ?? '处'}，`,
+          ` ${measureOf(hard.cat)}，`,
           n('15′'),
           ' 走得到 ',
           n(hard.walk),
-          ` ${MEASURE[hard.cat] ?? '处'}。`,
+          ` ${measureOf(hard.cat)}。`,
         ]
-      : ['小学、菜市场、药店：圈里有的，15′ 都走得到。'],
+      : [`${model.cats.join('、')}：圈里有的，15′ 都走得到。`],
     map: { ...base, sub: 'fac' },
   });
 
@@ -202,11 +212,11 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
       ? [
           '涉及 ',
           n(outer.units.length),
-          ` 个小区：步行 ${rule}内缺小学、菜市场或药店`,
+          ` 个小区：步行 ${rule}内缺${listWords(model.cats, '或')}`,
           ...(deeper ? ['；其中 ', n(deeper.areaKm2.toFixed(2)), ' km² 缺两类以上'] : []),
           '。',
         ]
-      : [`每个小区步行 ${rule}内都有小学、菜市场和药店。`],
+      : [`每个小区步行 ${rule}内都有${listWords(model.cats, '和')}。`],
     map: { ...base, gray: !!outer },
   });
 
@@ -217,7 +227,7 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
     kicker: '规划建议',
     head: pin
       ? [
-          `新增一${MEASURE[pin.cat] ?? '家'}${pin.cat}：可让 `,
+          `新增一${measureOf(pin.cat)}${newNoun(pin.cat)}：可让 `,
           n(pin.covers.length),
           ` 个小区步行 ${rule}内走得到`,
         ]
@@ -228,7 +238,7 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
           pin.verified ? '已用实测路线核验。' : '按这次体检的绕行系数估算，落地前需实测核验。',
         ]
       : model.walkGaps === 0
-        ? ['每个小区步行都走得到三类设施。']
+        ? [`每个小区步行都走得到这 ${model.cats.length} 类设施。`]
         : ['这份结果没有给出建议，也没有可用来估算的步行路线。'],
     map: pin ? { ...base, mode: 'plan', cat: pin.cat, site: pin.key } : { ...base, mode: 'plan' },
   });

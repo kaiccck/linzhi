@@ -64,7 +64,7 @@ describe('template mode (no LLM configured)', () => {
     const a = await advisor.ask('导出体检报告');
     expect(a.citations.map((c) => c.tool)).toEqual(['export_report']);
     expect(a.answer).toContain('没有指明社区，以下按样例“申城佳苑片区”（zj-a）回答。');
-    expect(a.answer).toContain('画圆漏掉了其中 7 个（87.5%）');
+    expect(a.answer).toContain('画圆漏掉了其中 8 个（88.9%）');
     expect(a.attachments).toHaveLength(1);
     expect(a.attachments![0]).toMatchObject({
       filename: 'zoudedao-zj-a-report.md',
@@ -151,7 +151,7 @@ describe('template mode (no LLM configured)', () => {
     const reach = await advisor.ask('15分钟能走多远？');
     expect(reach.answer).toContain('15 分钟有效步行半径中位数 775 m');
     const compare = await advisor.ask('对比一下老人和成人');
-    expect(compare.answer).toContain('两种画像的已核实缺口都是 8 个');
+    expect(compare.answer).toContain('两种画像的已核实缺口都是 9 个');
     for (const a of [school, unknown, reach, compare])
       expect(a.grounding).toMatchObject({ ok: true, uncited: [] });
   });
@@ -165,7 +165,7 @@ describe('LLM mode with a scripted OpenAI-compatible endpoint', () => {
       analyzeCall,
       {
         content:
-          '结论：画圆法只找到 1 个缺口，按实测步行距离已核实 8 个 [T1]。\n- 15 分钟步行实际可达 1.857 km²，画圆高估 1.88 倍 [T1]。',
+          '结论：画圆法只找到 1 个缺口，按实测步行距离已核实 9 个 [T1]。\n- 15 分钟步行实际可达 1.857 km²，画圆高估 1.88 倍 [T1]。',
       },
     ]);
     const advisor = createAdvisor({ backend: backend(), llm: { ...LLM, fetch: llm.fetch } });
@@ -206,7 +206,7 @@ describe('LLM mode with a scripted OpenAI-compatible endpoint', () => {
       facts: unknown[];
     };
     expect(payload).toMatchObject({ id: 'T1', tool: 'analyze_life_circle' });
-    expect(payload.summary).toContain('画圆漏掉了其中 7 个（87.5%）');
+    expect(payload.summary).toContain('画圆漏掉了其中 8 个（88.9%）');
   });
 
   it('repairs a hallucinated number once, listing it for the model', async () => {

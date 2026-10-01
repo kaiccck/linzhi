@@ -1,7 +1,7 @@
 /**
  * Synthetic city for the engine tests: a 100 m street grid, a straight river at x = 450 m that only one
  * bridge crosses (at y = −300 m), walking = shortest path on the grid (Dijkstra) at Baidu's 1.17 m/s.
- * Some compounds on one bank have their nearest school or market on the other bank.
+ * Some compounds on one bank have their nearest school, market or kindergarten on the other bank.
  */
 import { localFrame, type LngLat, type LocalFrame, type XY } from '@zoudedao/core';
 
@@ -387,7 +387,7 @@ export function cityPois(): CityPoi[] {
     { uid: 'p9', name: '河东大药房', tag: '医疗;药店', xy: [1240, 1180], navi: [1200, 1180] },
     { uid: 'p10', name: '东岸药店', tag: '医疗;药店', xy: [1040, -520], navi: [1000, -520] },
     { uid: 'p11', name: '爱宠宠物药店', tag: '医疗;药店', xy: [-80, -520] },
-    // 生鲜超市 and 幼儿园 (optional groups)
+    // 生鲜超市 (the optional group)
     {
       uid: 'f1',
       name: '钱大妈生鲜超市(河西店)',
@@ -396,9 +396,51 @@ export function cityPois(): CityPoi[] {
       navi: [-100, 420],
     },
     { uid: 'f2', name: '叮咚生鲜超市', tag: '购物;超市;生鲜超市', xy: [640, -160], navi: [600, -160] },
+    // kindergartens, checked like schools: a campus and an 艺术 kindergarten are kindergartens all the
+    // same; the early-education and childcare centres Baidu tags 幼儿园 and a gate named after one are
+    // not (core categorize)
     { uid: 'k1', name: '临河幼儿园', tag: '教育培训;幼儿园', xy: [60, -240] },
     { uid: 'k2', name: '河东幼儿园', tag: '教育培训;幼儿园', xy: [900, 200] },
     { uid: 'k3', name: '北苑幼儿园', tag: '教育培训;幼儿园', xy: [-350, 950] },
+    { uid: 'k4', name: '河西实验幼儿园', tag: '教育培训;幼儿园', xy: [-380, 120], navi: [-400, 120] },
+    { uid: 'k5', name: '南苑幼儿园', tag: '教育培训;幼儿园', xy: [-430, -720], navi: [-400, -720] },
+    { uid: 'k6', name: '东岸幼儿园(滨江部)', tag: '教育培训;幼儿园', xy: [820, 780], navi: [800, 780] },
+    { uid: 'k7', name: '北城艺术幼儿园', tag: '教育培训;幼儿园', xy: [-830, 640], navi: [-800, 640] },
+    { uid: 'k8', name: '金色童年早教中心', tag: '教育培训;幼儿园', xy: [220, -470] },
+    { uid: 'k9', name: '贝贝托育园', tag: '教育培训;幼儿园', xy: [-640, 90] },
+    { uid: 'k1g', name: '临河幼儿园(北门)', tag: '出入口;门', xy: [60, -190] },
+    // community health: the centre Baidu tags 综合医院 and the stations it tags like centres (as around
+    // 张江), checked per community; the centre's car park is no facility
+    {
+      uid: 'c1',
+      name: '临河社区卫生服务中心',
+      tag: '医疗;综合医院',
+      xy: [-420, -80],
+      navi: [-400, -80],
+    },
+    { uid: 'c2', name: '河东社区卫生服务站', tag: '医疗;诊所', xy: [980, 420], navi: [1000, 420] },
+    {
+      uid: 'c3',
+      name: '滨河社区卫生服务站',
+      tag: '医疗;医院;社区卫生服务中心',
+      xy: [230, 560],
+      navi: [200, 560],
+    },
+    {
+      uid: 'c4',
+      name: '北街社区卫生服务站',
+      tag: '医疗;医院;社区卫生服务中心',
+      xy: [-660, 1020],
+      navi: [-600, 1020],
+    },
+    {
+      uid: 'c5',
+      name: '南苑社区卫生服务站',
+      tag: '医疗;医院;社区卫生服务中心',
+      xy: [-150, -1300],
+      navi: [-100, -1300],
+    },
+    { uid: 'cp', name: '临河社区卫生服务中心停车场', tag: '交通设施;停车场', xy: [-450, -40] },
     // compounds placed on purpose, gates well inside the 1100 m demand radius (so the cap of 30 cuts
     // generated ones) except 远郊花园's: 滨河花园 (west bank) has its nearest school across the river,
     // 东岸新村 (east bank) its nearest market (河东菜场 is a 1090 m walk); two different 锦绣苑 lie 781 m
@@ -416,18 +458,9 @@ export function cityPois(): CityPoi[] {
     // noise the 小区 keyword brings along
     { uid: 'x-jwh', name: '河西小区居委会', tag: '政府机构;居民委员会', xy: [-60, 300] },
     { uid: 'x-park', name: '北苑小区停车场', tag: '交通设施;停车场', xy: [-420, 880] },
-    // the other 民生设施 (counted for the circle, never checked): 河东社区卫生服务站 lies just outside the
-    // straight circle, 东岸路 station inside it but a 1,980 m walk away (the bridge); the metro exits
-    // and a lift are no facilities of their own; a 生鲜超市-named 超市 is already found by the
-    // 生鲜超市 group
-    {
-      uid: 'c1',
-      name: '临河社区卫生服务中心',
-      tag: '医疗;综合医院',
-      xy: [-420, -80],
-      navi: [-400, -80],
-    },
-    { uid: 'c2', name: '河东社区卫生服务站', tag: '医疗;诊所', xy: [980, 420], navi: [1000, 420] },
+    // the other 民生设施 (counted for the circle, never checked): 东岸路 station lies inside the straight
+    // circle but a 1,980 m walk away (the bridge); the metro exits and a lift are no facilities of their
+    // own; a 生鲜超市-named 超市 is already found by the 生鲜超市 group
     { uid: 'e1', name: '滨河养老院', tag: '生活服务;养老院', xy: [250, -250] },
     { uid: 'e2', name: '临河街道长者食堂', tag: '美食;中餐厅', xy: [-180, 380] },
     { uid: 't1', name: '河西路', tag: '交通设施;地铁站', xy: [-520, 300], navi: [-500, 300] },

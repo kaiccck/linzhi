@@ -19,7 +19,7 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { AnalysisResult, HardCategory } from '@zoudedao/core';
+import { checkedCategories, HARD_CATEGORIES, type AnalysisResult, type HardCategory } from '@zoudedao/core';
 import type { StoredRoute } from '../src/history.js';
 import { checkPair, routeKey, toStoredRoute, type CheckPair } from '../src/route.js';
 import { missCost, openScriptClient, printLedger, REPO_ROOT, usage } from './script-client.js';
@@ -33,7 +33,6 @@ const max = at >= 0 ? Number(args[at + 1]) : 40;
 if (!Number.isInteger(max) || max < 0) throw new Error('--max 须为非负整数');
 
 const SAMPLES = ['zj-a', 'zj-b', 'zj-c', 'zj-v'];
-const CATEGORIES: HardCategory[] = ['小学', '菜市场', '药店'];
 const samplesDir = join(REPO_ROOT, 'data/samples');
 const routesDir = join(samplesDir, 'routes');
 
@@ -86,7 +85,7 @@ function wanted(): Want[] {
   for (const sample of SAMPLES) {
     const r = results.get(sample)!;
     for (const c of r.communities) {
-      for (const category of CATEGORIES) {
+      for (const category of checkedCategories(r)) {
         const k = c.checks[category];
         if (!k?.verified || k.status_main !== '伪覆盖') continue;
         const pair = checkPair(r, sample, { community: c.name, category });
@@ -173,7 +172,7 @@ if (!dryRun) {
   mkdirSync(routesDir, { recursive: true });
   for (const [id, file] of files) {
     if (!file.routes.length) continue;
-    const order = (r: RouteEntry) => `${r.community}\u0000${CATEGORIES.indexOf(r.category)}`;
+    const order = (r: RouteEntry) => `${r.community}\u0000${HARD_CATEGORIES.indexOf(r.category)}`;
     file.routes.sort((a, b) => (order(a) < order(b) ? -1 : order(a) > order(b) ? 1 : 0));
     writeFileSync(join(routesDir, `${id}.json`), `${JSON.stringify(file, null, 1)}\n`);
     console.log(`wrote data/samples/routes/${id}.json (${file.routes.length} routes)`);

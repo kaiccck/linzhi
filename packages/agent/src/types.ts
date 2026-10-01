@@ -68,7 +68,7 @@ export interface ProfileMeta {
   profile?: Profile;
   /** Walking speed behind field, contours and stats; meta.walk_speed_mps stays Baidu's 1.17. */
   profile_speed_mps?: number;
-  /** Rule distance per hard category, metres. */
+  /** Rule distance per checked category, metres. */
   rule_m?: Partial<Record<HardCategory, number>>;
   /** Chinese notes and warnings of a live run (samples carry English build notes instead). */
   notes?: string[];

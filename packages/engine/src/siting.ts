@@ -6,7 +6,9 @@
  * call. So the greedy runs as a pure function over the routes measured so far: whenever one of the top
  * suggestions rests on estimates only, that site is measured (one 1 × |D| routematrix call) and the
  * greedy re-runs — at most MAX_VERIFY_SITES sites per category and within the siting budget. Whatever
- * stays unmeasured keeps verified: false, i.e. an estimate.
+ * stays unmeasured keeps verified: false, i.e. an estimate. Every checked category competes for the
+ * budget alike (the one with the most gaps first); a category the communities were not checked for
+ * gets no suggestion.
  */
 import type { RouteMatrix } from '@zoudedao/baidu';
 import {
@@ -72,7 +74,10 @@ export async function runSiting(args: {
   const gaps = HARD_CATEGORIES.map((cat) => ({
     cat,
     demands: args.communities
-      .filter((c) => c.checks[cat].verified && c.checks[cat].status_main !== '覆盖')
+      .filter((c) => {
+        const k = (c.checks as Partial<LiveCommunity['checks']>)[cat];
+        return !!k && k.verified && k.status_main !== '覆盖';
+      })
       .map((c): SitingDemand => ({ id: c.name, xy: c.centroid, weight: 1 })),
   }))
     .filter((g) => g.demands.length)

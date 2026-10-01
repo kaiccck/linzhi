@@ -3,6 +3,9 @@ import type { ReverseGeocodeResult } from '@zoudedao/baidu';
 import {
   FRESH_ALT_K,
   FRESH_RULE_TEXT,
+  HARD_CATEGORIES,
+  TASK_CATEGORIES,
+  TASK_RULE_M,
   type AnalysisMeta,
   type ExcludedPoi,
   type HardCategory,
@@ -19,6 +22,7 @@ import {
   WALK_SPEED,
 } from './constants.js';
 import type { BrowserPoiStats } from './browser.js';
+import { LIVELIHOOD_CATEGORIES } from './facilities.js';
 import type { FreshOutcome } from './fresh.js';
 import { ALIAS_RADIUS_M, type ResidentialDedupe } from './residential.js';
 import type { Profile } from './types.js';
@@ -152,16 +156,30 @@ export interface LivelihoodNote {
 }
 
 function livelihoodNote(l: LivelihoodNote | null | undefined): string {
+  const others = LIVELIHOOD_CATEGORIES.join('、');
   if (!l) {
-    return '本次没有检索社区卫生、养老、地铁、公园、超市、公交（地点检索预算不足或检索失败），圈内设施统计（stats.facility_stats）只含小学、菜市场、药店等已检索的类别。';
+    return `本次没有检索${others}（地点检索预算不足或检索失败），圈内设施统计（stats.facility_stats）只含逐小区检查的${HARD_CATEGORIES.join('、')}与生鲜超市。`;
   }
   const cut = Object.entries(l.inventory)
     .filter(([, inv]) => inv && !inv.complete)
     .map(([cat, inv]) => `${cat}只统计到离中心 ${Math.round(inv!.radius_m)} 米`);
   return (
-    `民生设施：社区卫生、养老、地铁、公园、超市、公交用一次地点检索（$ 并集，半径 ${LIVELIHOOD_RADIUS_M} 米，最多 ${LIVELIHOOD_PAGES} 页）补充 ${l.found} 处，` +
+    `民生设施：${others}用一次地点检索（$ 并集，半径 ${LIVELIHOOD_RADIUS_M} 米，最多 ${LIVELIHOOD_PAGES} 页）补充 ${l.found} 处，` +
     '与已有设施重复的不重复计入，地铁站的各出入口算一个站。stats.facility_stats 按成人步速统计各类设施：清单数、15 分钟步行可达数、直线 15 分钟圆内数与最近一处的步行时间，老年人视图由前端按 0.9 米/秒换算。' +
     (cut.length ? `检索页数用完：${cut.join('，')}。` : '')
+  );
+}
+
+/** Which categories every community was checked for, and by what rule. */
+function checkedNote(): string {
+  const rules = [...new Set(HARD_CATEGORIES.map((c) => TASK_RULE_M[c]))];
+  const rule =
+    rules.length === 1
+      ? `一律按步行 ${rules[0]! / 1000} 公里内可达判定`
+      : HARD_CATEGORIES.map((c) => `${c}步行 ${TASK_RULE_M[c]} 米`).join('、');
+  return (
+    `逐小区检查 ${HARD_CATEGORIES.length} 类设施：${HARD_CATEGORIES.join('、')}（社区卫生含社区卫生服务中心与服务站），${rule}，` +
+    `各类判定方法相同（communities[].checks）；其中${TASK_CATEGORIES.join('、')}是赛题点名的三类。`
   );
 }
 
@@ -176,6 +194,7 @@ export function liveNotes(args: {
   livelihood?: LivelihoodNote | null;
 }): string[] {
   const notes = [
+    checkedNote(),
     '小区没有轮廓：百度的小区边界（AOI）属于付费服务，实时模式下 communities[].pts 为空，centroid 是小区出入口（优先取 navi_location）。',
     `需求点是地点检索“住宅区$小区”得到的小区出入口：同名子点（××-1号门、××东门、××-3号楼）已合并，限于中心 ${DEMAND_RADIUS_M} 米内（15 分钟直线圈），取最近的 ${args.communities_max} 个；本次 ${args.demand} 个（检出 ${args.demand_found} 个）。`,
     `设施检索半径 ${args.facility_radius_m} 米，即需求点范围 ${DEMAND_RADIUS_M} 米外加 1 公里缓冲，避免边缘小区出现假盲区；菜场摊位并入所属菜市场，不单独计数。`,

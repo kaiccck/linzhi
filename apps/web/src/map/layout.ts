@@ -10,7 +10,7 @@
  *    and Baidu's logo): they are hard boxes for cards, tags and names.
  *  - Density follows the map box: `narrow` (< 700 px) drops the cards, minor marks, labels and names.
  */
-import type { HardCategory, XY } from '@zoudedao/core';
+import { HARD_CATEGORIES, type HardCategory, type XY } from '@zoudedao/core';
 import type { View } from '../geo/view.js';
 import { circleR, poiName, spotOf, type IconId, type Model, type Unit } from '../model/derive.js';
 import type { FacilityMark, StatCategory } from '../model/facilities.js';
@@ -485,7 +485,7 @@ export function layoutOverlay(inp: LayoutInput): OverlayLayout {
   const pois: PoiPos[] = [];
   if (inp.marks) {
     const all = inp.marks.kind === 'all';
-    const hardCats = new Set<StatCategory>(['小学', '菜市场', '药店']);
+    const hardCats = new Set<StatCategory>(HARD_CATEGORIES);
     const list = inp.marks.list
       .filter((m) =>
         all ? m.inCircle || m.reach : m.fresh || m.cat === (inp.marks as { cat: HardCategory }).cat,

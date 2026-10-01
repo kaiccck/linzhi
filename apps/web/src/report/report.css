@@ -413,7 +413,8 @@ html[data-view='report'] body {
   margin: 0;
 }
 .rp-dir .c-cell {
-  width: 23%;
+  /* the categories share 69% of the width (three at 23% each, five at 13.8%) */
+  width: calc(69% / var(--n, 3));
   padding: 3px 4px;
 }
 .rp-cell {

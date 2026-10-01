@@ -29,12 +29,12 @@ import type { Meter } from './meter.js';
 import type { EngineClient } from './types.js';
 
 /** Categories of the 民生设施 union (the facilities counted, never checked per community). */
-export type LivelihoodKey = '社区卫生' | '养老' | '地铁' | '公园' | '超市' | '公交';
+export type LivelihoodKey = '养老' | '地铁' | '公园' | '超市' | '公交';
 
 /** Groups of the 买菜替代 search (engine fresh.ts): shops that name produce, then 超市. */
 export type FreshGroupKey = '果蔬店' | '超市';
 
-export type GroupKey = '小学' | '菜市场' | '生鲜超市' | '药店' | '幼儿园' | LivelihoodKey | FreshGroupKey;
+export type GroupKey = HardCategory | '生鲜超市' | LivelihoodKey | FreshGroupKey;
 
 export interface FacilityGroup {
   key: GroupKey;
@@ -43,16 +43,21 @@ export interface FacilityGroup {
 
 const GROUPS: Readonly<Record<Exclude<GroupKey, LivelihoodKey | FreshGroupKey>, FacilityGroup>> = {
   小学: { key: '小学', keywords: ['小学'] },
+  社区卫生: { key: '社区卫生', keywords: ['社区卫生服务中心', '社区卫生服务站'] },
+  幼儿园: { key: '幼儿园', keywords: ['幼儿园'] },
   菜市场: { key: '菜市场', keywords: ['菜市场', '菜场', '农贸市场', '生鲜市场'] },
   生鲜超市: { key: '生鲜超市', keywords: ['生鲜超市'] },
   药店: { key: '药店', keywords: ['药店', '药房'] },
-  幼儿园: { key: '幼儿园', keywords: ['幼儿园'] },
 };
 
-/** Keyword groups in query order: scarce hard categories first, optional ones when pages are left. */
+/**
+ * Keyword groups in query order: every checked category in one union of exactly 10 keywords (Baidu's
+ * most for one query), the scarcest first and the abundant 药店 last, so the page limit only trims
+ * the far tail of pharmacies; 生鲜超市 when pages are left.
+ */
 export function facilityGroups(): { required: FacilityGroup[]; optional: FacilityGroup[] } {
   const g = GROUPS;
-  return { required: [g.小学, g.菜市场, g.药店], optional: [g.生鲜超市, g.幼儿园] };
+  return { required: [g.小学, g.社区卫生, g.幼儿园, g.菜市场, g.药店], optional: [g.生鲜超市] };
 }
 
 export interface InventoryInfo {
@@ -214,7 +219,7 @@ export async function searchFacilities(args: {
       await query(optional, room());
     } catch (err) {
       if (!isDegradable(err)) throw err;
-      warn(`生鲜超市、幼儿园检索失败，只统计硬指标设施：${describeError(err)}`);
+      warn(`生鲜超市检索失败，只统计逐小区检查的设施：${describeError(err)}`);
     }
   }
   const { pois, dropped } = cleanPois(rows.map(toPlaceResult), { project: frame.toXY });
@@ -233,13 +238,13 @@ export function knownRadius(inventory: Inventory, cat: HardCategory): number {
 // ------------------------------------------------------------------------------- 民生设施
 
 /**
- * The 民生设施 union for the 圈内设施统计: exactly 10 keywords (Baidu's maximum for one query), grouped
- * by category and scarcest first, so the page limit only trims the far tail of bus stops. Every keyword
- * maps to its category through core's categorize(); station exits (出入口;其他) are dropped there.
+ * The 民生设施 union for the 圈内设施统计: one query (at most Baidu's 10 keywords), grouped by category
+ * and scarcest first, so the page limit only trims the far tail of bus stops. Every keyword maps to its
+ * category through core's categorize(); station exits (出入口;其他) are dropped there. 社区卫生 is not
+ * here: it is checked per community, with the facility union.
  */
 export const LIVELIHOOD_GROUPS: readonly (FacilityGroup & { key: LivelihoodKey })[] = [
-  { key: '社区卫生', keywords: ['社区卫生服务中心', '社区卫生服务站'] },
-  { key: '养老', keywords: ['养老院', '日间照料中心', '长者照护之家', '长者食堂'] },
+  { key: '养老', keywords: ['养老院', '日间照料中心', '长者照护之家', '长者食堂', '综合为老服务中心'] },
   { key: '地铁', keywords: ['地铁站'] },
   { key: '公园', keywords: ['公园'] },
   { key: '超市', keywords: ['超市'] },
@@ -344,7 +349,7 @@ export async function searchLivelihood(args: {
   } catch (err) {
     if (!isDegradable(err)) throw err;
     args.warn(
-      `社区卫生、养老、地铁、公园、超市、公交检索失败，圈内设施统计只含小学、菜市场、药店等已检索的类别：${describeError(err)}`,
+      `养老、地铁、公园、超市、公交检索失败，圈内设施统计只含逐小区检查的设施等已检索的类别：${describeError(err)}`,
     );
     return null;
   }
@@ -371,11 +376,12 @@ export async function searchLivelihood(args: {
 }
 
 export const COUNTED_CATEGORIES: readonly FacilityCategory[] = [
+  '幼儿园',
   '小学',
   '菜市场',
   '生鲜超市',
   '药店',
-  '幼儿园',
+  '社区卫生',
   ...LIVELIHOOD_CATEGORIES,
 ];
 

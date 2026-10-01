@@ -5,7 +5,7 @@
  * analysis' frame → WGS-84 with @zoudedao/core's public conversion (accurate to a few metres).
  */
 import { bd09ToWgs84, type ContourMeta, type XY, viaName } from '@zoudedao/core';
-import { CATS, circleR, distWords, type Model } from './derive.js';
+import { circleR, distWords, type Model } from './derive.js';
 
 type Pos = [number, number];
 type Geometry =
@@ -123,7 +123,7 @@ export function analysisGeoJSON(model: Model, opts: { scale: number }): Analysis
   // communities and their verdicts
   for (const u of model.units) {
     const props: Feature['properties'] = { layer: 'community', code: u.code, name: u.name };
-    for (const cat of CATS) {
+    for (const cat of model.cats) {
       const c = u.checks[cat];
       props[`${cat}_status`] = c.verified === false ? '待核实' : c.status;
       props[`${cat}_straight_m`] = c.straight_m >= 0 ? Math.round(c.straight_m) : null;

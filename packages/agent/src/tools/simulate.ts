@@ -1,6 +1,8 @@
 import { estimateRoute, siteCoverage, type HardCategory, type LngLat, type XY } from '@zoudedao/core';
 import * as z from 'zod';
 import {
+  CHECKED_SCOPE,
+  HARD_CATEGORIES,
   describePlace,
   findCommunity,
   frameOf,
@@ -12,7 +14,7 @@ import {
 } from '../analysis.js';
 import { AnchorBook } from '../anchors.js';
 import { FactBook, fmtNumber, round } from '../format.js';
-import { resolveAnalysis } from './context.js';
+import { assertChecked, resolveAnalysis } from './context.js';
 import { ToolError, defineTool } from './types.js';
 
 export type SimChange =
@@ -41,7 +43,18 @@ export interface SimulateData {
   caveats: string[];
 }
 
-const MEASURE: Record<HardCategory, string> = { 小学: '所', 菜市场: '家', 药店: '家' };
+/** Measure word of one new facility: 一所幼儿园、一所小学、一家菜市场、一家药店、一处社区卫生服务站. */
+const MEASURE: Record<HardCategory, string> = {
+  幼儿园: '所',
+  小学: '所',
+  菜市场: '家',
+  药店: '家',
+  社区卫生: '处',
+};
+
+/** What one new facility of the category is called: a 社区卫生 facility is a 社区卫生服务站. */
+const NOUN: Partial<Record<HardCategory, string>> = { 社区卫生: '社区卫生服务站' };
+const nounOf = (c: HardCategory): string => NOUN[c] ?? c;
 
 const ORDER: SimChange[] = [
   'newly_covered',
@@ -56,13 +69,14 @@ export const simulateFacility = defineTool({
   name: 'simulate_facility',
   title: '新增设施模拟（估算）',
   description:
-    '模拟“如果在某处新增一家小学/菜市场/药店”：用本次体检的绕行系数场估算新设施到每个小区的步行距离 L̂（不调用地图接口），' +
+    '模拟“如果在某处新增一处某类设施”：用本次体检的绕行系数场估算新设施到每个小区的步行距离 L̂（不调用地图接口），' +
     '判断哪些当前缺这类设施的小区会进入判定距离、哪些待核实的小区会被满足、哪些已覆盖的小区步行会变近。' +
+    `类别须是这份分析逐小区检查的（checked_categories）——${CHECKED_SCOPE}；没有检查的类别无法模拟（返回 not_checked 错误）。` +
     '结果一律是估算，回答时必须写明“估算”并提醒需要实测核验。位置二选一：center_bd09（BD-09 [经度, 纬度]）或 near_community（放在某个小区旁）。' +
     '位置须在本次分析范围内（离分析中心约 1.6 km 以内）。',
   inputSchema: z.object({
     analysis_id: z.string().trim().min(1).max(80).describe('analyze_life_circle 返回的 analysis_id'),
-    category: z.enum(['小学', '菜市场', '药店']).describe('新增哪类设施'),
+    category: z.enum(HARD_CATEGORIES).describe('新增哪类设施（须是这份分析逐小区检查的类别）'),
     center_bd09: z.array(z.number()).length(2).optional().describe('新设施位置，BD-09 [经度, 纬度]'),
     near_community: z
       .string()
@@ -94,6 +108,13 @@ export const simulateFacility = defineTool({
       throw new ToolError('invalid_input', 'center_bd09 和 near_community 需要且只能提供一个');
     }
     const category = args.category;
+    // without the current checks there is nothing a new facility could be said to fix
+    assertChecked(
+      result,
+      id,
+      category,
+      `不知道哪些小区现在走不到${category}，无法估算新增${nounOf(category)}能补上哪些缺口`,
+    );
     let xy: XY;
     let label = args.label ?? null;
     if (args.center_bd09) {
@@ -127,7 +148,8 @@ export const simulateFacility = defineTool({
       const straight = Math.hypot(c.centroid[0] - xy[0], c.centroid[1] - xy[1]);
       const est = straight <= rule_m * 2 ? Math.round(estimateRoute(xy, c.centroid, { estimator })) : null;
       const check = c.checks?.[category];
-      const current: RuleStatus = check ? statusUnderRule(check, rule_m) : '未达标';
+      // a community without its own check is unknown, never a gap
+      const current: RuleStatus = check ? statusUnderRule(check, rule_m) : '待核实';
       const ok = covered.has(c.name);
       const route = check && check.route_m >= 0 ? check.route_m : null;
       let change: SimChange;
@@ -155,19 +177,20 @@ export const simulateFacility = defineTool({
     const center = toBd09(result, xy);
 
     const book = new FactBook();
+    const noun = nounOf(category);
     const names = (kind: SimChange) =>
       rows
         .filter((r) => r.change === kind)
         .map((r) =>
           r.est_m !== null && r.est_m < 30
             ? `${r.community}（新设施就在小区旁）`
-            : `${r.community}（L̂ ≈ ${book.add(`${r.community}到新${category}的估算步行距离 L̂`, r.est_m ?? 0, 'm')}）`,
+            : `${r.community}（L̂ ≈ ${book.add(`${r.community}到新${noun}的估算步行距离 L̂`, r.est_m ?? 0, 'm')}）`,
         )
         .join('、');
     const gapsNow = counts.newly_covered + counts.still_gap;
     const pendingNow = counts.pending_covered + counts.pending_unresolved;
     const ruleText = `步行 ≤ ${fmtNumber(rule_m)} m`;
-    let summary = `估算（未经实测核验）：在${label ? `“${label}”（${place}）` : place}新增 ${book.add('新增设施数', 1, MEASURE[category])}${category}，按${ruleText} 判定——`;
+    let summary = `估算（未经实测核验）：在${label ? `“${label}”（${place}）` : place}新增 ${book.add('新增设施数', 1, MEASURE[category])}${noun}，按${ruleText} 判定——`;
     if (!gapsNow) summary += `当前没有已核实的${category}缺口`;
     else if (counts.newly_covered) {
       summary += `当前 ${book.add(`${category}已核实缺口数`, gapsNow, '个')}缺口中，估算有 ${book.add('估算新进入判定距离的小区数', counts.newly_covered, '个')}可以补上：${names('newly_covered')}`;

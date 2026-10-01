@@ -3,7 +3,8 @@ import { existsSync } from 'node:fs';
 import { request } from 'node:http';
 import { PassThrough } from 'node:stream';
 import { fileURLToPath } from 'node:url';
-import { LocalBackend, type ZddBackend } from '@zoudedao/agent';
+import { AnalysisStore, LocalBackend, type ZddBackend } from '@zoudedao/agent';
+import { HARD_CATEGORIES, TASK_CATEGORIES } from '@zoudedao/core';
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import {
@@ -64,17 +65,18 @@ describe('MCP server over an in-memory transport', () => {
     const r = await client.callTool({ name: 'analyze_life_circle', arguments: { sample_id: 'zj-a' } });
     expect(r.isError).toBeFalsy();
     expect(textOf(r)).toContain(
-      '画圆法（直线 1 km）只找到 1 个服务缺口，按实测步行距离已核实 8 个，画圆漏掉了其中 7 个（87.5%）',
+      '画圆法（直线 1 km）只找到 1 个服务缺口，按实测步行距离已核实 9 个，画圆漏掉了其中 8 个（88.9%）',
     );
     const data = r.structuredContent as Structured;
     expect(data).toMatchObject({
       status: 'ok',
       analysis_id: 'zj-a',
-      headline: { straight_gaps: 1, walking_gaps: 8, missed_share_pct: 87.5, pending: 0 },
+      checked_categories: [...HARD_CATEGORIES],
+      headline: { categories: 5, straight_gaps: 1, walking_gaps: 9, missed_share_pct: 88.9, pending: 0 },
       isochrone: { area_iso15_km2: 1.857, area_circle15_km2: 3.483, overstate_x: 1.88 },
     });
     const facts = (r._meta as { 'zoudedao/facts': { label: string; value: number }[] })['zoudedao/facts'];
-    expect(facts.find((f) => f.label === '画圆漏掉的比例')?.value).toBe(87.5);
+    expect(facts.find((f) => f.label === '画圆漏掉的比例')?.value).toBe(88.9);
     await client.close();
   });
 
@@ -109,7 +111,7 @@ describe('MCP server over an in-memory transport', () => {
     expect(resource.uri).toBe('zoudedao://analysis/zj-a/report.md');
     expect(resource.mimeType).toBe('text/markdown');
     expect(resource.text.startsWith('# 申城佳苑片区 · 15 分钟生活圈体检报告')).toBe(true);
-    expect(resource.text).toContain('画圆漏掉了其中 7 个（87.5%）');
+    expect(resource.text).toContain('画圆漏掉了其中 8 个（88.9%）');
     const geo = await client.callTool({
       name: 'export_report',
       arguments: { analysis_id: 'zj-a', format: 'geojson' },
@@ -175,6 +177,47 @@ describe('MCP server over an in-memory transport', () => {
     await client.close();
   });
 
+  it('takes every checked category and says when an analysis did not check one', async () => {
+    // zj-a as an analysis made before 幼儿园 and 社区卫生 were checked: the task's three only
+    const older = structuredClone(await backend().getAnalysis('zj-a'));
+    for (const c of older.communities) {
+      c.checks = Object.fromEntries(TASK_CATEGORIES.map((k) => [k, c.checks[k]])) as typeof c.checks;
+    }
+    const store = new AnalysisStore();
+    store.put(older, { id: 'zj-a-older', source: 'sample' });
+    const client = await connect(createServerFactory({ backend: backend(), store }));
+    const { tools } = await client.listTools();
+    const categoryEnum = (name: string) =>
+      (tools.find((t) => t.name === name)!.inputSchema.properties as Record<string, { enum?: unknown[] }>)
+        .category!.enum;
+    expect(categoryEnum('list_service_gaps')).toEqual([...HARD_CATEGORIES]);
+    expect(categoryEnum('simulate_facility')).toEqual([...HARD_CATEGORIES]);
+    expect(client.getInstructions()).toContain('checked_categories');
+    // the stored zj-a checks 幼儿园: checked and clean
+    const kinder = await client.callTool({
+      name: 'list_service_gaps',
+      arguments: { analysis_id: 'zj-a', category: '幼儿园' },
+    });
+    expect(kinder.isError).toBeFalsy();
+    expect(kinder.structuredContent).toMatchObject({
+      checked_categories: [...HARD_CATEGORIES],
+      counts: { checks: 12, gaps: 0 },
+    });
+    // the older copy never checked it: not "no gaps", but "not checked"
+    const r = await client.callTool({
+      name: 'list_service_gaps',
+      arguments: { analysis_id: 'zj-a-older', category: '幼儿园' },
+    });
+    expect(r.isError).toBe(true);
+    expect(r._meta).toMatchObject({ 'zoudedao/error_code': 'not_checked' });
+    expect(textOf(r)).toContain('没有逐小区检查幼儿园：这份分析只逐小区检查了小学、菜市场、药店');
+    const ok = await client.callTool({ name: 'list_service_gaps', arguments: { analysis_id: 'zj-a-older' } });
+    expect((ok.structuredContent as { checked_categories: string[] }).checked_categories).toEqual([
+      ...TASK_CATEGORIES,
+    ]);
+    await client.close();
+  });
+
   it('shares analysis ids between connections of one server factory', async () => {
     const base = backend();
     const live: ZddBackend = {
@@ -212,7 +255,7 @@ describe('Streamable HTTP', () => {
       await client.connect(new StreamableHTTPClientTransport(new URL(url)));
       expect((await client.listTools()).tools).toHaveLength(7);
       const r = await client.callTool({ name: 'analyze_life_circle', arguments: { sample_id: 'zj-a' } });
-      expect((r.structuredContent as { headline: { walking_gaps: number } }).headline.walking_gaps).toBe(8);
+      expect((r.structuredContent as { headline: { walking_gaps: number } }).headline.walking_gaps).toBe(9);
       await client.close();
     }
   });

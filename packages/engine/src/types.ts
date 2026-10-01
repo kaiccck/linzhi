@@ -129,8 +129,8 @@ export interface EngineBudget {
   /** Of `place`, pages kept for the residential (demand point) search. */
   residentialPages: number;
   /**
-   * Of `place`, pages kept for the 民生设施 union (社区卫生, 养老, 地铁, 公园, 超市, 公交) behind
-   * stats.facility_stats; 0 skips it. The hard-category search gets the rest.
+   * Of `place`, pages kept for the 民生设施 union (养老, 地铁, 公园, 超市, 公交) behind
+   * stats.facility_stats; 0 skips it. The search of the checked categories gets the rest.
    */
   livelihoodPages: number;
   /**

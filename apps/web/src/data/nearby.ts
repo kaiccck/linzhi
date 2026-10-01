@@ -13,6 +13,8 @@ import type { BMapNS } from '../map/loadBaidu.js';
 /** The facility keywords of the server's searches, and the 买菜替代 ones (蔬菜, 果蔬, 生鲜, 超市). */
 export const NEARBY_KEYWORDS = [
   '小学',
+  '社区卫生',
+  '幼儿园',
   '菜市场',
   '菜场',
   '农贸市场',
@@ -49,7 +51,7 @@ const PAGE = 50;
 const MAX_PAGES = 2;
 /** The whole search gives up after this long: the check goes on with what it has. */
 const TOTAL_MS = 25000;
-const CACHE_PREFIX = 'zdd:nearby:v1:';
+const CACHE_PREFIX = 'zdd:nearby:v2:';
 
 const sleep = (ms: number, signal?: AbortSignal) =>
   new Promise<void>((resolve) => {
@@ -169,12 +171,17 @@ export async function findNearby(
   center: [number, number],
   signal: AbortSignal,
   onProgress?: (done: number, total: number) => void,
-  /** tests: fewer keywords, no wait between searches */
-  opts: { keywords?: readonly string[]; gapMs?: number } = {},
+  /**
+   * tests: fewer keywords, no wait between searches; `cache` keeps the day cache for a keyword list
+   * of its own (by default only the full search reads and writes it)
+   */
+  opts: { keywords?: readonly string[]; gapMs?: number; cache?: boolean } = {},
 ): Promise<BrowserPoi[]> {
   const keywords = opts.keywords ?? NEARBY_KEYWORDS;
   const gap = opts.gapMs ?? GAP_MS;
-  const cached = readCache(center);
+  // the day cache holds the full search only (a few keywords asked on their own never stand in for it)
+  const own = opts.cache ?? !opts.keywords;
+  const cached = own ? readCache(center) : null;
   if (cached) return cached;
   const deadline = Date.now() + TOTAL_MS;
   const found = new Map<string, BrowserPoi>();
@@ -198,7 +205,7 @@ export async function findNearby(
   const d = (p: BrowserPoi) =>
     Math.hypot((p.bd09[0] - center[0]) * Math.cos((center[1] * Math.PI) / 180), p.bd09[1] - center[1]);
   const pois = [...found.values()].sort((a, b) => d(a) - d(b)).slice(0, NEARBY_MAX);
-  if (complete && !signal.aborted) writeCache(center, pois);
+  if (own && complete && !signal.aborted) writeCache(center, pois);
   return pois;
 }
 
@@ -207,6 +214,16 @@ export async function findNearby(
  * apps/web/scripts/capture-nearby.mjs (the samples' refresh reads its file). Spends the JS quota.
  */
 export function exposeNearby(load: () => Promise<BMapNS>) {
-  (window as unknown as Record<string, unknown>).__zddNearby = async (lng: number, lat: number) =>
-    findNearby(await load(), [lng, lat], new AbortController().signal);
+  (window as unknown as Record<string, unknown>).__zddNearby = async (
+    lng: number,
+    lat: number,
+    keywords?: readonly string[],
+  ) =>
+    findNearby(
+      await load(),
+      [lng, lat],
+      new AbortController().signal,
+      undefined,
+      keywords ? { keywords } : {},
+    );
 }

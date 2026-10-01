@@ -6,9 +6,12 @@
 import {
   HARD_CATEGORIES,
   ISO_LEVELS,
+  STAT_ORDER,
+  TASK_CATEGORIES,
   TASK_RULE_M,
   WALK_SPEED_MPS,
   bearingDeg,
+  checkedCategories,
   facilityStats,
   fieldEstimator,
   fieldFromGrid,
@@ -39,7 +42,35 @@ import {
 import { round } from './format.js';
 import { ELDER_SPEED_MPS, type Profile, type ZddMeta } from './types.js';
 
-export { HARD_CATEGORIES };
+/**
+ * HARD_CATEGORIES: every category a community can be checked for (display order); TASK_CATEGORIES:
+ * the three the task names; checkedCategories(result): those one analysis was checked for — all five
+ * on new analyses, the task's three on older ones. Everything below reads the last.
+ */
+export { HARD_CATEGORIES, TASK_CATEGORIES, checkedCategories };
+
+/**
+ * Which checked categories the task names, for method notes: "其中小学、菜市场、药店是赛题要求，幼儿园、
+ * 社区卫生按同一判定距离一并检查", or "均为赛题要求" when the analysis checked the task's own.
+ */
+export function taskScope(checked: readonly HardCategory[]): string {
+  const asked = checked.filter((c) => TASK_CATEGORIES.includes(c));
+  const added = checked.filter((c) => !TASK_CATEGORIES.includes(c));
+  if (!added.length) return '均为赛题要求';
+  if (!asked.length) return `${added.join('、')}按赛题的判定距离检查`;
+  return `其中${asked.join('、')}是赛题要求，${added.join('、')}按同一判定距离一并检查`;
+}
+
+/**
+ * What the per-community checks cover, for tool descriptions and the system prompt: "新的体检逐小区检查
+ * 幼儿园、小学、菜市场、药店、社区卫生（其中…），较早的体检只检查小学、菜市场、药店".
+ */
+export const CHECKED_SCOPE = `新的体检逐小区检查${HARD_CATEGORIES.join('、')}（${taskScope(HARD_CATEGORIES)}），较早的体检只检查${TASK_CATEGORIES.join('、')}`;
+
+/** 民生设施 the 圈内设施统计 counts beside the per-community categories (超市, 公交 …), in its order. */
+export const COUNTED_ONLY: readonly FacilityCategory[] = STAT_ORDER.filter(
+  (c) => !(HARD_CATEGORIES as readonly FacilityCategory[]).includes(c),
+);
 
 /** 15 minutes, the life-circle time budget. */
 export const LIMIT_S = 900;
@@ -103,10 +134,12 @@ export interface CheckRow {
   check: FacilityCheck;
 }
 
+/** Every check of the analysis' checked categories, community by community (display order within). */
 export function checkRows(result: AnalysisResult): CheckRow[] {
   const rows: CheckRow[] = [];
+  const checked = checkedCategories(result);
   result.communities.forEach((community, index) => {
-    for (const category of HARD_CATEGORIES) {
+    for (const category of checked) {
       const check = community.checks?.[category];
       if (check) rows.push({ community, index, category, check });
     }
@@ -131,12 +164,21 @@ export function ruleOf(result: AnalysisResult, category: HardCategory): number {
   return TASK_RULE_M[category];
 }
 
-/** How the rule reads in a sentence: "1 km" for the task rule, else the distances per category. */
+/** Rule distance per checked category of the analysis, metres. */
+export function rulesOf(result: AnalysisResult): Record<HardCategory, number> {
+  return Object.fromEntries(checkedCategories(result).map((c) => [c, ruleOf(result, c)])) as Record<
+    HardCategory,
+    number
+  >;
+}
+
+/** How the rule reads in a sentence: "1 km" for the task rule, else the distances per checked category. */
 export function ruleText(result: AnalysisResult): string {
-  const rules = HARD_CATEGORIES.map((c) => ruleOf(result, c));
+  const checked = checkedCategories(result);
+  const rules = checked.map((c) => ruleOf(result, c));
   if (rules.every((r) => r === 1000)) return '1 km';
   if (rules.every((r) => r === rules[0])) return `${rules[0]} m`;
-  return HARD_CATEGORIES.map((c) => `${c} ${ruleOf(result, c)} m`).join('、');
+  return checked.map((c) => `${c} ${ruleOf(result, c)} m`).join('、');
 }
 
 export interface CategoryCounts {
@@ -149,9 +191,13 @@ export interface CategoryCounts {
   待核实: number;
 }
 
+/**
+ * Counts per checked category. Like core's Community.checks, the record carries the analysis' checked
+ * categories only (checkedCategories): an older analysis has no 幼儿园 or 社区卫生 entry at all.
+ */
 export function categoryCounts(result: AnalysisResult): Record<HardCategory, CategoryCounts> {
   const out = Object.fromEntries(
-    HARD_CATEGORIES.map((c) => [c, { total: 0, 覆盖: 0, 伪覆盖: 0, 盲区: 0, 临界: 0, 待核实: 0 }]),
+    checkedCategories(result).map((c) => [c, { total: 0, 覆盖: 0, 伪覆盖: 0, 盲区: 0, 临界: 0, 待核实: 0 }]),
   ) as Record<HardCategory, CategoryCounts>;
   for (const { category, check } of checkRows(result)) {
     const n = out[category];
@@ -172,8 +218,10 @@ export function categoryCounts(result: AnalysisResult): Record<HardCategory, Cat
  * pending.
  */
 export interface Headline {
+  /** Rule distance per checked category (only the analysis' checked categories are present). */
   rule_m: Record<HardCategory, number>;
   communities: number;
+  /** Categories checked per community: 5 on new analyses, the task's 3 on older ones. */
   categories: number;
   checks: number;
   straight_gaps: number;
@@ -207,12 +255,9 @@ export function headline(result: AnalysisResult): Headline {
   }
   const walking = pseudo + blind;
   return {
-    rule_m: Object.fromEntries(HARD_CATEGORIES.map((c) => [c, ruleOf(result, c)])) as Record<
-      HardCategory,
-      number
-    >,
+    rule_m: rulesOf(result),
     communities: result.communities.length,
-    categories: HARD_CATEGORIES.length,
+    categories: checkedCategories(result).length,
     checks: rows.length,
     straight_gaps: straight,
     walking_gaps: walking,

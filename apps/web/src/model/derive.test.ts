@@ -35,15 +35,20 @@ describe('frame', () => {
 });
 
 describe('derived sign numbers (every number is computed, none typed in)', () => {
-  it('verdict: the circle finds 1 gap, walking finds 8', () => {
+  it('verdict: the circle finds 1 gap, walking finds 9 (8 of them among 小学, 菜市场, 药店)', () => {
+    expect(model.cats).toEqual(['幼儿园', '小学', '菜市场', '药店', '社区卫生']);
     expect(model.circleGaps).toBe(1);
-    expect(model.walkGaps).toBe(8);
+    expect(model.walkGaps).toBe(9);
+    const task = model.heads.filter((h) => ['小学', '菜市场', '药店'].includes(h.cat));
+    expect(task.reduce((n, h) => n + h.pseudo + h.blind, 0)).toBe(8);
   });
-  it('directory heads: 6/12, 10/12, 12/12, nothing pending since every nearer pharmacy was routed', () => {
+  it('directory heads: five categories side by side, nothing pending since every nearer pharmacy was routed', () => {
     expect(model.heads.map((h) => [h.cat, h.ok, h.pending])).toEqual([
+      ['幼儿园', 12, 0],
       ['小学', 6, 0],
       ['菜市场', 10, 0],
       ['药店', 12, 0],
+      ['社区卫生', 11, 0],
     ]);
     // a pending check counts neither as covered nor as a gap
     const p = deriveModel(withPending(data), 'zj-a');

@@ -110,9 +110,13 @@ describe('the panel per mode', () => {
     expect(html).toContain('<h1>申城佳苑片区</h1>');
     // the task rule only: no 口径 switch
     expect(html).not.toContain('aria-label="口径"');
-    expect(html).toContain('<b class="v-n">7</b>');
-    // the category buttons choose the list and the map; the list holds that category's gaps
-    expect(html).toContain('class="cats" role="radiogroup" aria-label="设施类别"');
+    expect(html).toContain('<b class="v-n">8</b>');
+    // five categories side by side; the buttons choose the list and the map, the list holds that
+    // category's gaps
+    expect(html).toContain('class="cats" role="radiogroup" aria-label="设施类别" style="--n:5"');
+    expect(
+      [...html.matchAll(/<span class="cat-name" aria-hidden="true">([^<]+)<\/span>/g)].map((m) => m[1]),
+    ).toEqual(['幼儿园', '小学', '菜市场', '药店', '社区卫生']);
     expect(html).toContain('<ol class="gl" aria-label="步行 1 公里内走不到小学的 6 个小区，由远到近">');
     expect(html).toContain('其余 <span class="num">6</span> 个小区步行 1 公里内走得到小学');
     expect(html).toContain('为这 <span class="num">6</span> 个小区找补点 →');
@@ -140,7 +144,7 @@ describe('the panel per mode', () => {
     const html = renderToStaticMarkup(
       <Panel {...props('plan', { model: b, pins: sitePins(b), cat: '菜市场' })} />,
     );
-    expect(html).toContain('假如在这里开一家菜市场');
+    expect(html).toContain('假如在这里新增一家菜市场');
     expect(html).toContain('建议选址 · 菜市场');
     expect(html).not.toContain('class="verdict"');
   });

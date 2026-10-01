@@ -1,23 +1,28 @@
 /**
  * Quota budgets per tier and the dry-run estimate (技术设计文档 §4.4). One cold personal-tier analysis
- * may spend at most 10 place pages (4 hard categories, 2 民生设施, 2 residential, 2 买菜替代 — the last
- * only when a 菜市场 check is a gap), 740 routematrix routes (seed, refinement, the coverage check with
- * its 买菜替代 routes, siting, 对口小学), 6 directionlite walks and 1 reverse geocoding call; a typical one spends less because refinement and the coverage check stop early.
+ * may spend at most 12 place pages (6 for the five checked categories, 2 民生设施, 2 residential, 2
+ * 买菜替代 — the last only when a 菜市场 check is a gap), 1,030 routematrix routes (seed, refinement,
+ * the coverage check of five categories with its 买菜替代 routes, siting for five categories, 对口小学),
+ * 6 directionlite walks and 1 reverse geocoding call; a typical one spends less because refinement
+ * and the coverage check stop early.
  * With `browser_pois` it may also spend up to 5 place/v3/detail requests (50 uids) on the POIs the
  * browser found and the searches did not return.
  */
 import type { BaiduTier } from '@zoudedao/baidu';
+import { HARD_CATEGORIES } from '@zoudedao/core';
 
-import { DEMAND_RADIUS_M, FACILITY_BUFFER_M } from './constants.js';
+import { DEMAND_RADIUS_M, FACILITY_BUFFER_M, MAX_VERIFY_SITES } from './constants.js';
+import { LIVELIHOOD_CATEGORIES } from './facilities.js';
 import { validateInput } from './input.js';
 import type { EngineBudget, EngineInput, EngineScope, EngineService, Stage } from './types.js';
 
 const FACILITY_RADIUS_M = DEMAND_RADIUS_M + FACILITY_BUFFER_M;
 
 export const TIER_BUDGETS: Readonly<Record<BaiduTier, Readonly<EngineBudget>>> = {
-  // 100 place calls a day are the scarcest personal quota; 5,000 routes allow ~7 cold runs a day
+  // 100 place calls a day are the scarcest personal quota: about 8 cold runs (each reserves its 12-page
+  // cap and spends ~10); 5,000 routes cover ~5 runs at the 1,030-route cap, more of the typical ~580
   personal: {
-    place: 10,
+    place: 12,
     residentialPages: 2,
     livelihoodPages: 2,
     freshPages: 2,
@@ -28,13 +33,14 @@ export const TIER_BUDGETS: Readonly<Record<BaiduTier, Readonly<EngineBudget>>> =
     seed: 48,
     refine: 192,
     refineRounds: 4,
-    coverage: 400,
-    siting: 60,
+    coverage: 650,
+    // up to MAX_VERIFY_SITES sites per category, each one route per gap compound within the rule
+    siting: 100,
     catchment: 40,
     communities: 30,
   },
   enterprise: {
-    place: 15,
+    place: 17,
     residentialPages: 3,
     livelihoodPages: 2,
     freshPages: 3,
@@ -45,8 +51,8 @@ export const TIER_BUDGETS: Readonly<Record<BaiduTier, Readonly<EngineBudget>>> =
     seed: 48,
     refine: 288,
     refineRounds: 6,
-    coverage: 900,
-    siting: 120,
+    coverage: 1500,
+    siting: 200,
     catchment: 80,
     communities: 60,
   },
@@ -177,15 +183,19 @@ export function serviceCaps(b: EngineBudget): Record<EngineService, number> {
   };
 }
 
-// Typical cold run, calibrated on the synthetic city of test/city.ts and the zj-a research calls:
-// the "$" union needs 1–2 pages and the leftover page goes to 生鲜超市/幼儿园; the 民生设施 union fills
-// its 2 pages with bus stops within 1.1 km; refinement converges after about 3 rounds; the coverage
-// check routes ~8 pairs per compound under the 1 km rule (the nearest two candidates per category, a
-// third round for a few; one or two for the nearest top-up, candidates nearer by straight line than
-// the walk that proved a verdict; the 买菜替代 of the 菜市场 gaps); where a catchment table covers the centre, about half the compounds
-// match and need their assigned school routed once or twice. Some 菜市场 check is a gap almost
-// everywhere, so the 买菜替代 search runs and fills its pages with the 超市 of a city district.
-const EXPECTED_FACILITY_PAGES = 3;
+// Typical cold run, calibrated on the synthetic city of test/city.ts and the cached place answers
+// around 张江 (data/cache): the 10-keyword "$" union of the five checked categories holds 30–70 rows
+// within 2.1 km (the old 7 keywords of 小学, markets and pharmacies 14–44, 生鲜超市$幼儿园 8–17, plus
+// the 社区卫生 centres and stations), so it needs about 3 pages and the page after it goes to
+// 生鲜超市; the 民生设施 union fills its 2 pages with bus stops within 1.1 km; refinement converges
+// after about 3 rounds; the coverage check routes ~12 pairs per compound under the 1 km rule (the
+// nearest two candidates of each of the five categories where it has any in range, a further round
+// for a few; one or two for the nearest top-up, candidates nearer by straight line than the walk
+// that proved a verdict; the 买菜替代 of the 菜市场 gaps); siting verifies a site or two for each
+// category with gaps; where a catchment table covers the centre, about half the compounds match and
+// need their assigned school routed once or twice. Some 菜市场 check is a gap almost everywhere, so
+// the 买菜替代 search runs and fills its pages with the 超市 of a city district.
+const EXPECTED_FACILITY_PAGES = 4;
 const EXPECTED_LIVELIHOOD_PAGES = 2;
 const EXPECTED_FRESH_PAGES = 2;
 // the browser lists ~10–30 POIs within 2.1 km that place/v3/around left out (around 万科翡翠公园:
@@ -193,8 +203,8 @@ const EXPECTED_FRESH_PAGES = 2;
 const EXPECTED_DETAIL_CALLS = 2;
 const EXPECTED_REFINE_ROUNDS = 3;
 const REFINE_BATCH = 48;
-const EXPECTED_ROUTES_PER_COMMUNITY = 8;
-const EXPECTED_SITING_ROUTES = 20;
+const EXPECTED_ROUTES_PER_COMMUNITY = 12;
+const EXPECTED_SITING_ROUTES = 30;
 const EXPECTED_CATCHMENT_ROUTES = 15;
 
 export interface QuotaPlanItem {
@@ -250,21 +260,19 @@ export function planQuota(
     siting: Math.min(caps.siting, EXPECTED_SITING_ROUTES),
     catchment: opts.catchment ? Math.min(caps.catchment, EXPECTED_CATCHMENT_ROUTES) : 0,
   };
+  const checked = HARD_CATEGORIES.join('、');
   const notes: Record<Step, string> = {
     locate: '逆地理编码：中心点所在街道、小区',
-    facilities:
-      '地点检索：小学、菜市场、药店（$ 并集分页，被挤掉的类别单独检索）；有余量时加查生鲜超市、幼儿园',
-    livelihood:
-      '地点检索：社区卫生、养老、地铁、公园、超市、公交（一次 $ 并集，半径 1.1 公里，最多 2 页），用于圈内设施统计',
+    facilities: `地点检索：逐小区检查的${checked}（一次 $ 并集，半径 ${(FACILITY_RADIUS_M / 1000).toFixed(1)} 公里，分页，被挤掉的类别单独检索）；有余量时加查生鲜超市`,
+    livelihood: `地点检索：${LIVELIHOOD_CATEGORIES.join('、')}（一次 $ 并集，半径 1.1 公里，最多 2 页），用于圈内设施统计`,
     residential: '地点检索：住宅区与小区出入口，作为盲区判定的需求点',
     fresh: `地点检索：蔬菜、果蔬、生鲜、超市（一次 $ 并集，半径 ${(FACILITY_RADIUS_M / 1000).toFixed(1)} 公里，最多 ${caps.fresh} 页），只在有菜市场缺口时检索，为缺口小区找判定距离内能买菜的店（买菜替代，只作参考）`,
     detail: `地点详情：地图前端（JSAPI）找到、服务端检索没有返回的设施，按 uid 查询标签后与检索结果一起清洗（每次 10 个，最多 ${caps.detail} 次，只在请求带 browser_pois 时查询）`,
     paths: '轻量步行路线：沿绕行最明显的方向采集路网骨架',
     seed: '批量算路：16 个方位 × 3 个半径的粗采样',
     refine: '批量算路：边界带加密，每轮 48 点，收敛即停',
-    coverage:
-      '批量算路：小区出入口 → 候选设施，直线剪枝，找到覆盖即停；最后补算直线比已测最短步行更近的设施，取实际最近的一处；菜市场有缺口的小区再算到判定距离内最近 2 家能买菜的店（买菜替代）',
-    siting: '批量算路：核验排名前 2 的选址建议',
+    coverage: `批量算路：小区出入口 → ${HARD_CATEGORIES.length} 类候选设施（${checked}），直线剪枝，每类找到覆盖即停；最后补算直线比已测最短步行更近的设施，取实际最近的一处；菜市场有缺口的小区再算到判定距离内最近 2 家能买菜的店（买菜替代）`,
+    siting: `批量算路：每类有缺口的设施核验排名前 ${MAX_VERIFY_SITES} 的选址建议`,
     catchment:
       '批量算路：小区出入口 → 对口小学校门（只在对口地段表覆盖的街镇；盲区判定已算过的路线直接复用）',
   };

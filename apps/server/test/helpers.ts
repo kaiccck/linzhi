@@ -1,7 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { AnalysisResult } from '@zoudedao/core';
+import {
+  classifyCheck,
+  type AnalysisResult,
+  type Community,
+  type FacilityCheck,
+  type HardCategory,
+} from '@zoudedao/core';
 import type { FastifyInstance } from 'fastify';
 import { buildApp, type AppOptions } from '../src/app.js';
 import { loadConfig, type ServerConfig } from '../src/config.js';
@@ -20,6 +26,46 @@ export const ANALYZE_BODY = {
 
 /** Stand-in result for route tests that do not care about its contents. */
 export const STUB_RESULT = { meta: { name: '测试' } } as unknown as AnalysisResult;
+
+const r1 = (v: number) => Math.round(v * 10) / 10;
+
+/**
+ * A copy of `r` whose communities carry checks of exactly `categories` (an analysis of the task's
+ * three, or of all five): checks it has are kept, the others made up from the nearest POI of the
+ * category, walked at 1.3 × the straight line like the fake routers of these tests.
+ */
+export function withCategories(r: AnalysisResult, categories: readonly HardCategory[]): AnalysisResult {
+  const out = structuredClone(r);
+  for (const c of out.communities) {
+    const checks: Partial<Record<HardCategory, FacilityCheck>> = {};
+    for (const cat of categories) {
+      const have = (c.checks as Partial<Record<HardCategory, FacilityCheck>>)[cat];
+      if (have) {
+        checks[cat] = have;
+        continue;
+      }
+      const near = out.pois
+        .filter((p) => p.cat === cat && !p.stall_of)
+        .map((p) => ({ p, d: Math.hypot(p.xy[0] - c.centroid[0], p.xy[1] - c.centroid[1]) }))
+        .sort((a, b) => a.d - b.d)[0];
+      if (!near) throw new Error(`fixture: ${r.meta.name} has no ${cat} POI`);
+      const route_m = Math.round(1.3 * near.d);
+      checks[cat] = {
+        straight_m: r1(near.d),
+        nearest_straight: near.p.name,
+        route_m,
+        dur_s: Math.round(route_m / 1.17),
+        via: near.p.name,
+        via_uid: near.p.uid,
+        via_straight_m: r1(near.d),
+        ...classifyCheck({ straight_m: near.d, route_m }),
+        route_basis: 'routed',
+      };
+    }
+    c.checks = checks as Community['checks'];
+  }
+  return out;
+}
 
 export function testConfig(overrides: Partial<ServerConfig> = {}): ServerConfig {
   return {

@@ -12,7 +12,14 @@ import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import type { DatabaseSync, StatementSync } from 'node:sqlite';
 import { gunzipSync, gzipSync } from 'node:zlib';
-import { HARD_CATEGORIES, type AnalysisResult, type HardCategory, type LngLat } from '@zoudedao/core';
+import {
+  checkedCategories,
+  HARD_CATEGORIES,
+  TASK_CATEGORIES,
+  type AnalysisResult,
+  type HardCategory,
+  type LngLat,
+} from '@zoudedao/core';
 import type { WhatIfResult } from './whatif.js';
 
 export const HISTORY_TTL_DAYS = 30;
@@ -25,6 +32,12 @@ const DAY_MS = 86_400_000;
 /** The numbers the area dropdown shows: size, the circle's overstatement, gaps under the task rule. */
 export interface HistoryHeadline {
   communities: number;
+  /**
+   * The categories every community was checked for, in display order: all five (幼儿园, 小学, 菜市场,
+   * 药店, 社区卫生) in analyses of engine 0.2.0 and later, the task's three (小学, 菜市场, 药店) in older
+   * ones; empty without communities (an isochrone-only run). The gap counts below cover these.
+   */
+  categories: HardCategory[];
   area_iso15_km2: number | null;
   area_circle15_km2: number | null;
   overstate_x: number | null;
@@ -76,7 +89,7 @@ function gapCounts(r: AnalysisResult) {
   let pending = 0;
   for (const c of r.communities ?? []) {
     for (const cat of HARD_CATEGORIES) {
-      const k = c.checks?.[cat as HardCategory];
+      const k = c.checks?.[cat];
       if (!k) continue;
       if (k.verified === false) {
         pending++;
@@ -92,8 +105,10 @@ function gapCounts(r: AnalysisResult) {
 /** Headline numbers of a result, the same counting as the advisor's headline() (待核实 never a gap). */
 export function historyHeadline(r: AnalysisResult): HistoryHeadline {
   const s = (r.stats ?? {}) as Record<string, unknown>;
+  const communities = r.communities ?? [];
   return {
-    communities: r.communities?.length ?? 0,
+    communities: communities.length,
+    categories: communities.length ? checkedCategories({ communities }) : [],
     area_iso15_km2: num(s.area_iso15_km2),
     area_circle15_km2: num(s.area_circle15_km2),
     overstate_x: num(s.overstate_x),
@@ -101,11 +116,15 @@ export function historyHeadline(r: AnalysisResult): HistoryHeadline {
   };
 }
 
-/** A stored headline without the fields older versions kept (the GB 50180 counts *_gb). */
+/**
+ * A stored headline without the fields older versions kept (the GB 50180 counts *_gb); one stored
+ * before the headline named its categories comes from an engine that checked the task's three.
+ */
 function storedHeadline(json: string): HistoryHeadline {
-  const h = JSON.parse(json) as HistoryHeadline;
+  const h = JSON.parse(json) as Partial<HistoryHeadline> & Omit<HistoryHeadline, 'categories'>;
   return {
     communities: h.communities,
+    categories: h.categories ?? (h.communities ? [...TASK_CATEGORIES] : []),
     area_iso15_km2: h.area_iso15_km2,
     area_circle15_km2: h.area_circle15_km2,
     overstate_x: h.overstate_x,

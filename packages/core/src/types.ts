@@ -19,8 +19,11 @@ export type CheckStatus = '覆盖' | '伪覆盖' | '盲区' | '临界';
 /** Three-state main verdict (临界 is an extra flag on top of one of these). */
 export type MainStatus = '覆盖' | '伪覆盖' | '盲区';
 
-/** Hard indicators named by the competition task. */
-export type HardCategory = '小学' | '菜市场' | '药店';
+/**
+ * The categories checked per community: the task's three (小学, 菜市场, 药店) and 幼儿园 and 社区卫生 on
+ * the same rule. An analysis may carry fewer (older ones: the task's three) — see checkedCategories.
+ */
+export type HardCategory = '幼儿园' | '小学' | '菜市场' | '药店' | '社区卫生';
 export type FacilityCategory =
   HardCategory | '生鲜超市' | '幼儿园' | '社区卫生' | '养老' | '超市' | '公交' | '地铁' | '公园' | '其他';
 

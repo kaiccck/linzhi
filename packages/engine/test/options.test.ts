@@ -113,7 +113,8 @@ describe('budget basis', () => {
       () => 1,
       (r) => r.pages,
     );
-    expect(requested.room('facilities')).toBe(3);
+    expect(stepCaps(b).facilities).toBe(6);
+    expect(requested.room('facilities')).toBe(5);
   });
 
   it('keeps a budget-bound run the same warm or cold with basis requested (real client, shared cache)', async () => {

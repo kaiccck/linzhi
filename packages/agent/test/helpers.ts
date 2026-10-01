@@ -1,10 +1,11 @@
 /** Test helpers: the zj-a sample through LocalBackend, tool contexts, and a scripted fake LLM endpoint. */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import type { AnalysisResult } from '@zoudedao/core';
+import type { AnalysisResult, Community } from '@zoudedao/core';
 import { AnalysisStore, LocalBackend } from '../src/backend.js';
 import type { ToolCall } from '../src/llm.js';
 import type { ToolContext } from '../src/tools/types.js';
+import type { ZddMeta } from '../src/types.js';
 
 export const SAMPLES_DIR = fileURLToPath(new URL('../../../data/samples/', import.meta.url));
 
@@ -69,6 +70,38 @@ export function zjAWithPending(): AnalysisResult {
 export function pendingCtx(): ToolContext {
   const ctx = localCtx();
   ctx.store.put(zjAWithPending(), { id: 'zj-a', source: 'sample' });
+  return ctx;
+}
+
+/** The categories checked beside the task's three; analyses made before 2026-10 lack them. */
+export const ADDED_CATEGORIES = ['幼儿园', '社区卫生'] as const;
+
+/**
+ * zj-a as an analysis made before 幼儿园 and 社区卫生 were checked per community, as every sample was
+ * until they gained those checks: the task's 小学、菜市场、药店 only — the stored checks, which the
+ * added categories left byte-identical. The facilities of the two stay in the inventory and the 圈内设施
+ * 统计, as older analyses listed them (counted from the centre, never checked per community). The stored
+ * 灰色区域 are drawn from all five categories, so the copy carries none. Treat as read-only.
+ */
+export function zjAThree(): AnalysisResult {
+  const r = structuredClone(zjA());
+  for (const c of r.communities) {
+    const { 小学, 菜市场, 药店 } = c.checks;
+    c.checks = { 小学, 菜市场, 药店 } as Community['checks'];
+  }
+  delete r.gray_areas;
+  const meta = r.meta as ZddMeta;
+  for (const cat of ADDED_CATEGORIES) {
+    delete r.site_suggestions?.[cat];
+    delete meta.rule_m?.[cat];
+  }
+  return r;
+}
+
+/** localCtx() whose zj-a is zjAThree(): a store entry wins over the sample file. */
+export function threeCtx(): ToolContext {
+  const ctx = localCtx();
+  ctx.store.put(zjAThree(), { id: 'zj-a', source: 'sample' });
   return ctx;
 }
 

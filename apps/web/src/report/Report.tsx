@@ -18,7 +18,6 @@ import { NumText } from '../components/NumText.js';
 import { verdictLines, verdictSentence } from '../components/Verdict.js';
 import {
   CAT_COLOR,
-  CATS,
   circleKm2,
   circleR,
   distWords,
@@ -157,7 +156,7 @@ function MapKey({ model }: { model: Model }) {
       {gray ? (
         <li>
           <span className="sw s-gray" aria-hidden="true" />
-          <span>灰色区域：{grayRuleText(model.ruleM)}</span>
+          <span>灰色区域：{grayRuleText(model)}</span>
         </li>
       ) : null}
       <li>
@@ -347,7 +346,12 @@ function DirectorySection({ model }: { model: Model }) {
     </>
   );
   return (
-    <Sec n="02" id="rp-dir" title={`小区 × ${CATS.join('、')}`} aside={<>{ruleWords(model)} · 由重到轻</>}>
+    <Sec
+      n="02"
+      id="rp-dir"
+      title={`小区 × ${model.cats.join('、')}`}
+      aside={<>{ruleWords(model)} · 由重到轻</>}
+    >
       <p className="rp-lead">
         <span className="muted">
           画圈只找到 <N>{model.circleGaps}</N> 项缺口；
@@ -361,7 +365,7 @@ function DirectorySection({ model }: { model: Model }) {
         。
       </p>
       <div className="rp-scroll">
-        <table className="rp-table rp-dir">
+        <table className="rp-table rp-dir" style={{ ['--n' as string]: model.cats.length }}>
           <thead>
             <tr>
               <th scope="col" colSpan={2}>
@@ -394,7 +398,7 @@ function DirectorySection({ model }: { model: Model }) {
                   {u.nameMain}
                   {u.nameSub ? <small>{u.nameSub}</small> : null}
                 </th>
-                {CATS.map((k) => (
+                {model.cats.map((k) => (
                   <DirCell key={k} cat={k} s={u.checks[k]} />
                 ))}
               </tr>
@@ -466,9 +470,9 @@ function FreshNote({ model }: { model: Model }) {
 
 /* ------------------------------------------------------------------ 03 灰色区域 */
 
-function levelWord(g: GrayLevel): string {
+function levelWord(g: GrayLevel, n: number): string {
   if (g.kind === 'pseudo') return '其中由伪覆盖造成';
-  if (g.min >= CATS.length) return `${CATS.length} 类都缺`;
+  if (g.min >= n) return `${n} 类都缺`;
   return `缺 ${g.min} 类及以上`;
 }
 
@@ -476,7 +480,7 @@ function GraySection({ model }: { model: Model }) {
   const levels = useMemo(() => grayLevels(model), [model]);
   const outer = levels.find((g) => g.kind === 'gap');
   return (
-    <Sec n="03" id="rp-gray" title="灰色区域" aside={grayRuleText(model.ruleM)}>
+    <Sec n="03" id="rp-gray" title="灰色区域" aside={grayRuleText(model)}>
       {outer ? (
         <>
           <p className="rp-lead">
@@ -508,7 +512,7 @@ function GraySection({ model }: { model: Model }) {
                         aria-hidden="true"
                       />
                     </td>
-                    <th scope="row">{levelWord(g)}</th>
+                    <th scope="row">{levelWord(g, model.cats.length)}</th>
                     <td className="c-n">
                       <N>{g.areaKm2.toFixed(2)}</N> <small>km²</small>
                     </td>
@@ -558,12 +562,12 @@ function SiteSection({
   pins: SitePin[];
   whatif: ReportWhatIf | null;
 }) {
-  const groups = CATS.flatMap((cat) => {
+  const groups = model.cats.flatMap((cat) => {
     const list = pins.filter((p) => p.cat === cat);
     return list.length ? [{ cat, list }] : [];
   });
   const rule = distWords(model.ruleM);
-  const gaps = model.units.some((u) => CATS.some((c) => isWalkGap(u.checks[c], model.ruleOf[c])));
+  const gaps = model.units.some((u) => model.cats.some((c) => isWalkGap(u.checks[c], model.ruleOf[c])));
   return (
     <Sec n="04" id="rp-site" title="规划建议" aside="贪心最大覆盖（MCLP）选址">
       {whatif ? (
@@ -874,7 +878,7 @@ export default function Report({
           <div className="rp-verdict">
             <Verdict model={model} />
             <p className="sub">
-              <N>{model.units.length}</N> 个小区 × {CATS.join('、')}，逐一实测步行路线
+              <N>{model.units.length}</N> 个小区 × {model.cats.join('、')}，逐一实测步行路线
               {pending ? (
                 <>
                   ；另有 <N>{pending}</N> 项待核，不计入

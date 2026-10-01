@@ -1,5 +1,5 @@
 import { setTimeout as delay } from 'node:timers/promises';
-import type { AnalysisResult, Poi } from '@zoudedao/core';
+import { checkedCategories, type AnalysisResult, type Poi } from '@zoudedao/core';
 import type { AnalyzeInput, Analyzer, Emit, Stage } from './analyzer.js';
 import { MemoryQuotaLedger } from './quota.js';
 
@@ -52,6 +52,8 @@ export class SampleReplayAnalyzer implements Analyzer {
     const seed = routed.slice(0, 48);
     const firstRound = routed.slice(48, 96);
     const routedPois = r.pois.filter((p) => p.center_route_m !== undefined).length;
+    // the categories the recorded analysis was checked for (zj-a: the task's three)
+    const categories = checkedCategories(r);
     const elder = input.profile === 'elder' ? '；老年人画像暂按成人步速回放' : '';
 
     stage(
@@ -64,7 +66,7 @@ export class SampleReplayAnalyzer implements Analyzer {
     emit('partial', { meta: r.meta, baseline: r.baseline, venue: r.venue, base: r.base });
     await wait(400);
 
-    stage('facilities', 0.1, '检索周边设施：小学、菜市场、药店等');
+    stage('facilities', 0.1, `检索周边设施：${categories.join('、')}等`);
     await wait(700);
     charge('place', 3);
     emit('partial', { pois: r.pois.map(unrouted) });
@@ -103,9 +105,13 @@ export class SampleReplayAnalyzer implements Analyzer {
     emit('partial', { pois: r.pois });
     await wait(200);
 
-    stage('coverage', 0.88, `判定 ${r.communities.length} 个小区 × 3 类设施的步行覆盖`);
+    stage(
+      'coverage',
+      0.88,
+      `判定 ${r.communities.length} 个小区 × ${categories.length} 类设施（${categories.join('、')}）的步行覆盖`,
+    );
     await wait(1500);
-    charge('routematrix_walking', r.communities.length * 3 * 2);
+    charge('routematrix_walking', r.communities.length * categories.length * 2);
     // like the engine: the 灰色区域 come with the checks they are drawn from
     emit('partial', { communities: r.communities, ...(r.gray_areas ? { gray_areas: r.gray_areas } : {}) });
     await wait(300);

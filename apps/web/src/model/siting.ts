@@ -19,7 +19,7 @@ import {
   type SiteSuggestion,
   type XY,
 } from '@zoudedao/core';
-import { CATS, type Model, type Unit } from './derive.js';
+import { type Model, type Unit } from './derive.js';
 
 export interface SitePin {
   key: string;
@@ -36,15 +36,24 @@ export interface SitePin {
 }
 
 const DIRS8 = ['北', '东北', '东', '东南', '南', '西南', '西', '西北'];
-const localCache = new WeakMap<AnalysisResult, Partial<Record<HardCategory, SiteSuggestion[]>>>();
+const localCache = new WeakMap<
+  AnalysisResult,
+  Map<string, Partial<Record<HardCategory, SiteSuggestion[]>>>
+>();
 
 /**
  * Suggestions for a result made before the engine wrote any (sample A): the engine's own greedy
  * covering (core suggestSites) over candidate sites every 50 m along the walked routes, judged with
  * this analysis' detour field at the task rule — estimates, never measured.
  */
-export function localSuggestions(model: Model): Partial<Record<HardCategory, SiteSuggestion[]>> {
-  const cached = localCache.get(model.data);
+export function localSuggestions(
+  model: Model,
+  /** only these categories (those the result's own suggestions leave out); default every checked one */
+  cats: readonly HardCategory[] = model.cats,
+): Partial<Record<HardCategory, SiteSuggestion[]>> {
+  const byCats = localCache.get(model.data) ?? new Map();
+  localCache.set(model.data, byCats);
+  const cached = byCats.get(cats.join());
   if (cached) return cached;
   const { paths, communities } = model.data;
   const candidates = siteCandidatesFromPaths(paths, 50).map((c) => {
@@ -57,7 +66,7 @@ export function localSuggestions(model: Model): Partial<Record<HardCategory, Sit
   const out: Partial<Record<HardCategory, SiteSuggestion[]>> = {};
   if (candidates.length) {
     const estimator = estimatorFor(model);
-    for (const cat of CATS) {
+    for (const cat of cats) {
       // the task rule's verdicts, as the engine's suggestions use (communities hold them in `checks`)
       const demands = communities
         .filter((c) => c.checks[cat].verified !== false && c.checks[cat].status_main !== '覆盖')
@@ -72,21 +81,25 @@ export function localSuggestions(model: Model): Partial<Record<HardCategory, Sit
       if (list.length) out[cat] = list;
     }
   }
-  localCache.set(model.data, out);
+  byCats.set(cats.join(), out);
   return out;
 }
 
 /**
- * The analysis' siting suggestions, per category in the task's order, best first — or, for a result
- * that carries none, the same search run here (`origin: 'local'`, always 估算).
+ * The analysis' siting suggestions, per checked category in display order, best first — or, for a
+ * result (or a category) that carries none, the same search run here (`origin: 'local'`, always 估算).
  */
 export function sitePins(model: Model): SitePin[] {
   const byName = new Map(model.units.map((u) => [u.name, u]));
   const own = model.data.site_suggestions;
-  const source = own ?? localSuggestions(model);
-  const origin = own ? 'engine' : 'local';
-  return CATS.flatMap((cat) =>
-    [...(source[cat] ?? [])]
+  // a category the engine's suggestions do not cover (a sample whose 幼儿园 and 社区卫生 were checked
+  // later) takes the local search, labelled 估算 like a result that carries none
+  const missing = model.cats.filter((c) => own?.[c] === undefined);
+  const local = missing.length ? localSuggestions(model, missing) : null;
+  return model.cats.flatMap((cat) => {
+    const engine = own?.[cat];
+    const origin = engine ? 'engine' : 'local';
+    return [...(engine ?? local?.[cat] ?? [])]
       .sort((a, b) => a.rank - b.rank)
       .map((s): SitePin => ({
         key: `${cat}#${s.rank}`,
@@ -97,8 +110,8 @@ export function sitePins(model: Model): SitePin[] {
         covers: s.covers.map((name) => ({ name, unit: byName.get(name) ?? null })),
         verified: origin === 'engine' && s.verified,
         origin,
-      })),
-  );
+      }));
+  });
 }
 
 const estimators = new WeakMap<AnalysisResult, RouteEstimator>();

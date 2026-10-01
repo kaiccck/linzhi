@@ -5,7 +5,13 @@
  * by round — so the progressive map can be built and captured without spending any Baidu quota. It
  * never touches /api/analyze. `hold` stops the stream after that stage (for screenshots mid-stream).
  */
-import { buildIsochrone, type AnalysisResult, type Poi, type TimeSample } from '@zoudedao/core';
+import {
+  buildIsochrone,
+  checkedCategories,
+  type AnalysisResult,
+  type Poi,
+  type TimeSample,
+} from '@zoudedao/core';
 import type { AnalyzeFn, StageEvent } from './api.js';
 import { sampleStage, type StageId } from './stream.js';
 
@@ -69,7 +75,7 @@ export function fakeAnalyzer(
     );
     send({ meta: r.meta });
     await hold('locate');
-    await stage('facilities', 0.08, '设施检索：小学、菜市场、药店');
+    await stage('facilities', 0.08, '设施检索：幼儿园、小学、菜市场、药店、社区卫生');
     send({ pois: r.pois.map(unrouted) });
     await hold('facilities');
     await stage('seed', 0.12, `粗采样：16 个方位 × 3 个半径，共 ${seed.length} 条步行路线`);
@@ -96,7 +102,11 @@ export function fakeAnalyzer(
       stats: r.stats,
     });
     await hold('reach');
-    await stage('coverage', 0.88, `判定 ${r.communities.length} 个小区 × 3 类设施的步行覆盖`);
+    await stage(
+      'coverage',
+      0.88,
+      `判定 ${r.communities.length} 个小区 × ${checkedCategories(r).length} 类设施的步行覆盖`,
+    );
     send({ communities: r.communities, ...(r.gray_areas ? { gray_areas: r.gray_areas } : {}) });
     await hold('coverage');
     await stage('report', 0.96, '汇总体检报告');

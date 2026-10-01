@@ -2,12 +2,33 @@
  * Looking up analyses by id for the tools: the in-memory store first, then derived profiles
  * ("<id>~elder" is recomputed from "<id>" on demand), then the backend's samples.
  */
-import { haversine, type LngLat } from '@zoudedao/core';
-import { deriveProfile, profileOf } from '../analysis.js';
+import { haversine, type AnalysisResult, type HardCategory, type LngLat } from '@zoudedao/core';
+import { HARD_CATEGORIES, checkedCategories, deriveProfile, profileOf } from '../analysis.js';
 import { BackendError, type StoredAnalysis } from '../backend.js';
 import { ToolError, type ToolContext } from './types.js';
 
 export const ELDER_SUFFIX = '~elder';
+
+/**
+ * Passes when the analysis checked `category` per community; otherwise a not_checked error that says
+ * so (an older analysis checked the task's 小学、菜市场、药店 only): a category never checked has no
+ * gaps to report, and saying "none" would be wrong. `consequence` says what cannot be answered.
+ */
+export function assertChecked(
+  result: AnalysisResult,
+  id: string,
+  category: HardCategory,
+  consequence: string,
+): void {
+  const checked = checkedCategories(result);
+  if (checked.includes(category)) return;
+  throw new ToolError(
+    'not_checked',
+    `${result.meta.name}（analysis_id: ${id}）没有逐小区检查${category}：这份分析只逐小区检查了${checked.join('、')}，${consequence}。` +
+      `从分析中心出发能走到几处${category}，见 analyze_life_circle 的圈内设施统计（facilities）；` +
+      `要逐小区检查${category}，需要重新体检该地点（新的体检逐小区检查${HARD_CATEGORIES.join('、')}）。`,
+  );
+}
 
 /** "可用的分析：zj-a（申城佳苑片区）；…" for error messages and prompts. */
 export async function availableText(ctx: ToolContext): Promise<string> {

@@ -1,8 +1,10 @@
 /**
  * Every tool on every sample in data/samples: the hand-built zj-a and the engine's live-mode results
- * (no community outlines, explicit route_basis, gray areas and siting suggestions of their own).
+ * (no community outlines, explicit route_basis, gray areas and siting suggestions of their own). All
+ * of them check 幼儿园、小学、菜市场、药店、社区卫生 per community.
  */
 import { readdirSync } from 'node:fs';
+import { HARD_CATEGORIES } from '@zoudedao/core';
 import { describe, expect, it } from 'vitest';
 import { checkGrounding, entityNames } from '../src/grounding.js';
 import type { FeatureCollection } from '../src/geo.js';
@@ -25,12 +27,16 @@ describe.each(ids)('sample %s', (id) => {
       ['get_isochrone', { analysis_id: id }],
       ['list_service_gaps', { analysis_id: id }],
       ['list_service_gaps', { analysis_id: `${id}~elder`, category: '菜市场' }],
+      ['list_service_gaps', { analysis_id: id, category: '社区卫生' }],
       ['simulate_facility', { analysis_id: id, category: '菜市场', near_community: community }],
+      ['simulate_facility', { analysis_id: id, category: '幼儿园', near_community: community }],
       ['compare_sites', { analysis_ids: [id, `${id}~elder`] }],
       ['export_report', { analysis_id: id }],
       ['export_report', { analysis_id: id, format: 'geojson' }],
     ];
-    expect(overview.headline.checks).toBe(overview.headline.communities * 3);
+    // every sample checks all five categories, for every community
+    expect(overview.checked_categories).toEqual([...HARD_CATEGORIES]);
+    expect(overview.headline.checks).toBe(overview.headline.communities * HARD_CATEGORIES.length);
     for (const [name, args] of calls) {
       const r = await reg.run(name, args, ctx);
       const g = checkGrounding(r.summary, [{ id: 'T1', facts: r.facts, names: entityNames(r.data) }], {

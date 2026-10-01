@@ -69,7 +69,8 @@ describe.each(Object.entries(samples))('the tour of %s', (id, raw) => {
   it('suggests a site, or says why there is none', () => {
     const plan = steps[5]!;
     const text = partsText(plan.head) + partsText(plan.body);
-    if (plan.map.site) expect(text).toMatch(/新增一(所|家)(小学|菜市场|药店)：可让 \d+ 个小区/);
+    if (plan.map.site)
+      expect(text).toMatch(/新增一(所|家|处)(幼儿园|小学|菜市场|药店|社区卫生服务站)：可让 \d+ 个小区/);
     else expect(text).toMatch(/没有/);
   });
 });

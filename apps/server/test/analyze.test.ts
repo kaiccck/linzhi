@@ -1,6 +1,6 @@
 import type { AddressInfo } from 'node:net';
 import { BaiduConfigError, BaiduUpstreamError } from '@zoudedao/baidu';
-import type { AnalysisResult } from '@zoudedao/core';
+import { checkedCategories, type AnalysisResult } from '@zoudedao/core';
 import { describe, expect, it } from 'vitest';
 import {
   AnalyzeError,
@@ -119,6 +119,14 @@ describe('POST /api/analyze with the sample replay analyzer', () => {
     const last = events.at(-1);
     expect(last?.event).toBe('result');
     expect((last?.data as AnalysisResult).meta.name).toBe('申城佳苑片区');
+    // the replay names the categories the recorded analysis was checked for, and charges for them
+    const replayed = last?.data as AnalysisResult;
+    const cats = checkedCategories(replayed);
+    const coverage = stages.find((s) => s.stage === 'coverage')!.message;
+    expect(coverage).toBe(
+      `判定 ${replayed.communities.length} 个小区 × ${cats.length} 类设施（${cats.join('、')}）的步行覆盖`,
+    );
+    expect(stages.find((s) => s.stage === 'facilities')!.message).toBe(`检索周边设施：${cats.join('、')}等`);
 
     // The health quota block and the streamed quota events come from the same ledger.
     const health = (await app.inject('/api/health')).json<{

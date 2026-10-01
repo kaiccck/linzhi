@@ -4,7 +4,7 @@
  * tool results.
  */
 import type { AnalysisResult, FacilityCategory, HardCategory, LngLat } from '@zoudedao/core';
-import { findCommunity, normName, toBd09 } from './analysis.js';
+import { HARD_CATEGORIES, TASK_CATEGORIES, findCommunity, normName, toBd09 } from './analysis.js';
 import type { Profile } from './types.js';
 
 export type IntentKind =
@@ -13,8 +13,12 @@ export type IntentKind =
 export interface Intent {
   /** Main thing asked for. */
   kind: IntentKind;
+  /**
+   * The per-community categories (HARD_CATEGORIES) the question names, in display order — whether or
+   * not the analysis checked them; the advisor tells the unchecked ones apart.
+   */
   categories: HardCategory[];
-  /** Every facility category the question names (the checked ones and the other 民生设施). */
+  /** Every facility category the question names (the per-community ones and the other 民生设施). */
   facilityCategories: FacilityCategory[];
   profile: Profile;
   /** Adult vs elder comparison ("老人和成人比"). */
@@ -26,17 +30,28 @@ export interface Intent {
   placeText?: string;
 }
 
+/** Words of the categories checked per community (any of HARD_CATEGORIES). */
 const CATEGORY_WORDS: [RegExp, HardCategory][] = [
-  [/小学|上学|读书|学校|孩子|小孩|学区|入学/, '小学'],
+  [/幼儿园|托儿所|托班|幼托/, '幼儿园'],
+  [/小学|上学|读书|学校|学区|入学/, '小学'],
   [/买菜|菜场|菜市场|菜市|农贸|生鲜|买肉|买鱼|买水果/, '菜市场'],
   [/药店|药房|买药|配药|拿药|药/, '药店'],
+  [/社区卫生|卫生服务|卫生站|卫生院|社区医院|看医生|看病|就医|诊所|医院|门诊/, '社区卫生'],
 ];
+/** 孩子、小孩 ask about school — unless the question names a kindergarten ("孩子上幼儿园方便吗"). */
+const KID = /孩子|小孩/;
+
+/** The categories checked per community that `q` names, in display order. */
+function categoriesIn(q: string): HardCategory[] {
+  const named = new Set(CATEGORY_WORDS.filter(([re]) => re.test(q)).map(([, c]) => c));
+  if (KID.test(q) && !named.has('幼儿园')) named.add('小学');
+  return HARD_CATEGORIES.filter((c) => named.has(c));
+}
+
 /** The other 民生设施, counted by the 圈内设施统计 (never checked per community). */
 const FACILITY_WORDS: [RegExp, FacilityCategory][] = [
-  [/幼儿园|托儿所|托班/, '幼儿园'],
   [/生鲜超市/, '生鲜超市'],
   [/(?<!生鲜)超市|便利店|商超/, '超市'],
-  [/社区卫生|卫生服务|卫生站|卫生院|诊所|看病|医院|门诊/, '社区卫生'],
   [/养老|敬老|日间照料|长者照护|长者食堂|助餐/, '养老'],
   [/公交|巴士/, '公交'],
   [/地铁|轨交|轨道交通/, '地铁'],
@@ -61,15 +76,26 @@ const REACH =
  * `names`: places the question may name (the analysis, its centre label, its communities). They are
  * blanked before the topic words are read, so 万科翡翠公园 is not a question about parks; the place
  * and the site are still read from the question as written.
+ *
+ * `checked`: the categories the analysis checked per community (core checkedCategories) — all five on
+ * new analyses, the task's three on older ones and by default (what core assumes of an analysis
+ * without communities). A category the analysis did not check is answered like the other 民生设施,
+ * from the 圈内设施统计, unless the question is about communities or gaps.
  */
-export function parseIntent(question: string, names: readonly string[] = []): Intent {
+export function parseIntent(
+  question: string,
+  names: readonly string[] = [],
+  checked: readonly HardCategory[] = TASK_CATEGORIES,
+): Intent {
   const raw = question.normalize('NFKC');
   let q = raw;
   for (const name of [...names].map((n) => n.normalize('NFKC')).sort((a, b) => b.length - a.length)) {
     if (name.length >= 2) q = q.split(name).join('　');
   }
-  const categories = CATEGORY_WORDS.filter(([re]) => re.test(q)).map(([, c]) => c);
+  const categories = categoriesIn(q);
   const others = FACILITY_WORDS.filter(([re]) => re.test(q)).map(([, c]) => c);
+  // named but never checked per community by this analysis: only the 圈内设施统计 knows about them
+  const counted = [...categories.filter((c) => !checked.includes(c)), ...others];
   // an elder's 长者食堂 is 养老, not the elderly profile's reason alone; 老人 still switches the profile
   const elder = ELDER.test(q.replace(/长者(?:照护|食堂)/g, ''));
   const intent: Intent = {
@@ -89,7 +115,7 @@ export function parseIntent(question: string, names: readonly string[] = []): In
   else if (COMPARE.test(q)) intent.kind = 'compare';
   else if (ISOCHRONE.test(q)) intent.kind = 'isochrone';
   else if (REACH.test(q)) intent.kind = 'reach';
-  else if (!ABOUT_COMMUNITIES.test(q) && (FACILITY_COUNT.test(q) || others.length > 0)) {
+  else if (!ABOUT_COMMUNITIES.test(q) && (FACILITY_COUNT.test(q) || counted.length > 0)) {
     intent.kind = 'facilities';
   } else if (
     categories.length ||
@@ -131,7 +157,7 @@ export function placeTextOf(q: string): string | undefined {
     return undefined;
   // topic words and questions are not places ("15分钟", "老人", "哪里")
   if (/\d|分钟|多远|多久|多少|怎么|哪|什么|为什么|能不能/.test(text) || ELDER.test(text)) return undefined;
-  if (CATEGORY_WORDS.some(([re]) => re.test(text))) return undefined;
+  if (CATEGORY_WORDS.some(([re]) => re.test(text)) || KID.test(text)) return undefined;
   return text;
 }
 

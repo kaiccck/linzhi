@@ -6,8 +6,9 @@
  * so they decide nothing themselves:
  *
  *   pick     uids the searches did not return (uid or merged uids), not curated out, within the facility
- *            radius; the scarce keywords first (小学, markets, pharmacies, produce, then 超市), nearest
- *            first, as many as the `detail` budget line allows (10 uids a request, asked in uid order)
+ *            radius; the checked categories' keywords first, scarcest first (小学, 社区卫生, 幼儿园,
+ *            markets, pharmacies), then produce and 超市, nearest first, as many as the `detail` budget
+ *            line allows (10 uids a request, asked in uid order)
  *   detail   place/v3/detail (scope 2): classified tag, entrance, parent_id, address
  *   clean    the detail rows join the search rows and everything is cleaned again (core cleanPois:
  *            categories, blacklists, stalls, duplicates), so tags decide: a restaurant, a fruit shop or
@@ -18,6 +19,7 @@ import { PLACE_DETAIL_MAX_UIDS, type PlacePoi } from '@zoudedao/baidu';
 import {
   cleanPois,
   excludedByPattern,
+  HARD_CATEGORIES,
   type FacilityCategory,
   type FacilityExclusion,
   type LocalFrame,
@@ -32,6 +34,8 @@ import type { BrowserPoi, EngineClient } from './types.js';
 /** Keywords of the browser search, scarcest first: a short budget details these first. */
 export const BROWSER_KEYWORDS: readonly string[] = [
   '小学',
+  '社区卫生',
+  '幼儿园',
   '菜市场',
   '菜场',
   '农贸市场',
@@ -121,7 +125,7 @@ export async function detailBrowserPois(args: {
     stats.budget_limited = true;
     args.warn(
       calls
-        ? `地图前端找到 ${fresh.length} 处服务端检索没有返回的设施，详情查询预算只够其中 ${uids.length} 处（小学、菜市场、药店优先，同类按距离）`
+        ? `地图前端找到 ${fresh.length} 处服务端检索没有返回的设施，详情查询预算只够其中 ${uids.length} 处（逐小区检查的${HARD_CATEGORIES.join('、')}优先，同类按距离）`
         : `地图前端找到 ${fresh.length} 处服务端检索没有返回的设施，本次没有详情查询预算，设施清单只用服务端检索结果`,
     );
   }

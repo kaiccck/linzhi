@@ -4,7 +4,7 @@
  * (kind 'gap') — plus the part caused by 伪覆盖 (kind 'pseudo'). Rings hold holes; fill even-odd.
  */
 import type { GrayArea, XY } from '@zoudedao/core';
-import { CATS, type Model, type Unit } from './derive.js';
+import { type Model, type Unit } from './derive.js';
 
 export interface GrayLevel {
   kind: GrayArea['kind'];
@@ -47,11 +47,12 @@ export function grayLevels(model: Model): GrayLevel[] {
     }));
 }
 
-/** The legend's words: "步行 1 公里内缺少小学、菜市场或药店" from the rule and the hard categories. */
-export function grayRuleText(ruleM: number): string {
+/** The legend's words: "步行 1 公里内缺少幼儿园、小学、菜市场、药店或社区卫生" from the rule and the categories. */
+export function grayRuleText(model: Pick<Model, 'ruleM' | 'cats'>): string {
+  const { ruleM, cats } = model;
   const km = ruleM % 1000 === 0 ? `${ruleM / 1000} 公里` : `${Math.round(ruleM)} 米`;
-  const cats = CATS.length > 1 ? `${CATS.slice(0, -1).join('、')}或${CATS.at(-1)}` : CATS[0]!;
-  return `步行 ${km}内缺少${cats}`;
+  const list = cats.length > 1 ? `${cats.slice(0, -1).join('、')}或${cats.at(-1)}` : cats[0]!;
+  return `步行 ${km}内缺少${list}`;
 }
 
 export const hasGray = (model: Model) => (model.data.gray_areas ?? []).some((g) => g.rings.length > 0);

@@ -5,7 +5,7 @@
  */
 import type { FacilityCheck, HardCategory } from '@zoudedao/core';
 import { checkState } from './checks.js';
-import { CATS, type Unit } from './derive.js';
+import { type Unit } from './derive.js';
 
 /** `edge-over`: borderline and past the line (tinted as 伪覆盖, ringed as 临界). */
 export type Look = 'ok' | 'pseudo' | 'blind' | 'edge' | 'edge-over' | 'pending' | 'none' | 'neutral';
@@ -19,7 +19,7 @@ export const categoryLook = (cat: HardCategory) => (u: Unit) => checkLook(u.chec
 
 /** The worst of a unit's three checks (the report's map shows them all at once). */
 export function worstLook(u: Unit): Look {
-  const looks = CATS.map((k) => checkLook(u.checks[k]));
+  const looks = Object.values(u.checks).map(checkLook);
   for (const l of ['blind', 'none', 'pseudo', 'edge-over', 'pending', 'edge'] as const)
     if (looks.includes(l)) return l === 'none' ? 'blind' : l;
   return 'ok';

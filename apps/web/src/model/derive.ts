@@ -2,10 +2,13 @@
  * Everything the screen shows is computed here from one AnalysisResult — no copy is hard-coded.
  *
  * The geometry (frame, time field, POIs, the measured detour route) and the verdicts (every unit's
- * checks, the gap counts, the heads) under the task rule: 小学、菜市场、药店 within 步行 1 公里. GB 50180
- * checks an older result may carry (`checks_gb`) are not read.
+ * checks, the gap counts, the heads) under one rule: each checked category within 步行 1 公里 — 幼儿园、
+ * 小学、菜市场、药店、社区卫生, or the task's three on an analysis made before the other two were
+ * checked (`model.cats`). GB 50180 checks an older result may carry (`checks_gb`) are not read.
  */
 import {
+  checkedCategories,
+  HARD_CATEGORIES,
   type AnalysisResult,
   type CheckStatus,
   type Community,
@@ -19,7 +22,6 @@ import {
 import { fieldSampler, rasterize, type Raster } from '../geo/field.js';
 import { frameFromMeta, type Frame } from '../geo/frame.js';
 
-export const CATS: readonly HardCategory[] = ['小学', '菜市场', '药店'];
 /** Elderly walking speed used by the profile switch (m/s); the adult speed comes from the data. */
 export const V_ELDER = 0.9;
 
@@ -156,7 +158,9 @@ export interface Model {
   code: string;
   data: AnalysisResult;
   frame: Frame;
-  /** rule distance per hard category, metres (the task rule: the same for all three) */
+  /** the categories this analysis checked per community, in display order */
+  cats: readonly HardCategory[];
+  /** rule distance per category, metres (the same 1 km for every one) */
   ruleOf: Record<HardCategory, number>;
   /** adult walking speed (m/s), Baidu routematrix: route metres / duration */
   vAdult: number;
@@ -203,12 +207,28 @@ export function splitName(name: string): [string, string] {
 
 export const poiName = (n: string) => n.replace(/^上海市/, '').replace(/^浦东新区/, '');
 
-/** The rule distance per category: the analysis' own (步行 1 公里) for all three. */
-export const rulesOf = (taskM: number): Record<HardCategory, number> => ({
-  小学: taskM,
-  菜市场: taskM,
-  药店: taskM,
-});
+/** The rule distance per category: the analysis' own (步行 1 公里) for every one. */
+export const rulesOf = (taskM: number): Record<HardCategory, number> =>
+  Object.fromEntries(HARD_CATEGORIES.map((c) => [c, taskM])) as Record<HardCategory, number>;
+
+/** The measure word of a category's facilities: 一所幼儿园, 一家药店, 一处社区卫生服务站. */
+export const MEASURE: Partial<Record<FacilityCategory, string>> = {
+  幼儿园: '所',
+  小学: '所',
+  菜市场: '家',
+  药店: '家',
+  社区卫生: '处',
+  地铁: '个',
+};
+export const measureOf = (cat: FacilityCategory) => MEASURE[cat] ?? '处';
+
+/** What a new facility of a category is called when one is proposed (新增一处社区卫生服务站). */
+export const newNoun = (cat: HardCategory) => (cat === '社区卫生' ? '社区卫生服务站' : cat);
+
+/** A list in words: "幼儿园、小学和药店" (and) or "…或药店" (or). */
+export function listWords(items: readonly string[], last: '和' | '或'): string {
+  return items.length > 1 ? `${items.slice(0, -1).join('、')}${last}${items.at(-1)}` : (items[0] ?? '');
+}
 
 /** "1 公里" / "500 米": a rule distance in words. */
 export const distWords = (m: number) => (m % 1000 === 0 ? `${m / 1000} 公里` : `${fmtInt(m)} 米`);
@@ -223,17 +243,18 @@ export const isCircleGap = (s: FacilityCheck, rule: number) => s.straight_m > ru
 
 type Verdicts = Pick<
   Model,
-  'ruleOf' | 'units' | 'boardOrder' | 'heads' | 'circleGaps' | 'walkGaps' | 'tally'
+  'cats' | 'ruleOf' | 'units' | 'boardOrder' | 'heads' | 'circleGaps' | 'walkGaps' | 'tally'
 >;
 
 /**
  * The verdicts: each unit's severity, the panel's order (worst first), the heads, and the circle's and
  * the walk's gap counts.
  */
-function verdicts(base: Pick<Model, 'ruleM'>, units: Unit[]): Verdicts {
+function verdicts(base: Pick<Model, 'ruleM' | 'cats'>, units: Unit[]): Verdicts {
+  const { cats } = base;
   const ruleOf = rulesOf(base.ruleM);
   for (const u of units) {
-    const st = CATS.map((k) => u.checks[k]).filter((s) => s.verified !== false);
+    const st = cats.map((k) => u.checks[k]).filter((s) => s.verified !== false);
     u.blind = st.some((s) => s.status === '盲区');
     u.bad = st.some((s) => s.status_main === '伪覆盖');
     u.sev =
@@ -242,7 +263,7 @@ function verdicts(base: Pick<Model, 'ruleM'>, units: Unit[]): Verdicts {
   }
   const boardOrder = [...units].sort((a, b) => a.sev - b.sev || a.code.localeCompare(b.code));
 
-  const pairs = units.flatMap((u) => CATS.map((k) => ({ u, k, s: u.checks[k] })));
+  const pairs = units.flatMap((u) => cats.map((k) => ({ u, k, s: u.checks[k] })));
   const circleGaps = pairs.filter(({ k, s }) => isCircleGap(s, ruleOf[k])).length;
   const walk = pairs.filter(({ k, s }) => isWalkGap(s, ruleOf[k]));
   const tally: VerdictTally = {
@@ -252,7 +273,7 @@ function verdicts(base: Pick<Model, 'ruleM'>, units: Unit[]): Verdicts {
     units: new Set(walk.map(({ u }) => u.code)).size,
     circleUnits: new Set(walk.filter(({ k, s }) => isCircleGap(s, ruleOf[k])).map(({ u }) => u.code)).size,
   };
-  const heads: CategoryHead[] = CATS.map((cat) => {
+  const heads: CategoryHead[] = cats.map((cat) => {
     const rule = ruleOf[cat];
     const measured = units.map((u) => u.checks[cat]).filter((s) => s.verified !== false);
     const gaps = measured.filter((s) => isWalkGap(s, rule));
@@ -265,7 +286,7 @@ function verdicts(base: Pick<Model, 'ruleM'>, units: Unit[]): Verdicts {
       edge: measured.filter((s) => s.route_m >= 0 && Math.abs(s.route_m - rule) <= 50).length,
     };
   });
-  return { ruleOf, units, boardOrder, heads, circleGaps, walkGaps: walk.length, tally };
+  return { cats, ruleOf, units, boardOrder, heads, circleGaps, walkGaps: walk.length, tally };
 }
 
 /** The route the map quotes (see `Detour`). */
@@ -349,7 +370,7 @@ export function deriveModel(data: AnalysisResult, id: string): Model {
     data,
     frame,
     vAdult,
-    ...verdicts({ ruleM }, units),
+    ...verdicts({ ruleM, cats: checkedCategories(data) }, units),
     ruleM,
     r15,
     raster: rasterize(data.field, 6),
@@ -498,7 +519,7 @@ export function worstUnit(
   return blind ? { ...blind, kind: 'blind' } : null;
 }
 
-/** The rule in words: "步行 1 公里内应有小学、菜市场、药店". */
-export function ruleWords(model: Pick<Model, 'ruleM'>): string {
-  return `步行 ${distWords(model.ruleM)}内应有${CATS.join('、')}`;
+/** The rule in words: "步行 1 公里内应有幼儿园、小学、菜市场、药店、社区卫生". */
+export function ruleWords(model: Pick<Model, 'ruleM' | 'cats'>): string {
+  return `步行 ${distWords(model.ruleM)}内应有${model.cats.join('、')}`;
 }

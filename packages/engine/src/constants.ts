@@ -1,7 +1,8 @@
 /** Numbers of the live pipeline, with the design-doc section they come from. */
 import { WALK_SPEED_MPS } from '@zoudedao/core';
 
-export const ENGINE_VERSION = '0.1.0';
+/** 0.2.0: every community is checked for five categories (幼儿园, 小学, 菜市场, 药店, 社区卫生). */
+export const ENGINE_VERSION = '0.2.0';
 
 /** Baidu routematrix walking speed: every answer has duration = distance / 1.17 (§2.2). */
 export const WALK_SPEED = WALK_SPEED_MPS;
@@ -27,9 +28,9 @@ export const DEMAND_RADIUS_M = 1100;
 export const FACILITY_BUFFER_M = 1000;
 export const PLACE_PAGE_SIZE = 20;
 /**
- * The other 民生设施 (社区卫生, 养老, 地铁, 公园, 超市, 公交) are counted for the circle being tested,
- * not for demand points near the edge: searched within the 15-minute circle plus 50 m, which lets the
- * page limit reach much further into it than the 2.1 km facility radius would.
+ * The other 民生设施 (养老, 地铁, 公园, 超市, 公交; not checked per community) are counted for the circle
+ * being tested, not for demand points near the edge: searched within the 15-minute circle plus 50 m,
+ * which lets the page limit reach much further into it than the 2.1 km facility radius would.
  */
 export const LIVELIHOOD_RADIUS_M = DEMAND_RADIUS_M;
 /** Place pages of the 民生设施 union (the rest of the 40 rows it can return is the bus-stop tail). */

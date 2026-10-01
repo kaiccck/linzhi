@@ -3,7 +3,7 @@
  * each with its headline numbers, for the area switcher — and GET /api/analysis/:id/branches, the
  * what-if measurements (POST /api/whatif) saved on an analysis, for 规划.
  */
-import type { AnalysisResult, HardCategory } from '@zoudedao/core';
+import { HARD_CATEGORIES, type AnalysisResult, type HardCategory } from '@zoudedao/core';
 import { ApiError, errorText } from './api.js';
 import { isAnalysisResult } from './loadAnalysis.js';
 import { parseWhatIf, type WhatIfResult } from './whatif.js';
@@ -142,7 +142,7 @@ export interface WhatIfBranch extends WhatIfResult {
   site_bd09: [number, number];
 }
 
-const CATS: readonly string[] = ['小学', '菜市场', '药店'];
+const CATS: readonly string[] = HARD_CATEGORIES;
 
 export function parseBranches(body: unknown): WhatIfBranch[] | null {
   const list = (body as { branches?: unknown } | null)?.branches;

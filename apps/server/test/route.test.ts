@@ -3,11 +3,18 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { frameOf } from '@zoudedao/agent';
 import { BaiduQuotaError, type WalkingRoute } from '@zoudedao/baidu';
-import { routingPoint, type AnalysisResult, type LngLat } from '@zoudedao/core';
+import {
+  checkedCategories,
+  HARD_CATEGORIES,
+  routingPoint,
+  TASK_CATEGORIES,
+  type AnalysisResult,
+  type LngLat,
+} from '@zoudedao/core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { checkPair, routeKey, type RouteWalker } from '../src/route.js';
 import { WindowLimiter, type RouteResponse } from '../src/routes/route.js';
-import { makeApp, SAMPLES_DIR } from './helpers.js';
+import { makeApp, SAMPLES_DIR, withCategories } from './helpers.js';
 
 const zjA = () => JSON.parse(readFileSync(join(SAMPLES_DIR, 'zj-a.json'), 'utf8')) as AnalysisResult;
 const zj = zjA();
@@ -19,7 +26,10 @@ const COMMUNITY = '川杨新苑四期';
 const pair = checkPair(zj, 'zj-a', { community: COMMUNITY, category: '菜市场' });
 if ('kind' in pair) throw new Error('fixture: 川杨新苑四期 has a routed 菜市场 check');
 
-/** Temp samples dir: zj-a, a copy whose 药店 checks were never routed, and a stored route. */
+/**
+ * Temp samples dir: zj-a, a copy whose 药店 checks were never routed, copies checked for the task's
+ * three categories and for all five, and a stored route.
+ */
 let dir: string;
 let dbPath: string;
 const storedPair = checkPair(zj, 'zj-a', { community: '申城佳苑二期B块', category: '小学' });
@@ -37,6 +47,8 @@ beforeAll(() => {
     };
   }
   writeFileSync(join(dir, 'zz-lb.json'), JSON.stringify(unrouted));
+  writeFileSync(join(dir, 'zz-three.json'), JSON.stringify(withCategories(zjA(), TASK_CATEGORIES)));
+  writeFileSync(join(dir, 'zz-five.json'), JSON.stringify(withCategories(zjA(), HARD_CATEGORIES)));
   if ('kind' in storedPair) throw new Error('fixture');
   mkdirSync(join(dir, 'routes'));
   writeFileSync(
@@ -199,6 +211,31 @@ describe('GET /api/route', () => {
     await app.close();
   });
 
+  it('walks a 幼儿园 or 社区卫生 check like any other in an analysis of all five', async () => {
+    const { walker, calls } = fakeWalker();
+    const app = await makeApp({ mode: 'live', samplesDir: dir }, { walker });
+    const five = withCategories(zjA(), HARD_CATEGORIES);
+    for (const category of ['幼儿园', '社区卫生'] as const) {
+      const k = five.communities.find((c) => c.name === COMMUNITY)!.checks[category];
+      const via = five.pois.find((p) => p.uid === k.via_uid)!;
+      const res = await app.inject(get({ ...checkQuery(COMMUNITY, category), analysis_id: 'zz-five' }));
+      expect(res.statusCode, category).toBe(200);
+      expect(res.json()).toMatchObject({
+        analysis_id: 'zz-five',
+        category,
+        rules: 'task',
+        facility: { name: via.name, uid: via.uid, category },
+        check: { status: k.status, route_m: k.route_m, rule_m: 1000, via: via.name },
+        source: 'baidu',
+      });
+      expect(calls.at(-1)!.destination).toEqual(
+        bd(frame.toLngLat(routingPoint(via)[0], routingPoint(via)[1])),
+      );
+    }
+    expect(calls).toHaveLength(2);
+    await app.close();
+  });
+
   it('takes two BD-09 points, with path_xy only when an analysis gives the frame', async () => {
     const { walker, calls } = fakeWalker();
     const app = await makeApp({ mode: 'live', samplesDir: dir }, { walker });
@@ -225,7 +262,11 @@ describe('GET /api/route', () => {
     const cases: [Record<string, string>, number, RegExp][] = [
       [{}, 400, /analysis_id、community、category/],
       [{ analysis_id: 'zj-a', community: COMMUNITY }, 400, /analysis_id、community、category/],
-      [{ ...checkQuery(), category: '医院' }, 400, /category 只能是/],
+      [
+        { ...checkQuery(), category: '医院' },
+        400,
+        /^category 只能是 幼儿园、小学、菜市场、药店、社区卫生 之一$/,
+      ],
       [{ ...checkQuery(), rules: 'x' }, 400, /rules 只能是/],
       [{ ...checkQuery(), analysis_id: '../zj-a' }, 400, /analysis_id 须为分析编号/],
       [{ from: '121.6,31.2' }, 400, /from 和 to 都要给出/],
@@ -235,6 +276,13 @@ describe('GET /api/route', () => {
       [checkQuery('没有这个小区'), 404, /没有小区“没有这个小区”.*川杨新苑四期/],
       [{ ...checkQuery(), analysis_id: 'zj-zz' }, 404, /找不到分析 zj-zz/],
       [{ ...checkQuery(COMMUNITY, '药店'), analysis_id: 'zz-lb' }, 404, /没有算路/],
+      // an analysis of the task's three has no 幼儿园 or 社区卫生 checks to show a route for
+      [
+        { ...checkQuery(COMMUNITY, '幼儿园'), analysis_id: 'zz-three' },
+        404,
+        /^分析 zz-three 没有检查幼儿园（只检查了小学、菜市场、药店/,
+      ],
+      [{ ...checkQuery(COMMUNITY, '社区卫生'), analysis_id: 'zz-three' }, 404, /没有检查社区卫生/],
     ];
     for (const [query, status, message] of cases) {
       const res = await app.inject(get(query));
@@ -327,24 +375,36 @@ describe('GET /api/route', () => {
     const app = await makeApp({
       rateLimit: { globalPerMinute: 1000, analyzePerHour: 6, locatePerMinute: 30, routePer10Min: 1000 },
     });
-    let checked = 0;
+    const walked: Record<string, number> = {};
+    const bounds: string[] = [];
     for (const id of ['zj-a', 'zj-b', 'zj-c', 'zj-v']) {
       const r = JSON.parse(readFileSync(join(SAMPLES_DIR, `${id}.json`), 'utf8')) as AnalysisResult;
       for (const c of r.communities) {
-        for (const category of ['小学', '菜市场', '药店'] as const) {
+        for (const category of checkedCategories(r)) {
           const k = c.checks[category];
           if (!k.verified || k.status_main !== '伪覆盖') continue;
+          const what = `${id} ${c.name} ${category}`;
           const res = await app.inject(get({ analysis_id: id, community: c.name, category }));
-          expect(res.statusCode, `${id} ${c.name} ${category}`).toBe(200);
+          // proven by a lower bound (every entrance beyond the rule, so nothing was routed): no walk
+          // to draw, and the answer says so
+          if ((k.route_basis ?? 'routed') !== 'routed') {
+            expect(res.statusCode, what).toBe(404);
+            expect(res.json().message, what).toMatch(/没有算路/);
+            bounds.push(what);
+            continue;
+          }
+          expect(res.statusCode, what).toBe(200);
           const body = res.json() as RouteResponse;
-          expect(body).toMatchObject({ source: 'stored', facility: { name: k.via } });
+          expect(body, what).toMatchObject({ source: 'stored', facility: { name: k.via } });
           // the walk Baidu draws is the one the check measured, give or take the engines' rounding
-          expect(Math.abs(body.distance_m - k.route_m)).toBeLessThan(50);
-          checked++;
+          expect(Math.abs(body.distance_m - k.route_m), what).toBeLessThan(50);
+          walked[category] = (walked[category] ?? 0) + 1;
         }
       }
     }
-    expect(checked).toBe(27);
+    // the task's three as ever (27), and the 20 routes stored for 幼儿园 and 社区卫生
+    expect(walked).toEqual({ 幼儿园: 4, 小学: 11, 菜市场: 13, 药店: 3, 社区卫生: 16 });
+    expect(bounds).toEqual(['zj-v 川杨兰苑 社区卫生']);
     await app.close();
   });
 

@@ -1,5 +1,5 @@
 import { BaiduError, toApiError } from '@zoudedao/baidu';
-import type { AnalysisResult, HardCategory, LngLat } from '@zoudedao/core';
+import { HARD_CATEGORIES, type AnalysisResult, type HardCategory, type LngLat } from '@zoudedao/core';
 import type { FastifyInstance, FastifySchemaValidationError } from 'fastify';
 import { untilAborted } from '../abort.js';
 import type { Mode } from '../config.js';
@@ -24,7 +24,8 @@ const bodySchema = {
   additionalProperties: false,
   properties: {
     analysis_id: { type: 'string', minLength: 1, maxLength: 80, pattern: '^[A-Za-z0-9][A-Za-z0-9_~-]*$' },
-    category: { type: 'string', enum: ['小学', '菜市场', '药店'] },
+    // every category an analysis can be checked for; one the analysis was not checked for is a 400 later
+    category: { type: 'string', enum: [...HARD_CATEGORIES] },
     site_bd09: {
       type: 'array',
       minItems: 2,
@@ -46,7 +47,7 @@ function describeInvalid(errors: FastifySchemaValidationError[]): string {
     case 'analysis_id':
       return 'analysis_id 须为分析编号：样例 id（如 zj-a）或实时结果的 meta.analysis_id（如 live-1a2b3c4d）';
     case 'category':
-      return 'category 只能是 小学、菜市场 或 药店';
+      return `category 只能是 ${HARD_CATEGORIES.join('、')} 之一`;
     case 'site_bd09':
       return 'site_bd09 须为中国境内的 BD-09 坐标 [经度, 纬度]';
     case 'rules':
@@ -150,6 +151,13 @@ export function registerWhatIfRoute(app: FastifyInstance, opts: WhatIfRouteOptio
               400,
               'invalid_input',
               '这次分析没有小区判定（只生成了等时圈），无法模拟新增设施',
+            );
+          }
+          if (out.kind === 'unchecked') {
+            throw new ApiError(
+              400,
+              'invalid_input',
+              `分析 ${id} 没有检查${body.category}：它只检查了${out.checked.join('、')}（较早的分析只检查赛题点名的三类），没有新增前的判定可比，无法模拟新增${body.category}。重新体检一次即可检查全部 ${HARD_CATEGORIES.length} 类设施`,
             );
           }
           const err = out.error;

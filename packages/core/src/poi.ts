@@ -2,8 +2,10 @@
  * POI cleaning for Baidu place search results (design doc §6.3):
  *
  *   1. uid dedupe across queries and pages (v2 and v3 return the same uids)
- *   2. category from classified_poi_tag / tag, then a name whitelist for generic tags
- *   3. per-category name blacklist (小学 ≠ 培训/辅导/托管/兴趣/英语; 药店 ≠ 兽药/宠物/医疗器械)
+ *   2. category from classified_poi_tag / tag, then a name whitelist for generic tags — never for a
+ *      facility's gate or car park (出入口 / 停车场 tags or names: …幼儿园(北门), …服务中心停车场)
+ *   3. per-category name blacklist (小学 ≠ 培训/辅导/托管/兴趣/英语; 幼儿园 ≠ 早教/托育/托儿所/亲子/
+ *      培训 …, unless the name is a kindergarten's own; 药店 ≠ 兽药/宠物/医疗器械)
  *   4. stall merge: "英英肉店(孙桥菜市场店)", or a 肉店/水产-type shop within 60 m of a market, or a
  *      POI whose parent_id is a market, belongs to that market and never counts on its own
  *   5. 生鲜超市 stays its own category (the task rule does not accept it for 菜市场)
@@ -56,12 +58,32 @@ interface CategoryRule {
   tag: RegExp;
   name?: RegExp;
   exclude?: RegExp;
+  /** A name this matches is never excluded: the facility's own name (whatever business words it holds). */
+  keep?: RegExp;
 }
+
+/**
+ * A kindergarten's own name: …幼儿园, or one of its campuses (东方德尚幼儿园(申江部), 东方德尚幼儿园孙环部,
+ * 周浦幼儿园-秀康部, 南门幼儿园(张江分园)) — as opposed to a business next to or named after one
+ * (金宝贝早教(幼儿园店), 某某艺术培训(北苑幼儿园旁)).
+ */
+const KINDERGARTEN_NAME =
+  /幼儿园(?:[-－—]?[^()（）\-－—]{0,8}(?:部|分园|园区|校区)|[(（][^()（）]{0,12}[)）])?$/;
 
 // Order matters: the first rule whose tag pattern matches wins.
 const RULES: readonly CategoryRule[] = [
   { cat: '小学', tag: /小学/, name: /小学/, exclude: /培训|辅导|托管|兴趣|英语/ },
-  { cat: '幼儿园', tag: /幼儿园/, name: /幼儿园/ },
+  // 幼儿园 is checked per community (ages 3–6): early education, childcare for the under-3s (托育,
+  // 托儿所 — a facility of its own in GB 50180-2018 and Shanghai's life-circle guide), after-school
+  // care, training and shops are no kindergarten, even where Baidu tags them 幼儿园 — unless the name
+  // is a kindergarten's own (某某艺术幼儿园, 某某幼儿园(托育部) stay)
+  {
+    cat: '幼儿园',
+    tag: /幼儿园/,
+    name: /幼儿园/,
+    exclude: /早教|托育|托儿所|托管|亲子|培训|辅导|衔接|兴趣|艺术|舞蹈|美术|英语|用品|玩具/,
+    keep: KINDERGARTEN_NAME,
+  },
   { cat: '菜市场', tag: /菜市场|农贸市场/, name: /菜市场|菜场|农贸市场|生鲜市场/ },
   { cat: '生鲜超市', tag: /生鲜超市/, name: /生鲜超市/ },
   { cat: '药店', tag: /药店|药房/, name: /药店|药房/, exclude: /兽药|宠物|医疗器械/ },
@@ -70,12 +92,12 @@ const RULES: readonly CategoryRule[] = [
   { cat: '超市', tag: /超市/ },
   { cat: '地铁', tag: /地铁站/ },
   { cat: '公交', tag: /公交车站/ },
-  // Shanghai's elderly services: care homes, day care, 长者照护之家 and the meal points (长者食堂,
-  // 社区食堂, 助餐点), which Baidu files under 美食. Not "自助餐".
+  // Shanghai's elderly services: care homes, day care, 长者照护之家, each town's 综合为老服务中心 and the
+  // meal points (长者食堂, 社区食堂, 助餐点), which Baidu files under 美食. Not "自助餐".
   {
     cat: '养老',
     tag: /养老|敬老/,
-    name: /养老院|敬老院|日间照料|长者照护|长者食堂|老年食堂|社区食堂|老年助餐|助餐点|助餐服务/,
+    name: /养老院|敬老院|日间照料|长者照护|为老服务|长者食堂|老年食堂|社区食堂|老年助餐|助餐点|助餐服务/,
   },
   { cat: '公园', tag: /公园/ },
 ];
@@ -103,12 +125,22 @@ export interface Categorized {
   excluded?: string;
 }
 
-/** Category of a POI from its tags, falling back to name keywords when the tag is generic. */
+/** Tags of a facility's gates and car parks: they carry its name, never its function. */
+const ACCESS_TAG_RE = /出入口|停车场|停车库/;
+/** The same by name, for rows whose tag says nothing: …小学-2号门, …幼儿园(北门), …服务中心停车场. */
+const ACCESS_NAME_RE =
+  /(?:[东南西北]{1,2}\d*[侧大小]?门|\d+号门|[侧正后大校园]门|出入口|停车场|停车库)[)）]?$/;
+
+/**
+ * Category of a POI from its tags, falling back to name keywords when the tag is generic — but never
+ * for a gate or a car park, which carries the facility's name without being it.
+ */
 export function categorize(name: string, tag: string): Categorized {
   const byTag = RULES.find((r) => r.tag.test(tag));
+  if (!byTag && (ACCESS_TAG_RE.test(tag) || ACCESS_NAME_RE.test(name))) return { cat: '其他' };
   const rule = byTag ?? RULES.find((r) => r.name?.test(name));
   if (!rule) return { cat: stallMarketName(name) ? '菜市场' : '其他' };
-  const hit = rule.exclude?.exec(name);
+  const hit = rule.keep?.test(name) ? null : rule.exclude?.exec(name);
   return hit ? { cat: rule.cat, excluded: hit[0] } : { cat: rule.cat };
 }
 

@@ -4,7 +4,7 @@
  * with core's greedy MCLP over L̂, and every such suggestion stays verified: false (估算).
  */
 import {
-  HARD_CATEGORIES,
+  checkedCategories,
   siteCandidatesFromPaths,
   suggestSites,
   type AnalysisResult,
@@ -22,7 +22,10 @@ export interface CategorySuggestions {
   list: SiteSuggestion[];
 }
 
-const cache = new WeakMap<AnalysisResult, Record<HardCategory, CategorySuggestions>>();
+/** Per checked category of the analysis; a category it did not check has no entry (never "none needed"). */
+export type SiteSuggestionsByCategory = Partial<Record<HardCategory, CategorySuggestions>>;
+
+const cache = new WeakMap<AnalysisResult, SiteSuggestionsByCategory>();
 
 /** Candidate sites: every 50 m along the walked paths (on a street by construction) and each community. */
 export function siteCandidates(result: AnalysisResult): SiteCandidate[] {
@@ -32,16 +35,13 @@ export function siteCandidates(result: AnalysisResult): SiteCandidate[] {
   ];
 }
 
-export function siteSuggestionsOf(
-  result: AnalysisResult,
-  maxSites = 2,
-): Record<HardCategory, CategorySuggestions> {
+export function siteSuggestionsOf(result: AnalysisResult, maxSites = 2): SiteSuggestionsByCategory {
   const hit = cache.get(result);
   if (hit) return hit;
   const estimator = routeEstimator(result);
   const candidates = siteCandidates(result);
-  const out = {} as Record<HardCategory, CategorySuggestions>;
-  for (const category of HARD_CATEGORIES) {
+  const out: SiteSuggestionsByCategory = {};
+  for (const category of checkedCategories(result)) {
     const demands = result.communities
       .filter((c) => {
         const check = c.checks?.[category];

@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { communityCodes, frameOf, normName, ruleOf } from '@zoudedao/agent';
 import { roundCoord, type BaiduClient, type WalkingRoute } from '@zoudedao/baidu';
 import {
+  checkedCategories,
   haversine,
   routingPoint,
   type AnalysisResult,
@@ -87,7 +88,8 @@ export interface CheckPair {
 
 export type PairFailure =
   | { kind: 'no_community'; names: string[] }
-  | { kind: 'no_check' }
+  /** `checked`: the categories the analysis was checked for (older analyses: the task's three). */
+  | { kind: 'no_check'; checked: HardCategory[] }
   | { kind: 'not_routed'; status: CheckStatus }
   | { kind: 'no_facility'; via: string };
 
@@ -120,7 +122,7 @@ export function checkPair(
   if (index < 0) return { kind: 'no_community', names: result.communities.map((c) => c.name) };
   const c = result.communities[index]!;
   const check = c.checks?.[input.category];
-  if (!check) return { kind: 'no_check' };
+  if (!check) return { kind: 'no_check', checked: checkedCategories(result) };
   const basis = check.route_basis ?? 'routed';
   if (basis !== 'routed' || !check.via || !(check.route_m > 0)) {
     return { kind: 'not_routed', status: check.status };

@@ -221,7 +221,7 @@ export function LayerOptions({ flat = false, ...p }: LayerProps & { flat?: boole
       label: '灰色区域',
       on: p.gray,
       set: p.onGray,
-      note: '步行 1 公里内缺小学、菜市场或药店的地方',
+      note: '步行 1 公里内缺少某类设施的地方',
     });
   items.push({
     id: 'method',

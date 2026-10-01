@@ -854,22 +854,27 @@ input::placeholder {
   background: var(--cobalt);
 }
 
-/* categories: one row of buttons — pictogram, name, the communities that cannot reach one */
+/* categories: one tile each, side by side — pictogram and the communities that cannot reach one, over
+   the name */
 .cats {
   margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+  gap: 5px;
 }
+/* five side by side in the 360px column: 68px tiles, room for 社区卫生 at 12px */
 .cat {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 40px;
-  padding: 0 10px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  height: 54px;
+  padding: 0 7px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-s);
+  text-align: left;
   transition:
     border-color 150ms var(--ease),
     background 150ms var(--ease);
@@ -881,21 +886,29 @@ input::placeholder {
   border-color: var(--cobalt);
   background: var(--cobalt-tint);
 }
+.cat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
 .cat .pg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   flex: none;
 }
 .cat-name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--ink);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cat-n {
-  margin-left: auto;
   font-size: 16px;
   font-weight: 600;
+  line-height: 1;
   color: var(--pseudo-text);
 }
 .cat-n.clear {
@@ -3967,6 +3980,10 @@ button.cite:focus-visible {
 @media (max-width: 1100px) {
   .workspace {
     grid-template-columns: 360px minmax(0, 1fr);
+  }
+  /* the 360px panel: five category tiles still name 社区卫生 in full */
+  .cat {
+    padding: 0 5px;
   }
   .panel {
     padding: 16px 16px 12px;

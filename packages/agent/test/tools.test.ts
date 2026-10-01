@@ -1,4 +1,11 @@
-import { bd09ToWgs84, buildIsochrone, facilityStats, localFrame, type AnalysisResult } from '@zoudedao/core';
+import {
+  TASK_CATEGORIES,
+  bd09ToWgs84,
+  buildIsochrone,
+  facilityStats,
+  localFrame,
+  type AnalysisResult,
+} from '@zoudedao/core';
 import { describe, expect, it } from 'vitest';
 import { deriveProfile, frameOf } from '../src/analysis.js';
 import { AnalysisStore } from '../src/backend.js';
@@ -11,7 +18,7 @@ import type { SimulateData } from '../src/tools/simulate.js';
 import { ToolError, type ToolContext } from '../src/tools/types.js';
 import type { Overview } from '../src/summary.js';
 import type { AnalyzeEvent, AnalyzeInput } from '../src/types.js';
-import { SHANGHAI, localCtx, pendingCtx, sphericalRingArea, zjA } from './helpers.js';
+import { SHANGHAI, localCtx, pendingCtx, sphericalRingArea, threeCtx, zjA } from './helpers.js';
 
 const reg = createToolRegistry();
 const fact = (facts: { label: string; value: number }[], label: string) =>
@@ -64,27 +71,32 @@ describe('registry', () => {
 });
 
 describe('analyze_life_circle on zj-a', () => {
-  it('reproduces the product claims: circle finds 1 gap, walking verifies 8, 87.5 % missed', async () => {
+  it('reproduces the product claims: circle finds 1 gap, walking verifies 9, 88.9 % missed (1 vs 8 in the task’s three)', async () => {
     const r = await reg.run('analyze_life_circle', { sample_id: 'zj-a' }, localCtx());
     const o = r.data as Overview & { status: string };
     expect(o.status).toBe('ok');
     expect(o.analysis_id).toBe('zj-a');
     expect(o.headline).toMatchObject({
       communities: 12,
-      categories: 3,
-      checks: 36,
+      categories: 5,
+      checks: 60,
       straight_gaps: 1,
-      walking_gaps: 8,
-      pseudo: 7,
+      walking_gaps: 9,
+      pseudo: 8,
       blind: 1,
-      missed_by_circle: 7,
-      missed_share_pct: 87.5,
+      missed_by_circle: 8,
+      missed_share_pct: 88.9,
       pending: 0,
     });
     expect(o.by_category.小学).toMatchObject({ 覆盖: 6, 伪覆盖: 5, 盲区: 1, 待核实: 0 });
     expect(o.by_category.菜市场).toMatchObject({ 覆盖: 10, 伪覆盖: 2, 盲区: 0, 临界: 1, 待核实: 0 });
     // every pharmacy walk was measured to the nearest pharmacy: none is left 待核实
     expect(o.by_category.药店).toMatchObject({ 覆盖: 12, 伪覆盖: 0, 盲区: 0, 待核实: 0 });
+    // checked beside the task's three on the same 1 km: the ninth gap is 虹御公寓's 社区卫生 (伪覆盖)
+    expect(o.by_category.幼儿园).toMatchObject({ 覆盖: 12, 伪覆盖: 0, 盲区: 0, 待核实: 0 });
+    expect(o.by_category.社区卫生).toMatchObject({ 覆盖: 11, 伪覆盖: 1, 盲区: 0, 待核实: 0 });
+    const taskGaps = TASK_CATEGORIES.reduce((n, c) => n + o.by_category[c].伪覆盖 + o.by_category[c].盲区, 0);
+    expect(taskGaps).toBe(8);
     expect(o.isochrone).toMatchObject({
       area_iso15_km2: 1.857,
       area_circle15_km2: 3.483,
@@ -95,17 +107,32 @@ describe('analyze_life_circle on zj-a', () => {
     expect(o.isochrone.reach15).toEqual({ median_m: 775, min_m: 466, max_m: 935, bearings: 72 });
 
     expect(r.summary).toContain(
-      '画圆法（直线 1 km）只找到 1 个服务缺口，按实测步行距离已核实 8 个，画圆漏掉了其中 7 个（87.5%）',
+      '画圆法（直线 1 km）只找到 1 个服务缺口，按实测步行距离已核实 9 个，画圆漏掉了其中 8 个（88.9%）',
     );
     expect(r.summary).not.toContain('待核实');
     const open = await reg.run('analyze_life_circle', { sample_id: 'zj-a' }, pendingCtx());
-    expect((open.data as Overview).headline).toMatchObject({ walking_gaps: 8, pending: 2 });
+    expect((open.data as Overview).headline).toMatchObject({ walking_gaps: 9, pending: 2 });
     expect(open.summary).toContain('另有 2 项待核实');
     expect(r.summary).toContain('1.857 km²');
     expect(r.summary).toContain('1.88 倍');
     expect(r.summary).toContain('775 m');
-    expect(fact(r.facts, '画圆漏掉的比例')).toBe(87.5);
-    expect(fact(r.facts, '步行已核实缺口数')).toBe(8);
+    expect(fact(r.facts, '画圆漏掉的比例')).toBe(88.9);
+    expect(fact(r.facts, '步行已核实缺口数')).toBe(9);
+    // the task's three alone, as an analysis checked for them only states it: 1 vs 8, 87.5 % missed
+    const three = await reg.run('analyze_life_circle', { sample_id: 'zj-a' }, threeCtx());
+    expect((three.data as Overview).headline).toMatchObject({
+      categories: 3,
+      checks: 36,
+      straight_gaps: 1,
+      walking_gaps: 8,
+      pseudo: 7,
+      blind: 1,
+      missed_by_circle: 7,
+      missed_share_pct: 87.5,
+    });
+    expect(three.summary).toContain(
+      '画圆法（直线 1 km）只找到 1 个服务缺口，按实测步行距离已核实 8 个，画圆漏掉了其中 7 个（87.5%）',
+    );
   });
 
   it('derives the elderly profile from the same routes: times scale, the 1 km verdicts do not', async () => {
@@ -115,7 +142,7 @@ describe('analyze_life_circle on zj-a', () => {
     expect(o.analysis_id).toBe('zj-a~elder');
     expect(o.profile).toBe('elder');
     expect(o.speed_mps).toBe(0.9);
-    expect(o.headline.walking_gaps).toBe(8);
+    expect(o.headline.walking_gaps).toBe(9);
     expect(o.isochrone.circle_r15_m).toBe(810);
     expect(o.isochrone.area_circle15_km2).toBe(2.061);
     // 15 elderly minutes = 900 · 0.9 / 1.17 ≈ 692 adult seconds: between the 10- and 15-minute areas
@@ -150,11 +177,13 @@ describe('analyze_life_circle on zj-a', () => {
     expect(row('药店').complete).toBeNull();
     expect(o.facilities!.none_within_walk).toEqual(['小学', '地铁']);
     expect(o.facilities!.circle_r_m).toBe(1053);
+    // 虹御公寓 lacks only 社区卫生 (伪覆盖): its area is in the ≥ 1 and the 伪覆盖 layers, not in ≥ 2
     expect(o.gray_areas.map((g) => [g.kind, g.min_missing, g.polygons, g.area_km2])).toEqual([
-      ['gap', 1, 1, 0.861],
+      ['gap', 1, 1, 0.976],
       ['gap', 2, 1, 0.118],
-      ['pseudo', 1, 1, 0.75],
+      ['pseudo', 1, 1, 0.865],
     ]);
+    expect(o.gray_areas[0]!.communities).toContain('虹御公寓');
     expect(o.gray_areas[1]!.communities).toEqual(['川杨新苑四期']);
     expect(r.summary).toContain('圈内设施（15 分钟步行可达 / 直线 15 分钟圆内）：小学 0 / 1，');
     expect(r.summary).toContain('药店 8 / 9');
@@ -163,7 +192,7 @@ describe('analyze_life_circle on zj-a', () => {
     expect(r.summary).toContain('药店 2.7 分钟');
     expect(r.summary).toContain('缺至少 2 类必需设施 0.118 km²（1 处）');
     expect(fact(r.facts, '15 分钟步行可达的药店数')).toBe(8);
-    expect(fact(r.facts, '灰色区域（缺至少1类）面积')).toBe(0.861);
+    expect(fact(r.facts, '灰色区域（缺至少1类）面积')).toBe(0.976);
 
     // the elder profile counts at 0.9 m/s over the same field, like the web (scale 1.17 / 0.9)
     const e = (await reg.run('analyze_life_circle', { sample_id: 'zj-a', profile: 'elder' }, localCtx()))
@@ -362,10 +391,10 @@ describe('get_isochrone', () => {
 });
 
 describe('list_service_gaps', () => {
-  it('lists the 8 verified gaps by walking distance and keeps pending checks apart', async () => {
+  it('lists the 9 verified gaps by walking distance and keeps pending checks apart', async () => {
     const r = await reg.run('list_service_gaps', { analysis_id: 'zj-a' }, localCtx());
     const d = r.data as GapsData;
-    expect(d.counts).toMatchObject({ checks: 36, gaps: 8, pseudo: 7, blind: 1, borderline: 0, pending: 0 });
+    expect(d.counts).toMatchObject({ checks: 60, gaps: 9, pseudo: 8, blind: 1, borderline: 0, pending: 0 });
     expect(d.gaps[0]).toMatchObject({
       community: '申城佳苑三期B块',
       category: '小学',
@@ -385,13 +414,22 @@ describe('list_service_gaps', () => {
     const routes = d.gaps.map((g) => g.route_m);
     expect(routes).toEqual([...routes].sort((a, b) => b - a));
     expect(d.gaps.some((g) => g.category === '药店')).toBe(false);
+    // the one gap outside the task's three
+    expect(d.gaps.filter((g) => g.category === '幼儿园' || g.category === '社区卫生')).toEqual([
+      expect.objectContaining({
+        community: '虹御公寓',
+        category: '社区卫生',
+        status: '伪覆盖',
+        route_m: 1083,
+      }),
+    ]);
     expect(d.pending).toEqual([]);
-    expect(d.communities_with_gaps).toHaveLength(7);
-    expect(r.summary).toContain('已核实缺口 8 个（伪覆盖 7、盲区 1）');
+    expect(d.communities_with_gaps).toHaveLength(8);
+    expect(r.summary).toContain('已核实缺口 9 个（伪覆盖 8、盲区 1）');
     // a check with a nearer facility never routed is listed apart, never as a gap
     const open = await reg.run('list_service_gaps', { analysis_id: 'zj-a' }, pendingCtx());
     const p = open.data as GapsData;
-    expect(p.counts).toMatchObject({ gaps: 8, pending: 2 });
+    expect(p.counts).toMatchObject({ gaps: 9, pending: 2 });
     expect(p.pending.map((x) => `${x.community}/${x.category}`)).toEqual([
       '川杨新苑四期/药店',
       '虹御公寓/药店',
@@ -438,8 +476,8 @@ describe('list_service_gaps', () => {
     expect(d.by_community).toHaveLength(12);
     expect(d.by_community.find((r) => r.community === '申城佳苑三期B块')).toEqual({
       community: '申城佳苑三期B块',
-      status: { 小学: '伪覆盖', 菜市场: '覆盖', 药店: '覆盖' },
-      walk_min: { 小学: 23.9, 菜市场: 7.7, 药店: 3.8 },
+      status: { 幼儿园: '覆盖', 小学: '伪覆盖', 菜市场: '覆盖', 药店: '覆盖', 社区卫生: '覆盖' },
+      walk_min: { 幼儿园: 3.3, 小学: 23.9, 菜市场: 7.7, 药店: 3.8, 社区卫生: 8.3 },
     });
     expect(d.by_community.find((r) => r.community === '虹御公寓')).toMatchObject({
       status: { 药店: '覆盖' },
@@ -584,7 +622,7 @@ describe('compare_sites', () => {
     const rows = (r.data as { rows: { label: string; walking_gaps: number; area_iso15_km2: number }[] }).rows;
     expect(rows.map((x) => x.label)).toEqual(['申城佳苑片区', '申城佳苑片区（老年人）']);
     expect(rows[0]!.walking_gaps).toBe(rows[1]!.walking_gaps);
-    expect(r.summary).toContain('各分析的已核实步行缺口数相同（都是 8 个）');
+    expect(r.summary).toContain('各分析的已核实步行缺口数相同（都是 9 个）');
     expect(r.summary).toContain('画圆高估最严重的是 申城佳苑片区（1.88 倍）');
     await expect(reg.run('compare_sites', { analysis_ids: ['zj-a', 'zj-a'] }, localCtx())).rejects.toThrow(
       /至少需要 2 个不同/,
@@ -602,10 +640,10 @@ describe('export_report', () => {
     const lines = md.split('\n');
     expect(lines[0]).toBe('# 申城佳苑片区 · 15 分钟生活圈体检报告');
     expect(lines[2]).toMatch(
-      /^> \*\*结论：\*\* 申城佳苑片区的 12 个小区中，有 7 个步行 1 km 内缺少至少一类必需设施/,
+      /^> \*\*结论：\*\* 申城佳苑片区的 12 个小区中，有 8 个步行 1 km 内缺少至少一类必需设施/,
     );
     expect(lines[2]).toContain(
-      '画圆法只找到 1 个缺口，按实测步行距离已核实 8 个，画圆漏掉了其中 7 个（87.5%）。',
+      '画圆法只找到 1 个缺口，按实测步行距离已核实 9 个，画圆漏掉了其中 8 个（88.9%）。',
     );
     for (const heading of [
       '## 一、关键数字',
@@ -631,7 +669,7 @@ describe('export_report', () => {
     // pending checks are listed apart and never in the gap table
     const open = await reg.run('export_report', { analysis_id: 'zj-a' }, pendingCtx());
     const pmd = (open.data as ReportData).content as string;
-    expect(pmd.split('\n')[2]).toContain('（87.5%）；另有 2 项待核实');
+    expect(pmd.split('\n')[2]).toContain('（88.9%）；另有 2 项待核实');
     expect(gapTable(pmd)).not.toContain('| 药店 |');
     expect(pmd.slice(pmd.indexOf('### 待核实'))).toContain('| 虹御公寓 | 药店 | 1,124 m（上界）');
     // siting suggestions are labelled as estimates
@@ -669,12 +707,17 @@ describe('export_report', () => {
     }
     const hongyu = (collection: FeatureCollection) =>
       collection.features.find((f) => f.properties.kind === 'community' && f.properties.name === '虹御公寓')!;
-    expect(hongyu(fc).properties).toMatchObject({ 药店_status: '覆盖', 药店_verified: true, missing: '' });
+    // its one gap is 社区卫生; a pending 药店 check never becomes one
+    expect(hongyu(fc).properties).toMatchObject({
+      药店_status: '覆盖',
+      药店_verified: true,
+      missing: '社区卫生',
+    });
     const open = await reg.run('export_report', { analysis_id: 'zj-a', format: 'geojson' }, pendingCtx());
     expect(hongyu((open.data as ReportData).content as FeatureCollection).properties).toMatchObject({
       药店_status: '待核实',
       药店_verified: false,
-      missing: '',
+      missing: '社区卫生',
     });
     const siyi = fc.features.find(
       (f) => f.properties.kind === 'community' && f.properties.name === '川杨新苑四期',
@@ -703,7 +746,7 @@ describe('export_report', () => {
     type Model = { verdict: string; gaps: unknown[]; pending: unknown[] };
     const r = await reg.run('export_report', { analysis_id: 'zj-a', format: 'json' }, localCtx());
     const model = (r.data as ReportData).content as Model;
-    expect(model.gaps).toHaveLength(8);
+    expect(model.gaps).toHaveLength(9);
     expect(model.pending).toHaveLength(0);
     const open = await reg.run('export_report', { analysis_id: 'zj-a', format: 'json' }, pendingCtx());
     expect(((open.data as ReportData).content as Model).pending).toHaveLength(2);

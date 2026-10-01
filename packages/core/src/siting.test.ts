@@ -12,7 +12,7 @@ import {
   siteCoverage,
   suggestSites,
 } from './siting.js';
-import { HARD_CATEGORIES } from './standards.js';
+import { TASK_CATEGORIES } from './standards.js';
 
 const zj = zjA();
 const iso = buildIsochrone(zj.samples, { loo: false });
@@ -22,7 +22,8 @@ const estimator = fieldEstimator(iso.rho);
 function measuredWalks(): { o: XY; q: XY; m: number }[] {
   const f = zjFrame();
   const out: { o: XY; q: XY; m: number }[] = [];
-  for (const cat of HARD_CATEGORIES) {
+  // the research blind-spot calls of zj-a: the task's three categories
+  for (const cat of TASK_CATEGORIES) {
     const raw = readRaw<{ result: MatrixElement[] }>(`research/zhangjiang/raw/bv_blind_A_${cat}_000.json`);
     const url = new URL(raw._meta.request);
     const O = latLngList(url.searchParams.get('origins')).map(([lng, lat]) => f.toXY(lng, lat));

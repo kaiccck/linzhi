@@ -44,8 +44,8 @@ describe('engine on the real BaiduClient', () => {
       expect(u.reserved, s).toBe(0);
       expect(u.in_flight, s).toBe(0);
     }
-    expect(ledger.usage('routematrix_walking').used).toBeLessThanOrEqual(700);
-    expect(ledger.usage('place').used).toBeLessThanOrEqual(8);
+    expect(ledger.usage('routematrix_walking').used).toBeLessThanOrEqual(1030);
+    expect(ledger.usage('place').used).toBeLessThanOrEqual(12);
     expect(ledger.usage('directionlite_walking').used).toBeLessThanOrEqual(6);
     expect(ledger.usage('reverse_geocoding').used).toBe(1);
     // quota events carry the ledger's day totals and tier limits
@@ -61,7 +61,9 @@ describe('engine on the real BaiduClient', () => {
   it('finds the same across-river gaps as with the fake client', () => {
     const byName = new Map(first.communities.map((c) => [c.name, c]));
     expect(first.communities).toHaveLength(30);
+    expect(first.communities.every((c) => Object.keys(c.checks).length === 5)).toBe(true);
     expect(byName.get('滨河花园')!.checks['小学']).toMatchObject({ status_main: '伪覆盖', verified: true });
+    expect(byName.get('滨河花园')!.checks['幼儿园']).toMatchObject({ status_main: '伪覆盖', verified: true });
     expect(byName.get('东岸新村')!.checks['菜市场']).toMatchObject({ status_main: '伪覆盖', verified: true });
     expect(first.stats.area_iso15_km2).toBeLessThan(0.7 * first.stats.area_circle15_km2);
   });

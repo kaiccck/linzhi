@@ -3,7 +3,7 @@
  * one quieter line on how few of the gaps the circle finds (a gap is one community × one category). The
  * report prints the two-line claim/walk form (verdictLines); verdictSentence is the spoken whole.
  */
-import { CATS, distWords, type Model } from '../model/derive.js';
+import { distWords, type Model } from '../model/derive.js';
 import { checkLook } from '../model/looks.js';
 
 /** What the verdict says, for screen readers and the page's live region: communities, then the gaps. */
@@ -58,7 +58,7 @@ export function Verdict({ model }: { model: Model }) {
   const missed = tally.units - tally.circleUnits;
   // a borderline walk past the rule shows in the lists' open rows: then it joins the key (one within
   // the rule folds away, its words on its row)
-  const edge = model.units.some((u) => CATS.some((k) => checkLook(u.checks[k]) === 'edge-over'));
+  const edge = model.units.some((u) => model.cats.some((k) => checkLook(u.checks[k]) === 'edge-over'));
   return (
     <section className="verdict" aria-labelledby="verdict-say">
       <p className="sr-only" id="verdict-say" aria-live="polite">
@@ -70,7 +70,7 @@ export function Verdict({ model }: { model: Model }) {
           <span className="v-t1">个小区缺设施</span>
           <span className="v-t2">
             <span className="num">{n}</span> 个小区中，
-            {tally.units ? `${rule}至少缺一类` : `${rule}三类设施都走得到`}
+            {tally.units ? `${rule}至少缺一类` : `${rule}${model.cats.length} 类设施都走得到`}
           </span>
         </p>
       </div>

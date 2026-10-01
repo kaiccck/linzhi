@@ -24,6 +24,7 @@ import {
   normalizeName,
   planFreshAlternatives,
   planMatrixBatches,
+  TASK_RULE_M,
   type Community,
   type DemandPoint,
   type FacilityExclusion,
@@ -275,10 +276,8 @@ export async function runFreshAlternatives(args: {
     );
     return true;
   };
-  const want = planFreshAlternatives(gaps, candidates, routes, {
-    rule_m: set.rule['菜市场'],
-    k: FRESH_ALT_K,
-  });
+  const rule_m = set.rule['菜市场'] ?? TASK_RULE_M['菜市场'];
+  const want = planFreshAlternatives(gaps, candidates, routes, { rule_m, k: FRESH_ALT_K });
   if (want.size) {
     let room = meter.room('coverage');
     const chosen: OdBatch<DemandPoint, OdDestination>[] = [];
@@ -298,7 +297,7 @@ export async function runFreshAlternatives(args: {
 
   // pick: the shortest walk within the rule, or null, per gap
   const alts = mergeFreshAlternatives(gaps, candidates, routes, {
-    rule_m: set.rule['菜市场'],
+    rule_m,
     k: FRESH_ALT_K,
     known_m: known,
     speed: WALK_SPEED,

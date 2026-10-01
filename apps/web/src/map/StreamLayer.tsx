@@ -8,13 +8,15 @@ import type { View } from '../geo/view.js';
 import { CAT_ICON, catColor } from '../model/derive.js';
 import type { StreamModel } from '../data/stream.js';
 
+/** The scarce kinds marked while a check streams in (pharmacies are too many to read). */
+const STREAM_MARKS: ReadonlySet<string> = new Set(['幼儿园', '小学', '菜市场', '社区卫生', '地铁']);
+
 export function StreamLayer({ view, model, label }: { view: View; model: StreamModel; label: string }) {
   const W = view.width;
   const H = view.height;
   const marks = model.pois.flatMap((p) => {
     const icon = CAT_ICON[p.cat];
-    if (!icon || p.stall_of || !['小学', '菜市场', '地铁'].includes(p.cat) || /出入口/.test(p.name))
-      return [];
+    if (!icon || p.stall_of || !STREAM_MARKS.has(p.cat) || /出入口/.test(p.name)) return [];
     const [px, py] = p.navi_xy ?? p.xy;
     const x = view.x(px);
     const y = view.y(py);

@@ -13,7 +13,7 @@ export interface Job {
 
 const MAX_LABEL = 80;
 
-/** Browser POIs one request may bring (JSAPI LocalSearch, 12 keywords within 2.1 km). */
+/** Browser POIs one request may bring (JSAPI LocalSearch, 14 keywords within 2.1 km). */
 export const BROWSER_POIS_MAX = 400;
 const BROWSER_NAME_MAX = 60;
 const BROWSER_KEYWORD_MAX = 10;

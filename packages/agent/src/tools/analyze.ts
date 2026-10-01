@@ -1,7 +1,7 @@
 import type { AnalysisResult, LngLat } from '@zoudedao/core';
 import * as z from 'zod';
 import { AnchorBook, type Anchor } from '../anchors.js';
-import { HARD_CATEGORIES, checkRows, isWalkGap, profileOf } from '../analysis.js';
+import { CHECKED_SCOPE, COUNTED_ONLY, checkRows, isWalkGap, profileOf } from '../analysis.js';
 import type { StoredAnalysis } from '../backend.js';
 import { FactBook } from '../format.js';
 import {
@@ -92,7 +92,7 @@ export function analysisSummary(o: Overview, book: FactBook, note = ''): string 
     profileSentence(o, book),
   ];
   if (o.profile === 'elder') {
-    const within = HARD_CATEGORIES.map((c) => {
+    const within = o.checked_categories.map((c) => {
       const w = o.within_15min[c];
       const und = w.undetermined
         ? `（另 ${book.num(`老年人15分钟可达${c}待核实数`, w.undetermined, '个')} 个待核实）`
@@ -131,11 +131,12 @@ export const analyzeLifeCircle = defineTool<typeof analyzeSchema, AnalyzeData>({
   title: '生活圈体检',
   description:
     '对一个社区做 15 分钟步行生活圈体检，或读取已有结果，返回 analysis_id 和核心数字：15 分钟步行可达面积与直线圆面积、' +
-    '画圆高估倍数、15 分钟有效步行半径中位数、小学/菜市场/药店在已核实检查中的覆盖/伪覆盖/盲区数、待核实数，' +
+    '画圆高估倍数、15 分钟有效步行半径中位数、逐小区检查的各类设施在已核实检查中的覆盖/伪覆盖/盲区数（by_category）、待核实数，' +
     '以及“画圆法找到的缺口 vs 实测步行核实的缺口”；' +
-    '圈内设施统计 facilities.rows（小学、幼儿园、菜市场、超市、药店、社区卫生、养老、公交、地铁、公园：清单数 found、直线 15 分钟圆内 circle、' +
+    `圈内设施统计 facilities.rows（从分析中心出发统计清单里的设施：逐小区检查的类别以及${COUNTED_ONLY.join('、')}；清单数 found、直线 15 分钟圆内 circle、` +
     '15 分钟步行可达 walk、最近一处 nearest 与步行分钟 nearest_min；complete=false 表示清单被检索页数截断，数量是下限），' +
     '以及灰色区域 gray_areas（缺至少 n 类必需设施或有伪覆盖的范围：面积、块数、涉及小区）。' +
+    `逐小区检查了哪些类别见 checked_categories：${CHECKED_SCOPE}。` +
     '“圈里有几家药店”“附近有什么设施”这类问题用 facilities 回答。' +
     'sample_id、analysis_id、center_bd09、place 四选一：sample_id 读内置样例（如 zj-a 申城佳苑片区）；analysis_id 读已有结果；' +
     'center_bd09 对该点实时体检（需要服务端实时模式和百度 Key，约 1 分钟）；place 先定位，候选不唯一时返回候选，请用户确认后再调用。' +

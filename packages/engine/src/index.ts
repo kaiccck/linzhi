@@ -62,7 +62,7 @@ export type { FusionResult, MatchRadii, OfficialEntry, OfficialList, OfficialSum
 export { runCatchment } from './catchment.js';
 export type { CatchmentOutcome, CatchmentStats } from './catchment.js';
 export type { Job } from './input.js';
-export { runCoverage, statusCounts, worstStatus } from './coverage.js';
+export { runCoverage, setCategories, statusCounts, worstStatus } from './coverage.js';
 export type { CheckSet, CoverageOutcome, LiveCommunity, MatrixFn } from './coverage.js';
 export {
   areaName,

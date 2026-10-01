@@ -210,7 +210,15 @@ describe('the Baidu style: plain tokens, names on in a muted voice, no POI icons
 describe('gray levels of a live result', () => {
   const levels = grayLevels(withGray);
   it('orders the nested gap levels by severity, then the 伪覆盖 part', () => {
-    expect(levels.map((g) => `${g.kind}${g.min}`)).toEqual(['gap1', 'gap2', 'gap3', 'pseudo1']);
+    // five checked categories: a place can lack up to five
+    expect(levels.map((g) => `${g.kind}${g.min}`)).toEqual([
+      'gap1',
+      'gap2',
+      'gap3',
+      'gap4',
+      'gap5',
+      'pseudo1',
+    ]);
     const gaps = levels.filter((g) => g.kind === 'gap');
     for (let i = 1; i < gaps.length; i++) expect(gaps[i]!.areaKm2).toBeLessThanOrEqual(gaps[i - 1]!.areaKm2);
   });
@@ -237,7 +245,12 @@ describe('gray levels of a live result', () => {
 
 describe('legend and layer switch', () => {
   it('adds the gray entry, in the rule’s own words, only when the layer is on', () => {
-    expect(grayRuleText(1000)).toBe('步行 1 公里内缺少小学、菜市场或药店');
+    expect(grayRuleText({ ruleM: 1000, cats: ['小学', '菜市场', '药店'] })).toBe(
+      '步行 1 公里内缺少小学、菜市场或药店',
+    );
+    expect(grayRuleText({ ruleM: 1000, cats: ['幼儿园', '小学', '菜市场', '药店', '社区卫生'] })).toBe(
+      '步行 1 公里内缺少幼儿园、小学、菜市场、药店或社区卫生',
+    );
     const legend = (gray: boolean) =>
       renderToStaticMarkup(
         <MapLegend
@@ -249,7 +262,7 @@ describe('legend and layer switch', () => {
             sites: false,
           }}
           gray={gray}
-          grayRule={grayRuleText(1000)}
+          grayRule={grayRuleText({ ruleM: 1000, cats: ['小学', '菜市场', '药店'] })}
         />,
       );
     expect(legend(true)).toContain('title="灰色区域：步行 1 公里内缺少小学、菜市场或药店"');

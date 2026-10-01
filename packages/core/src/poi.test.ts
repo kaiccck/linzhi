@@ -132,7 +132,7 @@ describe('categories and blacklists', () => {
     expect(categorize('某某咖啡', '美食;咖啡厅')).toEqual({ cat: '其他' });
   });
 
-  it('files the other 民生设施 under 社区卫生, 养老, 地铁, 公交, 公园 and 超市', () => {
+  it('files 社区卫生 and the other 民生设施 under 养老, 地铁, 公交, 公园 and 超市', () => {
     expect(categorize('张江社区卫生服务中心', '医疗;综合医院')).toEqual({ cat: '社区卫生' });
     expect(categorize('孙桥社区卫生服务站', '医疗;诊所')).toEqual({ cat: '社区卫生' });
     expect(categorize('合庆镇卫生院', '医疗;综合医院')).toEqual({ cat: '社区卫生' });
@@ -141,6 +141,7 @@ describe('categories and blacklists', () => {
     expect(categorize('孙桥社区老年人日间照料中心', '生活服务;其他')).toEqual({ cat: '养老' });
     expect(categorize('张江镇长者照护之家', '生活服务;其他')).toEqual({ cat: '养老' });
     expect(categorize('孙桥社区长者食堂', '美食;中餐厅')).toEqual({ cat: '养老' });
+    expect(categorize('张江镇综合为老服务中心', '生活服务;其他')).toEqual({ cat: '养老' });
     expect(categorize('金钱豹自助餐', '美食;自助餐')).toEqual({ cat: '其他' });
     expect(categorize('鹏海绿地公园', '旅游景点;公园')).toEqual({ cat: '公园' });
     expect(categorize('万科翡翠公园', '房地产;住宅区')).toEqual({ cat: '其他' });
@@ -185,6 +186,75 @@ describe('categories and blacklists', () => {
     expect(
       cleanPois([place('h', '星巴克', '美食;咖啡厅', 0, 0)], { project, keepOther: true }).pois[0]!.cat,
     ).toBe('其他');
+  });
+
+  it('keeps kindergartens, not the early-education, childcare and training businesses filed with them', () => {
+    // kindergartens and their campuses as Baidu names them around 张江 (data/samples)
+    for (const name of [
+      '浦东新区浦电幼儿园',
+      '上海浦东新区民办海川之星幼儿园',
+      '东方德尚幼儿园(申江部)',
+      '东方德尚幼儿园孙环部',
+      '周浦幼儿园-秀康部',
+      '南门幼儿园(张江分园)',
+    ]) {
+      expect(categorize(name, '教育培训;幼儿园'), name).toEqual({ cat: '幼儿园' });
+    }
+    // a kindergarten's own name stays one, whatever business word it holds
+    expect(categorize('某某艺术幼儿园', '教育培训;幼儿园')).toEqual({ cat: '幼儿园' });
+    expect(categorize('某某双语幼儿园', '教育培训;其他')).toEqual({ cat: '幼儿园' });
+    expect(categorize('某某幼儿园(托育部)', '教育培训;幼儿园')).toEqual({ cat: '幼儿园' });
+    // the businesses, even where Baidu tags them 幼儿园; 托育 and 托儿所 take the under-3s only
+    const excluded = (name: string, tag = '教育培训;幼儿园') => categorize(name, tag).excluded;
+    expect(excluded('金宝贝早教中心')).toBe('早教');
+    expect(excluded('贝贝托育园')).toBe('托育');
+    expect(excluded('某某幼儿园托育中心')).toBe('托育');
+    expect(excluded('阳光托儿所')).toBe('托儿所');
+    expect(excluded('快乐宝贝亲子园')).toBe('亲子');
+    expect(excluded('某某幼儿园托管中心', '教育培训;培训机构')).toBe('托管');
+    expect(excluded('小天使舞蹈(北苑幼儿园旁)', '教育培训;培训机构')).toBe('舞蹈');
+    expect(excluded('某某幼小衔接培训(幼儿园店)', '教育培训;培训机构')).toBe('衔接');
+    expect(excluded('童趣幼儿园用品店', '购物;其他')).toBe('用品');
+  });
+
+  it('never takes a gate or a car park for the facility whose name it carries', () => {
+    // the name decides only for tags that say nothing: a 出入口 / 停车场 tag, or such a name, is no facility
+    expect(categorize('临河幼儿园(北门)', '出入口;门')).toEqual({ cat: '其他' });
+    expect(categorize('孙桥小学-2号门', '出入口;门')).toEqual({ cat: '其他' });
+    expect(categorize('张江社区卫生服务中心停车场', '交通设施;停车场')).toEqual({ cat: '其他' });
+    expect(categorize('张江社区卫生服务中心停车场-出入口', '出入口;停车场出入口')).toEqual({ cat: '其他' });
+    expect(categorize('张江社区卫生服务中心停车场', '')).toEqual({ cat: '其他' });
+    expect(categorize('临河幼儿园东门', '')).toEqual({ cat: '其他' });
+    // names that only start with a gate word are facilities all the same
+    expect(categorize('南门幼儿园', '')).toEqual({ cat: '幼儿园' });
+    expect(categorize('东门菜场', '')).toEqual({ cat: '菜市场' });
+    // a tag of the category still decides: such a gate folds into its facility (parent_id, below)
+    expect(categorize('孙桥小学(张江校区)-东门', '教育培训;小学')).toEqual({ cat: '小学' });
+
+    const { pois, dropped } = cleanPois(
+      [
+        place('k', '临河幼儿园', '教育培训;幼儿园', 0, 0),
+        place('kg', '临河幼儿园(北门)', '出入口;门', 0, 60),
+        place('kp', '临河幼儿园停车场', '交通设施;停车场', 30, 0),
+        place('ke', '金宝贝早教中心', '教育培训;幼儿园', 200, 0),
+        place('c', '临河社区卫生服务中心', '医疗;综合医院', 400, 0),
+        place('cp', '临河社区卫生服务中心停车场', '交通设施;停车场', 420, 0),
+        // Baidu tags the stations like the centres
+        place('cs', '滨河社区卫生服务站', '医疗;医院;社区卫生服务中心', 800, 0),
+      ],
+      { project },
+    );
+    expect(pois.map((p) => [p.uid, p.cat])).toEqual([
+      ['k', '幼儿园'],
+      ['c', '社区卫生'],
+      ['cs', '社区卫生'],
+    ]);
+    expect(Object.fromEntries(dropped.map((d) => [d.uid, d.reason]))).toEqual({
+      kg: 'uncategorized',
+      kp: 'uncategorized',
+      ke: 'blacklist:早教',
+      cp: 'uncategorized',
+    });
   });
 });
 

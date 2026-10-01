@@ -4,9 +4,12 @@
  * site (one routematrix request, ≤ 30 routes) and its check re-judged with core withNewFacility():
  * before and after under the task rule (1 km), and which communities the new facility newly covers.
  * The web's instant estimate (L̂ from the time field) stays the web's; this is the measured answer.
+ * Any category the analysis checked can be simulated; one it did not check (幼儿园 or 社区卫生 in an
+ * analysis made before they were checked) cannot: there is no "before" to compare with.
  */
 import type { BaiduClient, RouteMatrix } from '@zoudedao/baidu';
 import {
+  checkedCategories,
   localFrame,
   ruleDistance,
   shownStatus,
@@ -60,7 +63,11 @@ export interface WhatIfResult {
   quota: { routes: number; cached: number };
 }
 
-export type WhatIfFailure = { kind: 'no_checks' } | { kind: 'baidu'; error: unknown };
+export type WhatIfFailure =
+  | { kind: 'no_checks' }
+  /** The analysis was not checked for the category; `checked` lists what it was checked for. */
+  | { kind: 'unchecked'; checked: HardCategory[] }
+  | { kind: 'baidu'; error: unknown };
 
 const r1 = (v: number) => Math.round(v * 10) / 10;
 
@@ -69,8 +76,9 @@ function checkOf(c: Community, category: HardCategory): FacilityCheck | undefine
 }
 
 /**
- * Runs one what-if against an analysis: the result, or why it cannot be answered (no checks, or a
- * Baidu error when no route at all came back). Rejects with the signal's reason on abort.
+ * Runs one what-if against an analysis: the result, or why it cannot be answered (no checks, a
+ * category the analysis was not checked for — before any route is asked —, or a Baidu error when no
+ * route at all came back). Rejects with the signal's reason on abort.
  */
 export async function runWhatIf(
   id: string,
@@ -81,6 +89,8 @@ export async function runWhatIf(
 ): Promise<WhatIfResult | WhatIfFailure> {
   const { category } = input;
   if (!result.communities?.length) return { kind: 'no_checks' };
+  const checked = checkedCategories(result);
+  if (!checked.includes(category)) return { kind: 'unchecked', checked };
   const rule_m = ruleDistance(category) ?? 1000;
   const [lng, lat] = result.meta.center_bd09;
   const frame = localFrame(lng, lat);
@@ -135,7 +145,8 @@ export async function runWhatIf(
       straight_m: r1(straight),
       route_m,
       dur_s: ok ? cell.durationS : null,
-      before: check ? shownStatus(check) : '盲区',
+      // a community the analysis left without this check (it has no verdict to show) reads 待核实
+      before: check ? shownStatus(check) : '待核实',
       after: shownStatus(after),
     };
   });

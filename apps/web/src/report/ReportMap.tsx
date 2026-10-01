@@ -5,6 +5,7 @@
  * (about 290 dpi at this size); codes, marks and tags are HTML over them, placed by the same layout
  * rules as the screen (codes win). Each unit wears its worst verdict of the three categories.
  */
+import { HARD_CATEGORIES } from '@zoudedao/core';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Pg } from '../components/Icons.js';
 import { staticView } from '../geo/view.js';
@@ -21,7 +22,7 @@ export const MAP_H = 566;
 const DPR = 3;
 const NICE = [100, 200, 250, 500, 1000];
 const noop = () => {};
-const HARD = new Set(['小学', '菜市场', '药店']);
+const HARD: ReadonlySet<string> = new Set(HARD_CATEGORIES);
 
 export function ReportMap({ model, scale, onPainted }: { model: Model; scale: number; onPainted?(): void }) {
   const underRef = useRef<HTMLCanvasElement>(null);

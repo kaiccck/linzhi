@@ -6,9 +6,17 @@
  */
 import type { FacilityCategory, HardCategory } from '@zoudedao/core';
 import type { Anchor } from './anchors.js';
-import { findCommunity, normName } from './analysis.js';
+import {
+  CHECKED_SCOPE,
+  COUNTED_ONLY,
+  HARD_CATEGORIES,
+  TASK_CATEGORIES,
+  checkedCategories,
+  findCommunity,
+  normName,
+} from './analysis.js';
 import { AnalysisStore, type ZddBackend } from './backend.js';
-import { fmtNumber, type Fact } from './format.js';
+import { fmtNumber, joinZh, type Fact } from './format.js';
 import {
   checkGrounding,
   completeCitations,
@@ -282,7 +290,7 @@ function gapsAnswer(
   const community = data.filter.community;
   let lead: string;
   if (community) {
-    const cats = category ? [category] : (['小学', '菜市场', '药店'] as const);
+    const cats = category ? [category] : data.checked_categories;
     const parts = cats.map((cat) => {
       const gap = data.gaps.find((g) => g.category === cat);
       if (gap)
@@ -372,29 +380,48 @@ function facilitiesAnswer(
 const cutNote = (r: FacilityRow, cite: string) =>
   `${r.category}的清单只统计到离中心 ${fmtNumber(r.known_radius_m ?? 0)} m（检索页数用完），实际可能更多 [${cite}]。`;
 
-/** Names a question may use for an analysis: its name, centre label and communities. */
-async function namesOf(turn: Turn, id: string): Promise<string[]> {
+/**
+ * What a question is read against: the names it may use for the analysis (its name, centre label and
+ * communities) and the categories the analysis checked per community.
+ */
+async function topicOf(turn: Turn, id: string): Promise<{ names: string[]; checked: HardCategory[] }> {
   const r = await resolveAnalysis(turn.ctx, id).catch(() => undefined);
-  if (!r) return [];
+  if (!r) return { names: [], checked: [...TASK_CATEGORIES] };
   const m = r.result.meta;
-  return [
-    m.name,
-    m.name.replace(/片区$|周边$/, ''),
-    ...(m.center_label ?? '').split(/[×xX、和与/（）()]/).map((p) => p.trim()),
-    ...r.result.communities.map((c) => c.name),
-  ].filter((n) => n.length >= 2);
+  return {
+    names: [
+      m.name,
+      m.name.replace(/片区$|周边$/, ''),
+      ...(m.center_label ?? '').split(/[×xX、和与/（）()]/).map((p) => p.trim()),
+      ...r.result.communities.map((c) => c.name),
+    ].filter((n) => n.length >= 2),
+    checked: checkedCategories(r.result),
+  };
 }
+
+/** "申城佳苑片区没有逐小区检查幼儿园：这份分析只逐小区检查了小学、菜市场、药店" — no gaps, no "none". */
+const uncheckedText = (name: string, unchecked: readonly HardCategory[], checked: readonly HardCategory[]) =>
+  `${name}没有逐小区检查${joinZh(unchecked)}：这份分析只逐小区检查了${checked.join('、')}`;
+
+/** Where a per-community check of those categories comes from. */
+const recheckText = (unchecked: readonly HardCategory[]) =>
+  `新的体检会逐小区检查${HARD_CATEGORIES.join('、')}；要看${joinZh(unchecked)}，可以重新体检这个地点。`;
 
 async function templateAnswer(turn: Turn, question: string, opts: AskOptions): Promise<string> {
   const first = parseIntent(question);
   const target = await pickTarget(turn, question, first, opts.analysisId);
   if (typeof target === 'string') return target;
   turn.analysisId ??= target.id;
-  // the topic, read again without the analysis' own names ("万科翡翠公园" is not about parks)
-  const second = parseIntent(question, await namesOf(turn, target.id));
+  // the topic, read again without the analysis' own names ("万科翡翠公园" is not about parks) and
+  // against the categories it checked per community
+  const topic = await topicOf(turn, target.id);
+  const { checked } = topic;
+  const second = parseIntent(question, topic.names, checked);
   const intent: Intent = { ...second, profile: first.profile, profileCompare: first.profileCompare };
   if (first.placeText) intent.placeText = first.placeText;
   else delete intent.placeText;
+  // categories the question names that this analysis never checked per community
+  const unchecked = intent.categories.filter((c) => !checked.includes(c));
   const lines: string[] = [];
   let lead: string;
   const bullets: string[] = [];
@@ -441,6 +468,12 @@ async function templateAnswer(turn: Turn, question: string, opts: AskOptions): P
     case 'simulate': {
       const category = intent.categories[0]!;
       const { result } = await resolveAnalysis(turn.ctx, target.id);
+      if (unchecked.includes(category)) {
+        // no per-community check of the category: nothing is known that a new one could fix
+        lead = `没法估算新增${category}的效果——${uncheckedText(result.meta.name, [category], checked)}，不知道哪些小区现在走不到${category}。`;
+        bullets.push(recheckText([category]));
+        break;
+      }
       if (!intent.siteText) {
         return `要模拟新增${category}，请说明位置：小区名（如${result.communities[0]?.name ?? '某小区'}旁）、路名或路口，或给出 BD-09 坐标。`;
       }
@@ -485,6 +518,11 @@ async function templateAnswer(turn: Turn, question: string, opts: AskOptions): P
       const f = facilitiesAnswer(r.result.data, r.result.summary, r.id, intent.facilityCategories);
       lead = f.lead;
       bullets.push(...f.bullets);
+      if (unchecked.length) {
+        bullets.push(
+          `${uncheckedText(r.result.data.name, unchecked, checked)}，以上是从分析中心出发的圈内设施统计，不是逐小区的判定。`,
+        );
+      }
       break;
     }
     case 'reach': {
@@ -496,8 +534,22 @@ async function templateAnswer(turn: Turn, question: string, opts: AskOptions): P
       break;
     }
     case 'gaps': {
+      const asked = intent.categories.filter((c) => checked.includes(c));
+      if (unchecked.length && !asked.length) {
+        // nothing checked per community to list: say so (never "no gaps"), then what the
+        // 圈内设施统计 knows from the analysis centre
+        const r = await turn.run<Overview>('analyze_life_circle', {
+          analysis_id: target.id,
+          ...elderArg(intent),
+        });
+        const o = r.result.data;
+        lead = `${uncheckedText(o.name, unchecked, o.checked_categories)}，说不出哪些小区步行 ${o.rule_text} 内走不到${joinZh(unchecked, '或')} [${r.id}]。`;
+        const f = facilitiesAnswer(o, r.result.summary, r.id, unchecked);
+        bullets.push(`圈内设施统计（从分析中心出发）——${f.lead}`, ...f.bullets, recheckText(unchecked));
+        break;
+      }
       const p = await profiled(turn, target.id, intent);
-      const category = intent.categories.length === 1 ? intent.categories[0] : undefined;
+      const category = asked.length === 1 ? asked[0] : undefined;
       const community = target.community ?? (await communityIn(turn, p.id, question));
       const r = await turn.run<GapsData>('list_service_gaps', {
         analysis_id: p.id,
@@ -507,6 +559,11 @@ async function templateAnswer(turn: Turn, question: string, opts: AskOptions): P
       const g = gapsAnswer(r.result.data, r.id, category);
       lead = g.lead;
       bullets.push(...g.bullets);
+      if (unchecked.length) {
+        bullets.push(
+          `${uncheckedText(r.result.data.name, unchecked, checked)}，以上不含${joinZh(unchecked)}。`,
+        );
+      }
       if (p.cite) {
         const reach = citeSentences(p.cite.summary, p.cite.id).find((x) => x.includes('15 分钟步行实际可达'));
         if (reach) bullets.push(`整个片区（老年人步速）：${reach}`);
@@ -568,7 +625,7 @@ export function systemPrompt(available: string, current?: string): string {
     '7. simulate_facility 的结果都是估算（L̂）：回答以“估算（未经实测核验）：”开头，并提醒落地前需要实测核验。',
     '8. 术语：伪覆盖＝直线距离在判定距离内、实际步行超出；盲区＝直线距离就已超出；临界＝步行距离与判定距离相差不超过 50 m。',
     '9. 问到老人时用老年人画像：在 analysis_id 后加 ~elder（如 zj-a~elder），所有工具都可以直接使用它。',
-    '10. 体检的范围：逐个小区核对小学、菜市场、药店能否在判定距离内步行走到（list_service_gaps）；圈内设施统计（analyze_life_circle 的 facilities）另有幼儿园、超市、社区卫生、养老、公交、地铁、公园，按从分析中心出发的步行时间统计。“看病”看社区卫生和药店，没有医院的数据。',
+    `10. 体检的范围：list_service_gaps 逐个小区核对各类设施能否在判定距离内步行走到，核对了哪些见工具结果的 checked_categories——${CHECKED_SCOPE}；分析没有核对的类别不能说成“没有缺口”，要说明这份分析没有逐小区检查它。圈内设施统计（analyze_life_circle 的 facilities）按从分析中心出发的步行时间统计清单里的设施，除了逐小区检查的类别，还统计${COUNTED_ONLY.join('、')}。“看病”看社区卫生和药店，没有医院的数据。`,
     '10a. 菜市场缺口可能带 alt（买菜替代：判定距离内步行能到的能买菜的店及步行距离）：它不算覆盖，缺口仍是缺口，任何计数都不变；只能写成“可在××买菜（步行 ×× m）”，alt 为 null 就说判定距离内步行也没有能买菜的店。',
     '',
     '## 调用工具',

@@ -7,7 +7,16 @@
  */
 import type { HardCategory } from '@zoudedao/core';
 import { shortTime, type WhatIfBranch } from '../data/history.js';
-import { CAT_COLOR, CAT_ICON, distWords, fmtInt, type Model, type Unit } from '../model/derive.js';
+import {
+  CAT_COLOR,
+  CAT_ICON,
+  distWords,
+  fmtInt,
+  measureOf,
+  newNoun,
+  type Model,
+  type Unit,
+} from '../model/derive.js';
 import { checkLook, lookClass } from '../model/looks.js';
 import { lacks, type SitePin, type WhatIfEstimate } from '../model/siting.js';
 import type { PlanState } from '../state.js';
@@ -100,7 +109,10 @@ function WhatIf({
     <div className={'whatif' + (plan.placing ? ' placing' : '')}>
       <div className="wi-head">
         <Pg id={CAT_ICON[cat]!} color={CAT_COLOR[cat]} />
-        <h2>假如在这里开一家{cat}</h2>
+        <h2>
+          假如在这里新增一{measureOf(cat)}
+          {newNoun(cat)}
+        </h2>
         {plan.site ? (
           <button type="button" className="link" onClick={onClear}>
             清除
@@ -229,7 +241,8 @@ function Branches({
                 <Pg id={CAT_ICON[b.category]!} color={CAT_COLOR[b.category]} />
                 <span className="br-what">
                   <b>
-                    新增{b.category} · <span className="num">{b.newly_covered.length}</span> 个小区因此走得到
+                    新增{newNoun(b.category)} · <span className="num">{b.newly_covered.length}</span>{' '}
+                    个小区因此走得到
                   </b>
                   <small>
                     <span className="num">{shortTime(b.created_at)}</span> · 实测{' '}

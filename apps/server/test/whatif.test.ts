@@ -3,17 +3,25 @@ import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { BaiduQuotaError, type BaiduError, type RouteCell, type RouteMatrix } from '@zoudedao/baidu';
-import { localFrame, type AnalysisResult, type LngLat } from '@zoudedao/core';
+import {
+  HARD_CATEGORIES,
+  localFrame,
+  shownStatus,
+  TASK_CATEGORIES,
+  type AnalysisResult,
+  type LngLat,
+} from '@zoudedao/core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Analyzer } from '../src/analyzer.js';
 import type { WhatIfResult, WhatIfRouter } from '../src/whatif.js';
-import { ANALYZE_BODY, makeApp, parseSse, SAMPLES_DIR } from './helpers.js';
+import { ANALYZE_BODY, makeApp, parseSse, SAMPLES_DIR, withCategories } from './helpers.js';
 
 const zjA = () => JSON.parse(readFileSync(join(SAMPLES_DIR, 'zj-a.json'), 'utf8')) as AnalysisResult;
 
 /**
- * Temp samples dir: zj-a as is, and a copy whose pharmacy check at 川杨新苑四期 is 待核实 (as zj-a's was
- * before its nearer pharmacies were routed).
+ * Temp samples dir: zj-a as is, a copy whose pharmacy check at 川杨新苑四期 is 待核实 (as zj-a's was
+ * before its nearer pharmacies were routed), and copies checked for the task's three categories and for
+ * all five.
  */
 let dir: string;
 beforeAll(() => {
@@ -29,6 +37,8 @@ beforeAll(() => {
     verified: false,
   });
   writeFileSync(join(dir, 'pending.json'), JSON.stringify(pending));
+  writeFileSync(join(dir, 'three.json'), JSON.stringify(withCategories(zjA(), TASK_CATEGORIES)));
+  writeFileSync(join(dir, 'five.json'), JSON.stringify(withCategories(zjA(), HARD_CATEGORIES)));
 });
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
@@ -151,6 +161,44 @@ describe('POST /api/whatif', () => {
     await app.close();
   });
 
+  it('simulates every category the analysis checked, and refuses one it did not check', async () => {
+    const { router, calls } = fakeRouter();
+    const app = await makeApp({ mode: 'live', samplesDir: dir }, { router });
+    // an analysis of all five: 幼儿园 and 社区卫生 are simulated like the task's three
+    const five = withCategories(zjA(), HARD_CATEGORIES);
+    const before = five.communities.find((c) => c.name === '川杨新苑四期')!.checks;
+    for (const category of ['幼儿园', '社区卫生'] as const) {
+      const res = await app.inject(post({ analysis_id: 'five', category, site_bd09: SITE }));
+      expect(res.statusCode, category).toBe(200);
+      const body = res.json() as WhatIfResult;
+      expect(body).toMatchObject({ analysis_id: 'five', category, rules: 'task', rule_m: 1000 });
+      expect(body.measured.find((r) => r.community === '川杨新苑四期')).toMatchObject({
+        route_m: 156,
+        before: shownStatus(before[category]),
+        after: '覆盖',
+      });
+    }
+    expect(calls).toHaveLength(2);
+    // an analysis of the task's three has no 幼儿园 verdicts to compare with: a clear 400, no route asked
+    for (const category of ['幼儿园', '社区卫生'] as const) {
+      const res = await app.inject(post({ analysis_id: 'three', category, site_bd09: SITE }));
+      expect(res.statusCode, category).toBe(400);
+      expect(res.json()).toEqual({
+        error: 'invalid_input',
+        message: expect.stringMatching(
+          new RegExp(
+            `^分析 three 没有检查${category}：它只检查了小学、菜市场、药店.*无法模拟新增${category}`,
+          ),
+        ),
+      });
+    }
+    expect(calls).toHaveLength(2);
+    // the task's three still work on it
+    const market = await app.inject(post({ analysis_id: 'three', category: '菜市场', site_bd09: SITE }));
+    expect(market.statusCode).toBe(200);
+    await app.close();
+  });
+
   it('accepts rules "task" from older clients and refuses the retired GB 50180 rule', async () => {
     const { router, calls } = fakeRouter();
     const app = await makeApp({ mode: 'live', samplesDir: dir }, { router });
@@ -197,7 +245,10 @@ describe('POST /api/whatif', () => {
     const app = await makeApp({ mode: 'live', samplesDir: dir }, { router });
     for (const [payload, field] of [
       [{ analysis_id: 'zj-a', category: '药店', site_bd09: [2.35, 48.85] }, /site_bd09/],
-      [{ analysis_id: 'zj-a', category: '医院', site_bd09: SITE }, /category/],
+      [
+        { analysis_id: 'zj-a', category: '医院', site_bd09: SITE },
+        /^category 只能是 幼儿园、小学、菜市场、药店、社区卫生 之一$/,
+      ],
       [{ analysis_id: 'zj-a', category: '药店', site_bd09: SITE, rules: 'iso' }, /rules/],
       [{ analysis_id: '../x', category: '药店', site_bd09: SITE }, /analysis_id/],
       [{ analysis_id: 'zj-a', category: '药店', site_bd09: ['121.6', '31.2'] }, /site_bd09/],

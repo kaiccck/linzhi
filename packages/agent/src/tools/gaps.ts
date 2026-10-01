@@ -1,11 +1,14 @@
 import { type HardCategory } from '@zoudedao/core';
 import * as z from 'zod';
 import {
+  CHECKED_SCOPE,
   HARD_CATEGORIES,
   checkRows,
+  checkedCategories,
   findCommunity,
   profileOf,
   ruleOf,
+  rulesOf,
   speedOf,
   within15,
 } from '../analysis.js';
@@ -22,7 +25,7 @@ import {
   type GapRow,
   type PendingRow,
 } from '../rows.js';
-import { resolveAnalysis } from './context.js';
+import { assertChecked, resolveAnalysis } from './context.js';
 import { ToolError, defineTool } from './types.js';
 
 export interface GapsData {
@@ -31,6 +34,11 @@ export interface GapsData {
   profile: string;
   speed_mps: number;
   filter: { category: HardCategory | null; status: string | null; community: string | null };
+  /**
+   * The categories this analysis checked per community (display order): 幼儿园、小学、菜市场、药店、
+   * 社区卫生 on new analyses, 小学、菜市场、药店 on older ones. rule_m carries these only.
+   */
+  checked_categories: HardCategory[];
   rule_m: Record<HardCategory, number>;
   counts: {
     checks: number;
@@ -67,11 +75,16 @@ export const listServiceGaps = defineTool({
     '只有已核实（verified=true）的检查才算缺口：伪覆盖 = 直线在判定距离内、步行超出；盲区 = 直线就已超出（route_basis=lower_bound 表示判定距离内根本没有这类设施，没有算路）；临界 = 步行距离与判定距离相差不超过 50 m。' +
     '未核实的检查单独列在 pending（待核实），回答时只能说“待核实”，不能说成缺口。' +
     '菜市场缺口可能带 alt（买菜替代：判定距离内步行能到的能买菜的超市或果蔬店及步行距离），只作参考，不算覆盖，缺口仍计为缺口；alt 为 null 表示判定距离内步行没有这样的店。' +
-    '可按类别（小学/菜市场/药店）、状态和小区过滤；问某个小区时传 community（小区名，如“申城佳苑三期A块”），还会返回该小区能走到的设施（covered）。' +
+    `逐小区检查了哪些类别见结果的 checked_categories：${CHECKED_SCOPE}；` +
+    '问到这份分析没有检查的类别会返回 not_checked 错误——不能说成“没有缺口”，可改用 analyze_life_circle 的圈内设施统计。' +
+    '可按类别、状态和小区过滤；问某个小区时传 community（小区名，如“申城佳苑三期A块”），还会返回该小区能走到的设施（covered）。' +
     '老年人画像的 analysis_id 是原 id 加 ~elder（如 zj-a~elder），会给出 15 分钟内能走到的小区数。',
   inputSchema: z.object({
     analysis_id: z.string().trim().min(1).max(80).describe('analyze_life_circle 返回的 analysis_id'),
-    category: z.enum(['小学', '菜市场', '药店']).optional().describe('只看某一类设施'),
+    category: z
+      .enum(HARD_CATEGORIES)
+      .optional()
+      .describe('只看某一类设施（须是这份分析逐小区检查的类别，见 checked_categories）'),
     status: z.enum(['伪覆盖', '盲区', '临界']).optional().describe('只看某种状态'),
     community: z.string().trim().min(1).max(40).optional().describe('只看某个小区（按小区名匹配）'),
     include_pending: z.boolean().default(true).describe('是否附上待核实清单（不计入缺口）'),
@@ -95,6 +108,10 @@ export const listServiceGaps = defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true },
   async run(args, ctx) {
     const { id, result } = await resolveAnalysis(ctx, args.analysis_id);
+    if (args.category) {
+      assertChecked(result, id, args.category, `说不出哪些小区步行走不到${args.category}`);
+    }
+    const checked = checkedCategories(result);
     let community: string | undefined;
     if (args.community) {
       community = findCommunity(result, args.community)?.name;
@@ -117,7 +134,7 @@ export const listServiceGaps = defineTool({
     };
     const pending = args.include_pending ? pendingRows(result, scope) : [];
     const covered = community ? coveredRows(result, scope) : [];
-    const cats = args.category ? [args.category] : [...HARD_CATEGORIES];
+    const cats = args.category ? [args.category] : checked;
     const rows = checkRows(result).filter(
       (r) => cats.includes(r.category) && (!community || r.community.name === community),
     );
@@ -129,10 +146,8 @@ export const listServiceGaps = defineTool({
       profile: profileOf(result),
       speed_mps: speed,
       filter: { category: args.category ?? null, status: args.status ?? null, community: community ?? null },
-      rule_m: Object.fromEntries(HARD_CATEGORIES.map((c) => [c, ruleOf(result, c)])) as Record<
-        HardCategory,
-        number
-      >,
+      checked_categories: checked,
+      rule_m: rulesOf(result),
       counts: {
         checks: rows.length,
         gaps: all.length,
@@ -186,7 +201,7 @@ export const listServiceGaps = defineTool({
         if (pending.some((p) => p.category === cat)) return `${cat}待核实（有更近的设施还没有算路）`;
         return `${cat}没有检查结果`;
       });
-      const rule = HARD_CATEGORIES.every((c) => ruleOf(result, c) === 1000)
+      const rule = cats.every((c) => ruleOf(result, c) === 1000)
         ? '1,000 m'
         : cats.map((c) => `${c} ${fmtNumber(ruleOf(result, c))} m`).join('、');
       summary = `${result.meta.name} · ${community}（analysis_id: ${id}，判定距离 ${rule}）：${parts.join('；')}。`;
@@ -196,9 +211,9 @@ export const listServiceGaps = defineTool({
         : `${book.add('设施类别数', cats.length, '类')}设施`;
       const rule = args.category
         ? `步行 ≤ ${fmtNumber(ruleOf(result, args.category))} m`
-        : HARD_CATEGORIES.every((c) => ruleOf(result, c) === 1000)
+        : cats.every((c) => ruleOf(result, c) === 1000)
           ? '步行 ≤ 1,000 m'
-          : HARD_CATEGORIES.map((c) => `${c} ≤ ${fmtNumber(ruleOf(result, c))} m`).join('、');
+          : cats.map((c) => `${c} ≤ ${fmtNumber(ruleOf(result, c))} m`).join('、');
       const statusTag = args.status ? `（只看${args.status}）` : '';
       const n = data.counts;
       summary = `${result.meta.name}（analysis_id: ${id}）${scopeText}，判定距离 ${rule}${statusTag}：${book.add('小区数', result.communities.length, '个')}小区中，`;

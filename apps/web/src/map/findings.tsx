@@ -38,10 +38,15 @@ export const U = ({ n, unit }: { n: string; unit: string }) => (
   </span>
 );
 
-const ONLY: Partial<Record<string, string>> = { 小学: '所小学', 地铁: '个地铁站' };
+const ONLY: Partial<Record<string, string>> = {
+  幼儿园: '所幼儿园',
+  小学: '所小学',
+  社区卫生: '处社区卫生服务站',
+  地铁: '个地铁站',
+};
 
 function facilityCard(marks: readonly FacilityMark[]): FindingItem | null {
-  for (const cat of ['小学', '菜市场', '药店', '地铁'] as const) {
+  for (const cat of ['小学', '幼儿园', '社区卫生', '菜市场', '药店', '地铁'] as const) {
     const inCircle = marks.filter((m) => m.cat === cat && m.inCircle);
     // a walk that rounds to 15′ would read "步行 15′ … 15′ 走不到": pin only clear misses
     const miss = inCircle

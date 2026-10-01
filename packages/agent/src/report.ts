@@ -5,8 +5,8 @@
  */
 import type { AnalysisResult, HardCategory, LngLat } from '@zoudedao/core';
 import { viaName } from '@zoudedao/core';
-import { HARD_CATEGORIES, checkRows, describePlace, isPending, toBd09 } from './analysis.js';
-import { beijingDate, fmtNumber } from './format.js';
+import { checkRows, describePlace, isPending, taskScope, toBd09 } from './analysis.js';
+import { beijingDate, fmtNumber, joinZh } from './format.js';
 import { communitiesWithGaps, gapRows, pendingRows, type GapRow, type PendingRow } from './rows.js';
 import { siteSuggestionsOf } from './siting.js';
 import { overview, provenance, type FacilityOverview, type Overview } from './summary.js';
@@ -37,6 +37,7 @@ export interface ReportModel {
     straight_m: number;
     route_m: number;
   } | null;
+  /** One entry per checked category (overview.checked_categories), none for a category not checked. */
   siting: {
     category: HardCategory;
     source: 'analysis' | 'estimated' | 'none';
@@ -60,9 +61,10 @@ const hasCjk = (s: string) => /[一-鿿]/.test(s);
 function verdictOf(o: Overview, withGaps: number): string {
   const h = o.headline;
   if (!h.checks) return `${o.name}：本次分析没有小区设施检查结果，只能评估步行等时圈。`;
+  const cats = o.checked_categories;
   const lead = withGaps
-    ? `${o.name}的 ${h.communities} 个小区中，有 ${withGaps} 个步行 ${o.rule_text} 内缺少至少一类必需设施（小学、菜市场或药店）`
-    : `${o.name}的 ${h.communities} 个小区，在已核实的检查中步行 ${o.rule_text} 内都能走到小学、菜市场和药店`;
+    ? `${o.name}的 ${h.communities} 个小区中，有 ${withGaps} 个步行 ${o.rule_text} 内缺少至少一类必需设施（${joinZh(cats, '或')}）`
+    : `${o.name}的 ${h.communities} 个小区，在已核实的检查中步行 ${o.rule_text} 内都能走到${joinZh(cats)}`;
   let circle = '';
   if (h.walking_gaps && h.missed_by_circle) {
     circle = `；画圆法只找到 ${h.straight_gaps} 个缺口，按实测步行距离已核实 ${h.walking_gaps} 个，画圆漏掉了其中 ${h.missed_by_circle} 个（${pct(h.missed_share_pct ?? 0)}）`;
@@ -93,8 +95,9 @@ function methodLines(result: AnalysisResult, o: Overview): string[] {
   parts.push(
     `画圆法对照：以分析中心为圆心、半径 ${m(o.isochrone.circle_r15_m)}（900 秒 × ${fmtNumber(o.speed_mps, 2, true)} m/s）的直线 15 分钟圆。`,
   );
+  const cats = o.checked_categories;
   parts.push(
-    `设施可达：从每个小区出发，对直线距离在判定距离内的候选设施做批量算路（步行距离不会短于直线距离，更远的候选不必算）。判定距离按赛题口径 1 km：步行最短距离不超过判定距离为覆盖；直线在判定距离内、步行超出为伪覆盖；直线就已超出为盲区；步行距离与判定距离相差不超过 50 m 另标临界。菜市场、药店、小学任一类缺失，即记为该小区的服务缺口。`,
+    `设施可达：从每个小区出发，逐类检查${cats.join('、')}（${taskScope(cats)}），对直线距离在判定距离内的候选设施做批量算路（步行距离不会短于直线距离，更远的候选不必算）。判定距离按赛题口径 1 km：步行最短距离不超过判定距离为覆盖；直线在判定距离内、步行超出为伪覆盖；直线就已超出为盲区；步行距离与判定距离相差不超过 50 m 另标临界。${cats.join('、')}任一类缺失，即记为该小区的服务缺口。`,
   );
   parts.push(
     '待核实：还有更近的候选设施没有从该小区算路，实际最短步行可能更短。这些检查单独列出，不计入缺口，也不画结论颜色。',
@@ -189,8 +192,8 @@ export function buildReportModel(result: AnalysisResult, id: string): ReportMode
     gaps,
     pending: pendingRows(result),
     pseudo_example: example,
-    siting: HARD_CATEGORIES.map((category) => {
-      const entry = suggestions[category];
+    siting: o.checked_categories.map((category) => {
+      const entry = suggestions[category] ?? { source: 'none' as const, demands: [], list: [] };
       return {
         category,
         source: entry.source,
@@ -322,7 +325,7 @@ function graySection(o: Overview, scope: string): string {
   const lines = [
     '### 灰色区域（设施匮乏的范围）',
     '',
-    `每个位置交给离它最近的小区，按该小区已核实的判定数缺了几类必需设施（小学、菜市场、药店），缺得越多颜色越深；伪覆盖层标出“直线看着近、实际走不到”的范围。${
+    `每个位置交给离它最近的小区，按该小区已核实的判定数缺了几类必需设施（${o.checked_categories.join('、')}），缺得越多颜色越深；伪覆盖层标出“直线看着近、实际走不到”的范围。${
       scope
     }`,
     '',
@@ -352,7 +355,7 @@ function checksSection(model: ReportModel): string {
     '',
     table(
       ['类别', '判定距离', '覆盖', '伪覆盖', '盲区', '其中临界', '待核实'],
-      HARD_CATEGORIES.map((c) => {
+      o.checked_categories.map((c) => {
         const n = o.by_category[c];
         return [c, m(h.rule_m[c]), `${n.覆盖}`, `${n.伪覆盖}`, `${n.盲区}`, `${n.临界}`, `${n.待核实}`];
       }),

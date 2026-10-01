@@ -151,8 +151,8 @@ const KNOWN: ReadonlySet<FacilityCategory> = new Set<FacilityCategory>([
   '公园',
 ]);
 
-/** Measure word of a category in the Chinese notes. */
-const MEASURE: Partial<Record<FacilityCategory, string>> = { 小学: '所', 幼儿园: '所' };
+/** Measure word of a category in the Chinese notes (家 for the rest: markets, pharmacies, 社区卫生 …). */
+const MEASURE: Partial<Record<FacilityCategory, string>> = { 小学: '所', 幼儿园: '所', 社区卫生: '家' };
 const measureOf = (cat: FacilityCategory) => MEASURE[cat] ?? '家';
 
 /** Baidu categories a listed facility may hide under ('其他' = no category, e.g. a plain 购物 tag). */

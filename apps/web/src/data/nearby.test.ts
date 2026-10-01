@@ -81,7 +81,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 const C: [number, number] = [121.618088, 31.185923];
-const opts = (keywords: string[]) => ({ keywords, gapMs: 0 });
+const opts = (keywords: string[]) => ({ keywords, gapMs: 0, cache: true });
 
 describe('浏览器端周边检索', () => {
   it('searches every keyword, keeps a POI once (first keyword wins), turns a second page on the same search, nearest first', async () => {
@@ -128,6 +128,12 @@ describe('浏览器端周边检索', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('never lets a few keywords asked on their own stand in for the full search', async () => {
+    const few = fakeBaidu({ 小学: [[row(6, '孙桥小学')]] });
+    await findNearby(few.B, C, new AbortController().signal, undefined, { keywords: ['小学'], gapMs: 0 });
+    expect(store.size).toBe(0);
   });
 
   it('hands back the same day’s result for the same centre without searching', async () => {

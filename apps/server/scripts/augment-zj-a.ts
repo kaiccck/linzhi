@@ -57,7 +57,7 @@ import {
   freshCandidates,
   gapCount,
   grayAreaPolygons,
-  HARD_CATEGORIES,
+  TASK_CATEGORIES,
   localFrame,
   mergeFreshAlternatives,
   mergeMatrixResults,
@@ -122,6 +122,12 @@ const GRAY_CELL_M = 25;
  * layer, so without a halo the gray areas would sit entirely under them and never show on the map.
  */
 const GRAY_HALO_M = 120;
+/**
+ * The categories this script recomputes from the research routes (research/zhangjiang/raw/bv_*_A_*):
+ * the task's three. 幼儿园 and 社区卫生 were checked later by scripts/add-categories.ts, which also
+ * keeps them current; their checks pass through here untouched.
+ */
+const RESEARCH_CATEGORIES = TASK_CATEGORIES;
 /** The live engine's facility radius: the 生鲜超市$幼儿园 query at this centre is cached with it. */
 const ENGINE_FACILITY_RADIUS_M = 2100;
 const NOTE_PREFIX = '民生设施（社区卫生、养老、地铁、公园、超市、公交）';
@@ -315,7 +321,7 @@ function officialMarketRoutes(): RoutedPair[] {
 }
 
 const routes: RoutedPair[] = [
-  ...HARD_CATEGORIES.flatMap((cat) => researchRoutes(cat, allPoisAtStart)),
+  ...RESEARCH_CATEGORIES.flatMap((cat) => researchRoutes(cat, allPoisAtStart)),
   ...officialMarketRoutes(),
 ];
 for (const f of [
@@ -582,7 +588,7 @@ try {
   const taskFacilities = (cat: HardCategory) => facilitiesFor(result.pois.filter(checked), [cat]);
   // the nearest top-up: every candidate nearer by straight line than a check's best walk, through the
   // cached client (offline: the answers the last run wrote to the book)
-  const byCategory = Object.fromEntries(HARD_CATEGORIES.map((cat) => [cat, taskFacilities(cat)]));
+  const byCategory = Object.fromEntries(RESEARCH_CATEGORIES.map((cat) => [cat, taskFacilities(cat)]));
   if (client) {
     const from = routes.length;
     const asked = await routeMissing(planNearestTopUp(demand, byCategory, routes));
@@ -608,7 +614,7 @@ try {
     'verified',
     'unrouted_nearer',
   ] as const;
-  for (const cat of HARD_CATEGORIES) {
+  for (const cat of RESEARCH_CATEGORIES) {
     const merged = mergeMatrixResults(demand, taskFacilities(cat), routes);
     for (const c of result.communities) {
       const got = merged.get(c.name)!;

@@ -12,7 +12,7 @@
  *   node --env-file=../../.env.local --conditions=source --import tsx scripts/refresh-live-samples.ts [zj-b …]
  *
  * A live run stops (writing nothing further) before it could spend more than --max-place pages or
- * --max-routes routematrix routes in total (defaults 12 and 300), and prints the ledger before and after.
+ * --max-routes routematrix routes in total (defaults 20 and 600), and prints the ledger before and after.
  * --max-place 0 answers place searches from a copy of the cache only (as --dry-run does) and stops at
  * the first one that is not cached.
  *
@@ -26,7 +26,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { AnalysisResult, LngLat } from '@zoudedao/core';
+import { checkedCategories, type AnalysisResult, type LngLat } from '@zoudedao/core';
 import { analyze, browserPois, type BrowserPoi, type EngineInput, type Profile } from '@zoudedao/engine';
 import { loadOfficialData } from '../src/official.js';
 import {
@@ -47,7 +47,7 @@ const option = (name: string, fallback: number) => {
 };
 const WITH_VALUE = new Set(['--max-place', '--max-routes', '--browser-pois', '--detail-calls']);
 const dryRun = flag('--dry-run');
-const limits = { place: option('--max-place', 12), routematrix_walking: option('--max-routes', 300) };
+const limits = { place: option('--max-place', 20), routematrix_walking: option('--max-routes', 600) };
 // --detail-calls: place/v3/detail requests per sample (10 uids each) instead of the tier's (5 personal):
 // a sample may look up every POI the browser found, a live check keeps its budget
 const detailCalls = args.includes('--detail-calls') ? option('--detail-calls', 5) : null;
@@ -144,7 +144,7 @@ try {
     const was = new Map(old.communities.map((c) => [c.name, c]));
     for (const c of result.communities) {
       const o = was.get(c.name);
-      for (const cat of ['小学', '菜市场', '药店'] as const) {
+      for (const cat of checkedCategories(result)) {
         const a = o?.checks[cat];
         const b = c.checks[cat];
         if (

@@ -165,8 +165,7 @@ export async function analyze(
           },
           {
             step: 'livelihood' as const,
-            warning:
-              '地点检索今日配额接近上限：本次不检索社区卫生、养老、地铁、公园、超市、公交，圈内设施统计只含小学、菜市场、药店等',
+            warning: `地点检索今日配额接近上限：本次不检索${LIVELIHOOD_CATEGORIES.join('、')}，圈内设施统计只含逐小区检查的${HARD_CATEGORIES.join('、')}与生鲜超市`,
           },
         ].filter((o) => caps[o.step] > 0);
         let place = svcCaps.place;
@@ -367,7 +366,7 @@ async function pipeline(r: {
   if (full) {
     out.stage(
       'facilities',
-      `设施检索：小学、菜市场、药店，半径 ${(facilityRadius / 1000).toFixed(1)} 公里`,
+      `设施检索：${HARD_CATEGORIES.join('、')}，半径 ${(facilityRadius / 1000).toFixed(1)} 公里`,
       0.05,
     );
     let fac = await searchFacilities({
@@ -433,7 +432,7 @@ async function pipeline(r: {
     const checked = exclude(hard.pois);
     // the other 民生设施, for the 圈内设施统计 (counted, never checked per community)
     if (meter.room('livelihood') >= 1) {
-      out.stage('facilities', '设施检索：社区卫生、养老、地铁、公园、超市、公交', 0.08);
+      out.stage('facilities', `设施检索：${LIVELIHOOD_CATEGORIES.join('、')}`, 0.08);
     }
     const livelihood = await searchLivelihood({
       meter,
@@ -443,7 +442,7 @@ async function pipeline(r: {
       existing: checked,
       warn: (m) => warnings.push(m),
     });
-    // lists of counted categories (社区卫生 …) match the 民生设施 rows, within that search's radius
+    // lists of counted categories (养老 …) match the 民生设施 rows, within that search's radius
     const soft = fuseOfficial({
       lists: r.official.filter(counted),
       pois: livelihood ? [...checked, ...livelihood.pois] : checked,
@@ -469,13 +468,11 @@ async function pipeline(r: {
     const counts = facilityCounts(pois);
     if (browser) browser.kept = pois.filter((p) => p.found_by === 'jsapi').length;
     out.partial({ pois });
-    const others = livelihood
-      ? `；社区卫生、养老、地铁、公园、超市、公交共 ${livelihood.pois.length} 处`
-      : '';
+    const others = livelihood ? `；${LIVELIHOOD_CATEGORIES.join('、')}共 ${livelihood.pois.length} 处` : '';
     const fromBrowser = browser?.kept ? `；其中 ${browser.kept} 处由地图前端补充` : '';
     out.stage(
       'facilities',
-      `设施：小学 ${counts['小学']} 所、菜市场 ${counts['菜市场']} 个、药店 ${counts['药店']} 家（菜场摊位已并入菜市场）${others}${fromBrowser}`,
+      `设施：幼儿园 ${counts['幼儿园']} 所、小学 ${counts['小学']} 所、菜市场 ${counts['菜市场']} 个、药店 ${counts['药店']} 家、社区卫生 ${counts['社区卫生']} 处（菜场摊位已并入菜市场）${others}${fromBrowser}`,
       0.1,
     );
     facilityStage = { fac, browser, fused, livelihood, pois, counts, excluded };
@@ -718,7 +715,11 @@ async function pipeline(r: {
     routes: [],
   };
   if (demand.length) {
-    out.stage('coverage', `盲区判定：${demand.length} 个小区 × 3 类设施，逐轮算路，找到覆盖即停`, 0.7);
+    out.stage(
+      'coverage',
+      `盲区判定：${demand.length} 个小区 × ${HARD_CATEGORIES.length} 类设施（${HARD_CATEGORIES.join('、')}），逐轮算路，找到覆盖即停`,
+      0.7,
+    );
     cov = await runCoverage({
       meter,
       frame,
@@ -814,7 +815,7 @@ async function pipeline(r: {
   out.stage('report', '生成体检报告', 0.96);
   const stats: AnalysisStats = {
     ...isoStats,
-    community_status_counts: statusCounts(cov.communities),
+    community_status_counts: statusCounts(cov.communities, HARD_CATEGORIES),
     facility_counts: counts,
     pois_dropped: fused.dropped.length,
     official: fused.summaries,

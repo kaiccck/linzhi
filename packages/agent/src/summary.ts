@@ -5,9 +5,10 @@
  */
 import type { AnalysisResult, FacilityCategory, HardCategory, LngLat } from '@zoudedao/core';
 import {
-  HARD_CATEGORIES,
+  LIMIT_S,
   PROFILE_ZH,
   categoryCounts,
+  checkedCategories,
   circleRadius,
   facilityStatsOf,
   grayLayers,
@@ -93,7 +94,13 @@ export interface Overview {
   headline: Headline;
   /** How the rule reads in a sentence, e.g. "1 km". */
   rule_text: string;
+  /**
+   * The categories checked per community, in display order: 幼儿园、小学、菜市场、药店、社区卫生 on new
+   * analyses, the task's 小学、菜市场、药店 on older ones. by_category and within_15min carry these only.
+   */
+  checked_categories: HardCategory[];
   by_category: Record<HardCategory, CategoryCounts>;
+  /** Per checked category: communities that reach one within 15 minutes at the profile speed. */
   within_15min: Record<
     HardCategory,
     { limit_m: number; within: number; undetermined: number; total: number }
@@ -151,6 +158,7 @@ export function overview(result: AnalysisResult, id: string): Overview {
   });
   const bySrc = (s.n_samples_by_src as Record<string, number> | undefined) ?? {};
   const profile = profileOf(result);
+  const checked = checkedCategories(result);
   return {
     analysis_id: id,
     name: result.meta.name,
@@ -182,9 +190,10 @@ export function overview(result: AnalysisResult, id: string): Overview {
       : null,
     headline: headline(result),
     rule_text: ruleText(result),
+    checked_categories: checked,
     by_category: categoryCounts(result),
     within_15min: Object.fromEntries(
-      HARD_CATEGORIES.map((c) => [c, within15(result, c)]),
+      checked.map((c) => [c, within15(result, c)]),
     ) as Overview['within_15min'],
     sampling: {
       samples: s.n_samples,
@@ -255,22 +264,27 @@ export function reachSentence(o: Overview, book: FactBook, opts: PhraseOptions =
   return text;
 }
 
-/** "小学：覆盖 6、伪覆盖 5、盲区 1；…" over verified checks, pending counted separately. */
+/**
+ * "小学：覆盖 6、伪覆盖 5、盲区 1；…" over verified checks, pending counted separately; every checked
+ * category by default (categories the analysis did not check are left out).
+ */
 export function categorySentence(
   o: Overview,
   book: FactBook,
-  categories: readonly HardCategory[] = HARD_CATEGORIES,
+  categories: readonly HardCategory[] = o.checked_categories,
   opts: PhraseOptions = {},
 ): string {
   const p = opts.labelPrefix ?? '';
-  const parts = categories.map((cat) => {
-    const n = o.by_category[cat];
-    const items = (['覆盖', '伪覆盖', '盲区'] as const).map(
-      (k) => `${k} ${book.num(`${p}${cat}${k}数（已核实）`, n[k], '个')}`,
-    );
-    if (n.待核实) items.push(`待核实 ${book.num(`${p}${cat}待核实数`, n.待核实, '项')}`);
-    return `${cat}：${items.join('、')}`;
-  });
+  const parts = categories
+    .filter((cat) => o.by_category[cat] !== undefined)
+    .map((cat) => {
+      const n = o.by_category[cat];
+      const items = (['覆盖', '伪覆盖', '盲区'] as const).map(
+        (k) => `${k} ${book.num(`${p}${cat}${k}数（已核实）`, n[k], '个')}`,
+      );
+      if (n.待核实) items.push(`待核实 ${book.num(`${p}${cat}待核实数`, n.待核实, '项')}`);
+      return `${cat}：${items.join('、')}`;
+    });
   return `各类设施（按小区计，已核实）——${parts.join('；')}。`;
 }
 
@@ -279,7 +293,8 @@ export function profileSentence(o: Overview, book: FactBook, opts: PhraseOptions
   if (o.profile !== 'elder') return '';
   const p = opts.labelPrefix ?? '';
   const speed = book.add(`${p}老年人步速`, o.speed_mps, 'm/s', { digits: 2, trim: true });
-  const limit = book.add(`${p}老年人 15 分钟步行距离`, o.within_15min.小学.limit_m, 'm');
+  // the distance 15 minutes reach at the profile speed (within_15min's limit_m, whatever the category)
+  const limit = book.add(`${p}老年人 15 分钟步行距离`, Math.round(LIMIT_S * o.speed_mps), 'm');
   return `按老年人步速 ${speed} 计算：路线距离不变、时间变长，15 分钟最多走 ${limit}。`;
 }
 

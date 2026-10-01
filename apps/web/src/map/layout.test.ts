@@ -10,7 +10,7 @@ import rawB from '../../../../data/samples/zj-b.json?raw';
 import rawC from '../../../../data/samples/zj-c.json?raw';
 import rawV from '../../../../data/samples/zj-v.json?raw';
 import { compositionFor, focusedComposition, NARROW_PX, staticView, type View } from '../geo/view.js';
-import { circleR, CATS, deriveModel, profileScale, worstUnit, type Model } from '../model/derive.js';
+import { circleR, deriveModel, profileScale, worstUnit, type Model } from '../model/derive.js';
 import { evidenceBase } from '../model/evidence.js';
 import { facilityMarks } from '../model/facilities.js';
 import { MAP_H, MAP_W } from '../report/ReportMap.js';
@@ -219,7 +219,7 @@ for (const m of models) {
 describe('facility marks follow the view', () => {
   const view = staticView(1040, 840, compositionFor(false));
   it('体检单: the chosen category only, named where there is room', () => {
-    for (const cat of CATS) {
+    for (const cat of model.cats) {
       const L = layout(model, view, { marks: { kind: 'category', cat, list: facilityMarks(model, 1) } });
       expect(L.pois.length).toBeGreaterThan(0);
       expect(L.pois.every((p) => p.cat === cat)).toBe(true);

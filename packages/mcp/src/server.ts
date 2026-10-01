@@ -6,6 +6,7 @@
  */
 import {
   AnalysisStore,
+  CHECKED_SCOPE,
   ToolError,
   createToolRegistry,
   isochroneCollection,
@@ -35,6 +36,7 @@ export const INSTRUCTIONS = [
   '典型流程：locate_place（地名 → 候选）→ analyze_life_circle（体检，得到 analysis_id 和核心数字）→ list_service_gaps（服务缺口）→ simulate_facility（新增设施的估算）或 compare_sites → export_report（Markdown / GeoJSON 报告）。',
   '内置样例（如 zj-a 上海张江申城佳苑片区，完整列表见资源 zoudedao://samples）可直接体检，不消耗地图配额；问到老人时用 profile=elder，或直接使用 <analysis_id>~elder。',
   '想知道哪些小区都方便：list_service_gaps 的 by_community 每个小区一行，给出各类设施的判定与步行分钟。',
+  `逐小区检查了哪些设施以结果里的 checked_categories 为准——${CHECKED_SCOPE}；分析没有检查的类别不能说成没有缺口，从分析中心出发能走到几处见 analyze_life_circle 的圈内设施统计。`,
   '回答规则：数字一律原样引用工具结果，不要自己计算、换算或四舍五入；verified=false 的检查是“待核实”，不是缺口；simulate_facility 的结果是估算，必须注明“估算”。',
 ].join('\n');
 

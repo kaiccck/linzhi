@@ -1,12 +1,12 @@
 /**
- * The three hard categories as one row of buttons: pictogram, name, and how many communities cannot
- * walk to one within the rule (a tick when none). They choose the category the list, the map's tints
- * and the 规划 view show (a radiogroup: arrows move, one tab stop); the chosen one wears the cobalt edge.
- * The share that can (24/30) and what is pending are in the button's spoken label.
+ * The checked categories side by side, one tile each: pictogram and how many communities cannot walk to
+ * one within the rule (a tick when none) over the category's name. They choose the category the list,
+ * the map's tints and the 规划 view show (a radiogroup: arrows move, one tab stop); the chosen one wears
+ * the cobalt edge. The share that can (24/30) and what is pending are in the tile's spoken label.
  */
 import { useRef, type KeyboardEvent } from 'react';
 import type { HardCategory } from '@zoudedao/core';
-import { CAT_COLOR, CAT_ICON, CATS, distWords, type CategoryHead, type Model } from '../model/derive.js';
+import { CAT_COLOR, CAT_ICON, distWords, type CategoryHead, type Model } from '../model/derive.js';
 import { Pg } from './Icons.js';
 
 export function cardLabel(h: CategoryHead, n: number, rule: number): string {
@@ -36,16 +36,17 @@ export function CategoryCards({
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const n = model.units.length;
   const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
-    const i = CATS.indexOf(cat);
+    const cats = model.cats;
+    const i = cats.indexOf(cat);
     const next =
       e.key === 'ArrowRight' || e.key === 'ArrowDown'
-        ? (i + 1) % CATS.length
+        ? (i + 1) % cats.length
         : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
-          ? (i - 1 + CATS.length) % CATS.length
+          ? (i - 1 + cats.length) % cats.length
           : -1;
     if (next < 0) return;
     e.preventDefault();
-    onCat(CATS[next]!);
+    onCat(cats[next]!);
     refs.current[next]?.focus();
   };
   return (
@@ -53,6 +54,7 @@ export function CategoryCards({
       className={'cats' + (n > 16 ? ' dense' : '')}
       role="radiogroup"
       aria-label="设施类别"
+      style={{ ['--n' as string]: model.heads.length }}
       onKeyDown={onKey}
     >
       {model.heads.map((h, i) => {
@@ -73,13 +75,15 @@ export function CategoryCards({
             aria-label={cardLabel(h, n, rule)}
             onClick={() => onCat(h.cat)}
           >
-            <Pg id={CAT_ICON[h.cat]!} color={CAT_COLOR[h.cat]} />
+            <span className="cat-top" aria-hidden="true">
+              <Pg id={CAT_ICON[h.cat]!} color={CAT_COLOR[h.cat]} />
+              <b className={'cat-n num' + (gaps ? '' : pending ? ' pending' : ' clear')}>
+                {gaps || (pending ? 0 : '✓')}
+              </b>
+            </span>
             <span className="cat-name" aria-hidden="true">
               {h.cat}
             </span>
-            <b className={'cat-n num' + (gaps ? '' : pending ? ' pending' : ' clear')} aria-hidden="true">
-              {gaps || (pending ? 0 : '✓')}
-            </b>
           </button>
         );
       })}

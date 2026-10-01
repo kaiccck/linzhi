@@ -1,7 +1,8 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { applyExclusions, type FacilityCategory, type Poi } from '@zoudedao/core';
+import { applyExclusions, HARD_CATEGORIES, type FacilityCategory, type Poi } from '@zoudedao/core';
+import { LIVELIHOOD_CATEGORIES } from '@zoudedao/engine';
 import { describe, expect, it } from 'vitest';
 import { loadOfficialData, loadOfficialLists } from '../src/official.js';
 import { REPO_ROOT } from './helpers.js';
@@ -58,6 +59,11 @@ describe('official facility lists', () => {
     expect(schools.entries.some((e) => e.name.includes('育华'))).toBe(false);
     const health = data.lists.find((l) => l.id === 'shanghai-community-health')!;
     expect(health).toMatchObject({ category: '社区卫生', publisher: '上海市卫生健康委员会' });
+    // 社区卫生 is checked per community: the engine fuses the list with the checked categories at the
+    // facility radius, not with the 民生设施 it only counts
+    expect(HARD_CATEGORIES).toContain(health.category);
+    expect(LIVELIHOOD_CATEGORIES).not.toContain(health.category);
+    for (const l of data.lists) expect(HARD_CATEGORIES, l.id).toContain(l.category);
     expect(health.entries).toHaveLength(46);
     expect(health.entries.find((e) => e.name === '张江社区卫生服务中心')).toMatchObject({
       address: '益江路458号',

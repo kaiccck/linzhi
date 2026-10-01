@@ -20,23 +20,32 @@ import {
 } from './coverage.js';
 import { pointInRing, ringSignedArea } from './geom.js';
 import { facilitiesFor, routingPoint } from './poi.js';
-import { HARD_CATEGORIES } from './standards.js';
+import { checkedCategories, HARD_CATEGORIES, TASK_CATEGORIES } from './standards.js';
 import type { FacilityCheck, HardCategory, Poi } from './types.js';
 
 const zj = zjA();
 const baiduPois = zj.pois.filter((p) => p.source === 'baidu');
 const demand: DemandPoint[] = zj.communities.map((c) => ({ id: c.name, name: c.name, xy: c.centroid }));
+// the research calls behind zj-a routed the task's three categories (幼儿园 and 社区卫生 were checked
+// later by the engine's coverage check, apps/server/scripts/add-categories.ts)
 const facilitiesByCategory = Object.fromEntries(
-  HARD_CATEGORIES.map((c) => [c, facilitiesFor(baiduPois, [c])]),
+  TASK_CATEGORIES.map((c) => [c, facilitiesFor(baiduPois, [c])]),
 ) as Record<HardCategory, Poi[]>;
 
 describe('four-state rule', () => {
-  it('reproduces all 36 stored zj-a statuses from their own straight/route numbers', () => {
-    let n = 0;
+  it('reproduces all 60 stored zj-a statuses from their own straight/route numbers', () => {
+    // zj-a checks all five categories: the task's three from the research calls, 幼儿园 and 社区卫生
+    // from the engine's coverage check
+    expect(checkedCategories(zj)).toEqual([...HARD_CATEGORIES]);
+    const n: Record<string, number> = {};
     for (const c of zj.communities) {
       for (const cat of HARD_CATEGORIES) {
         const k = c.checks[cat];
-        const v = classifyCheck({ straight_m: k.straight_m, route_m: k.route_m });
+        const v = classifyCheck({
+          straight_m: k.straight_m,
+          route_m: k.route_m,
+          lowerBound: k.route_basis === 'lower_bound',
+        });
         expect([c.name, cat, v.status, v.status_main, v.borderline]).toEqual([
           c.name,
           cat,
@@ -44,10 +53,11 @@ describe('four-state rule', () => {
           k.status_main,
           k.borderline,
         ]);
-        n++;
+        n[cat] = (n[cat] ?? 0) + 1;
       }
     }
-    expect(n).toBe(36);
+    expect(Object.values(n).reduce((a, b) => a + b, 0)).toBe(60);
+    expect(TASK_CATEGORIES.reduce((t, cat) => t + n[cat]!, 0)).toBe(36);
   });
 
   it('draws the lines where the design doc does', () => {
@@ -158,7 +168,7 @@ function nearestRoutes(): RoutedPair[] {
 
 describe('merging routematrix answers into FacilityChecks', () => {
   it('rebuilds the 36 zj-a checks from the raw Baidu answers, flags included', () => {
-    for (const cat of HARD_CATEGORIES) {
+    for (const cat of TASK_CATEGORIES) {
       const research =
         cat === '菜市场' ? [...researchRoutes(cat), ...officialMarketRoutes()] : researchRoutes(cat);
       const routes = [...research, ...nearestRoutes()];
@@ -268,7 +278,7 @@ describe('candidate pruning, rounds and early stop', () => {
       }
       for (const d of demand) {
         if (resolvedAt.has(d.id)) continue;
-        const done = HARD_CATEGORIES.every((cat) => {
+        const done = TASK_CATEGORIES.every((cat) => {
           const c = mergeMatrixResults([d], facilitiesByCategory[cat], routes).get(d.id)!;
           return c.verified;
         });
@@ -281,14 +291,14 @@ describe('candidate pruning, rounds and early stop', () => {
     const naive = demand.reduce(
       (s, d) =>
         s +
-        HARD_CATEGORIES.reduce(
+        TASK_CATEGORIES.reduce(
           (t, cat) => t + pruneCandidates(rankCandidates(d.xy, facilitiesByCategory[cat])).length,
           0,
         ),
       0,
     );
     expect(billed).toBeLessThan(naive);
-    for (const cat of HARD_CATEGORIES) {
+    for (const cat of TASK_CATEGORIES) {
       for (const c of mergeMatrixResults(demand, facilitiesByCategory[cat], routes).values()) {
         expect(c.verified).toBe(true);
         if (c.route_basis === 'routed') expect(c.route_m).toBeGreaterThanOrEqual(c.via_straight_m! * 0.8);
@@ -310,7 +320,7 @@ describe('candidate pruning, rounds and early stop', () => {
     expect(planNearestTopUp(demand, facilitiesByCategory, routes).size).toBe(0);
     while (ask(planCoverageRound(demand, facilitiesByCategory, routes, { k: 2 })) > 0);
     const checks = () =>
-      HARD_CATEGORIES.flatMap((cat) =>
+      TASK_CATEGORIES.flatMap((cat) =>
         [...mergeMatrixResults(demand, facilitiesByCategory[cat], routes)].map(([id, c]) => ({ id, cat, c })),
       );
     const early = checks();
@@ -435,7 +445,8 @@ describe('灰色区域', () => {
 
   it('counts only verified gaps', () => {
     const c = zj.communities.find((x) => x.name === '川杨新苑四期')!;
-    // 小学 and 菜市场 are verified 伪覆盖; the pharmacy is 192 m away on foot
+    // 小学 and 菜市场 are verified 伪覆盖; the pharmacy (192 m), the kindergarten (260 m) and the health
+    // station (131 m) are within the rule on foot
     expect(gapCount(c.checks)).toEqual({ missing: 2, pseudo: true });
     // an unverified gap is left out, not guessed
     const open = { ...c.checks, 药店: { ...c.checks.药店, status_main: '伪覆盖' as const, verified: false } };
@@ -444,8 +455,16 @@ describe('灰色区域', () => {
       missing: 3,
       pseudo: true,
     });
-    // 7 of the 12 communities have a gap
-    expect(points.filter((p) => p.missing > 0)).toHaveLength(7);
+    // 8 of the 12 communities have a gap: 7 in the task's three, and 虹御公寓, whose 社区卫生 is a
+    // 1,083 m walk for 874 m in a straight line (伪覆盖)
+    expect(points.filter((p) => p.missing > 0)).toHaveLength(8);
+    const task = (k: (typeof zj.communities)[number]) =>
+      gapCount(Object.fromEntries(TASK_CATEGORIES.map((cat) => [cat, k.checks[cat]])));
+    expect(zj.communities.filter((k) => task(k).missing > 0)).toHaveLength(7);
+    const hy = zj.communities.find((x) => x.name === '虹御公寓')!;
+    expect(task(hy).missing).toBe(0);
+    expect(gapCount(hy.checks)).toEqual({ missing: 1, pseudo: true });
+    expect(hy.checks.社区卫生).toMatchObject({ status_main: '伪覆盖', verified: true, route_m: 1083 });
   });
 
   it('draws nested polygons per number of missing categories plus a 伪覆盖 layer', () => {

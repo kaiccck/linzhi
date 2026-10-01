@@ -979,7 +979,7 @@ export function MapPanel(props: Props) {
             ref={legendRef}
             legend={legend}
             gray={ui.gray && grayAvailable && !playing}
-            grayRule={grayRuleText(model.ruleM)}
+            grayRule={grayRuleText(model)}
             method={ui.method && !playing ? methodCounts : null}
           />
         )}

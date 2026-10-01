@@ -10,7 +10,7 @@ import rawB from '../../../../data/samples/zj-b.json?raw';
 import { CategoryCards, worstCategory } from '../components/Categories.js';
 import { cellWords, GapList } from '../components/GapList.js';
 import { Verdict, verdictLines, verdictSentence } from '../components/Verdict.js';
-import { CATS, deriveModel, isCircleGap, isWalkGap } from './derive.js';
+import { deriveModel, isCircleGap, isWalkGap } from './derive.js';
 import { checkLook } from './looks.js';
 import { withPending } from './pending.test-data.js';
 
@@ -19,43 +19,44 @@ const task = deriveModel(dataA, 'zj-a');
 const pendingA = deriveModel(withPending(dataA), 'zj-a');
 
 describe('the task rule, the only one', () => {
-  it('judges all three categories at the analysis’ own 1 km', () => {
-    expect(task.ruleOf).toEqual({ 小学: 1000, 菜市场: 1000, 药店: 1000 });
+  it('judges every checked category at the analysis’ own 1 km', () => {
+    expect(task.cats.length).toBeGreaterThanOrEqual(3);
+    for (const k of task.cats) expect(task.ruleOf[k]).toBe(1000);
   });
 
   it('reads each community’s own checks, never the GB 50180 ones an older result carries', () => {
     for (const u of task.units) {
       const c = dataA.communities.find((x) => x.name === u.name)!;
-      for (const k of CATS) expect(u.checks[k]).toBe(c.checks[k]);
+      for (const k of task.cats) expect(u.checks[k]).toBe(c.checks[k]);
     }
   });
 
   it('splits the walk’s gaps into the circle’s (blind) and the ones it misses (pseudo)', () => {
-    expect([task.circleGaps, task.walkGaps]).toEqual([1, 8]);
+    expect([task.circleGaps, task.walkGaps]).toEqual([1, 9]);
     expect(task.tally.blind + task.tally.pseudo).toBe(task.walkGaps);
-    const pairs = task.units.flatMap((u) => CATS.map((k) => ({ s: u.checks[k], r: task.ruleOf[k] })));
+    const pairs = task.units.flatMap((u) => task.cats.map((k) => ({ s: u.checks[k], r: task.ruleOf[k] })));
     expect(task.tally.blind).toBe(pairs.filter(({ s, r }) => isWalkGap(s, r) && isCircleGap(s, r)).length);
   });
 });
 
 describe('the verdict, in communities', () => {
   it('says how many communities lack a facility, and the circle’s count against the walk’s', () => {
-    expect(task.tally.units).toBe(7);
+    expect(task.tally.units).toBe(8);
     expect(task.tally.circleUnits).toBe(1);
     const html = renderToStaticMarkup(<Verdict model={task} />);
-    expect(html).toContain('<b class="v-n">7</b>');
+    expect(html).toContain('<b class="v-n">8</b>');
     expect(html).toContain('<span class="v-t1">个小区缺设施</span>');
     expect(html).toContain('<span class="num">12</span> 个小区中，步行 1 公里内至少缺一类');
-    // two bars on one scale (the 12 communities): the circle's 1, the walk's 7 (1 + 6 伪覆盖)
+    // two bars on one scale (the 12 communities): the circle's 1, the walk's 8 (1 + 7 伪覆盖)
     expect(html).toMatch(
       /画圈<\/span><span class="vc-track"><i class="vc-blind" style="width:8\.33\d*%"><\/i><\/span><span class="vc-n num">1<\/span>/,
     );
     expect(html).toMatch(
-      /<i class="vc-pseudo" style="width:50%"><\/i><\/span><span class="vc-n num">7<\/span>/,
+      /<i class="vc-pseudo" style="width:58\.33\d*%"><\/i><\/span><span class="vc-n num">8<\/span>/,
     );
     // under the bars, one line keys each colour once: how many it holds, what it means (the list's key too)
     expect(html).toMatch(
-      /<li><i class="sw s-pseudo"><\/i><span class="term" title="伪覆盖：[^"]*">伪覆盖<\/span><span><span class="num">6<\/span> 个：圈里有、走不到<\/span><\/li>/,
+      /<li><i class="sw s-pseudo"><\/i><span class="term" title="伪覆盖：[^"]*">伪覆盖<\/span><span><span class="num">7<\/span> 个：圈里有、走不到<\/span><\/li>/,
     );
     expect(html).toContain('<b>盲区</b><span><span class="num">1</span> 个：直线就超出</span>');
     expect(html).not.toContain('待核');
@@ -73,13 +74,13 @@ describe('the verdict, in communities', () => {
   it('says so when the circle finds every one (直线就已超出)', () => {
     const all = { ...task, tally: { ...task.tally, circleUnits: task.tally.units } };
     const html = renderToStaticMarkup(<Verdict model={all} />);
-    expect(html).toContain('<b>盲区</b><span><span class="num">7</span> 个：直线就超出</span>');
+    expect(html).toContain('<b>盲区</b><span><span class="num">8</span> 个：直线就超出</span>');
     expect(html).not.toContain('sw s-pseudo');
   });
 
   it('says it in words for screen readers: communities, then the gaps', () => {
     expect(verdictSentence(task)).toBe(
-      '7 个小区步行 1 公里内至少缺一类设施，画圈只能发现其中 1 个。共 8 项缺口，画圈只找到 1 项，其中 7 项是画圈漏掉的伪覆盖，1 项是直线也够不到的盲区。',
+      '8 个小区步行 1 公里内至少缺一类设施，画圈只能发现其中 1 个。共 9 项缺口，画圈只找到 1 项，其中 8 项是画圈漏掉的伪覆盖，1 项是直线也够不到的盲区。',
     );
     expect(verdictSentence(pendingA)).toMatch(/另有 2 项待核，不计入。$/);
   });
@@ -109,20 +110,22 @@ describe('category buttons (规划)', () => {
   it('open on the category with the most gaps', () => {
     expect(worstCategory(task)).toBe('小学');
     const b = deriveModel(JSON.parse(rawB) as AnalysisResult, 'zj-b');
-    expect(worstCategory(b)).toBe('菜市场');
+    // 玉兰香苑: 20 communities cannot walk to a 社区卫生服务中心/站 within 1 km, more than lack a market
+    expect(worstCategory(b)).toBe('社区卫生');
   });
 
   it('are a radiogroup: the chosen category checked, its gaps as one number, the rest spoken', () => {
     const html = renderToStaticMarkup(<CategoryCards model={pendingA} cat="药店" onCat={() => {}} />);
     expect(html).toContain('role="radiogroup"');
-    expect(html.match(/role="radio"/g)).toHaveLength(3);
+    expect(html.match(/role="radio"/g)).toHaveLength(5);
+    expect(html).toContain('style="--n:5"');
     expect(html).toMatch(/aria-checked="true"[^>]*aria-label="药店：12 个小区里 10 个步行 1 公里内走得到/);
-    expect(html).toContain(
-      '<span class="cat-name" aria-hidden="true">小学</span><b class="cat-n num" aria-hidden="true">6</b>',
+    expect(html).toMatch(
+      /<span class="cat-top" aria-hidden="true"><svg[^>]*><use href="#pg-school"><\/use><\/svg><b class="cat-n num">6<\/b><\/span><span class="cat-name" aria-hidden="true">小学<\/span>/,
     );
     // pending but no gap: a grey 0, not the tick (nothing is verified yet)
-    expect(html).toContain(
-      '<span class="cat-name" aria-hidden="true">药店</span><b class="cat-n num pending" aria-hidden="true">0</b>',
+    expect(html).toMatch(
+      /<b class="cat-n num pending">0<\/b><\/span><span class="cat-name" aria-hidden="true">药店<\/span>/,
     );
   });
 });

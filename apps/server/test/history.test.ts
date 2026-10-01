@@ -3,7 +3,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import type { RouteCell, RouteMatrix } from '@zoudedao/baidu';
-import { localFrame, type AnalysisResult, type LngLat } from '@zoudedao/core';
+import {
+  checkedCategories,
+  HARD_CATEGORIES,
+  localFrame,
+  TASK_CATEGORIES,
+  type AnalysisResult,
+  type LngLat,
+} from '@zoudedao/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Analyzer } from '../src/analyzer.js';
 import {
@@ -14,7 +21,7 @@ import {
   type WhatIfBranch,
 } from '../src/history.js';
 import type { WhatIfResult, WhatIfRouter } from '../src/whatif.js';
-import { ANALYZE_BODY, makeApp, parseSse, SAMPLES_DIR } from './helpers.js';
+import { ANALYZE_BODY, makeApp, parseSse, SAMPLES_DIR, withCategories } from './helpers.js';
 
 const zjA = () => JSON.parse(readFileSync(join(SAMPLES_DIR, 'zj-a.json'), 'utf8')) as AnalysisResult;
 
@@ -76,14 +83,28 @@ describe('HistoryStore', () => {
   });
 
   it('counts headline gaps like the advisor: verified only, the task rule', () => {
+    // zj-a: 60 checks of all five categories, every one measured
     const h = historyHeadline(zjA());
-    // zj-a: 36 checks, every one measured; the checks_gb older versions wrote are ignored
     expect(h).toMatchObject({
       communities: 12,
+      categories: ['幼儿园', '小学', '菜市场', '药店', '社区卫生'],
+      walking_gaps: 9,
+      pseudo: 8,
+      blind: 1,
+      pending: 0,
+    });
+    expect(h.categories).toEqual(checkedCategories(zjA()));
+    // the task's three alone: 8 gaps as ever; the ninth is 虹御公寓's 社区卫生 (伪覆盖)
+    expect(historyHeadline(withCategories(zjA(), TASK_CATEGORIES))).toMatchObject({
+      categories: ['小学', '菜市场', '药店'],
       walking_gaps: 8,
       pseudo: 7,
       blind: 1,
       pending: 0,
+    });
+    expect(zjA().communities.find((c) => c.name === '虹御公寓')!.checks['社区卫生']).toMatchObject({
+      status_main: '伪覆盖',
+      verified: true,
     });
     expect(h.walking_gaps).toBe(h.pseudo + h.blind);
     expect(Object.keys(h).filter((k) => k.endsWith('_gb'))).toEqual([]);
@@ -92,7 +113,46 @@ describe('HistoryStore', () => {
     const open = zjA();
     const k = open.communities.find((c) => c.name === '虹御公寓')!.checks['药店'];
     Object.assign(k, { status: '伪覆盖', status_main: '伪覆盖', route_m: 1124, verified: false });
-    expect(historyHeadline(open)).toMatchObject({ walking_gaps: 8, pending: 1 });
+    expect(historyHeadline(open)).toMatchObject({ walking_gaps: 9, pending: 1 });
+  });
+
+  it('names the categories an analysis was checked for, so 3- and 5-category analyses tell apart', async () => {
+    const three = withCategories(liveResult(), TASK_CATEGORIES);
+    const five = withCategories(liveResult(), HARD_CATEGORIES);
+    const h3 = historyHeadline(three);
+    const h5 = historyHeadline(five);
+    expect(h3.categories).toEqual(['小学', '菜市场', '药店']);
+    expect(h5.categories).toEqual(['幼儿园', '小学', '菜市场', '药店', '社区卫生']);
+    // every checked category counts alike: the five-category analysis has the three's gaps and its own
+    const gaps = (r: AnalysisResult) =>
+      r.communities.flatMap((c) =>
+        Object.values(c.checks).filter((k) => k.verified !== false && k.status_main !== '覆盖'),
+      ).length;
+    expect(h3.walking_gaps).toBe(gaps(three));
+    expect(h5.walking_gaps).toBe(gaps(five));
+    expect(h5.walking_gaps).toBeGreaterThan(h3.walking_gaps);
+    // an isochrone-only analysis checked nothing
+    expect(historyHeadline({ ...liveResult(), communities: [] }).categories).toEqual([]);
+
+    // kept with the stored row; a row stored before headlines named them is the task's three
+    const store = new HistoryStore({ path: dbPath });
+    store.saveAnalysis('live-00000003', three);
+    store.saveAnalysis('live-00000005', five);
+    store.saveAnalysis('live-00000006', liveResult());
+    store.close();
+    const { DatabaseSync } = await import('node:sqlite');
+    const db = new DatabaseSync(dbPath);
+    const { categories: _c, ...older } = historyHeadline(liveResult());
+    db.prepare('UPDATE analyses SET headline = ? WHERE id = ?').run(JSON.stringify(older), 'live-00000006');
+    db.close();
+    const again = new HistoryStore({ path: dbPath });
+    const byId = new Map(again.recent().map((i) => [i.id, i.headline.categories]));
+    expect(Object.fromEntries(byId)).toEqual({
+      'live-00000003': ['小学', '菜市场', '药店'],
+      'live-00000005': ['幼儿园', '小学', '菜市场', '药店', '社区卫生'],
+      'live-00000006': ['小学', '菜市场', '药店'],
+    });
+    again.close();
   });
 
   it('ignores the GB 50180 fields of rows older versions stored', async () => {
@@ -280,8 +340,10 @@ describe('the history over HTTP', () => {
     const samples = body.items.filter((i) => i.sample);
     expect(samples.map((i) => i.id)).toEqual(['zj-a', 'zj-b', 'zj-c', 'zj-v']);
     expect(samples[0]).toMatchObject({ name: '申城佳苑片区', created_at: zjA().meta.generated });
-    // zj-b still carries checks_gb: nothing of it reaches the headline
+    // the GB 50180 counts older versions kept never reach the headline
     expect(Object.keys(samples[1]!.headline).filter((k) => k.endsWith('_gb'))).toEqual([]);
+    // every sample now carries checks of all five categories, and its headline says so
+    for (const item of samples) expect(item.headline.categories, item.id).toEqual([...HARD_CATEGORIES]);
     await app.close();
   });
 

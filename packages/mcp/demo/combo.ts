@@ -31,6 +31,7 @@ import {
 } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import {
+  CHECKED_SCOPE,
   ChatClient,
   checkGrounding,
   completeCitations,
@@ -259,7 +260,7 @@ async function main(): Promise<void> {
     baiduOk
       ? `- 百度地图官方 MCP（map_ 开头）：地理编码、地点检索、路线规划。用它找到用户说的地点、附近的小区、医院和社区卫生服务中心。本次最多调用 ${maxBaidu} 次，先想清楚再调用；坐标用百度 BD-09。`
       : '- 百度地图官方 MCP 本次不可用，只能使用邻至的工具，并在回答里说明这一点。',
-    `- 邻至 MCP：按百度地图实测步行路线做的 15 分钟生活圈体检。已体检的片区：${catalogue}；老年人画像的 analysis_id 在后面加 ~elder（按 0.9 m/s 步速换算）。list_service_gaps 逐个小区核对小学、菜市场、药店能否在 1 km 判定距离内步行走到，结果里的 by_community 每个小区一行（各类设施的判定：覆盖、伪覆盖、盲区、待核实，以及步行分钟 walk_min）；analyze_life_circle 给出片区的 15 分钟可达范围和圈内设施（含社区卫生，从片区中心出发）；compare_sites 并排对比片区。`,
+    `- 邻至 MCP：按百度地图实测步行路线做的 15 分钟生活圈体检。已体检的片区：${catalogue}；老年人画像的 analysis_id 在后面加 ~elder（按 0.9 m/s 步速换算）。list_service_gaps 逐个小区核对各类设施能否在 1 km 判定距离内步行走到，结果里的 by_community 每个小区一行（各类设施的判定：覆盖、伪覆盖、盲区、待核实，以及步行分钟 walk_min）；核对了哪些类别见结果里的 checked_categories——${CHECKED_SCOPE}，没有核对的类别不能说成没有缺口；analyze_life_circle 给出片区的 15 分钟可达范围和圈内设施（从片区中心出发，各类设施都统计，包括社区卫生）；compare_sites 并排对比片区。`,
     allowLive
       ? '- 允许对新地点实时体检（analyze_life_circle 的 center_bd09，约 1 分钟）。'
       : '- 本次演示不发起新的实时体检（会消耗百度配额），只用已体检的片区；用户说的地方不在这些片区里，就如实说明。',

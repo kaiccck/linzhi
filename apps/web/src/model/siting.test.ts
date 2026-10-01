@@ -12,12 +12,14 @@ import { estimatorFor, lacks, sitePins, whatIf } from './siting.js';
 const b = deriveModel(JSON.parse(rawB) as AnalysisResult, 'zj-b');
 
 describe('siting suggestions as pins', () => {
-  it('lists every suggestion of the result, per category in the task’s order, best first', () => {
+  it('lists every suggestion of the result, per category in display order, best first', () => {
     const pins = sitePins(b);
     const data = b.data.site_suggestions!;
-    expect(pins).toHaveLength(Object.values(data).reduce((n, l) => n + (l?.length ?? 0), 0));
+    const engine = pins.filter((p) => p.origin === 'engine');
+    expect(engine).toHaveLength(Object.values(data).reduce((n, l) => n + (l?.length ?? 0), 0));
+    const order = b.cats as readonly string[];
     expect(pins.map((p) => p.cat)).toEqual(
-      [...pins.map((p) => p.cat)].sort((x, y) => '小学菜市场药店'.indexOf(x) - '小学菜市场药店'.indexOf(y)),
+      [...pins.map((p) => p.cat)].sort((x, y) => order.indexOf(x) - order.indexOf(y)),
     );
     const market = pins.filter((p) => p.cat === '菜市场');
     expect(market.map((p) => p.rank)).toEqual([1, 2, 3]);
@@ -44,7 +46,10 @@ describe('siting suggestions as pins', () => {
       const ranks = pins.filter((p) => p.cat === cat).map((p) => p.rank);
       expect(ranks).toEqual(ranks.map((_, i) => i + 1));
     }
-    expect(sitePins(b).every((p) => p.origin === 'engine')).toBe(true);
+    // zj-b's own suggestions cover the task's three; 幼儿园 and 社区卫生, checked later, are estimated here
+    const own = b.data.site_suggestions!;
+    for (const p of sitePins(b)) expect(p.origin).toBe(own[p.cat] ? 'engine' : 'local');
+    expect(sitePins(b).some((p) => p.cat === '社区卫生' && p.origin === 'local' && !p.verified)).toBe(true);
   });
 });
 

@@ -36,9 +36,11 @@ export interface EvidenceBase {
 function facilityPoint(model: Model, cat: HardCategory, name: string | undefined): XY | null {
   if (!name) return null;
   const kin: Record<HardCategory, string[]> = {
+    幼儿园: ['幼儿园'],
     小学: ['小学'],
     菜市场: ['菜市场', '生鲜超市'],
     药店: ['药店'],
+    社区卫生: ['社区卫生'],
   };
   const hit =
     model.data.pois.find((p) => p.name === name && kin[cat].includes(p.cat)) ??

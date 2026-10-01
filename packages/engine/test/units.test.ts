@@ -12,10 +12,14 @@ import {
 } from '@zoudedao/baidu';
 import {
   cleanPois,
+  HARD_CATEGORIES,
   localFrame,
+  TASK_CATEGORIES,
+  TASK_RULE_M,
   type Community,
   type FacilityCheck,
   type FacilityExclusion,
+  type HardCategory,
   type LngLat,
   type Poi,
   type XY,
@@ -23,8 +27,9 @@ import {
 import { describe, expect, it } from 'vitest';
 
 import type { CheckSet, MatrixFn } from '../src/coverage.js';
-import { runCoverage } from '../src/coverage.js';
+import { runCoverage, setCategories, statusCounts } from '../src/coverage.js';
 import { searchFacilities, toPlaceResult } from '../src/facilities.js';
+import { runSiting } from '../src/siting.js';
 import {
   LIVELIHOOD_KEYWORDS,
   LIVELIHOOD_RADIUS_M,
@@ -680,12 +685,19 @@ describe('facility search within the place budget', () => {
       radius_m: 2600,
       warn: () => {},
     });
+    // one union of the five checked categories (Baidu's 10 keywords at most) on all pages but one; the
+    // pharmacies it crowded out get the page kept back
     expect(asked.map((a) => [a.keywords.join('$'), a.maxPages])).toEqual([
-      ['小学$菜市场$菜场$农贸市场$生鲜市场$药店$药房', 3],
+      ['小学$社区卫生服务中心$社区卫生服务站$幼儿园$菜市场$菜场$农贸市场$生鲜市场$药店$药房', 5],
       ['药店$药房', 1],
     ]);
-    expect(m.byStep.facilities).toBe(4);
+    expect(asked[0]!.keywords).toHaveLength(10);
+    expect(m.byStep.facilities).toBe(6);
     expect(found.inventory['小学']).toMatchObject({ complete: true });
+    // the groups before the last one the union reached are complete, found or not
+    expect(found.inventory['社区卫生']).toMatchObject({ complete: true, fetched: 0 });
+    expect(found.inventory['幼儿园']).toMatchObject({ complete: true, fetched: 0 });
+    expect(found.inventory['菜市场']).toMatchObject({ complete: false, fetched: 50 });
     expect(found.inventory['药店']).toMatchObject({ complete: false, fetched: 20 });
     expect(knownRadius(found.inventory, '小学')).toBe(Infinity);
     expect(knownRadius(found.inventory, '药店')).toBeCloseTo(Math.hypot(1140, 120), 0);
@@ -729,7 +741,6 @@ describe('the 民生设施 union', () => {
     ];
     const { pois, dropped } = livelihoodPois(rows, existing, frame);
     expect(pois.map((p) => [p.uid, p.cat])).toEqual([
-      ['b-clinic2', '社区卫生'],
       ['b-shop', '超市'],
       ['b-canteen', '养老'],
       ['b-far', '地铁'],
@@ -738,10 +749,12 @@ describe('the 民生设施 union', () => {
     expect(why).toMatchObject({
       'b-station': 'duplicate:name osm:station',
       'b-exit': 'uncategorized',
-      'b-clinic': 'duplicate:name osm:clinic',
       'hm-2': 'duplicate:known',
-      // a pharmacy belongs to the checked inventory, with its own completeness bookkeeping
+      // a pharmacy or a health centre belongs to the checked inventory, with its own completeness
+      // bookkeeping (社区卫生 is checked per community since engine 0.2.0)
       'b-pharm': 'category:药店',
+      'b-clinic': 'category:社区卫生',
+      'b-clinic2': 'category:社区卫生',
     });
   });
 
@@ -883,6 +896,116 @@ describe('communities of the coverage check', () => {
     // the walks start at the gate: both phases walk the same 600 m to the school
     expect(by.get('一期')!.checks['小学']).toMatchObject({ route_m: 600, status: '覆盖' });
     expect(by.get('二期')!.checks['小学'].route_m).toBe(600);
+    // a set of the task's three checks those three only
+    for (const c of out.communities) expect(Object.keys(c.checks)).toEqual(['小学', '菜市场', '药店']);
+  });
+
+  it('checks every category a set lists alike, all five or fewer, and counts what was checked', async () => {
+    // routes are 1.2 × straight; every category has one facility 500 m east of the gate
+    const at = (cat: HardCategory, i: number) => poi(`${cat}-${i}`, cat, [500, 20 * i]);
+    const full = (cats: readonly HardCategory[]): CheckSet => ({
+      facilities: Object.fromEntries(cats.map((c, i) => [c, [at(c, i)]])),
+      rule: TASK_RULE_M,
+      knownRadius: Object.fromEntries(cats.map((c) => [c, Infinity])),
+    });
+    const go = (set: CheckSet) =>
+      runCoverage({
+        meter: meter(),
+        frame,
+        matrix: fakeMatrix((a, b) => 1.2 * Math.hypot(a[0] - b[0], a[1] - b[1])),
+        demand: [site('甲', [0, 0]), site('乙', [-900, 0])],
+        set,
+      });
+    const five = await go(full(HARD_CATEGORIES));
+    expect(setCategories(full(HARD_CATEGORIES))).toEqual([...HARD_CATEGORIES]);
+    for (const c of five.communities) {
+      expect(Object.keys(c.checks)).toEqual([...HARD_CATEGORIES]);
+      // the same rule, the same verdict for every category: 甲 walks ~600 m, 乙 sees them 1.4 km away
+      for (const cat of HARD_CATEGORIES) {
+        expect(c.checks[cat]).toMatchObject({
+          status_main: c.name === '甲' ? '覆盖' : '盲区',
+          verified: true,
+        });
+      }
+    }
+    expect(statusCounts(five.communities)).toMatchObject({
+      total: 10,
+      main: { 覆盖: 5, 伪覆盖: 0, 盲区: 5 },
+      by_category: Object.fromEntries(
+        HARD_CATEGORIES.map((c) => [c, { 覆盖: 1, 临界: 0, 伪覆盖: 0, 盲区: 1 }]),
+      ),
+    });
+    // an analysis of the task's three: only those are checked and counted (core checkedCategories)
+    const three = await go(full(TASK_CATEGORIES));
+    const counts = statusCounts(three.communities);
+    expect(Object.keys(counts.by_category)).toEqual([...TASK_CATEGORIES]);
+    expect(counts).toMatchObject({ total: 6, main: { 覆盖: 3, 伪覆盖: 0, 盲区: 3 } });
+    // asked for all five, the two it lacks count nothing
+    const asked = statusCounts(three.communities, HARD_CATEGORIES);
+    expect(asked.total).toBe(6);
+    expect(asked.by_category['幼儿园']).toEqual({ 覆盖: 0, 临界: 0, 伪覆盖: 0, 盲区: 0 });
+    expect(asked.by_category['小学']).toEqual(counts.by_category['小学']);
+    // no communities: nothing to count, in whatever categories asked for
+    expect(statusCounts([], HARD_CATEGORIES)).toMatchObject({ total: 0, unverified: 0 });
+    expect(Object.keys(statusCounts([], HARD_CATEGORIES).by_category)).toEqual([...HARD_CATEGORIES]);
+  });
+
+  it('never claims a gap of a category whose list completeness is unknown', async () => {
+    const out = await runCoverage({
+      meter: meter(),
+      frame,
+      matrix: fakeMatrix((a, b) => 1.2 * Math.hypot(a[0] - b[0], a[1] - b[1])),
+      demand: [site('far', [0, 0])],
+      set: { facilities: { 幼儿园: [poi('k', '幼儿园', [1500, 0])] }, rule: {}, knownRadius: {} },
+    });
+    expect(Object.keys(out.communities[0]!.checks)).toEqual(['幼儿园']);
+    expect(out.communities[0]!.checks['幼儿园']).toMatchObject({ status_main: '盲区', verified: false });
+    expect(out.unverified_by_inventory).toBe(1);
+  });
+});
+
+describe('siting over the categories that were checked', () => {
+  it('suggests sites for the gaps of whichever categories the communities carry', async () => {
+    // a walked route due east, a community 300 m north of its middle with a 药店 gap
+    const pts: [number, number, number, number][] = Array.from({ length: 41 }, (_, i) => [
+      25 * i,
+      0,
+      (25 * i) / 1.17,
+      25 * i,
+    ]);
+    const check = (status_main: FacilityCheck['status_main']): FacilityCheck => ({
+      straight_m: status_main === '覆盖' ? 200 : 1300,
+      route_m: status_main === '覆盖' ? 260 : 1500,
+      dur_s: 1000,
+      status: status_main,
+      status_main,
+      borderline: false,
+      route_upper_bound: false,
+      verified: true,
+    });
+    const community = {
+      name: '甲',
+      pts: [],
+      centroid: [500, 300] as XY,
+      gate: 'navi' as const,
+      // an analysis of the task's three (no 幼儿园 or 社区卫生 check at all)
+      checks: { 小学: check('覆盖'), 菜市场: check('覆盖'), 药店: check('盲区') } as Community['checks'],
+    };
+    const asked: number[][] = [];
+    const out = await runSiting({
+      meter: meter(),
+      frame,
+      matrix: fakeMatrix((a, b) => 1.2 * Math.hypot(a[0] - b[0], a[1] - b[1]), asked),
+      communities: [community],
+      gates: new Map([['甲', frame.toLngLat(500, 300)]]),
+      paths: [{ bearing_deg: 90, pts }],
+      rule: TASK_RULE_M,
+      estimator: { rhoAt: () => 1.2 },
+    });
+    expect(Object.keys(out.suggestions)).toEqual(['药店']);
+    expect(out.suggestions['药店']![0]).toMatchObject({ covers: ['甲'], verified: true });
+    expect(out.verified_sites).toBe(1);
+    expect(asked).toEqual([[1, 1]]);
   });
 });
 
@@ -1006,11 +1129,12 @@ describe('买菜替代: the nearest shop within the rule on foot that sells vege
       verified: true,
     }) satisfies FacilityCheck;
   const covered = () => check('覆盖', 100, 120);
+  // communities of an analysis of the task's three: a 买菜替代 only needs their 菜市场 check
   const community = (name: string, xy: XY, market: FacilityCheck): Community => ({
     name,
     pts: [],
     centroid: xy,
-    checks: { 小学: covered(), 菜市场: market, 药店: covered() },
+    checks: { 小学: covered(), 菜市场: market, 药店: covered() } as Community['checks'],
   });
   const shopPoi = (
     uid: string,
@@ -1199,13 +1323,13 @@ describe('budgets and the quota estimate', () => {
       freshPages: 0,
       refine: 0,
       paths: 6,
-      coverage: 400,
+      coverage: 650,
     });
     expect(stepCaps(b)).toMatchObject({ facilities: 0, livelihood: 0, residential: 1, fresh: 0 });
-    // the defaults keep 4 pages for the checked categories, 2 for the 民生设施, 2 for compounds and 2
-    // for the 买菜替代 search
+    // the defaults keep 6 pages for the five checked categories, 2 for the 民生设施, 2 for compounds
+    // and 2 for the 买菜替代 search
     expect(stepCaps(resolveBudget('personal'))).toMatchObject({
-      facilities: 4,
+      facilities: 6,
       livelihood: 2,
       residential: 2,
       fresh: 2,
@@ -1217,21 +1341,36 @@ describe('budgets and the quota estimate', () => {
       residential: 2,
       fresh: 0,
     });
-    expect(stepCaps(resolveBudget('personal', { place: 9 }))).toMatchObject({ facilities: 4, fresh: 1 });
-    expect(stepCaps(resolveBudget('personal', { place: 12 }))).toMatchObject({ facilities: 6, fresh: 2 });
-    expect(stepCaps(resolveBudget('personal', { freshPages: 0 }))).toMatchObject({ facilities: 6, fresh: 0 });
-    expect(stepCaps(resolveBudget('enterprise'))).toMatchObject({ facilities: 7, fresh: 3 });
-    expect(serviceCaps(resolveBudget('enterprise')).routematrix_walking).toBe(48 + 288 + 900 + 120 + 80);
+    expect(stepCaps(resolveBudget('personal', { place: 9 }))).toMatchObject({ facilities: 5, fresh: 0 });
+    expect(stepCaps(resolveBudget('personal', { place: 11 }))).toMatchObject({ facilities: 6, fresh: 1 });
+    // a larger one goes to the checked categories
+    expect(stepCaps(resolveBudget('personal', { place: 14 }))).toMatchObject({ facilities: 8, fresh: 2 });
+    expect(stepCaps(resolveBudget('personal', { freshPages: 0 }))).toMatchObject({ facilities: 8, fresh: 0 });
+    expect(stepCaps(resolveBudget('enterprise'))).toMatchObject({ facilities: 9, fresh: 3 });
+    // five categories share the siting routes: up to two verified sites each
+    expect(resolveBudget('personal')).toMatchObject({ coverage: 650, siting: 100 });
+    expect(resolveBudget('enterprise')).toMatchObject({ coverage: 1500, siting: 200 });
+    expect(serviceCaps(resolveBudget('personal')).routematrix_walking).toBe(48 + 192 + 650 + 100 + 40);
+    expect(serviceCaps(resolveBudget('enterprise')).routematrix_walking).toBe(48 + 288 + 1500 + 200 + 80);
   });
 
   it('plans within the caps', () => {
     const task = planQuota({ center_bd09: CITY_ORIGIN });
     for (const s of task.steps) expect(s.expected).toBeLessThanOrEqual(s.max);
-    // the coverage check expects about 8 routes per compound
-    expect(task.steps.find((s) => s.step === 'coverage')).toMatchObject({ expected: 8 * 30 });
-    expect(planQuota({ center_bd09: CITY_ORIGIN }, { tier: 'enterprise' }).max.place).toBe(15);
-    expect(task.max.place).toBe(10);
-    expect(task.expected.place).toBe(9);
+    // the coverage check of five categories expects about 12 routes per compound
+    expect(task.steps.find((s) => s.step === 'coverage')).toMatchObject({ expected: 12 * 30 });
+    expect(task.steps.find((s) => s.step === 'siting')).toMatchObject({ expected: 30, max: 100 });
+    expect(planQuota({ center_bd09: CITY_ORIGIN }, { tier: 'enterprise' }).max.place).toBe(17);
+    expect(task.max.place).toBe(12);
+    // the union of the five checked categories takes about three pages, 生鲜超市 one more
+    expect(task.steps.find((s) => s.step === 'facilities')).toMatchObject({ expected: 4, max: 6 });
+    expect(task.expected.place).toBe(10);
+    // the notes name what the pages and routes buy
+    const note = (step: string) => task.steps.find((s) => s.step === step)!.note;
+    expect(note('facilities')).toMatch(/逐小区检查的幼儿园、小学、菜市场、药店、社区卫生/);
+    expect(note('livelihood')).toMatch(/^地点检索：养老、地铁、公园、超市、公交（/);
+    expect(note('coverage')).toMatch(/5 类候选设施（幼儿园、小学、菜市场、药店、社区卫生）/);
+    expect(note('siting')).toMatch(/每类有缺口的设施核验排名前 2 的选址建议/);
     expect(task.steps.find((s) => s.step === 'livelihood')).toMatchObject({
       stage: 'facilities',
       service: 'place',

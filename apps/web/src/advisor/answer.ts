@@ -5,7 +5,7 @@
  * their unit on the map. Nothing here changes what the answer says.
  */
 import type { CheckStatus, HardCategory } from '@zoudedao/core';
-import { CATS, type Model } from '../model/derive.js';
+import { type Model } from '../model/derive.js';
 import { HISTORY_CONTENT_MAX, HISTORY_MAX, type AskAnswer, type HistoryTurn } from '../data/ask.js';
 
 export type Inline =
@@ -247,11 +247,18 @@ export interface Suggestion {
 }
 
 const RANK: Record<CheckStatus, number> = { 盲区: 0, 伪覆盖: 1, 临界: 2, 覆盖: 3 };
-const MEASURE: Record<HardCategory, string> = { 小学: '所', 菜市场: '家', 药店: '家' };
+const MEASURE: Record<HardCategory, string> = {
+  幼儿园: '所',
+  小学: '所',
+  菜市场: '家',
+  药店: '家',
+  社区卫生: '家',
+};
 
 /** The category a unit misses worst: 盲区 before 伪覆盖, then the longer walk; verified checks only. */
 export function worstCategory(unit: Model['units'][number]): HardCategory | null {
-  const bad = CATS.map((cat) => ({ cat, c: unit.checks[cat] }))
+  const bad = (Object.keys(unit.checks) as HardCategory[])
+    .map((cat) => ({ cat, c: unit.checks[cat] }))
     .filter(({ c }) => c.verified !== false && c.status_main !== '覆盖')
     .sort((a, b) => (RANK[a.c.status_main] ?? 3) - (RANK[b.c.status_main] ?? 3) || b.c.route_m - a.c.route_m);
   return bad[0]?.cat ?? null;

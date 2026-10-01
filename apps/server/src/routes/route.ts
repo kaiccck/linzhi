@@ -1,5 +1,11 @@
 import { BaiduError, toApiError } from '@zoudedao/baidu';
-import type { AnalysisResult, HardCategory, LngLat, XY } from '@zoudedao/core';
+import {
+  HARD_CATEGORIES,
+  type AnalysisResult,
+  type HardCategory,
+  type LngLat,
+  type XY,
+} from '@zoudedao/core';
 import type { FastifyInstance, FastifySchemaValidationError } from 'fastify';
 import { untilAborted } from '../abort.js';
 import { ApiError, ERROR_STATUS } from '../errors.js';
@@ -59,7 +65,7 @@ const querySchema = {
   properties: {
     analysis_id: { type: 'string', minLength: 1, maxLength: 80, pattern: '^[A-Za-z0-9][A-Za-z0-9_~-]*$' },
     community: { type: 'string', minLength: 1, maxLength: 60 },
-    category: { type: 'string', enum: ['小学', '菜市场', '药店'] },
+    category: { type: 'string', enum: [...HARD_CATEGORIES] },
     rules: { type: 'string', enum: ['task'] },
     from: { type: 'string', maxLength: 60 },
     to: { type: 'string', maxLength: 60 },
@@ -74,7 +80,7 @@ function describeInvalid(errors: FastifySchemaValidationError[]): string {
     case 'community':
       return 'community 须为小区名（或地图编号，如 A-01），不超过 60 个字符';
     case 'category':
-      return 'category 只能是 小学、菜市场 或 药店';
+      return `category 只能是 ${HARD_CATEGORIES.join('、')} 之一`;
     case 'rules':
       return 'rules 只能是 task（赛题口径：步行 1 公里），国标口径已停用';
     default:
@@ -214,7 +220,13 @@ export function registerRouteRoute(app: FastifyInstance, opts: RouteRouteOptions
                 `分析 ${id} 里没有小区“${q.community}”。可选：${found.names.join('、')}`,
               );
             case 'no_check':
-              throw new ApiError(404, 'not_found', `“${q.community}”没有${q.category}的判定`);
+              throw new ApiError(
+                404,
+                'not_found',
+                found.checked.includes(q.category!)
+                  ? `“${q.community}”没有${q.category}的判定`
+                  : `分析 ${id} 没有检查${q.category}（只检查了${found.checked.join('、')}，较早的分析只检查赛题点名的三类），没有这一类的判定路线`,
+              );
             case 'not_routed':
               throw new ApiError(
                 404,

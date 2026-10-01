@@ -61,7 +61,7 @@ export const initialUi: UiState = {
   hot: null,
   playing: false,
   walked: false,
-  facCats: ['小学', '菜市场', '药店'],
+  facCats: ['幼儿园', '小学', '菜市场', '药店', '社区卫生'],
 };
 
 export function uiReducer(s: UiState, a: UiAction): UiState {

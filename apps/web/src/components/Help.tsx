@@ -4,8 +4,9 @@
  * lists are read from the analysis on screen (its attribution), never typed in.
  */
 import { useEffect, useId, useRef, useState } from 'react';
+import { TASK_CATEGORIES } from '@zoudedao/core';
 import { readApprovalNumber } from '../map/BaiduBasemap.js';
-import { CATS, distWords, type Model } from '../model/derive.js';
+import { distWords, type Model } from '../model/derive.js';
 import { Ui } from './Icons.js';
 import { NumText } from './NumText.js';
 
@@ -29,7 +30,10 @@ export function helpFacts(model: Model) {
     lists: officialLists(attribution),
     outlines: model.units.some((u) => u.outlined),
     osm: osm ?? null,
-    task: `步行 ${distWords(model.ruleM)}内应有${CATS.join('、')}`,
+    task: `步行 ${distWords(model.ruleM)}内应有${model.cats.join('、')}`,
+    // which of them the task itself names, and which are checked beside them on the same walk
+    asked: model.cats.filter((c) => TASK_CATEGORIES.includes(c)),
+    added: model.cats.filter((c) => !TASK_CATEGORIES.includes(c)),
   };
 }
 
@@ -88,7 +92,12 @@ function Panel({ model, live, onClose }: { model: Model; live: boolean; onClose(
       </section>
       <section>
         <h3>判定规则</h3>
-        <p>{f.task}（赛题要求），按百度实测的步行距离判定，不按直线。</p>
+        <p>
+          {f.task}，按百度实测的步行距离判定，不按直线。
+          {f.added.length
+            ? `其中${f.asked.join('、')}是赛题要求，${f.added.join('、')}按同一距离一并检查。`
+            : '（赛题要求）'}
+        </p>
       </section>
       <section>
         <h3>数据来源与日期</h3>

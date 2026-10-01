@@ -22,7 +22,7 @@ export * from './tools/types.js';
 export * from './tools/context.js';
 export * from './tools/registry.js';
 export { analyzeLifeCircle, analysisSummary, type AnalyzeData } from './tools/analyze.js';
-export { compareSites, type CompareRow } from './tools/compare.js';
+export { compareSites, type CompareData, type CompareRow } from './tools/compare.js';
 export { listServiceGaps, type GapsData } from './tools/gaps.js';
 export { getIsochrone, featureSummaries } from './tools/isochrone.js';
 export { locatePlace } from './tools/locate.js';

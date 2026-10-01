@@ -8,9 +8,13 @@
  *         pass a nearer facility never routed; those are routed too, so via / route_m are the nearest
  *         walk (what the budget cannot cover keeps route_upper_bound and unrouted_nearer)
  *   then  mergeMatrixResults per category → four-state checks → 灰色区域
+ *
+ * Every category the check set lists is checked alike; a set may list fewer than all five (the task's
+ * three in older analyses and their tests), and the communities then carry checks of those only.
  */
 import type { RouteMatrix } from '@zoudedao/baidu';
 import {
+  checkedCategories,
   gapCount,
   grayAreaPolygons,
   HARD_CATEGORIES,
@@ -19,6 +23,7 @@ import {
   planMatrixBatches,
   planNearestTopUp,
   statusRaster,
+  TASK_RULE_M,
   type CheckStatus,
   type Community,
   type DemandPoint,
@@ -52,13 +57,27 @@ export interface LiveCommunity extends Community {
   gate: GateSource;
 }
 
-/** What the check needs: distances, the facilities that answer each category, inventory limits. */
+/**
+ * What the check needs, per checked category: the facilities that answer it (the categories listed
+ * here are the ones checked), its distance and how far out its facility list is complete.
+ */
 export interface CheckSet {
-  rule: Readonly<Record<HardCategory, number>>;
-  facilities: Readonly<Record<HardCategory, readonly Poi[]>>;
-  /** Distance from the centre within which each category's facilities are all known. */
-  knownRadius: Readonly<Record<HardCategory, number>>;
+  /** Absent: the task rule (TASK_RULE_M, 1 km). */
+  rule: Readonly<Partial<Record<HardCategory, number>>>;
+  facilities: Readonly<Partial<Record<HardCategory, readonly Poi[]>>>;
+  /**
+   * Distance from the centre within which each category's facilities are all known. Absent: nothing is
+   * known to be complete, so no gap of that category is ever claimed (it stays unverified).
+   */
+  knownRadius: Readonly<Partial<Record<HardCategory, number>>>;
 }
+
+/** The categories a set checks, in display order: those it lists facilities for. */
+export function setCategories(set: Pick<CheckSet, 'facilities'>): HardCategory[] {
+  return HARD_CATEGORIES.filter((c) => set.facilities[c] !== undefined);
+}
+
+const ruleOf = (set: CheckSet, cat: HardCategory) => set.rule[cat] ?? TASK_RULE_M[cat];
 
 export interface CoverageOutcome {
   communities: LiveCommunity[];
@@ -83,9 +102,9 @@ function planSet(
   routes: readonly RoutedPair[],
 ): Map<string, OdDestination[]> {
   const want = new Map<string, OdDestination[]>();
-  for (const cat of HARD_CATEGORIES) {
-    const w = planCoverageRound(points, { [cat]: set.facilities[cat] }, routes, {
-      rule_m: set.rule[cat],
+  for (const cat of setCategories(set)) {
+    const w = planCoverageRound(points, { [cat]: set.facilities[cat]! }, routes, {
+      rule_m: ruleOf(set, cat),
       k: COVERAGE_K,
     });
     for (const [id, dests] of w) {
@@ -102,23 +121,20 @@ function mergeSet(
   demand: readonly DemandSite[],
   set: CheckSet,
   routes: readonly RoutedPair[],
-): { checks: Record<HardCategory, Map<string, FacilityCheck>>; unverified: number } {
+): { checks: Partial<Record<HardCategory, Map<string, FacilityCheck>>>; unverified: number } {
   let unverified = 0;
-  const checks = {} as Record<HardCategory, Map<string, FacilityCheck>>;
-  for (const cat of HARD_CATEGORIES) {
-    const merged = mergeMatrixResults(points, set.facilities[cat], routes, {
-      rule_m: set.rule[cat],
+  const checks: Partial<Record<HardCategory, Map<string, FacilityCheck>>> = {};
+  for (const cat of setCategories(set)) {
+    const rule = ruleOf(set, cat);
+    const known = set.knownRadius[cat] ?? 0;
+    const merged = mergeMatrixResults(points, set.facilities[cat]!, routes, {
+      rule_m: rule,
       speed: WALK_SPEED,
     });
     for (const d of demand) {
       const c = merged.get(d.id);
       // a gap is only proven if every facility that could serve the point was in the search results
-      if (
-        c &&
-        c.verified &&
-        c.status_main !== '覆盖' &&
-        d.straight_m + set.rule[cat] > set.knownRadius[cat]
-      ) {
+      if (c && c.verified && c.status_main !== '覆盖' && d.straight_m + rule > known) {
         c.verified = false;
         unverified++;
       }
@@ -141,6 +157,7 @@ export async function runCoverage(args: {
   warn?: (message: string) => void;
 }): Promise<CoverageOutcome> {
   const { meter, frame, matrix, demand, set } = args;
+  const categories = setCategories(set);
   const points: DemandPoint[] = demand.map((d) => ({ id: d.id, name: d.name, xy: d.xy }));
   const site = new Map(demand.map((d) => [d.id, d]));
   const routes: RoutedPair[] = [];
@@ -215,7 +232,8 @@ export async function runCoverage(args: {
 
   // nearest top-up: whole batches while the budget lasts; a skipped one only leaves its checks'
   // upper-bound flags standing
-  const topUp = planNearestTopUp(points, set.facilities, routes);
+  const byCategory = Object.fromEntries(categories.map((cat) => [cat, set.facilities[cat]!]));
+  const topUp = planNearestTopUp(points, byCategory, routes);
   if (topUp.size) {
     let room = meter.room('coverage');
     const chosen: OdBatch<DemandPoint, OdDestination>[] = [];
@@ -239,12 +257,11 @@ export async function runCoverage(args: {
   const main = mergeSet(points, demand, set, routes);
 
   const communities: LiveCommunity[] = demand.map((d) => {
-    const pick = (set: typeof main) =>
-      Object.fromEntries(HARD_CATEGORIES.map((cat) => [cat, set.checks[cat].get(d.id)!])) as Record<
-        HardCategory,
-        FacilityCheck
-      >;
-    const c = pick(main);
+    // the set's categories only (Community.checks holds what was checked; core checkedCategories)
+    const c = Object.fromEntries(categories.map((cat) => [cat, main.checks[cat]!.get(d.id)!])) as Record<
+      HardCategory,
+      FacilityCheck
+    >;
     // centroid is the gate (every walk starts there); label_xy where the compound sits on the map
     const out: LiveCommunity = {
       name: d.name,
@@ -287,25 +304,31 @@ export function worstStatus(checks: readonly FacilityCheck[]): CheckStatus | und
   return worst;
 }
 
-/** Same shape as stats.community_status_counts of the samples. */
-export function statusCounts(communities: readonly Community[]) {
+/**
+ * Same shape as stats.community_status_counts of the samples, over `categories` (default: those the
+ * communities were checked for, core checkedCategories); a check a community lacks counts nowhere.
+ */
+export function statusCounts(
+  communities: readonly Community[],
+  categories: readonly HardCategory[] = checkedCategories({ communities: [...communities] }),
+) {
   const zero = (): Record<CheckStatus, number> => ({ 覆盖: 0, 临界: 0, 伪覆盖: 0, 盲区: 0 });
   const all = zero();
   const main = { 覆盖: 0, 伪覆盖: 0, 盲区: 0 };
-  const by_category = Object.fromEntries(HARD_CATEGORIES.map((c) => [c, zero()])) as Record<
-    HardCategory,
-    Record<CheckStatus, number>
+  const by_category = Object.fromEntries(categories.map((c) => [c, zero()])) as Partial<
+    Record<HardCategory, Record<CheckStatus, number>>
   >;
   let unverified = 0;
   let upper = 0;
   let total = 0;
   for (const c of communities) {
-    const checks = c.checks;
-    for (const cat of HARD_CATEGORIES) {
+    const checks = c.checks as Partial<Record<HardCategory, FacilityCheck>>;
+    for (const cat of categories) {
       const k = checks[cat];
+      if (!k) continue;
       all[k.status]++;
       main[k.status_main]++;
-      by_category[cat][k.status]++;
+      by_category[cat]![k.status]++;
       if (!k.verified) unverified++;
       if (k.route_upper_bound) upper++;
       total++;
