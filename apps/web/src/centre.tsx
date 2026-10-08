@@ -1,8 +1,10 @@
 /**
  * Choosing a centre: the top bar's search (an address, or coordinates in a chosen frame) and a point
- * picked on the map. Live mode checks the new centre (a typed or found place at once, a map click
- * after a confirmation, since a check costs Baidu quota); sample mode says honestly that it does not
- * recompute, and shows where the point lies. The notes it writes appear under the search box.
+ * picked on the map. The map only offers a new centre after 新体检 asked for one (`picking`): a click
+ * on the map is otherwise just a look around. Live mode checks the new centre (a typed or found place
+ * at once, a map click after a confirmation, since a check costs Baidu quota); sample mode says
+ * honestly that it does not recompute, and shows where the point lies. The notes it writes appear
+ * under the search box.
  */
 import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { bearingDeg, type XY } from '@zoudedao/core';
@@ -71,8 +73,12 @@ export interface Centre {
   notes: Note[];
   dismiss(id: string): void;
   pending: PendingPoint | null;
-  /** a point picked on the map (BD-09) */
-  pick(lng: number, lat: number): void;
+  /** 新体检 is on: the next click on the map proposes a centre */
+  picking: boolean;
+  startPick(): void;
+  stopPick(): void;
+  /** a point clicked on the map (BD-09): a centre only while picking (or forced, for captures) */
+  pick(lng: number, lat: number, force?: boolean): void;
   confirm(): void;
   cancel(restoreFocus: boolean): void;
   /** the map tells whether a typed point can be brought into view (Baidu pans; offline cannot) */
@@ -100,6 +106,9 @@ export function useCentre({
   const [crs, setCrs] = useState<Crs>('bd09');
   const [notes, setNotes] = useState<Note[]>([]);
   const [pending, setPending] = useState<PendingPoint | null>(null);
+  const [picking, setPicking] = useState(false);
+  const pickingRef = useRef(picking);
+  pickingRef.current = picking;
   const canReveal = useRef<(xy: XY) => boolean>(() => true);
 
   const show = useCallback(
@@ -110,7 +119,9 @@ export function useCentre({
 
   /* ---------- a centre picked on the map ---------- */
   const pick = useCallback(
-    (lng: number, lat: number) => {
+    (lng: number, lat: number, force = false) => {
+      // not asked for: a click on the map is a look around, not a new check
+      if (!force && !pickingRef.current) return;
       const xy = model.frame.toXY(lng, lat);
       const coords = fmtLngLat([lng, lat], 5);
       const candidate: LocateCandidate = {
@@ -144,6 +155,21 @@ export function useCentre({
     [model, live, dataNote, show, clearSample],
   );
 
+  // 新体检: in live mode the map waits for a click (or the search for an address); sample mode cannot
+  // check a new place, and says so instead of waiting
+  const startPick = useCallback(() => {
+    if (!live) {
+      show(sampleNote(model, dataNote, live, '体检新地点：'));
+      return;
+    }
+    clearSample();
+    setPicking(true);
+  }, [live, model, dataNote, show, clearSample]);
+  const stopPick = useCallback(() => {
+    setPicking(false);
+    setPending((p) => (p && !p.running ? null : p));
+  }, []);
+
   const prevFocus = useRef<Element | null>(null);
   useEffect(() => {
     if (pending?.ask) prevFocus.current ??= document.activeElement;
@@ -153,6 +179,7 @@ export function useCentre({
     (restoreFocus: boolean) => {
       const back = prevFocus.current;
       setPending(null);
+      setPicking(false);
       clearSample();
       if (restoreFocus && back instanceof HTMLElement && back.isConnected && back !== document.body) {
         back.focus({ preventScroll: true });
@@ -163,11 +190,12 @@ export function useCentre({
   const confirm = useCallback(() => {
     if (!pending) return;
     setPending({ ...pending, ask: false, running: true });
+    setPicking(false);
     onAnalyze(pending.candidate);
   }, [pending, onAnalyze]);
-  // Esc cancels the confirmation plate, wherever focus is
+  // Esc cancels the confirmation plate, or leaves 新体检, wherever focus is
   useEffect(() => {
-    if (!pending?.ask) return;
+    if (!pending?.ask && !picking) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       e.preventDefault();
@@ -175,7 +203,11 @@ export function useCentre({
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [pending?.ask, cancel]);
+  }, [pending?.ask, picking, cancel]);
+  // a check under way (from the map or the search) ends the picking
+  useEffect(() => {
+    if (run?.status === 'running') setPicking(false);
+  }, [run]);
   // the marker of a started check goes when the check stops (a result clears it below)
   useEffect(() => {
     if (pending?.running && run?.status !== 'running') setPending(null);
@@ -188,6 +220,7 @@ export function useCentre({
       return;
     }
     setPending(null);
+    setPicking(false);
     setNotes([]);
   }, [resultKey]);
 
@@ -433,6 +466,9 @@ export function useCentre({
     notes: shown,
     dismiss,
     pending,
+    picking,
+    startPick,
+    stopPick,
     pick,
     confirm,
     cancel,

@@ -40,9 +40,7 @@ export function StreamLayer({ view, model, label }: { view: View; model: StreamM
       ))}
       <div className="here passive tag-above" style={{ left: hx, top: hy }}>
         <span className="tag">{label.length > 16 ? `${label.slice(0, 15)}…` : label}</span>
-        <span className="dot">
-          <Pg id="pg-walk" />
-        </span>
+        <span className="dot" />
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ import type { Model } from '../model/derive.js';
 import type { Mode } from '../state.js';
 import { HelpButton } from './Help.js';
 import { BRAND, BrandMark } from './Brand.js';
-import { Ui } from './Icons.js';
+import { Pg, Ui } from './Icons.js';
 
 export type TopTab = Mode | 'report';
 
@@ -285,7 +285,18 @@ function AreaMenu({
   );
 }
 
-function Search({ centre, open, onClose }: { centre: Centre; open: boolean; onClose(): void }) {
+function Search({
+  centre,
+  open,
+  focusTick = 0,
+  onClose,
+}: {
+  centre: Centre;
+  open: boolean;
+  /** bumped when 新体检 starts: the box takes the focus, ready for an address */
+  focusTick?: number;
+  onClose(): void;
+}) {
   const { search, setSearch, crs, onCrs, submit, notes, dismiss } = centre;
   const coords = parseCoords(search);
   const isCoords = coords?.ok === true;
@@ -300,6 +311,9 @@ function Search({ centre, open, onClose }: { centre: Centre; open: boolean; onCl
   useEffect(() => {
     if (open) input.current?.focus();
   }, [open]);
+  useEffect(() => {
+    if (focusTick) input.current?.focus({ preventScroll: true });
+  }, [focusTick]);
   useEffect(() => {
     const onDown = (e: PointerEvent) => {
       if (!box.current?.contains(e.target as Node)) setFocus(false);
@@ -416,6 +430,9 @@ export function TopBar({
   live = false,
   onTour,
   tourWhy = '数据载入后可以演示',
+  onNewCheck,
+  newCheckOn = false,
+  newCheckWhy = '数据载入后可以体检新地点',
 }: {
   tab: TopTab;
   onTab(tab: TopTab): void;
@@ -439,8 +456,18 @@ export function TopBar({
   /** 演示: open 路演模式 (absent while it cannot run: the button stays, disabled, saying why) */
   onTour?(): void;
   tourWhy?: string;
+  /** 新体检: start choosing a new centre (on the map, or by the search); absent while it cannot */
+  onNewCheck?(): void;
+  /** choosing a new centre now (the button reads as pressed; pressing again leaves it) */
+  newCheckOn?: boolean;
+  newCheckWhy?: string;
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
+  // 新体检 turned on: the search is the other way in, ready for an address
+  const [focusTick, setFocusTick] = useState(0);
+  useEffect(() => {
+    if (newCheckOn) setFocusTick((t) => t + 1);
+  }, [newCheckOn]);
   return (
     <header className="topbar" data-search={searchOpen ? 'open' : undefined}>
       <a className="brand" href="./" aria-label={`${BRAND}，15 分钟生活圈体检`}>
@@ -473,6 +500,24 @@ export function TopBar({
           {...(onOpenHistory ? { onOpenHistory } : {})}
           {...(onMenu ? { onMenu } : {})}
         />
+        <button
+          type="button"
+          className="tool-btn new-check"
+          onClick={onNewCheck}
+          disabled={!onNewCheck}
+          aria-pressed={onNewCheck ? newCheckOn : undefined}
+          title={
+            !onNewCheck
+              ? newCheckWhy
+              : newCheckOn
+                ? '取消选点（Esc）'
+                : '体检一个新地点：在地图上点选中心，或输入地址、经纬度'
+          }
+          aria-label={onNewCheck ? '新体检：选一个新的中心' : `新体检（${newCheckWhy}）`}
+        >
+          <Pg id="pg-pin" />
+          <span>新体检</span>
+        </button>
         {centre ? (
           <>
             <button
@@ -484,7 +529,12 @@ export function TopBar({
             >
               <Ui id={searchOpen ? 'ui-close' : 'ui-search'} />
             </button>
-            <Search centre={centre} open={searchOpen} onClose={() => setSearchOpen(false)} />
+            <Search
+              centre={centre}
+              open={searchOpen}
+              focusTick={focusTick}
+              onClose={() => setSearchOpen(false)}
+            />
           </>
         ) : (
           // while the data loads: the box in its place, not yet usable (nothing in the bar moves later)

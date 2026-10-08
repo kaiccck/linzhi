@@ -521,9 +521,8 @@ export function MapOverlay(props: Props) {
           ) : (
             <span className="tag">{props.hereLabel ?? '片区中心'}</span>
           )}
-          <span className="dot">
-            <Pg id="pg-walk" />
-          </span>
+          {/* the centre itself: a plain point, the walk's origin (no pictogram: it means nothing here) */}
+          <span className="dot" />
         </div>
 
         {props.pending ? (

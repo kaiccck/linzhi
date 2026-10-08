@@ -132,9 +132,7 @@ function MapKey({ model }: { model: Model }) {
   return (
     <ul className="rp-key">
       <li>
-        <span className="k-here" aria-hidden="true">
-          <Pg id="pg-walk" />
-        </span>
+        <span className="k-here" aria-hidden="true" />
         <span>片区中心</span>
       </li>
       <li>

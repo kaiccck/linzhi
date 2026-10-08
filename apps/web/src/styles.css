@@ -2425,7 +2425,8 @@ button.cite:focus-visible {
 .map[data-basemap='baidu'] .layer.under {
   mix-blend-mode: multiply;
 }
-.map[data-placing] .bm {
+.map[data-placing] .bm,
+.map[data-picking] .bm {
   cursor: crosshair;
 }
 .layer {
@@ -2693,6 +2694,16 @@ button.cite:focus-visible {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.3);
   color: #fff;
+}
+.map-hint .hint-x {
+  margin-left: 10px;
+  padding: 0 0 0 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-weight: 500;
+}
+.map-hint .hint-x:hover {
+  color: #c9d6f3;
 }
 
 /* 走一遍: the one primary action, with the time scrubber and its readout */
@@ -3085,21 +3096,19 @@ button.cite:focus-visible {
 .here {
   transform: translate(-50%, -50%);
 }
+/* 片区中心: a plain cobalt point in a white ring (the walk starts here), its flag beside it — 12px
+   off the 18px point, where the layout reserves it (15px from the centre plus a 6px gap) */
 .here .dot {
   position: relative;
-  width: 30px;
-  height: 30px;
+  display: block;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
   background: var(--cobalt);
-  color: #fff;
   border: 3px solid #fff;
-  box-shadow: 0 2px 8px rgba(20, 70, 176, 0.35);
-}
-.here .dot .pg {
-  width: 15px;
-  height: 15px;
+  box-shadow:
+    0 0 0 1px rgba(20, 70, 176, 0.28),
+    0 2px 8px rgba(20, 70, 176, 0.35);
 }
 .here .tag {
   position: absolute;
@@ -3114,21 +3123,21 @@ button.cite:focus-visible {
 }
 .here.tag-left .tag {
   top: calc(50% + var(--dy, 0px));
-  right: calc(100% + 6px);
+  right: calc(100% + 12px);
   transform: translateY(-50%);
 }
 .here.tag-right .tag {
   top: calc(50% + var(--dy, 0px));
-  left: calc(100% + 6px);
+  left: calc(100% + 12px);
   transform: translateY(-50%);
 }
 .here.tag-above .tag {
-  bottom: calc(100% + 6px);
+  bottom: calc(100% + 12px);
   left: calc(50% + var(--dx, 0px));
   transform: translateX(-50%);
 }
 .here.tag-below .tag {
-  top: calc(100% + 6px);
+  top: calc(100% + 12px);
   left: calc(50% + var(--dx, 0px));
   transform: translateX(-50%);
 }
@@ -3854,6 +3863,16 @@ button.cite:focus-visible {
   border-color: var(--cobalt);
   color: var(--cobalt);
 }
+/* 新体检: the one way to a new centre (the map no longer takes one from a stray click) */
+.new-check .pg {
+  width: 15px;
+  height: 15px;
+}
+.new-check[aria-pressed='true'] {
+  border-color: var(--cobalt);
+  background: var(--cobalt-tint);
+  color: var(--cobalt);
+}
 .help {
   position: relative;
 }
@@ -4194,6 +4213,12 @@ button.cite:focus-visible {
 .map[data-narrow='true'] .legend .lg-who {
   display: none;
 }
+.map[data-narrow='true'] .map-hint {
+  width: calc(100% - 24px);
+  white-space: normal;
+  text-align: center;
+  border-radius: 12px;
+}
 /* a narrow map's 走一遍 card, compact and one height whatever it says: the button and the reach on one
    row, the scrubber under them, the circle's line last */
 .map[data-narrow='true'] .walk {
@@ -4311,11 +4336,11 @@ button.cite:focus-visible {
   .topbar {
     height: auto;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto auto;
     grid-template-areas:
-      'brand area toggle help tour'
-      'search search search search search'
-      'modes modes modes modes modes';
+      'brand area new toggle help tour'
+      'search search search search search search'
+      'modes modes modes modes modes modes';
     gap: 0 6px;
     padding: 10px 12px 0;
   }
@@ -4327,7 +4352,13 @@ button.cite:focus-visible {
     width: 36px;
     padding: 0;
   }
-  .tour-btn span {
+  .new-check {
+    grid-area: new;
+    width: 36px;
+    padding: 0;
+  }
+  .tour-btn span,
+  .new-check span {
     display: none;
   }
   .help-pop {

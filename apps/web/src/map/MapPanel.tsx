@@ -400,7 +400,7 @@ export function MapPanel(props: Props) {
   const streamingRef = useRef(false);
   streamingRef.current = !!stream;
   const pick = useCallback(
-    (lng: number, lat: number) => {
+    (lng: number, lat: number, force = false) => {
       // 规划: the click places the planned site instead of choosing a new centre
       if (planRef.current.placing) {
         placeRef.current(model.frame.toXY(lng, lat), [round6(lng), round6(lat)]);
@@ -408,7 +408,8 @@ export function MapPanel(props: Props) {
       }
       // a check is streaming in: the map shows its centre, not the one on screen
       if (streamingRef.current) return;
-      centre.pick(lng, lat);
+      // a centre only after 新体检 asked for one (the hook ignores a click otherwise)
+      centre.pick(lng, lat, force);
     },
     [model, centre],
   );
@@ -541,7 +542,7 @@ export function MapPanel(props: Props) {
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     const w = window as unknown as Record<string, unknown>;
-    w.__zddPick = (lng: number, lat: number) => pickRef.current(lng, lat);
+    w.__zddPick = (lng: number, lat: number) => pickRef.current(lng, lat, true);
     return () => {
       delete w.__zddPick;
     };
@@ -936,6 +937,7 @@ export function MapPanel(props: Props) {
         data-basemap={offline ? 'offline' : 'baidu'}
         data-narrow={narrow}
         data-placing={plan.placing || undefined}
+        data-picking={(centre.picking && !plan.placing) || undefined}
         data-docked={((pending?.ask || evItem) && narrow) || undefined}
         data-tour={props.tour ? (narrow ? 'narrow' : 'wide') : undefined}
       >
@@ -1037,7 +1039,17 @@ export function MapPanel(props: Props) {
         ) : null}
         {plan.placing ? (
           <p className="map-hint" role="status">
-            在地图上点一个位置，放下新的设施 · <kbd>Esc</kbd> 取消
+            在地图上点一个位置，放下新的设施 · <kbd>Esc</kbd>
+            <button type="button" className="hint-x" onClick={props.onCancelPlacing}>
+              取消
+            </button>
+          </p>
+        ) : centre.picking && !pending?.ask ? (
+          <p className="map-hint" role="status">
+            新体检：在地图上点一个中心，或在上方输入地址、经纬度 · <kbd>Esc</kbd>
+            <button type="button" className="hint-x" onClick={centre.stopPick}>
+              取消
+            </button>
           </p>
         ) : null}
 

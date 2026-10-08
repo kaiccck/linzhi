@@ -140,6 +140,19 @@ export function Screen({
   const [branchSeq, setBranchSeq] = useState(0);
 
   const centre = useCentre({ model, dataNote, live, run, resultKey, onAnalyze, onCancelAnalysis });
+  const centreRef = useRef(centre);
+  centreRef.current = centre;
+  // 新体检: the map (or the search) is asked for a new centre; pressed again, it stops asking
+  const onNewCheck = useCallback(() => {
+    const c = centreRef.current;
+    if (c.picking) {
+      c.stopPick();
+      return;
+    }
+    // one click mode at a time: 规划's own placing stops
+    setPlan((p) => (p.placing ? { ...p, placing: false } : p));
+    c.startPick();
+  }, []);
 
   const stopLoop = () => {
     cancelAnimationFrame(raf.current);
@@ -287,6 +300,7 @@ export function Screen({
   const onPlan = useCallback(() => onMode('plan'), [onMode]);
   const onPlace = useCallback(() => {
     measureCtl.current?.abort();
+    centreRef.current.stopPick();
     setPlan((p) => ({ ...p, placing: true }));
     onMode('plan');
   }, [onMode]);
@@ -483,6 +497,7 @@ export function Screen({
   const step = tourAt === null ? null : (steps[Math.min(tourAt, steps.length - 1)] ?? null);
   const beforeTour = useRef<{ mode: Mode; sub: CheckView; cat: HardCategory; gray: boolean } | null>(null);
   const startTour = useCallback(() => {
+    centreRef.current.stopPick();
     beforeTour.current = { mode, sub, cat, gray: ui.gray };
     onView('check');
     setTourAt(0);
@@ -595,6 +610,9 @@ export function Screen({
         live={live}
         onTour={view === 'report' || running ? undefined : startTour}
         tourWhy={running ? '体检进行中，结束后可以演示' : '回到体检页可以演示'}
+        onNewCheck={view === 'report' || running || touring ? undefined : onNewCheck}
+        newCheckOn={centre.picking}
+        newCheckWhy={running ? '体检进行中' : touring ? '演示中不能选点' : '回到体检页可以选点'}
       />
       {view === 'report' ? (
         <Suspense fallback={<p className="report-loading">正在排版体检报告…</p>}>

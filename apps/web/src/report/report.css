@@ -259,17 +259,12 @@ html[data-view='report'] body {
   font-weight: 500;
 }
 .k-here {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
   background: var(--cobalt);
-  color: #fff;
-}
-.k-here .pg {
-  width: 10px;
-  height: 10px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(20, 70, 176, 0.4);
 }
 .k-ramp {
   width: 26px;
