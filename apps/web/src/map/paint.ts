@@ -128,7 +128,7 @@ export const GRAY = {
 export type UnderStep = 'ground' | 'field' | 'gray-fill' | 'streets';
 /** Layers of the `over` canvas, bottom first; the HTML codes, marks and cards sit above both. */
 export type OverStep =
-  'gray-edge' | 'plates' | 'isochrones' | 'method' | 'front' | 'circle' | 'route' | 'labels';
+  'gray-edge' | 'iso-minor' | 'plates' | 'isochrones' | 'method' | 'front' | 'circle' | 'route' | 'labels';
 
 export interface PlanInput {
   T: number;
@@ -155,10 +155,13 @@ export function paintPlan(p: PlanInput): { under: UnderStep[]; over: OverStep[] 
   if (base) under.push('streets');
   const over: OverStep[] = [];
   if (gray) over.push('gray-edge');
-  over.push('plates', 'isochrones');
+  // 5′ and 10′ under the community plates (they read the field, they must not cut through a verdict);
+  // the 15′ edge over them
+  over.push('iso-minor', 'plates', 'isochrones');
   // the method layer is data, not a verdict, but it keeps out of the one authored moment
   if (p.method && !p.playing) over.push('method');
-  if (![300, 600, 900].includes(p.T) && p.T > 0) over.push('front');
+  // the walk's front at every minute it is walking (a scrubbed 5′ or 10′ shows its own hairline)
+  if (p.T > 0 && p.T < 900 && (p.playing || (p.T !== 300 && p.T !== 600))) over.push('front');
   if (p.circle) over.push('circle');
   if (verdict && p.T >= 900 && p.route) over.push('route');
   if (base) over.push('labels');
@@ -366,9 +369,10 @@ export class ScenePainter {
             o.setLineDash([]);
           }
           break;
+        case 'iso-minor':
         case 'isochrones':
-          // 5′ and 10′ as hairlines, 15′ as the clear edge of the reach
-          for (const L of [300, 600, 900] as const) {
+          // 5′ and 10′ as hairlines (under the plates), 15′ as the clear edge of the reach (over them)
+          for (const L of step === 'iso-minor' ? ([300, 600] as const) : ([900] as const)) {
             if (L > st.T + 1e-6) continue;
             o.beginPath();
             if (ts === 1) {

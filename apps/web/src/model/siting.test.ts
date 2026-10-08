@@ -40,7 +40,7 @@ describe('siting suggestions as pins', () => {
       expect(p.covers.length).toBeGreaterThan(0);
       for (const c of p.covers) expect(c.unit && lacks(c.unit, p.cat)).toBeTruthy();
       // candidates lie on the walked routes, and say where
-      expect(p.label).toMatch(/向步行路线约 \d+ 米处$/);
+      expect(p.label).toMatch(/向步行路线约 \d+ m 处$/);
     }
     for (const cat of ['小学', '菜市场', '药店'] as const) {
       const ranks = pins.filter((p) => p.cat === cat).map((p) => p.rank);

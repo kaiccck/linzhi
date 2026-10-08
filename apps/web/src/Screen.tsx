@@ -31,8 +31,13 @@ import {
   type Profile,
 } from './state.js';
 
-const WALK_MS = 3400;
+/** 走一遍: 15′ in 2.8 s, slow off the mark and into the edge, and it lands the instant it reaches 15′. */
+const WALK_MS = 2800;
 const WALK_TO = 900;
+const easeInOut = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+/** the opening's pause between the map settling and the walk, and the longest it waits for the map */
+const INTRO_BREATH_MS = 450;
+const INTRO_LATEST_MS = 7000;
 
 /** ?tour opens 路演模式 on its first step, ?tour=3 on the third */
 const tourFromUrl = (): number | null => {
@@ -75,6 +80,7 @@ export function Screen({
   activeLive,
   onOpenHistory,
   onHistoryMenu,
+  intro = false,
 }: {
   model: Model;
   resultKey: string;
@@ -106,8 +112,12 @@ export function Screen({
   onOpenHistory(item: HistoryItem): void;
   /** the area menu opened: a chance to refresh the history */
   onHistoryMenu(): void;
+  /** the first visit's opening: the reach waits at 0 and walks once by itself when the map is ready */
+  intro?: boolean;
 }) {
-  const [ui, dispatch] = useReducer(uiReducer, initialUi);
+  const [ui, dispatch] = useReducer(uiReducer, intro, (i) =>
+    i ? { ...initialUi, T: 0, playing: true } : initialUi,
+  );
   const playingRef = useRef(false);
   playingRef.current = ui.playing;
   const raf = useRef(0);
@@ -137,12 +147,11 @@ export function Screen({
   };
 
   // a new analysis on screen: its reach at 15′, its worst category, no planned site
-  const firstResult = useRef(true);
+  // (keyed on the result, not on a first-run flag: StrictMode's second mount is no new analysis)
+  const shownKey = useRef(resultKey);
   useEffect(() => {
-    if (firstResult.current) {
-      firstResult.current = false;
-      return;
-    }
+    if (shownKey.current === resultKey) return;
+    shownKey.current = resultKey;
     stopLoop();
     dispatch({ type: 'reset' });
     setCat(worstCategory(model));
@@ -154,6 +163,26 @@ export function Screen({
     setBranches(null);
     // the model is read for its worst category once per result, not again when the rule set changes
   }, [resultKey]);
+
+  // the walk: the reach from 0 to 15′ over WALK_MS, eased in and out
+  const walk = useCallback(() => {
+    stopLoop();
+    dispatch({ type: 'play' });
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / WALK_MS);
+      const T = Math.round((easeInOut(p) * WALK_TO) / 10) * 10;
+      // no frame waits at 15′: the verdict lands as the walk reaches it
+      if (T < WALK_TO) {
+        dispatch({ type: 'tick', T });
+        raf.current = requestAnimationFrame(tick);
+      } else {
+        raf.current = 0;
+        dispatch({ type: 'finish' });
+      }
+    };
+    raf.current = requestAnimationFrame(tick);
+  }, []);
 
   // 走一遍: the reach replays from 0; tints, codes and rows hold their verdict until 15′
   const onPlay = useCallback(() => {
@@ -169,22 +198,34 @@ export function Screen({
       dispatch({ type: 'finish' });
       return;
     }
-    stopLoop();
-    dispatch({ type: 'play' });
-    const t0 = performance.now();
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - t0) / WALK_MS);
-      const eased = 1 - Math.pow(1 - p, 3);
-      if (p < 1) {
-        dispatch({ type: 'tick', T: Math.round((eased * WALK_TO) / 10) * 10 });
-        raf.current = requestAnimationFrame(tick);
-      } else {
-        raf.current = 0;
-        dispatch({ type: 'finish' });
-      }
+    walk();
+  }, [walk]);
+
+  // the opening (App asks for it once per tab): held at 0 until the map says it is ready
+  // (<html data-zdd-ready>), a breath, then the same walk; a planner who got there first wins
+  useEffect(() => {
+    if (!intro) return;
+    const root = document.documentElement;
+    let timer = 0;
+    const go = () => {
+      if (timer) return;
+      timer = window.setTimeout(() => {
+        if (playingRef.current && !raf.current) walk();
+      }, INTRO_BREATH_MS);
     };
-    raf.current = requestAnimationFrame(tick);
-  }, []);
+    const mo = new MutationObserver(() => {
+      if (root.dataset.zddReady) go();
+    });
+    if (root.dataset.zddReady) go();
+    else mo.observe(root, { attributes: true, attributeFilter: ['data-zdd-ready'] });
+    // a basemap that never settles: walk on the drawn map rather than hold the verdict back
+    const late = window.setTimeout(go, INTRO_LATEST_MS);
+    return () => {
+      mo.disconnect();
+      clearTimeout(timer);
+      clearTimeout(late);
+    };
+  }, [intro, walk]);
 
   const onScrub = useCallback((T: number) => {
     stopLoop();
@@ -553,6 +594,7 @@ export function Screen({
         help={model}
         live={live}
         onTour={view === 'report' || running ? undefined : startTour}
+        tourWhy={running ? '体检进行中，结束后可以演示' : '回到体检页可以演示'}
       />
       {view === 'report' ? (
         <Suspense fallback={<p className="report-loading">正在排版体检报告…</p>}>

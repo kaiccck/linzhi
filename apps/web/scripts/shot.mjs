@@ -10,18 +10,25 @@
 // <html data-zdd-ready="baidu|offline"> (tiles, overlays and web fonts in place). `auto` height grows
 // the frame to the page's full scroll height (stacked phone layout). An optional script runs inside
 // the frame before the capture, e.g. "document.querySelector('.play').click()". SHOT_CLIP="x,y,w,h"
-// (CSS px) keeps only that part of the frame, for close-ups.
+// (CSS px) keeps only that part of the frame, for close-ups. The page is asked to hold still (?still: no
+// opening walk on a first visit); SHOT_INTRO=1 leaves the opening in.
 // Needs Google Chrome and Node ≥ 22 (built-in WebSocket); no npm dependencies.
 import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const [, , url, out, wArg, hArg, sArg = '2', frameScript = ''] = process.argv;
-if (!url || !out || !wArg || !hArg) {
+const [, , rawUrl, out, wArg, hArg, sArg = '2', frameScript = ''] = process.argv;
+if (!rawUrl || !out || !wArg || !hArg) {
   console.error('usage: shot.mjs <url> <out.png> <width> <height|auto> [scale=2] [script]');
   process.exit(2);
 }
+const still = (u) => {
+  const i = u.indexOf('#');
+  const [base, hash] = i < 0 ? [u, ''] : [u.slice(0, i), u.slice(i)];
+  return `${base}${base.includes('?') ? '&' : '?'}still${hash}`;
+};
+const url = process.env.SHOT_INTRO ? rawUrl : still(rawUrl);
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const W = Number(wArg);
 let H = hArg === 'auto' ? 900 : Number(hArg);

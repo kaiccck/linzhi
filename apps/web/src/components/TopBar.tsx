@@ -415,6 +415,7 @@ export function TopBar({
   help = null,
   live = false,
   onTour,
+  tourWhy = '数据载入后可以演示',
 }: {
   tab: TopTab;
   onTab(tab: TopTab): void;
@@ -435,8 +436,9 @@ export function TopBar({
   /** the analysis the “?” panel explains */
   help?: Model | null;
   live?: boolean;
-  /** 演示: open 路演模式 (absent while it cannot run) */
+  /** 演示: open 路演模式 (absent while it cannot run: the button stays, disabled, saying why) */
   onTour?(): void;
+  tourWhy?: string;
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   return (
@@ -484,20 +486,38 @@ export function TopBar({
             </button>
             <Search centre={centre} open={searchOpen} onClose={() => setSearchOpen(false)} />
           </>
-        ) : null}
-        {help ? <HelpButton model={help} live={live} /> : null}
-        {onTour ? (
-          <button
-            type="button"
-            className="tool-btn tour-btn"
-            onClick={onTour}
-            title="路演模式：六步讲清这次体检（← → 翻页，Esc 退出）"
-            aria-label="演示：进入路演模式"
-          >
-            <Ui id="ui-present" />
-            <span>演示</span>
-          </button>
-        ) : null}
+        ) : (
+          // while the data loads: the box in its place, not yet usable (nothing in the bar moves later)
+          <>
+            <span className="search-toggle wait" aria-hidden="true">
+              <Ui id="ui-search" />
+            </span>
+            <div className="search-box" aria-hidden="true">
+              <div className="search wait">
+                <Ui id="ui-search" />
+                <input type="search" tabIndex={-1} disabled placeholder="输入地址或经纬度" />
+              </div>
+            </div>
+          </>
+        )}
+        {help ? (
+          <HelpButton model={help} live={live} />
+        ) : (
+          <span className="tool-btn help-btn wait" aria-hidden="true">
+            ?
+          </span>
+        )}
+        <button
+          type="button"
+          className="tool-btn tour-btn"
+          onClick={onTour}
+          disabled={!onTour}
+          title={onTour ? '路演模式：六步讲清这次体检（← → 翻页，Esc 退出）' : tourWhy}
+          aria-label={onTour ? '演示：进入路演模式' : `演示（${tourWhy}）`}
+        >
+          <Ui id="ui-present" />
+          <span>演示</span>
+        </button>
       </div>
     </header>
   );

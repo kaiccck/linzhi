@@ -118,7 +118,9 @@ describe('the panel per mode', () => {
       [...html.matchAll(/<span class="cat-name" aria-hidden="true">([^<]+)<\/span>/g)].map((m) => m[1]),
     ).toEqual(['幼儿园', '小学', '菜市场', '药店', '社区卫生']);
     expect(html).toContain('<ol class="gl" aria-label="步行 1 公里内走不到小学的 6 个小区，由远到近">');
-    expect(html).toContain('其余 <span class="num">6</span> 个小区步行 1 公里内走得到小学');
+    expect(html).toContain(
+      '其余 <span class="num">6</span> 个小区步行 <span class="num n">1</span> 公里内走得到小学',
+    );
     expect(html).toContain('为这 <span class="num">6</span> 个小区找补点 →');
     // the fresh-food line waits for 菜市场
     expect(html).not.toContain('fresh-line');
@@ -152,7 +154,7 @@ describe('the panel per mode', () => {
   it('问询: the verdict in one line above the desk, the model named', () => {
     const html = renderToStaticMarkup(<Panel {...props('ask')} />);
     expect(html).toContain('class="v-brief"');
-    expect(html).toContain('大模型 deepseek-flash 组织语言');
+    expect(html).toContain('措辞：DeepSeek · 数字来自体检结果');
     expect(html).not.toContain('aria-label="口径"');
   });
 

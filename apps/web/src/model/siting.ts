@@ -61,7 +61,7 @@ export function localSuggestions(
     const path = m ? paths[Number(m[1])] : undefined;
     if (!path || !m) return c;
     const dir = DIRS8[Math.round((((path.bearing_deg % 360) + 360) % 360) / 45) % 8]!;
-    return { ...c, label: `${dir}向步行路线约 ${m[2]} 米处` };
+    return { ...c, label: `${dir}向步行路线约 ${m[2]} m 处` };
   });
   const out: Partial<Record<HardCategory, SiteSuggestion[]>> = {};
   if (candidates.length) {
@@ -85,6 +85,9 @@ export function localSuggestions(
   return out;
 }
 
+/** A stored site label in the page's units: "北向步行路线约 150 米处" (results before 0.2) reads "约 150 m 处". */
+export const siteWords = (label: string) => label.replace(/约\s*(\d+)\s*米处/, '约 $1 m 处');
+
 /**
  * The analysis' siting suggestions, per checked category in display order, best first — or, for a
  * result (or a category) that carries none, the same search run here (`origin: 'local'`, always 估算).
@@ -106,7 +109,7 @@ export function sitePins(model: Model): SitePin[] {
         cat,
         rank: s.rank,
         xy: s.xy,
-        ...(s.label ? { label: s.label } : {}),
+        ...(s.label ? { label: siteWords(s.label) } : {}),
         covers: s.covers.map((name) => ({ name, unit: byName.get(name) ?? null })),
         verified: origin === 'engine' && s.verified,
         origin,

@@ -32,7 +32,7 @@ export function siteInputs(
       icon,
       label: `新增${cat}：${n} 个小区走得到`,
       verified: !!measured,
-      aria: `假如在这里开一家${cat}：${measured ? '实测' : '估算'}可让 ${n} 个小区进入步行规则距离`,
+      aria: `假如在这里开一家${cat}：${measured ? '实测' : '估算'} ${n} 个小区因此步行规则距离内走得到`,
     });
   }
   for (const p of pins) {

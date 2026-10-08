@@ -21,6 +21,7 @@ import { checkLook, lookClass } from '../model/looks.js';
 import { lacks, type SitePin, type WhatIfEstimate } from '../model/siting.js';
 import type { PlanState } from '../state.js';
 import { Pg } from './Icons.js';
+import { NumText } from './NumText.js';
 
 function Chips({
   units,
@@ -134,7 +135,10 @@ function WhatIf({
         <div className="wi-result" aria-live="polite">
           <p className="wi-big">
             <b className="v-n">{measured ? measured.newly_covered.length : estimate.flips.length}</b>
-            <span>个小区可进入步行 {distWords(rule)}</span>
+            <span>
+              个小区因此步行 <NumText text={distWords(rule)} />
+              内走得到
+            </span>
             <Badge verified={!!measured} />
           </p>
           <p className="wi-of">
@@ -201,12 +205,53 @@ function WhatIf({
           </div>
           {why ? (
             <p className="wi-why" id="wi-why">
-              {why}
+              {why ? <NumText text={why} /> : null}
             </p>
           ) : null}
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * 规划's answer before its list: how many new sites the suggestions take, and how many of the
+ * communities that lack the category they bring within the rule on foot (估算 until measured).
+ */
+function PlanVerdict({ model, cat, list }: { model: Model; cat: HardCategory; list: SitePin[] }) {
+  const demand = model.units.filter((u) => lacks(u, cat)).length;
+  if (!demand || !list.length) return null;
+  const covered = new Set(list.flatMap((p) => p.covers.map((c) => c.name))).size;
+  const all = covered >= demand;
+  const rule = distWords(model.ruleOf[cat]);
+  return (
+    <section className="verdict plan-verdict" aria-labelledby="plan-say">
+      <p className="sr-only" id="plan-say">
+        {`新增 ${list.length} ${measureOf(cat)}${newNoun(cat)}，缺${cat}的 ${demand} 个小区中 ${covered} 个因此步行 ${rule}内走得到（${list.every((p) => p.verified) ? '已核验' : '估算'}）。`}
+      </p>
+      <div className="v-top" aria-hidden="true">
+        <b className="v-n">{list.length}</b>
+        <p className="v-lines">
+          <span className="v-t1">
+            {measureOf(cat)}新{newNoun(cat)}
+            {all ? '就够' : ''}
+          </span>
+          <span className="v-t2">
+            缺{cat}的 <span className="num">{demand}</span> 个小区
+            {all ? (
+              '都'
+            ) : (
+              <>
+                里 <span className="num">{covered}</span> 个
+              </>
+            )}
+            能步行 <NumText text={rule} />
+            内走到
+          </span>
+        </p>
+        <Badge verified={list.every((p) => p.verified)} />
+      </div>
+    </section>
   );
 }
 
@@ -293,20 +338,7 @@ export function Planning({
   const current = m.status === 'done' ? (m.saved?.id ?? m.result.branch_id ?? null) : null;
   return (
     <section className="plan" aria-label="规划">
-      <WhatIf
-        model={model}
-        cat={cat}
-        plan={plan}
-        estimate={estimate}
-        measureBlocked={measureBlocked}
-        onPlace={onPlace}
-        onClear={onClear}
-        onMeasure={onMeasure}
-        onHot={onHot}
-      />
-      {branches?.length && onRestoreBranch ? (
-        <Branches branches={branches} current={current} onRestore={onRestoreBranch} />
-      ) : null}
+      <PlanVerdict model={model} cat={cat} list={list} />
       <h2 className="plan-h">建议选址 · {cat}</h2>
       {list.length ? (
         <ol className="sites">
@@ -323,7 +355,7 @@ export function Planning({
               </span>
               <span className="what">
                 <b>
-                  新增后可覆盖 <span className="num">{p.covers.length}</span> 个小区
+                  新增后 <span className="num">{p.covers.length}</span> 个小区走得到
                   <Badge verified={p.verified} />
                 </b>
                 <small>{p.label ?? `选址点 ${p.rank}`}</small>
@@ -339,6 +371,20 @@ export function Planning({
             : '没有找到合适的选址。'}
         </p>
       )}
+      <WhatIf
+        model={model}
+        cat={cat}
+        plan={plan}
+        estimate={estimate}
+        measureBlocked={measureBlocked}
+        onPlace={onPlace}
+        onClear={onClear}
+        onMeasure={onMeasure}
+        onHot={onHot}
+      />
+      {branches?.length && onRestoreBranch ? (
+        <Branches branches={branches} current={current} onRestore={onRestoreBranch} />
+      ) : null}
     </section>
   );
 }

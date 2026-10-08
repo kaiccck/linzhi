@@ -247,10 +247,10 @@ describe('the elder profile: one circle everywhere', () => {
     expect(circleR(model, 1)).toBeCloseTo(model.r15, 6);
     expect(circleR(model, elder)).toBeCloseTo(810, 6);
     const L = layout(model, view, { scale: elder });
-    expect(L.circleTag?.text).toBe('直线 15′ 圈 · 半径 810 m');
+    expect(L.circleTag?.text).toBe('片区中心 · 直线 15′ 圈 · 810 m');
     const d = Math.hypot(view.mx(L.circleTag!.x), view.my(L.circleTag!.y));
     expect(d).toBeCloseTo(810, 0);
-    expect(layout(model, view).circleTag?.text).toBe('直线 15′ 圈 · 半径 1,053 m');
+    expect(layout(model, view).circleTag?.text).toBe('片区中心 · 直线 15′ 圈 · 1,053 m');
   });
 });
 

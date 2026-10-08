@@ -19,11 +19,14 @@ const elder = profileScale('elder', model.vAdult);
 describe('facilitySummary', () => {
   const s = facilitySummary(model, 1);
 
-  it('carries facilityStats’ numbers unchanged, one row per category present', () => {
+  it('carries facilityStats’ numbers unchanged, one row per category present, the checked five first', () => {
     const core = facilityStats(data);
-    expect(s.rows.map((r) => [r.cat, r.found, r.walk, r.circle])).toEqual(
-      core.map((c) => [c.category, c.found, c.walk, c.circle]),
+    const byCat = (rows: (string | number)[][]) =>
+      [...rows].sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+    expect(byCat(s.rows.map((r) => [r.cat, r.found, r.walk, r.circle]))).toEqual(
+      byCat(core.map((c) => [c.category, c.found, c.walk, c.circle])),
     );
+    expect(s.rows.slice(0, model.cats.length).map((r) => r.cat)).toEqual(model.cats);
     for (const r of s.rows) expect(r.icon).toBe(STAT_ICON[r.cat]);
     expect(s.walk).toBe(core.reduce((n, c) => n + c.walk, 0));
     expect(s.circle).toBe(core.reduce((n, c) => n + c.circle, 0));
@@ -44,8 +47,10 @@ describe('facilitySummary', () => {
     const e = facilitySummary(model, elder);
     expect(e.walk).toBeLessThan(s.walk);
     expect(e.radiusM).toBeCloseTo(900 * 0.9, 6);
-    expect(e.rows.map((r) => [r.cat, r.walk, r.circle])).toEqual(
-      facilityStats(data, { scale: elder }).map((c) => [c.category, c.walk, c.circle]),
+    const byCat = (rows: (string | number)[][]) =>
+      [...rows].sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+    expect(byCat(e.rows.map((r) => [r.cat, r.walk, r.circle]))).toEqual(
+      byCat(facilityStats(data, { scale: elder }).map((c) => [c.category, c.walk, c.circle])),
     );
     const market = (x: typeof s) => x.rows.find((r) => r.cat === '菜市场')!.nearestMin!;
     expect(market(e)).toBeGreaterThan(market(s));
@@ -133,7 +138,7 @@ describe('FacilityView rendering', () => {
     expect(html).toContain(
       `从片区中心出发，直线画的 15 分钟圈里有 ${s.circle} 处设施，15 分钟步行只走得到 ${s.walk} 处。`,
     );
-    expect(html).toContain('直线圈半径 <span class="num">1,053</span> m');
+    expect(html).toContain('直线圈半径 <span class="num n">1,053 m</span>');
   });
 
   it('names the elder circle’s radius when the elder is chosen', () => {
@@ -148,7 +153,7 @@ describe('FacilityView rendering', () => {
         onShow={noop}
       />,
     );
-    expect(e).toContain('圈半径 <span class="num">810</span> m');
+    expect(e).toContain('圈半径 <span class="num n">810 m</span>');
     expect(e).toContain('老人 <span class="num">3.2</span> km/h');
   });
 

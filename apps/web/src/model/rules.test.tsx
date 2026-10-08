@@ -46,7 +46,9 @@ describe('the verdict, in communities', () => {
     const html = renderToStaticMarkup(<Verdict model={task} />);
     expect(html).toContain('<b class="v-n">8</b>');
     expect(html).toContain('<span class="v-t1">个小区缺设施</span>');
-    expect(html).toContain('<span class="num">12</span> 个小区中，步行 1 公里内至少缺一类');
+    expect(html).toContain(
+      '<span class="num">12</span> 个小区中，步行 <span class="num n">1</span> 公里内至少缺一类',
+    );
     // two bars on one scale (the 12 communities): the circle's 1, the walk's 8 (1 + 7 伪覆盖)
     expect(html).toMatch(
       /画圈<\/span><span class="vc-track"><i class="vc-blind" style="width:8\.33\d*%"><\/i><\/span><span class="vc-n num">1<\/span>/,
@@ -54,11 +56,12 @@ describe('the verdict, in communities', () => {
     expect(html).toMatch(
       /<i class="vc-pseudo" style="width:58\.33\d*%"><\/i><\/span><span class="vc-n num">8<\/span>/,
     );
-    // under the bars, one line keys each colour once: how many it holds, what it means (the list's key too)
+    // under the bars, one line keys each colour once with what it means (the list's key too); the
+    // counts are the bars' own, at their ends
     expect(html).toMatch(
-      /<li><i class="sw s-pseudo"><\/i><span class="term" title="伪覆盖：[^"]*">伪覆盖<\/span><span><span class="num">7<\/span> 个：圈里有、走不到<\/span><\/li>/,
+      /<li><i class="sw s-pseudo"><\/i><span class="term" title="伪覆盖：[^"]*">伪覆盖<\/span><span>圈里有、走不到<\/span><\/li>/,
     );
-    expect(html).toContain('<b>盲区</b><span><span class="num">1</span> 个：直线就超出</span>');
+    expect(html).toContain('<b>盲区</b><span>直线就超出</span>');
     expect(html).not.toContain('待核');
     expect(renderToStaticMarkup(<Verdict model={pendingA} />)).toContain(
       '<b>待核</b><span><span class="num">2</span> 项，不计入</span>',
@@ -74,7 +77,7 @@ describe('the verdict, in communities', () => {
   it('says so when the circle finds every one (直线就已超出)', () => {
     const all = { ...task, tally: { ...task.tally, circleUnits: task.tally.units } };
     const html = renderToStaticMarkup(<Verdict model={all} />);
-    expect(html).toContain('<b>盲区</b><span><span class="num">8</span> 个：直线就超出</span>');
+    expect(html).toContain('<b>盲区</b><span>直线就超出</span>');
     expect(html).not.toContain('sw s-pseudo');
   });
 
@@ -158,14 +161,18 @@ describe('体检单: one category at a time', () => {
     const walks = codes(html).map((c) => task.units.find((u) => u.code === c)!.checks['小学'].route_m);
     expect(walks).toEqual([...walks].sort((x, y) => y - x));
     expect(codes(html)[0]).toBe('A-11');
-    expect(html).toContain('其余 <span class="num">6</span> 个小区步行 1 公里内走得到小学');
+    expect(html).toContain(
+      '其余 <span class="num">6</span> 个小区步行 <span class="num n">1</span> 公里内走得到小学',
+    );
     expect(html).toContain('aria-expanded="false"');
   });
 
   it('says so in one line when every community walks there', () => {
     const html = list(task, '药店');
     expect(codes(html)).toEqual([]);
-    expect(html).toContain('<span class="num">12</span> 个小区步行 1 公里内都走得到药店');
+    expect(html).toContain(
+      '<span class="num">12</span> 个小区步行 <span class="num n">1</span> 公里内都走得到药店',
+    );
   });
 
   it('opens the fold by itself for the unit whose route is on the map', () => {

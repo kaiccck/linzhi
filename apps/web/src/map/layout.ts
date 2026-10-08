@@ -252,6 +252,26 @@ export function sharedNameMembers<T>(
   return [];
 }
 
+/**
+ * Where a shared name may stand, nearest first: on its phases' centre, then rings out to ~90 px, wider
+ * than tall (a name is wide). 申城佳苑's phases ring 片区中心, whose disc and flag sit on their centre.
+ */
+const GROUP_SPOTS: readonly (readonly [number, number])[] = [
+  [0, 0],
+  [0, -18],
+  [0, 18],
+  [-40, 0],
+  [40, 0],
+  [0, -36],
+  [0, 36],
+  ...[54, 72, 90].flatMap((r) =>
+    [-90, 90, -45, 45, -135, 135, 0, 180].map((deg): [number, number] => {
+      const a = (deg * Math.PI) / 180;
+      return [Math.round(Math.cos(a) * r * 1.5), Math.round(Math.sin(a) * r)];
+    }),
+  ),
+];
+
 /** The 你在这里 disc (30 px with its white ring, and a little shadow room) and its flag. */
 const DOT_R = 17;
 const TAG = { w: 66, h: 22, gap: 6 };
@@ -648,7 +668,7 @@ export function layoutOverlay(inp: LayoutInput): OverlayLayout {
   let circleTag: OverlayLayout['circleTag'] = null;
   if (circle && !narrow && !playing) {
     const R = circleR(model, scale);
-    const text = `直线 15′ 圈 · 半径 ${Math.round(R).toLocaleString('en-US')} m`;
+    const text = `片区中心 · 直线 15′ 圈 · ${Math.round(R).toLocaleString('en-US')} m`;
     const w = textWidth(text, 12) + 18;
     for (const b of [312, 322, 302, 332, 292, 238, 228, 248, 45, 58, 135, 148, 20]) {
       const a = (b * Math.PI) / 180;
@@ -669,6 +689,9 @@ export function layoutOverlay(inp: LayoutInput): OverlayLayout {
     const free = (r: Rect) => inside(r, W, H, 6) && !taken.some((t) => hit(r, t, 2));
     const { own, groups } = unitNameTexts(model.units);
     const full = new Set<string>();
+    // each unit's first choice for its own name (east of its code): a shared name never takes it
+    const eastOf = (u: UnitPos) => nameRect(own.get(u.unit.code) ?? '', 'unit', u.rect.x + u.rect.w + 3, u.y);
+    const ownSpots = units.map(eastOf);
     for (const g of groups) {
       const all = units.filter((u) => g.codes.includes(u.unit.code));
       // a shared name only over phases that sit together around it (sharedNameMembers); the others
@@ -687,17 +710,9 @@ export function layoutOverlay(inp: LayoutInput): OverlayLayout {
       const gy = members.reduce((s, u) => s + v.y(spotOf(u.unit)[1]), 0) / members.length;
       const probe = nameRect(g.name, 'group', 0, 0);
       let placed = false;
-      for (const [dx, dy] of [
-        [0, 0],
-        [0, -18],
-        [0, 18],
-        [-40, 0],
-        [40, 0],
-        [0, -36],
-        [0, 36],
-      ] as const) {
+      for (const [dx, dy] of GROUP_SPOTS) {
         const r = nameRect(g.name, 'group', gx + dx - probe.w / 2, gy + dy);
-        if (!free(r)) continue;
+        if (!free(r) || ownSpots.some((o) => hit(r, o, 1))) continue;
         taken.push(r);
         names.push({ key: `g:${g.name}`, text: g.name, kind: 'group', x: r.x, y: gy + dy });
         placed = true;

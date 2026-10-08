@@ -64,6 +64,15 @@ function Panel({ model, live, onClose }: { model: Model; live: boolean; onClose(
         </button>
       </div>
       <section>
+        <h3>两种范围，别混在一起</h3>
+        <p>
+          沙色是从片区中心步行 <NumText text="15′" /> 走得到的地方，虚线圈是同一中心直线画的{' '}
+          <NumText text="15′" /> 圈。小区的颜色是另一件事：每个小区从自己出发，步行到最近一处设施有多远（
+          <NumText text={distWords(model.ruleM)} />
+          为界）。点一个小区，地图会画出它自己的直线圈和实际步行路线。
+        </p>
+      </section>
+      <section>
         <h3>四种判定（按所选类别）</h3>
         <dl className="help-keys">
           <dt>

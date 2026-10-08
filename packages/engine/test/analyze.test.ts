@@ -563,7 +563,7 @@ describe('live analysis of a synthetic river city', () => {
           .map((c) => c.name),
       );
       for (const s of list) {
-        expect(s.label).toMatch(/步行路线约 \d+ 米处/);
+        expect(s.label).toMatch(/步行路线约 \d+ m 处/);
         for (const id of s.covers) expect(gaps.has(id)).toBe(true);
         for (const row of s.routes)
           expect(s.verified ? (row.route_m ?? 0) : row.est_m).toBeLessThanOrEqual(1000);

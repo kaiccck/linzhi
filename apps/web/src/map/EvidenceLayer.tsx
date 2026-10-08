@@ -23,10 +23,19 @@ export function EvidenceLayer({
   to,
   path,
   routeKey,
+  ruleM,
+  tone = 'pseudo',
 }: {
   view: View;
   /** the community's point */
   from: XY;
+  /**
+   * the rule's distance: the community's own straight circle is drawn around it (what 画圈 claims for
+   * this community), so a facility inside it reached only by a longer walk reads as 伪覆盖 at a glance
+   */
+  ruleM?: number;
+  /** the check's verdict colours the circle (伪覆盖 red, 盲区 slate, else ink) */
+  tone?: 'pseudo' | 'blind' | 'ink';
   /** the facility's POI point (the straight line's end), when known */
   to: XY | null;
   /** the walking route, once it has arrived */
@@ -44,6 +53,11 @@ export function EvidenceLayer({
       aria-hidden="true"
       data-state={path ? 'route' : 'straight'}
     >
+      {ruleM ? (
+        // this community's own straight 1 km: a pale disc in its verdict colour, unlike the centre's
+        // dashed 15′ circle (which steps aside while a route is shown)
+        <circle className={`ev-ring t-${tone}`} cx={fx} cy={fy} r={ruleM * view.s} strokeWidth={1.2} />
+      ) : null}
       {to ? (
         <g className="ev-straight">
           <line x1={fx} y1={fy} x2={view.x(to[0])} y2={view.y(to[1])} stroke="#fff" strokeWidth={3.2} />

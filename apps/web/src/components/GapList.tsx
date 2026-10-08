@@ -11,7 +11,9 @@ import type { FacilityCheck, HardCategory } from '@zoudedao/core';
 import { distWords, fmtInt, poiName, type Model, type Unit } from '../model/derive.js';
 import { catchmentText } from '../model/evidence.js';
 import { checkLook, lookClass, LOOK_WORD, type Look } from '../model/looks.js';
+import { Ui } from './Icons.js';
 import { Le } from './Le.js';
+import { NumText } from './NumText.js';
 
 /** Looks that need no attention: within the rule (临界 within it too). */
 const FINE: ReadonlySet<Look> = new Set(['ok', 'edge']);
@@ -36,6 +38,8 @@ const walk = (s: FacilityCheck) => (s.route_m > 0 ? s.route_m : Infinity);
 
 /** The measured walk, set by where it came from (The Honest Number Rule). */
 function Value({ s, walking }: { s: FacilityCheck; walking: boolean }) {
+  // 走一遍 plays: no walk is told before it lands
+  if (walking) return <span className="gl-v num s-quiet wait">—</span>;
   const look = checkLook(s);
   if (look === 'none') return <span className="gl-v num s-blind">无</span>;
   const bound =
@@ -177,7 +181,8 @@ export const GapList = memo(function GapList({
   );
   return (
     <ol
-      className="gl"
+      key={cat}
+      className={'gl' + (walking ? ' walking' : '')}
       aria-label={
         main.length
           ? `步行 ${rule}内走不到${cat}的 ${main.length} 个小区，由远到近`
@@ -187,9 +192,20 @@ export const GapList = memo(function GapList({
       {main.map(row)}
       {rest.length ? (
         <li className="gl-fold">
-          <button type="button" aria-expanded={shown} onClick={() => setOpen(!shown)}>
+          <button
+            type="button"
+            className={main.length ? undefined : 'all-ok'}
+            aria-expanded={shown}
+            onClick={() => setOpen(!shown)}
+          >
+            {main.length ? null : (
+              <span className="gl-ok" aria-hidden="true">
+                <Ui id="ui-check" />
+              </span>
+            )}
             {main.length ? '其余 ' : ''}
-            <span className="num">{rest.length}</span> 个小区步行 {rule}内{main.length ? '' : '都'}走得到{cat}
+            <span className="num">{rest.length}</span> 个小区
+            <NumText text={`步行 ${rule}内${main.length ? '' : '都'}走得到${cat}`} />
             <svg className="chev" viewBox="0 0 10 10" aria-hidden="true" focusable="false">
               <path d="M3.5 2 6.5 5 3.5 8" />
             </svg>

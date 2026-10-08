@@ -311,6 +311,7 @@ function DirCell({ cat, s }: { cat: HardCategory; s: FacilityCheck }) {
       : s.status === '临界'
         ? `临界${s.status_main === '覆盖' ? '' : `·${s.status_main}`}`
         : s.status;
+  // the verdict word beside the walk it judges; on a line of its own when the cell is too narrow
   return (
     <td className="c-cell">
       <div className={'rp-cell ' + lookClass(look)}>
@@ -319,12 +320,12 @@ function DirCell({ cat, s }: { cat: HardCategory; s: FacilityCheck }) {
             {bound}
             {fmtInt(s.route_m)} m
           </N>
+          {word ? <em>{word}</em> : null}
         </span>
         <span className="bot">
           <span>
             直线 <N>{fmtInt(s.straight_m)}</N> m
           </span>
-          {word ? <em>{word}</em> : null}
         </span>
         {s.alt ? (
           <span className="fresh" title={freshText(s.alt)}>
@@ -349,7 +350,9 @@ function DirectorySection({ model }: { model: Model }) {
     <Sec
       n="02"
       id="rp-dir"
-      title={`小区 × ${model.cats.join('、')}`}
+      title={
+        model.cats.length > 3 ? `各小区 × ${model.cats.length} 类设施` : `小区 × ${model.cats.join('、')}`
+      }
       aside={<>{ruleWords(model)} · 由重到轻</>}
     >
       <p className="rp-lead">
@@ -368,7 +371,7 @@ function DirectorySection({ model }: { model: Model }) {
         <table className="rp-table rp-dir" style={{ ['--n' as string]: model.cats.length }}>
           <thead>
             <tr>
-              <th scope="col" colSpan={2}>
+              <th scope="col" className="c-name">
                 小区
               </th>
               {model.heads.map((h) => (
@@ -391,12 +394,12 @@ function DirectorySection({ model }: { model: Model }) {
           <tbody>
             {model.boardOrder.map((u) => (
               <tr key={u.code}>
-                <td className="c-code">
-                  <Code u={u} />
-                </td>
                 <th scope="row" className="c-name">
-                  {u.nameMain}
-                  {u.nameSub ? <small>{u.nameSub}</small> : null}
+                  <Code u={u} />
+                  <span className="nm">
+                    {u.nameMain}
+                    {u.nameSub ? <small>{u.nameSub}</small> : null}
+                  </span>
                 </th>
                 {model.cats.map((k) => (
                   <DirCell key={k} cat={k} s={u.checks[k]} />
@@ -584,7 +587,7 @@ function SiteSection({
               <div className="what">
                 <b>规划页上选的位置</b>
                 <span>
-                  可使 <N>{whatif.covers.length}</N> 个小区进入步行 <N>{rule}</N>
+                  新增后 <N>{whatif.covers.length}</N> 个小区步行 <N>{rule}</N>内走得到
                   {whatif.covers.length ? '：' : '。'}
                   {whatif.covers.map((u) => (
                     <Code key={u.code} u={u} />
@@ -599,7 +602,7 @@ function SiteSection({
       {groups.length ? (
         <>
           <p className="rp-lead">
-            在这些位置补设施，可让更多小区进入步行 <N>{rule}</N>。
+            在这些位置补上设施，更多小区步行 <N>{rule}</N>内走得到。
           </p>
           {groups.map(({ cat, list }) => (
             <div className="rp-sites" key={cat} style={{ ['--c' as string]: CAT_COLOR[cat] }}>
@@ -616,7 +619,7 @@ function SiteSection({
                     <div className="what">
                       <b>{p.label ?? `选址点 ${p.rank}`}</b>
                       <span>
-                        可使 <N>{p.covers.length}</N> 个小区进入步行 <N>{rule}</N>：
+                        新增后 <N>{p.covers.length}</N> 个小区步行 <N>{rule}</N>内走得到：
                         {p.covers.map(({ name, unit }) =>
                           unit ? (
                             <Code key={name} u={unit} />
@@ -660,7 +663,7 @@ export function sourceLines(attribution: readonly string[], measuredOn: string):
 
 /* ------------------------------------------------------------------ 05 方法与局限 */
 
-function MethodSection({ model, profile }: { model: Model; profile: Profile }) {
+function MethodSection({ model, profile, date }: { model: Model; profile: Profile; date: string }) {
   const { meta, stats } = model.data;
   const notes = (meta as { notes?: unknown }).notes;
   const warnings = (meta as { warnings?: unknown }).warnings;
@@ -712,7 +715,8 @@ function MethodSection({ model, profile }: { model: Model; profile: Profile }) {
           <li key={a}>{a}</li>
         ))}
         <li>
-          报告由{BRAND}（开源，Apache-2.0）根据体检结果生成，生成于 <N>{meta.generated.slice(0, 10)}</N>。
+          体检结果生成于 <N>{meta.generated.slice(0, 10)}</N>，本报告由{BRAND}（开源，Apache-2.0）生成于{' '}
+          <N>{date}</N>。
         </li>
       </ul>
       {list(notes).length ? (
@@ -903,10 +907,11 @@ export default function Report({
           <DirectorySection model={model} />
           <GraySection model={model} />
           <SiteSection model={model} pins={pins} whatif={whatif} />
-          <MethodSection model={model} profile={profile} />
+          <MethodSection model={model} profile={profile} date={date} />
           <footer className="rp-end">
             <BrandMark size={18} />
-            {BRAND} · 按真实路网体检 15 分钟生活圈 · {sourceNote}
+            {BRAND} · 按真实路网体检 15 分钟生活圈 · {sourceTag ?? `样例 ${model.code}`} · 百度地图实测{' '}
+            {model.measuredOn}
           </footer>
         </div>
       </article>

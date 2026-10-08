@@ -126,6 +126,10 @@ kbd {
 input::placeholder {
   color: var(--ink-3);
 }
+input,
+textarea {
+  caret-color: var(--cobalt);
+}
 /* tab panels and other toggled parts: [hidden] beats the display their class sets */
 [hidden] {
   display: none !important;
@@ -188,7 +192,8 @@ input::placeholder {
   white-space: nowrap;
   transition:
     border-color 150ms var(--ease),
-    background 150ms var(--ease);
+    background 150ms var(--ease),
+    transform 120ms var(--ease);
 }
 .btn:hover:not(:disabled) {
   border-color: var(--line-3);
@@ -679,6 +684,60 @@ input::placeholder {
   padding: 24px 0;
   color: var(--ink-2);
 }
+/* 载入中: the panel's own shapes in their places, quiet; one light sweeps across all of them at once
+   (the gradient is fixed to the window, so the blocks read as one surface, not as many spinners) */
+.skel {
+  pointer-events: none;
+  user-select: none;
+}
+.sk {
+  display: inline-block;
+  height: 0.7em;
+  vertical-align: middle;
+  border-radius: 4px;
+  background: linear-gradient(100deg, var(--well) 40%, #f9fafb 50%, var(--well) 60%) var(--well);
+  background-size: 200% 100%;
+  background-attachment: fixed;
+  animation: zdd-shimmer 1600ms linear infinite;
+}
+.skel .sk-n {
+  width: 0.62em;
+  height: 0.8em;
+  border-radius: 6px;
+}
+.skel .sk-tile {
+  gap: 8px;
+}
+.skel .sk-tile .sk {
+  height: 9px;
+}
+.skel .sk-code {
+  width: 40px;
+  height: 20px;
+  border-radius: 10px;
+}
+.skel .sk-v {
+  width: 52px;
+  height: 22px;
+  border-radius: 6px;
+}
+.panel-error {
+  padding: 28px 0;
+}
+.panel-error h1 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 26px;
+}
+.panel-error p {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.panel-error .btn {
+  margin-top: 16px;
+}
 .place-row {
   display: flex;
   flex-wrap: wrap;
@@ -728,7 +787,7 @@ input::placeholder {
 }
 .v-t1 {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ink);
 }
 .v-t2 {
@@ -757,6 +816,28 @@ input::placeholder {
 }
 .vc-track i {
   height: 100%;
+  transition: width 560ms var(--ease);
+  animation: zdd-grow 640ms var(--ease) both;
+}
+.vc-track i + i {
+  transition-delay: 140ms;
+  animation-delay: 140ms;
+}
+.verdict.walking .vc-track i {
+  width: 0 !important;
+  transition-duration: 200ms;
+  transition-delay: 0ms;
+}
+.v-key,
+.verdict .vc-n {
+  transition: opacity 200ms var(--ease);
+}
+.verdict.walking .v-key {
+  opacity: 0.4;
+}
+/* the counts wait with their bars, and land with them */
+.verdict.walking .vc-n {
+  opacity: 0;
 }
 .vc-blind {
   background: var(--blind);
@@ -772,7 +853,7 @@ input::placeholder {
   background: repeating-linear-gradient(90deg, #b9c0ca 0 3px, transparent 3px 5px);
 }
 .vc-n {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--ink);
   text-align: right;
@@ -799,6 +880,17 @@ input::placeholder {
   color: var(--ink);
 }
 .v-key .num {
+  font-weight: 600;
+  color: var(--ink);
+}
+/* 中心周边设施's note under its bars: the same quiet voice as the verdict's key */
+.v-note {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ink-3);
+}
+.v-note .num {
   font-weight: 600;
   color: var(--ink);
 }
@@ -877,10 +969,17 @@ input::placeholder {
   text-align: left;
   transition:
     border-color 150ms var(--ease),
-    background 150ms var(--ease);
+    background 150ms var(--ease),
+    transform 120ms var(--ease);
 }
 .cat:hover {
   border-color: var(--line-3);
+}
+.cat:active {
+  transform: scale(0.97);
+}
+.cat:focus-visible {
+  border-radius: var(--r-s);
 }
 .cat[aria-checked='true'] {
   border-color: var(--cobalt);
@@ -909,7 +1008,35 @@ input::placeholder {
   font-size: 16px;
   font-weight: 600;
   line-height: 1;
-  color: var(--pseudo-text);
+  color: var(--ink);
+}
+.cat-n.wait {
+  color: var(--ink-4);
+}
+/* the gaps as a share of all communities, at the tile's foot: 伪覆盖 red, 盲区 slate */
+.cat {
+  position: relative;
+  overflow: hidden;
+}
+.cat-share {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  bottom: 5px;
+  display: flex;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--well);
+  overflow: hidden;
+}
+.cat-share i {
+  height: 100%;
+}
+.cat-share .sp {
+  background: var(--pseudo);
+}
+.cat-share .sb {
+  background: var(--blind);
 }
 .cat-n.clear {
   font-size: 14px;
@@ -957,7 +1084,17 @@ input::placeholder {
   margin-top: 20px;
 }
 .gl {
-  margin-top: 8px;
+  margin-top: 12px;
+  animation: zdd-fade 180ms var(--ease);
+  transition: opacity 200ms var(--ease);
+}
+/* 走一遍 plays: the list waits, quieter, its walks untold */
+.gl.walking {
+  opacity: 0.55;
+}
+.gl-v.wait {
+  min-width: 52px;
+  justify-content: center;
 }
 .gl-row {
   display: flex;
@@ -971,6 +1108,9 @@ input::placeholder {
 .gl-row:hover,
 .gl-row.hot {
   background: var(--well);
+}
+.gl-row:active {
+  background: #e8ecf1;
 }
 .gl-row.sel {
   background: var(--cobalt-tint);
@@ -1070,6 +1210,27 @@ input::placeholder {
 .gl-fold button:hover {
   color: var(--ink);
 }
+/* a category every community walks to: said in the positive, a teal tick before it */
+.gl-fold button.all-ok {
+  height: 44px;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.gl-ok {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ok-tint);
+  color: var(--ok);
+}
+.gl-ok .ui {
+  width: 12px;
+  height: 12px;
+}
 .chev {
   width: 10px;
   height: 10px;
@@ -1096,13 +1257,29 @@ input::placeholder {
 /* the next step: a link (走一遍 stays the page's one filled button) */
 .sheet-next {
   display: block;
-  margin-top: 18px;
+  align-self: flex-start;
+  margin-top: 12px;
   font-size: 13px;
   font-weight: 500;
   color: var(--cobalt);
 }
 .sheet-next:hover {
   color: var(--cobalt-2);
+}
+.sheet-next.waiting {
+  visibility: hidden;
+}
+/* a tall panel: the way into 中心周边设施 settles at its foot, whatever room the list leaves */
+.panel > .checkup {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+.checkup > .fac-entry {
+  margin-top: auto;
+}
+.checkup > :nth-last-child(2) {
+  margin-bottom: 20px;
 }
 /* the way into 中心周边设施, and back */
 .fac-entry {
@@ -1111,7 +1288,7 @@ input::placeholder {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 10px;
-  margin-top: 18px;
+  margin-top: 20px;
   padding: 14px 0 2px;
   border-top: 1px solid var(--line);
   text-align: left;
@@ -1390,6 +1567,23 @@ input::placeholder {
 /* ---------------------------------------------------------------- 规划 */
 .plan {
   margin-top: 16px;
+}
+/* the answer first, in the verdict's voice: how many new sites, how many communities they reach */
+.plan > .plan-verdict {
+  margin-top: 4px;
+}
+.plan-verdict .v-top {
+  align-items: flex-start;
+}
+.plan-verdict .v-lines {
+  padding-top: 2px;
+}
+.plan-verdict .badge {
+  margin: 6px 0 0 auto;
+}
+/* the planner's own question after the suggestions */
+.plan > .whatif {
+  margin-top: 20px;
 }
 .whatif {
   padding: 12px 14px 14px;
@@ -2357,11 +2551,16 @@ button.cite:focus-visible {
   font-size: 13px;
   font-weight: 500;
   color: var(--ink);
-  transition: background 150ms var(--ease);
+  transition:
+    background 150ms var(--ease),
+    transform 120ms var(--ease);
 }
 .layers-btn:hover,
 .layers-btn[aria-expanded='true'] {
   background: var(--well);
+}
+.layers-btn:active {
+  transform: scale(0.97);
 }
 .layers-btn .ui {
   width: 17px;
@@ -2508,6 +2707,8 @@ button.cite:focus-visible {
   padding: 10px 14px 10px 10px;
 }
 .play {
+  min-width: 128px;
+  justify-content: center;
   height: 38px;
   display: flex;
   align-items: center;
@@ -2584,7 +2785,9 @@ button.cite:focus-visible {
   border: 2px solid var(--cobalt);
 }
 .scrub input:focus-visible {
-  outline: none;
+  outline: 2px solid var(--cobalt);
+  outline-offset: 4px;
+  border-radius: 8px;
 }
 .scrub input:focus-visible::-webkit-slider-thumb {
   box-shadow: 0 0 0 3px #c9d6f3;
@@ -2620,8 +2823,13 @@ button.cite:focus-visible {
   white-space: nowrap;
 }
 .readout .ro-t b {
+  display: inline-block;
   font-size: 22px;
   font-weight: 600;
+}
+/* while it plays the minutes tick in tenths: one width, nothing beside them moves */
+.walk[data-playing] .readout .ro-t b {
+  min-width: 2.6em;
 }
 .readout .ro-s {
   display: block;
@@ -2706,6 +2914,9 @@ button.cite:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.86);
   white-space: nowrap;
 }
 .scalebar .sb-bar {
@@ -3160,6 +3371,14 @@ button.cite:focus-visible {
 }
 
 /* ---------------------------------------------------------------- motion (DESIGN.md: 150–200 ms) */
+@keyframes zdd-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
 @keyframes zdd-rise {
   from {
     opacity: 0;
@@ -3170,6 +3389,22 @@ button.cite:focus-visible {
   from {
     opacity: 0;
   }
+}
+@keyframes zdd-grow {
+  from {
+    width: 0;
+  }
+}
+/* 走一遍 lands: a gap's code lifts once, the ripple running out from the centre */
+@keyframes zdd-land {
+  40% {
+    transform: translate(-50%, -50%) scale(1.16);
+  }
+}
+.overlay[data-landed] .m-code.s-pseudo,
+.overlay[data-landed] .m-code.s-blind,
+.overlay[data-landed] .m-code.s-edge.over {
+  animation: zdd-land 520ms var(--ease) var(--land, 0ms);
 }
 @keyframes zdd-draw {
   to {
@@ -3212,6 +3447,7 @@ button.cite:focus-visible {
 .callout,
 .help-pop,
 .cite-pop,
+.layer-pop,
 .float.legend {
   animation: zdd-rise 180ms var(--ease);
 }
@@ -3237,6 +3473,22 @@ button.cite:focus-visible {
 }
 .ev-straight {
   animation: zdd-fade 150ms var(--ease);
+}
+/* the picked community's own straight circle: what 画圈 claims for it, in its verdict colour */
+.ev-ring {
+  animation: zdd-fade 200ms var(--ease);
+}
+.ev-ring.t-pseudo {
+  fill: rgba(224, 72, 62, 0.05);
+  stroke: rgba(224, 72, 62, 0.42);
+}
+.ev-ring.t-blind {
+  fill: rgba(63, 74, 90, 0.05);
+  stroke: rgba(63, 74, 90, 0.4);
+}
+.ev-ring.t-ink {
+  fill: rgba(91, 102, 117, 0.04);
+  stroke: rgba(91, 102, 117, 0.35);
 }
 .ev-draw {
   stroke-dasharray: 1;
@@ -3317,6 +3569,9 @@ button.cite:focus-visible {
   border-color: var(--pseudo);
 }
 .callout .ev-hint,
+.callout .ev-over {
+  color: var(--pseudo-text);
+}
 .callout .ev-wait {
   color: var(--ink-3);
 }
@@ -3560,11 +3815,29 @@ button.cite:focus-visible {
   white-space: nowrap;
   transition:
     border-color 150ms var(--ease),
-    color 150ms var(--ease);
+    color 150ms var(--ease),
+    transform 120ms var(--ease);
 }
-.tool-btn:hover {
+.tool-btn:hover:not(:disabled) {
   border-color: var(--line-3);
   color: var(--ink);
+}
+.tool-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+/* not now (data loading, a check running, the report): in its place, quiet */
+.tool-btn:disabled,
+.tool-btn.wait {
+  border-color: var(--line);
+  color: var(--ink-4);
+  cursor: default;
+}
+.search.wait,
+.search-toggle.wait {
+  color: var(--ink-4);
+}
+.search.wait input::placeholder {
+  color: var(--ink-4);
 }
 .tool-btn .ui {
   width: 17px;
@@ -3848,15 +4121,16 @@ button.cite:focus-visible {
   height: 40px;
   font-size: 14px;
 }
+/* the step forward is the page's one primary action: cobalt, like 走一遍 */
 .tour-nav .btn.next {
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--cobalt);
+  border-color: var(--cobalt);
   color: #fff;
   padding: 0 14px 0 16px;
 }
-.tour-nav .btn.next:hover {
-  background: #111a25;
-  border-color: #111a25;
+.tour-nav .btn.next:hover:not(:disabled) {
+  background: var(--cobalt-2);
+  border-color: var(--cobalt-2);
 }
 .tour-keys {
   margin-left: auto;
@@ -3916,29 +4190,51 @@ button.cite:focus-visible {
   padding: 6px 10px;
   gap: 2px 10px;
 }
-.map[data-narrow='true'] .legend .sep {
+.map[data-narrow='true'] .legend .sep,
+.map[data-narrow='true'] .legend .lg-who {
   display: none;
 }
+/* a narrow map's 走一遍 card, compact and one height whatever it says: the button and the reach on one
+   row, the scrubber under them, the circle's line last */
 .map[data-narrow='true'] .walk {
   left: 12px;
   right: 12px;
   bottom: 12px;
   max-width: none;
-  flex-wrap: wrap;
-  gap: 8px 14px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'play reach'
+    'scrub scrub'
+    'note note';
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 12px 9px;
+}
+.map[data-narrow='true'] .play {
+  grid-area: play;
+  min-width: 116px;
+  height: 36px;
 }
 .map[data-narrow='true'] .scrub {
-  flex: 1 1 calc(100% - 140px);
+  grid-area: scrub;
   width: auto;
-  min-width: 150px;
+  min-width: 0;
+  padding-top: 4px;
 }
 .map[data-narrow='true'] .readout {
-  flex: 1 1 auto;
-  min-width: 0;
+  display: contents;
 }
-.map[data-narrow='true'] .readout .ro-t,
+.map[data-narrow='true'] .readout .ro-t {
+  grid-area: reach;
+  min-width: 0;
+  overflow: hidden;
+}
 .map[data-narrow='true'] .readout .ro-s {
-  white-space: normal;
+  grid-area: note;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .map[data-narrow='true'] .stage-card {
   width: auto;
@@ -3950,10 +4246,12 @@ button.cite:focus-visible {
   *::before,
   *::after {
     transition-duration: 0ms !important;
+    transition-delay: 0ms !important;
     animation-duration: 0ms !important;
     animation-delay: 0ms !important;
   }
-  .here .dot::after {
+  .here .dot::after,
+  .sk {
     animation: none;
   }
   .ev-draw {
@@ -4115,19 +4413,60 @@ button.cite:focus-visible {
     display: flex;
     flex-direction: column;
   }
+  /* short enough that the verdict starts on the first screen; the compact 走一遍 card leaves the
+     codes their band */
   .map {
     order: 1;
-    height: max(440px, min(66vh, 540px));
+    height: clamp(400px, 56vh, 460px);
     flex: none;
   }
   .map-strip {
     order: 2;
+    display: block;
+    padding: 0 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .ms-fold > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    list-style: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .ms-fold > summary::-webkit-details-marker {
+    display: none;
+  }
+  .ms-fold > summary .ui {
+    width: 16px;
+    height: 16px;
+    color: var(--ink-3);
+  }
+  .ms-fold > summary .ui:last-child {
+    transition: transform 150ms var(--ease);
+  }
+  .ms-fold[open] > summary .ui:last-child {
+    transform: rotate(180deg);
+  }
+  .ms-now {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ink-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ms-body {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 10px 12px 12px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--line);
+    padding: 2px 0 12px;
   }
   .map-strip .lo-layers {
     flex-direction: row;
@@ -4136,7 +4475,7 @@ button.cite:focus-visible {
   }
   .map-strip .layer-btn {
     width: auto;
-    height: 32px;
+    height: 40px;
     min-height: 0;
     padding: 0 10px 0 8px;
     border: 1px solid var(--line);
@@ -4154,7 +4493,7 @@ button.cite:focus-visible {
   .map-strip .attrib {
     display: block;
     text-align: left;
-    padding: 0;
+    padding: 0 0 10px;
     background: none;
     font-size: 12px;
     color: var(--ink-3);
@@ -4187,26 +4526,22 @@ button.cite:focus-visible {
   .place-row {
     flex-wrap: wrap;
   }
-  .v-line {
-    font-size: 16px;
-    line-height: 34px;
-    white-space: normal;
+  /* a thumb's reach: the rows, the fold and the way into 中心周边设施 at 44px */
+  .gl-row,
+  .gl-fold button {
+    height: 44px;
   }
-  .v-n {
-    font-size: 28px;
+  .sheet-next {
+    margin-top: 0;
+    padding: 12px 0;
   }
-  .walk .readout {
-    min-width: 0;
-  }
-  .walk .readout .ro-s {
-    white-space: normal;
+  .fac-entry {
+    min-height: 52px;
+    padding-bottom: 0;
   }
 }
 @media (max-width: 400px) {
   .brand-word {
     display: none;
-  }
-  .walk .readout {
-    flex: 1;
   }
 }

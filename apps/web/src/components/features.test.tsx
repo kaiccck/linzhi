@@ -79,7 +79,7 @@ describe('方法 layer', () => {
         route: false,
         method: true,
       }).over;
-    expect(plan(false)).toEqual(['plates', 'isochrones', 'method', 'circle']);
+    expect(plan(false)).toEqual(['iso-minor', 'plates', 'isochrones', 'method', 'circle']);
     expect(plan(true)).not.toContain('method');
   });
 });
@@ -206,7 +206,7 @@ describe('规划 lists the saved what-if measurements', () => {
 });
 
 describe('the top bar’s help and 演示', () => {
-  it('offers both only when there is something to explain or show', () => {
+  it('offers both; 演示 keeps its place, disabled and saying why, while it cannot run', () => {
     const bar = (withTour: boolean) =>
       renderToStaticMarkup(
         <TopBar
@@ -224,7 +224,8 @@ describe('the top bar’s help and 演示', () => {
       );
     expect(bar(true)).toContain('aria-label="说明：判定、规则、数据来源与用法"');
     expect(bar(true)).toContain('<span>演示</span>');
-    expect(bar(false)).not.toContain('演示');
+    expect(bar(true)).not.toMatch(/class="tool-btn tour-btn" disabled/);
+    expect(bar(false)).toMatch(/class="tool-btn tour-btn" disabled="" title="数据载入后可以演示"/);
   });
 
   it('reads the data’s own sources and dates', () => {

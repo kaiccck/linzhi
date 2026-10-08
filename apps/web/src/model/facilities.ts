@@ -46,7 +46,12 @@ export interface FacilitySummary {
 }
 
 export function facilitySummary(model: Model, scale: number): FacilitySummary {
-  const stats = facilityStats(model.data, { scale });
+  // the categories checked per community lead, in the category buttons' order; the rest keep theirs
+  const lead = (c: string) => {
+    const i = (model.cats as readonly string[]).indexOf(c);
+    return i < 0 ? model.cats.length : i;
+  };
+  const stats = [...facilityStats(model.data, { scale })].sort((a, b) => lead(a.category) - lead(b.category));
   const rows = stats.flatMap((s): FacilityRow[] => {
     if (s.category === '其他') return [];
     const n = Math.max(s.circle, s.walk);

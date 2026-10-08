@@ -97,8 +97,8 @@ describe('the route evidence of A-11 → 小学', () => {
       '直线 <span class="nw"><span class="num">819</span> m</span> · 实际步行 <span class="nw"><span class="num">1,676</span> m</span><br/>',
     );
     expect(html).toContain('约 <span class="num">24′</span>（百度步行路线）');
-    // the assigned school, which here is the one the check routed to
-    expect(html).toContain('对口：孙桥小学（申江校区）');
+    // the assigned school is the one the check routed to: said so, not named twice
+    expect(html).toContain('这所就是对口小学');
     expect(item.spec).toMatchObject({
       key: 'evidence',
       code: 'A-11',

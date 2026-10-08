@@ -23,12 +23,16 @@ export interface StyleRule {
 /** The map's ground (Baidu's land, and the offline map's paper). */
 export const GROUND = '#eef0f1';
 
-/** Street, place and POI name inks: muted, a step apart, all readable on the ground with their halo. */
+/**
+ * Street, place and POI name inks: muted, a step apart, all readable on the ground with their halo,
+ * and a step under the overlay's own names (--ink-2), so the basemap reads as the ground beneath them.
+ * The elevated roads keep the darkest: they are the barriers the findings name.
+ */
 export const LABEL_INK = {
-  road: '#5b6675',
-  wall: '#4d5866',
-  place: '#5b6675',
-  poi: '#66707e',
+  road: '#6d7886',
+  wall: '#566170',
+  place: '#6d7886',
+  poi: '#77818e',
   water: '#4f7ea6',
   park: '#5c8a57',
 } as const;

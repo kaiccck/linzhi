@@ -395,8 +395,19 @@ html[data-view='report'] body {
   margin: 0 2px 0 6px;
 }
 
-.rp-dir .c-code {
-  width: 52px;
+/* the community: its code over its name, a narrow column, so five categories get the room */
+.rp-dir .c-name {
+  width: 15%;
+}
+.rp-dir tbody .c-name {
+  white-space: normal;
+}
+.rp-dir .c-name .code {
+  margin-bottom: 4px;
+}
+.rp-dir .c-name .nm {
+  display: block;
+  line-height: 18px;
 }
 .rp-dir .c-name small {
   display: block;
@@ -413,9 +424,9 @@ html[data-view='report'] body {
   margin: 0;
 }
 .rp-dir .c-cell {
-  /* the categories share 69% of the width (three at 23% each, five at 13.8%) */
-  width: calc(69% / var(--n, 3));
-  padding: 3px 4px;
+  /* the categories share 85% of the width (three at 28% each, five at 17%) */
+  width: calc(85% / var(--n, 3));
+  padding: 3px 3px;
 }
 .rp-cell {
   display: flex;
@@ -428,9 +439,22 @@ html[data-view='report'] body {
 }
 .rp-cell .top {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 6px;
+  gap: 0 6px;
+}
+/* a word never breaks inside: it moves to its own line whole */
+.rp-cell .top em,
+.rp-cell .bot > span,
+.rp-cell .fresh {
+  white-space: nowrap;
+}
+.rp-cell .top em {
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  color: var(--ink-2);
 }
 .rp-cell .top .num {
   font-size: 15px;

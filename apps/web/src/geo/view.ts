@@ -74,10 +74,30 @@ export function focusedComposition(base: Composition, points: readonly XY[]): Co
   return { ...base, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
 }
 
+/**
+ * The scale Baidu's map settles on for `s` px per local metre: BaiduBasemap.fit snaps down to a whole
+ * zoom (crisp labels), where BD-09 Mercator draws 2^(z - 18) px per unit and a unit is cos(lat) m
+ * along x. The static view uses it while the Baidu map loads, so its arrival does not rescale the map.
+ */
+export function wholeZoomScale(s: number, lat0: number): number {
+  const c = Math.cos((lat0 * Math.PI) / 180);
+  const zoom = Math.max(3, Math.min(19, Math.floor(18 + Math.log2(s * c) + 0.03)));
+  return 2 ** (zoom - 18) / c;
+}
+
 /** `shiftY` moves the composition's centre off the panel's middle (px, + down), e.g. into the band
- * the floating controls leave free; `shiftX` moves it right (the 路演 card covers the left side). */
-export function staticView(width: number, height: number, c: Composition, shiftY = 0, shiftX = 0): View {
-  const s = Math.min(width, height) / c.span;
+ * the floating controls leave free; `shiftX` moves it right (the 路演 card covers the left side).
+ * With `lat0` the scale snaps to the whole zoom Baidu's map will use (wholeZoomScale). */
+export function staticView(
+  width: number,
+  height: number,
+  c: Composition,
+  shiftY = 0,
+  shiftX = 0,
+  lat0?: number,
+): View {
+  const fit = Math.min(width, height) / c.span;
+  const s = lat0 === undefined ? fit : wholeZoomScale(fit, lat0);
   return affineView(width, height, width / 2 + shiftX - c.cx * s, height / 2 + shiftY + c.cy * s, s, s);
 }
 

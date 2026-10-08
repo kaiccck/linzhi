@@ -3,8 +3,10 @@
  * one quieter line on how few of the gaps the circle finds (a gap is one community × one category). The
  * report prints the two-line claim/walk form (verdictLines); verdictSentence is the spoken whole.
  */
+import { useEffect, useRef, useState } from 'react';
 import { distWords, type Model } from '../model/derive.js';
 import { checkLook } from '../model/looks.js';
+import { NumText } from './NumText.js';
 
 /** What the verdict says, for screen readers and the page's live region: communities, then the gaps. */
 export function verdictSentence(model: Model): string {
@@ -46,12 +48,41 @@ export const PSEUDO_MEANING =
 const pct = (part: number, whole: number) => `${whole ? (100 * part) / whole : 0}%`;
 
 /**
+ * The numeral 走一遍 holds back: "–" while the walk plays, then a count up to the result over the 560 ms
+ * the bars grow in (instant with reduced motion; a first render shows the number as it is).
+ */
+function useLandingCount(target: number, walking: boolean): number | null {
+  const [shown, setShown] = useState<number>(target);
+  const was = useRef(walking);
+  useEffect(() => {
+    const landed = was.current && !walking;
+    was.current = walking;
+    if (walking) return;
+    if (!landed || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setShown(target);
+      return;
+    }
+    const t0 = performance.now();
+    let id = 0;
+    const step = (now: number) => {
+      const p = Math.min(1, (now - t0) / 560);
+      setShown(Math.round((1 - Math.pow(1 - p, 3)) * target));
+      if (p < 1) id = requestAnimationFrame(step);
+    };
+    setShown(0);
+    id = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(id);
+  }, [walking, target]);
+  return walking ? null : shown;
+}
+
+/**
  * The panel's answer, in one unit — communities: how many lack a facility on foot, then the same
  * count as the circle and as the walk, two bars on one scale (the whole area). The few the circle finds
  * are slate on both bars; the walk's extra ones are red (伪覆盖). Under the bars, one line keys each
  * colour once with how many it holds and what it means: the key for the bars and the list below alike.
  */
-export function Verdict({ model }: { model: Model }) {
+export function Verdict({ model, walking = false }: { model: Model; walking?: boolean }) {
   const { tally } = model;
   const n = model.units.length;
   const rule = `步行 ${distWords(model.ruleM)}内`;
@@ -59,18 +90,21 @@ export function Verdict({ model }: { model: Model }) {
   // a borderline walk past the rule shows in the lists' open rows: then it joins the key (one within
   // the rule folds away, its words on its row)
   const edge = model.units.some((u) => model.cats.some((k) => checkLook(u.checks[k]) === 'edge-over'));
+  const numeral = useLandingCount(tally.units, walking);
   return (
-    <section className="verdict" aria-labelledby="verdict-say">
+    <section className={'verdict' + (walking ? ' walking' : '')} aria-labelledby="verdict-say">
       <p className="sr-only" id="verdict-say" aria-live="polite">
         {verdictSentence(model)}
       </p>
       <div className="v-top" aria-hidden="true">
-        <b className="v-n">{tally.units}</b>
+        <b className="v-n">{numeral ?? '–'}</b>
         <p className="v-lines">
           <span className="v-t1">个小区缺设施</span>
           <span className="v-t2">
             <span className="num">{n}</span> 个小区中，
-            {tally.units ? `${rule}至少缺一类` : `${rule}${model.cats.length} 类设施都走得到`}
+            <NumText
+              text={tally.units ? `${rule}至少缺一类` : `${rule}${model.cats.length} 类设施都走得到`}
+            />
           </span>
         </p>
       </div>
@@ -96,18 +130,14 @@ export function Verdict({ model }: { model: Model }) {
                 <span className="term" title={PSEUDO_MEANING}>
                   伪覆盖
                 </span>
-                <span>
-                  <span className="num">{missed}</span> 个：圈里有、走不到
-                </span>
+                <span>圈里有、走不到</span>
               </li>
             ) : null}
             {tally.circleUnits ? (
               <li>
                 <i className="sw s-blind" />
                 <b>盲区</b>
-                <span>
-                  <span className="num">{tally.circleUnits}</span> 个：直线就超出
-                </span>
+                <span>直线就超出</span>
               </li>
             ) : null}
             {edge ? (
@@ -137,19 +167,22 @@ export function Verdict({ model }: { model: Model }) {
 
 /** The verdict in one quiet line (the 问询 panel keeps the conclusion above the desk). */
 export function VerdictBrief({ model }: { model: Model }) {
-  const { circleGaps, walkGaps, tally } = model;
+  const { tally } = model;
+  // the verdict's own unit, communities: how many lack one on foot, how few of them the circle sees
   return (
     <p className="v-brief">
       <span className="sr-only">{verdictSentence(model)}</span>
       <span aria-hidden="true">
-        画圈 <span className="num">{circleGaps}</span> 项缺口 · 走一遍 <span className="num">{walkGaps}</span>{' '}
-        项
         {tally.units ? (
           <>
-            {' '}
-            · <span className="num">{tally.units}</span> 个小区
+            <span className="num">{tally.units}</span> 个小区缺设施 · 画圈只看出{' '}
+            <span className="num">{tally.circleUnits}</span> 个
           </>
-        ) : null}
+        ) : (
+          <>
+            <span className="num">{model.cats.length}</span> 类设施各小区都走得到
+          </>
+        )}
       </span>
     </p>
   );

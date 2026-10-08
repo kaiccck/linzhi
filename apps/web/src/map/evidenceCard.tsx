@@ -5,7 +5,7 @@
  * why (never a blank). Placed on the map like a finding card (docked at the foot on a phone).
  */
 import { NumText } from '../components/NumText.js';
-import { fmtInt, spotOf } from '../model/derive.js';
+import { fmtInt, poiName, spotOf } from '../model/derive.js';
 import { catchmentText, type EvidenceBase, type EvidenceFacts } from '../model/evidence.js';
 import { freshText } from '../model/fresh.js';
 import type { FindingItem } from './findings.js';
@@ -30,7 +30,13 @@ const TAG: Partial<Record<string, [string, string]>> = {
 
 export function evidenceItem(
   ev: EvidenceView,
-  opts: { scale: number; crossing: boolean; onClose(): void },
+  opts: {
+    scale: number;
+    crossing: boolean;
+    onClose(): void;
+    /** the rule's distance: a walk past it says by how much */
+    rule?: number;
+  },
 ): FindingItem {
   const { base, facts } = ev;
   const { unit, cat, look, check } = base;
@@ -43,6 +49,14 @@ export function evidenceItem(
       <>
         直线 {straight} · 实际步行 <U n={fmtInt(facts.routeM)} unit="m" />
         <br />
+        {opts.rule && facts.routeM > opts.rule ? (
+          <span className="nw ev-over">
+            超出 {opts.rule % 1000 === 0 ? <N>{opts.rule / 1000}</N> : <N>{fmtInt(opts.rule)}</N>}
+            {opts.rule % 1000 === 0 ? ' 公里 ' : ' m '}
+            <U n={fmtInt(facts.routeM - opts.rule)} unit="m" />
+            {' · '}
+          </span>
+        ) : null}
         <span className="nw">
           {elder ? '老人' : ''}约 <N>{facts.minutes}′</N>（
           {opts.crossing ? '含过街等待，估算' : '百度步行路线'}）
@@ -57,7 +71,12 @@ export function evidenceItem(
     );
   // the quiet foot: the assigned school, and the distance the verdict used when the drawn route differs
   const foot: string[] = [];
-  if (cat === '小学' && unit.catchment) foot.push(catchmentText(unit.catchment));
+  // the assigned school, unless the route already goes to it (said once, not twice)
+  const bare = (s: string) => s.replace(/[（(]/g, '(').replace(/[）)]/g, ')').replace(/\s/g, '');
+  if (cat === '小学' && unit.catchment) {
+    const same = !!base.facility && bare(base.facility).includes(bare(poiName(unit.catchment.school)));
+    foot.push(same ? '这所就是对口小学' : catchmentText(unit.catchment));
+  }
   if (facts?.checkRouteM) foot.push(`判定距离 ${fmtInt(facts.checkRouteM)} m`);
   // a 菜市场 gap: where vegetables can still be bought on foot (the verdict stays)
   if (cat === '菜市场' && check.alt) foot.push(freshText(check.alt));

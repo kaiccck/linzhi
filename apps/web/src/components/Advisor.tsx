@@ -50,6 +50,21 @@ type Exchange = { key: number; question: string } & (
   | { status: 'stopped' }
 );
 
+/** A model id as people know it: deepseek-flash → DeepSeek; an unknown id as it is. */
+function modelName(id: string | null | undefined): string {
+  if (!id) return '大模型';
+  const known: [RegExp, string][] = [
+    [/deepseek/i, 'DeepSeek'],
+    [/qwen|tongyi/i, '通义千问'],
+    [/glm|zhipu/i, '智谱 GLM'],
+    [/kimi|moonshot/i, 'Kimi'],
+    [/doubao/i, '豆包'],
+    [/claude/i, 'Claude'],
+    [/gpt|openai/i, 'OpenAI'],
+  ];
+  return known.find(([re]) => re.test(id))?.[1] ?? id;
+}
+
 export interface AdvisorProps {
   model: Model;
   /** what POST /api/ask answers about (the analysis on screen) */
@@ -701,18 +716,21 @@ export const AdvisorPanel = memo(function AdvisorPanel({
     return samples.find((s) => s.id === base)?.name ?? base;
   };
 
+  // who words the answers, and where the numbers come from (they never come from the model)
   const modeLine =
     advisor?.mode === 'llm'
-      ? `大模型 ${advisor.model ?? ''} 组织语言`
+      ? `措辞：${modelName(advisor.model)} · 数字来自体检结果`
       : advisor?.mode === 'template'
-        ? '模板回答（未配置大模型）'
+        ? '模板回答 · 未配置大模型'
         : null;
 
   return (
     <section className="advisor" id="panel-ask" role="tabpanel" aria-labelledby="tab-ask" hidden={hidden}>
       {modeLine && !disabled ? (
         <div className="ask-head">
-          <span className="ask-mode">{modeLine}</span>
+          <span className="ask-mode" title={advisor?.model ? `模型 ${advisor.model}` : undefined}>
+            {modeLine}
+          </span>
         </div>
       ) : null}
       <div className="ask-scroll" ref={scrollRef}>

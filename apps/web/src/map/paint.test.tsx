@@ -43,7 +43,14 @@ describe('paint plan', () => {
   });
 
   it('closes the gray areas under the community tints, isochrones, circle and route; names last offline', () => {
-    expect(paintPlan(base).over).toEqual(['gray-edge', 'plates', 'isochrones', 'circle', 'route']);
+    expect(paintPlan(base).over).toEqual([
+      'gray-edge',
+      'iso-minor',
+      'plates',
+      'isochrones',
+      'circle',
+      'route',
+    ]);
     expect(paintPlan({ ...base, offline: true, hasBase: true }).over.at(-1)).toBe('labels');
   });
 

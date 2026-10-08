@@ -28,10 +28,13 @@ export function CategoryCards({
   model,
   cat,
   onCat,
+  walking = false,
 }: {
   model: Model;
   cat: HardCategory;
   onCat(cat: HardCategory): void;
+  /** 走一遍 plays: the counts wait for it ("·") */
+  walking?: boolean;
 }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const n = model.units.length;
@@ -77,13 +80,24 @@ export function CategoryCards({
           >
             <span className="cat-top" aria-hidden="true">
               <Pg id={CAT_ICON[h.cat]!} color={CAT_COLOR[h.cat]} />
-              <b className={'cat-n num' + (gaps ? '' : pending ? ' pending' : ' clear')}>
-                {gaps || (pending ? 0 : '✓')}
-              </b>
+              {walking ? (
+                <b className="cat-n num wait">·</b>
+              ) : (
+                <b className={'cat-n num' + (gaps ? '' : pending ? ' pending' : ' clear')}>
+                  {gaps || (pending ? 0 : '✓')}
+                </b>
+              )}
             </span>
             <span className="cat-name" aria-hidden="true">
               {h.cat}
             </span>
+            {gaps && !walking ? (
+              // the gaps as a share of the communities, in their materials: 伪覆盖 red, 盲区 slate
+              <span className="cat-share" aria-hidden="true">
+                <i className="sp" style={{ width: `${(100 * h.pseudo) / n}%` }} />
+                <i className="sb" style={{ width: `${(100 * h.blind) / n}%` }} />
+              </span>
+            ) : null}
           </button>
         );
       })}

@@ -7,6 +7,7 @@
  */
 import { memo, useMemo } from 'react';
 import { CAT_COLOR, fmtInt, type Model } from '../model/derive.js';
+import { NumText } from './NumText.js';
 import { facilitySummary, rowLabel, type FacilityRow, type Mark } from '../model/facilities.js';
 import { Pg, Ui } from './Icons.js';
 
@@ -141,8 +142,7 @@ export const FacilityView = memo(function FacilityView({
         <span className="vc-n num">{s.walk}</span>
       </div>
       <p className="v-note" aria-hidden="true">
-        直线圈半径 <span className="num">{fmtInt(s.radiusM)}</span> m；圈里有
-        <span className="num"> {s.circle - s.walk} </span>处 15 分钟走不到
+        <NumText text={`直线圈半径 ${fmtInt(s.radiusM)} m；圈里有 ${s.circle - s.walk} 处 15′ 走不到`} />
       </p>
       <div className="fac-cols" aria-hidden="true">
         <span className="keys">

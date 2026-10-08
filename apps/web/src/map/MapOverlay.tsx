@@ -36,6 +36,11 @@ interface Props {
   onPick?(code: string): void;
   /** the chosen category (the school category shows a unit's assigned school on hover) */
   cat?: HardCategory;
+  /**
+   * 走一遍 has just landed: the codes whose verdict is a gap give a small lift, rippling out from the
+   * centre as the walk did (once, under a second)
+   */
+  landed?: boolean;
   /** unit codes a planned site would bring within the rule: their pills carry a teal tick */
   flips?: ReadonlySet<string> | undefined;
   /** 规划: the site under the pointer (lit here and in the panel's list) */
@@ -327,7 +332,7 @@ export function MapOverlay(props: Props) {
           })}
         </svg>
       ) : null}
-      <div className="layer overlay">
+      <div className="layer overlay" data-landed={props.landed || undefined}>
         {L.names.map((n) => (
           <div
             key={n.key}
@@ -443,7 +448,12 @@ export function MapOverlay(props: Props) {
               key={unit.code}
               type="button"
               className={cls}
-              style={{ left: x, top: y }}
+              style={{
+                left: x,
+                top: y,
+                // the landing ripple reaches a code as far behind the centre's as the walk did
+                ['--land' as string]: `${Math.round(Math.min(420, Math.hypot(x - L.here.x, y - L.here.y) * 0.9))}ms`,
+              }}
               title={unit.name + detail}
               aria-label={`${unit.code} ${unit.name}${word ? `（${word}）` : ''}${props.onPick ? '，画出步行路线' : ''}`}
               aria-pressed={props.onPick ? props.selected === unit.code : undefined}

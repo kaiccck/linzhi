@@ -119,6 +119,7 @@ export function MapLegend({
   return (
     <div className="float legend" ref={ref} aria-label="图例" role="group">
       <b>
+        <span className="lg-who">各小区到</span>
         {cat} · 步行{' '}
         {rule % 1000 === 0 ? (
           <>
@@ -406,10 +407,10 @@ export function WalkCard({
   // an estimate reads as one (The Honest Number Rule)
   const est = crossing ? '≈' : '';
   const m = T / 60;
-  const minutes = Number.isInteger(m) ? String(m) : m.toFixed(1);
+  const minutes = !playing && Number.isInteger(m) ? String(m) : m.toFixed(1);
   const who = profile === 'elder' ? '老人' : '';
   return (
-    <div className="float walk" ref={ref}>
+    <div className="float walk" ref={ref} data-playing={playing || undefined}>
       <button
         type="button"
         className="play"
@@ -468,7 +469,7 @@ export function WalkCard({
         <span className="ro-s">
           {T === 900 ? (
             <>
-              直线圈 <span className="num">{circleKm2.toFixed(2)}</span> km²，圈里{' '}
+              片区中心直线圈 <span className="num">{circleKm2.toFixed(2)}</span> km²，圈里{' '}
               <span className="num">
                 {est}
                 {Math.round(missShare * 100)}%

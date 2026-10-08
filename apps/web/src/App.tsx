@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { IconSprite } from './components/Icons.js';
+import { PanelSkeleton } from './components/Skeleton.js';
 import { TopBar } from './components/TopBar.js';
 import { analyze, getHealth, type AnalyzeFn, type Health, type StageEvent } from './data/api.js';
 import { analysisIdOf, askGate, measureGate } from './data/gates.js';
@@ -50,6 +51,23 @@ const FAKE_STREAM = import.meta.env.DEV ? params.get('fakeStream') : null;
 // dev only: the 浏览器端周边检索 of any centre, for the samples' capture script
 if (import.meta.env.DEV)
   exposeNearby(() => loadBaidu(import.meta.env.VITE_BAIDU_BROWSER_AK as string | undefined));
+/**
+ * The first visit in a tab opens with 走一遍: the reach walks out once by itself when the map is ready,
+ * the product's argument before any word of it. Not for a deep link (a view, a step, a check, a hash),
+ * a capture (?still, an automated browser) or reduced motion.
+ */
+const INTRO = (() => {
+  const deep = ['still', 'tour', 'report', 'plan', 'ask', 'analysis', 'center', 'fakeLive', 'fakeStream'];
+  if (deep.some((k) => params.has(k)) || window.location.hash) return false;
+  if (navigator.webdriver || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return false;
+  try {
+    if (sessionStorage.getItem('zdd:intro')) return false;
+    sessionStorage.setItem('zdd:intro', '1');
+    return true;
+  } catch {
+    return false;
+  }
+})();
 const viewFromUrl = (): View =>
   new URLSearchParams(window.location.search).has('report') ? 'report' : 'check';
 /** deep link to a live check: ?center=<lng>,<lat>&label=<名称> (live mode only) */
@@ -101,6 +119,8 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    // dev: ?hold=load keeps the page loading (its skeleton), for captures
+    if (import.meta.env.DEV && params.get('hold') === 'load') return;
     const ctl = new AbortController();
     void getHealth(ctl.signal).then((h) => {
       if (ctl.signal.aborted) return;
@@ -387,10 +407,23 @@ export function App() {
             centre={null}
           />
           <div className="workspace">
-            <aside className="panel" aria-label="体检结论">
-              <p className="panel-status" role="status">
-                {state.status === 'error' ? `数据载入失败：${state.message}` : '正在载入样例数据…'}
-              </p>
+            <aside className="panel" aria-label="体检结论" aria-busy={state.status === 'loading'}>
+              {state.status === 'error' ? (
+                <div className="panel-error" role="alert">
+                  <h1>数据没有载入</h1>
+                  <p>{state.message}</p>
+                  <button type="button" className="btn" onClick={() => window.location.reload()}>
+                    重新载入
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p className="sr-only" role="status">
+                    正在载入样例数据…
+                  </p>
+                  <PanelSkeleton />
+                </>
+              )}
             </aside>
             <main className="map" aria-busy={state.status === 'loading'} aria-label="步行可达地图" />
           </div>
@@ -444,6 +477,7 @@ export function App() {
         activeLive={loaded.source === 'live' ? analysisId : null}
         onOpenHistory={openHistory}
         onHistoryMenu={onHistoryMenu}
+        intro={INTRO}
       />
     </>
   );

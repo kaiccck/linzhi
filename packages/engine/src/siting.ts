@@ -42,7 +42,7 @@ export function pathCandidates(paths: readonly WalkPath[]): SiteCandidate[] {
   return siteCandidatesFromPaths(paths, SITE_SPACING_M).map((c) => {
     const m = /^path(\d+)@(\d+)m$/.exec(c.id);
     const path = m ? paths[Number(m[1])] : undefined;
-    return path && m ? { ...c, label: `${direction8(path.bearing_deg)}向步行路线约 ${m[2]} 米处` } : c;
+    return path && m ? { ...c, label: `${direction8(path.bearing_deg)}向步行路线约 ${m[2]} m 处` } : c;
   });
 }
 

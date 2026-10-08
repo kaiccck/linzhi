@@ -238,7 +238,7 @@ export function MapPanel(props: Props) {
     basemap.kind === 'baidu' && liveView && size && liveView.width === size.W && liveView.height === size.H
       ? liveView
       : size && still
-        ? staticView(size.W, size.H, still.c, still.shift, still.shiftX)
+        ? staticView(size.W, size.H, still.c, still.shift, still.shiftX, model.frame.lat0)
         : null;
   const viewRef = useRef(view);
   viewRef.current = view;
@@ -583,6 +583,19 @@ export function MapPanel(props: Props) {
 
   /* ---------- what the map shows ---------- */
   const playing = ui.playing;
+  // 走一遍 lands (it played and stopped at 15′): the gap codes ripple once, as the panel's bars grow
+  const [landed, setLanded] = useState(false);
+  const wasPlaying = useRef(false);
+  useEffect(() => {
+    const done = wasPlaying.current && !playing && ui.T === 900;
+    wasPlaying.current = playing;
+    if (done) setLanded(true);
+  }, [playing, ui.T]);
+  useEffect(() => {
+    if (!landed) return;
+    const id = window.setTimeout(() => setLanded(false), 1000);
+    return () => window.clearTimeout(id);
+  }, [landed]);
   const hold = !!props.tour?.hold;
   const facView = mode === 'check' && sub === 'fac';
   // 圈内设施: only the categories ticked in the panel's list, so one kind can be read at a time
@@ -605,9 +618,14 @@ export function MapPanel(props: Props) {
   const evItem = useMemo<FindingItem | null>(
     () =>
       evidence && !touring
-        ? evidenceItem(evidence, { scale, crossing: ui.crossing, onClose: closeEvidence })
+        ? evidenceItem(evidence, {
+            scale,
+            crossing: ui.crossing,
+            onClose: closeEvidence,
+            rule: model.ruleOf[evidence.base.cat],
+          })
         : null,
-    [evidence, touring, scale, ui.crossing, closeEvidence],
+    [evidence, touring, scale, ui.crossing, closeEvidence, model],
   );
   // the map pins nothing unasked on the 体检单: a picked community's route card is its finding
   const items = useMemo<FindingItem[]>(() => {
@@ -640,7 +658,7 @@ export function MapPanel(props: Props) {
       playing,
       T: ui.T,
       scale,
-      circle: ui.circle,
+      circle: ui.circle && !evidence,
       marks: facView ? { kind: 'all', list: shownMarks } : { kind: 'category', cat, list: catMarks },
       sites,
       floats: floats.rects,
@@ -789,7 +807,7 @@ export function MapPanel(props: Props) {
         T: ui.T,
         scale,
         timeScale,
-        circle: ui.circle,
+        circle: ui.circle && !evidence,
         heat: ui.heat,
         hot: ui.hot,
         lit,
@@ -812,6 +830,7 @@ export function MapPanel(props: Props) {
     scale,
     timeScale,
     ui.circle,
+    evidence,
     ui.heat,
     ui.hot,
     lit,
@@ -897,6 +916,16 @@ export function MapPanel(props: Props) {
   };
   const band = { top: floats.top, bottom: size ? Math.max(size.H - floats.walkTop + 10, 96) : 104 };
   const kmh = ((ui.profile === 'elder' ? V_ELDER : model.vAdult) * 3.6).toFixed(1);
+  const stripNow = [
+    ui.circle ? '直线圈' : '',
+    ui.heat ? '色阶' : '',
+    grayAvailable && ui.gray ? '灰色区域' : '',
+    ui.method ? '采样点' : '',
+    `${ui.profile === 'elder' ? '老人' : '成人'} ${kmh} km/h`,
+    ui.crossing ? '含过街' : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <>
@@ -946,6 +975,14 @@ export function MapPanel(props: Props) {
                 to={evidence.facts?.facilityXY ?? evidence.base.facilityXY}
                 path={evidence.facts?.path ?? null}
                 routeKey={`${evidence.base.unit.code}|${evidence.base.cat}|${evidence.facts?.routeM ?? ''}`}
+                ruleM={model.ruleOf[evidence.base.cat]}
+                tone={
+                  evidence.base.look === 'pseudo' || evidence.base.look === 'edge-over'
+                    ? 'pseudo'
+                    : evidence.base.look === 'blind' || evidence.base.look === 'none'
+                      ? 'blind'
+                      : 'ink'
+                }
               />
             ) : null}
             <MapOverlay
@@ -960,6 +997,7 @@ export function MapPanel(props: Props) {
               selected={evidence?.base.unit.code ?? null}
               onPick={touring || playing || plan.placing ? undefined : onEvidence}
               cat={cat}
+              landed={landed}
               flips={flips}
               hotSite={plan.hotSite}
               onHotSite={props.onHotSite}
@@ -1054,9 +1092,20 @@ export function MapPanel(props: Props) {
           {ui.profile === 'elder' ? `按老人步速 ${kmh} km/h 显示` : ''}
         </span>
       </main>
-      {/* a phone's map strip: the layer switch and the provenance live under the map */}
+      {/* a phone's map strip: the layers and the walker under the map, folded to one line (what is on)
+          until asked, so the verdict follows the map; the provenance stays in sight */}
       <div className="map-strip">
-        <LayerOptions {...layerProps} flat />
+        <details className="ms-fold">
+          <summary>
+            <Ui id="ui-layers" />
+            <span className="ms-t">图层与步速</span>
+            <span className="ms-now">{stripNow}</span>
+            <Ui id="ui-chevron" />
+          </summary>
+          <div className="ms-body">
+            <LayerOptions {...layerProps} flat />
+          </div>
+        </details>
         {attribution.length ? <p className="attrib">{attribution.join(' · ')}</p> : null}
       </div>
     </>

@@ -81,8 +81,8 @@ function Checkup({
   const fresh = cat === '菜市场' ? freshLine(model) : null;
   return (
     <section className="checkup" id="panel-sheet" aria-label="各小区缺口">
-      <Verdict model={model} />
-      <CategoryCards model={model} cat={cat} onCat={onCat} />
+      <Verdict model={model} walking={walking} />
+      <CategoryCards model={model} cat={cat} onCat={onCat} walking={walking} />
       <GapList
         model={model}
         cat={cat}
@@ -101,8 +101,16 @@ function Checkup({
           </span>
         </p>
       ) : null}
-      {gaps && !walking ? (
-        <button type="button" className="sheet-next" onClick={onPlan}>
+      {gaps ? (
+        // kept in place while 走一遍 plays (nothing below it jumps), back when the verdict lands
+        <button
+          type="button"
+          className={'sheet-next' + (walking ? ' waiting' : '')}
+          onClick={onPlan}
+          disabled={walking}
+          aria-hidden={walking || undefined}
+          tabIndex={walking ? -1 : undefined}
+        >
           为这 <span className="num">{gaps}</span> 个小区找补点 →
         </button>
       ) : null}
@@ -218,7 +226,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           ) : null}
           {mode === 'plan' ? (
             <>
-              <CategoryCards model={model} cat={props.cat} onCat={props.onCat} />
+              <CategoryCards model={model} cat={props.cat} onCat={props.onCat} walking={props.walking} />
               <Planning
                 model={model}
                 cat={props.cat}
