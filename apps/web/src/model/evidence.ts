@@ -5,7 +5,7 @@
  * route; nothing is typed in.
  */
 import type { CatchmentCheck, FacilityCheck, HardCategory, XY } from '@zoudedao/core';
-import { viaName } from '@zoudedao/core';
+import { viaName, policyCatchment, schoolUnjudged } from '@zoudedao/core';
 import type { RouteEvidence } from '../data/route.js';
 import { distWords, fmtInt, poiName, type Model, type Unit } from './derive.js';
 import { checkLook, type Look } from './looks.js';
@@ -33,7 +33,11 @@ export interface EvidenceBase {
 }
 
 /** The facility a check names, found among the analysis' POIs of the category (by name). */
-function facilityPoint(model: Model, cat: HardCategory, name: string | undefined): XY | null {
+function facilityPoint(model: Model, cat: HardCategory, name: string | undefined, uid?: string): XY | null {
+  if (uid) {
+    const hit = model.data.pois.find((p) => p.uid === uid || p.merged_uids?.includes(uid));
+    if (hit) return hit.xy;
+  }
   if (!name) return null;
   const kin: Record<HardCategory, string[]> = {
     幼儿园: ['幼儿园'],
@@ -53,7 +57,10 @@ export function evidenceBase(model: Model, code: string, cat: HardCategory): Evi
   const unit = model.units.find((u) => u.code === code);
   if (!unit) return null;
   const check = unit.checks[cat];
-  const facilityXY = facilityPoint(model, cat, check.via);
+  const facilityXY = schoolUnjudged(check)
+    ? null
+    : ((cat === '小学' ? unit.catchment?.school_xy : undefined) ??
+      facilityPoint(model, cat, check.via, check.via_uid));
   const straightM = facilityXY
     ? Math.hypot(facilityXY[0] - unit.centroid[0], facilityXY[1] - unit.centroid[1])
     : (check.via_straight_m ?? check.straight_m);
@@ -62,7 +69,9 @@ export function evidenceBase(model: Model, code: string, cat: HardCategory): Evi
     check,
     cat,
     look: checkLook(check),
-    facility: poiName(viaName(check) ?? check.nearest_straight ?? ''),
+    facility: poiName(
+      viaName(check) ?? (cat === '小学' ? unit.catchment?.school : undefined) ?? check.nearest_straight ?? '',
+    ),
     from: unit.centroid,
     facilityXY,
     straightM,
@@ -75,6 +84,8 @@ export function evidenceBase(model: Model, code: string, cat: HardCategory): Evi
  * routed for this unit on its own yet (待核). Null when the check was routed.
  */
 export function noRouteReason(check: FacilityCheck, cat: HardCategory, rule: number): string | null {
+  const pending = schoolUnjudged(check);
+  if (pending) return `${pending}。`;
   const basis = check.route_basis ?? 'routed';
   if (basis === 'none' || check.straight_m < 0) return `设施清单里没有${cat}，没有可画的步行路线。`;
   if (basis === 'lower_bound')
@@ -126,5 +137,17 @@ export function evidenceFacts(
 
 /** "对口：孙桥小学（申江校区）· 步行 1,676 m" — the assigned school, which is not always the nearest. */
 export function catchmentText(c: CatchmentCheck): string {
-  return `对口：${poiName(c.school)} · ${c.route_m !== null ? `步行 ${fmtInt(c.route_m)} m` : '步行未测'}`;
+  c = policyCatchment(c)!;
+  // a 商办 compound: no 对口地段 at all, and why
+  if (c.assignment_status === 'not_applicable') return c.note ?? '商办产权，没有对口小学';
+  const year = c.published?.slice(0, 4) ?? /\d{4}/.exec(c.source)?.[0];
+  const detail =
+    c.assignment_status === 'campus_pending'
+      ? '校区待核实'
+      : c.assignment_status === 'location_pending'
+        ? '位置待核实'
+        : c.route_m !== null
+          ? `步行 ${fmtInt(c.route_m)} m`
+          : '步行未测';
+  return `${year ? `${year} 年` : ''}对口：${poiName(c.school)} · ${detail}`;
 }

@@ -17,7 +17,7 @@ describe('买菜替代', () => {
   });
 
   it('finds the shops the server search left out: 万科翡翠公园 buys vegetables at 联华超市 and 清美生鲜', () => {
-    expect(freshTally(C)).toEqual({ gaps: 12, withAlt: 12, none: 0 });
+    expect(freshTally(C)).toEqual({ gaps: 7, withAlt: 7, none: 0 });
     const shops = new Set(C.units.map((u) => u.checks['菜市场'].alt?.name));
     expect(shops).toEqual(new Set(['联华超市(川和路店)', '清美生鲜(荣科路店)']));
     // 联华 came from the browser's map search (the server's place search never returned it)
@@ -30,8 +30,8 @@ describe('买菜替代', () => {
     const data = JSON.parse(rawC) as AnalysisResult;
     for (const c of data.communities) if (c.checks['菜市场'].alt) c.checks['菜市场'].alt = null;
     const none = deriveModel(data, 'zj-c');
-    expect(freshTally(none)).toEqual({ gaps: 12, withAlt: 0, none: 12 });
-    expect(freshLine(none)).toBe('缺菜市场的 12 个小区，步行 1 公里内也没有超市或菜店。');
+    expect(freshTally(none)).toEqual({ gaps: 7, withAlt: 0, none: 7 });
+    expect(freshLine(none)).toBe('缺菜市场的 7 个小区，步行 1 公里内也没有超市或菜店。');
     expect(freshMarks(none)).toEqual([]);
   });
 

@@ -351,6 +351,15 @@ html[data-view='report'] body {
   font-weight: 500;
   white-space: nowrap;
 }
+@media screen {
+  .rp-dir thead th {
+    position: sticky;
+    top: 62px;
+    z-index: 2;
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--line-2);
+  }
+}
 .rp-table th small,
 .rp-table td small {
   margin-left: 4px;
@@ -721,6 +730,13 @@ html[data-view='report'] body {
   }
   .rp-scroll .rp-table {
     min-width: 640px;
+  }
+  .rp-directory {
+    max-height: calc(100svh - 180px);
+    overflow: auto;
+  }
+  .rp-dir thead th {
+    top: 0;
   }
 }
 

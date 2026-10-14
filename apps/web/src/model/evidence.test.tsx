@@ -15,7 +15,22 @@ import { deriveModel, profileScale } from './derive.js';
 import { catchmentText, evidenceBase, evidenceFacts, noRouteReason } from './evidence.js';
 import { withPending } from './pending.test-data.js';
 
-const a = deriveModel(JSON.parse(rawA) as AnalysisResult, 'zj-a');
+// A synthetic confirmed assignment exercises route-card rendering independently of real Sunqiao
+// campus ambiguity. The actual policy sample is checked separately below.
+const scenario = JSON.parse(rawA) as AnalysisResult;
+const assignedUnit = scenario.communities.find((c) => c.name === '申城佳苑三期B块')!;
+assignedUnit.catchment = {
+  school: '孙桥小学(申江校区)',
+  school_uid: scenario.pois.find((p) => p.name === '孙桥小学(申江校区)')!.uid,
+  assignment_status: 'confirmed',
+  straight_m: 818.5,
+  route_m: 1676,
+  dur_s: 1431,
+  source: 'test-2026',
+  published: '2026-04-07',
+  matched_by: 'test:explicit-campus',
+};
+const a = deriveModel(scenario, 'zj-a');
 const b = deriveModel(JSON.parse(rawB) as AnalysisResult, 'zj-b');
 
 /** A-11's stored route, in the analysis' frame, as the page would read it */
@@ -98,7 +113,7 @@ describe('the route evidence of A-11 → 小学', () => {
     );
     expect(html).toContain('约 <span class="num">24′</span>（百度步行路线）');
     // the assigned school is the one the check routed to: said so, not named twice
-    expect(html).toContain('这所就是对口小学');
+    expect(html).toContain('招生地段对口');
     expect(item.spec).toMatchObject({
       key: 'evidence',
       code: 'A-11',
@@ -149,15 +164,25 @@ describe('a check with no route to draw says why, without asking the server', ()
   });
 
   it('an inventory without the category has nothing to route to', () => {
-    const none = { ...a.units[0]!.checks['小学'], route_basis: 'none' as const, straight_m: -1, route_m: -1 };
+    const none = { ...a.units[0]!.checks['药店'], route_basis: 'none' as const, straight_m: -1, route_m: -1 };
     expect(noRouteReason(none, '小学', 1000)).toBe('设施清单里没有小学，没有可画的步行路线。');
   });
 });
 
 describe('对口小学', () => {
   it('names the assigned school and its measured walk', () => {
-    const u = a.units.find((x) => x.code === 'A-01')!;
-    expect(catchmentText(u.catchment!)).toBe('对口：孙桥小学（张江校区） · 步行 1,102 m');
-    expect(catchmentText({ ...u.catchment!, route_m: null })).toMatch(/步行未测$/);
+    const actual = deriveModel(JSON.parse(rawA) as AnalysisResult, 'zj-a');
+    const u = actual.units.find((x) => x.code === 'A-01')!;
+    expect(catchmentText(u.catchment!)).toBe('2026 年对口：孙桥小学 · 校区待核实');
+    const base = evidenceBase(actual, u.code, '小学')!;
+    expect(base.facilityXY).toBeNull();
+    expect(base.check.via).toBeUndefined();
+    expect(noRouteReason(base.check, '小学', 1000)).toContain('校区待核实');
+    expect(actual.heads.find((h) => h.cat === '小学')).toMatchObject({
+      pending: 12,
+      blind: 0,
+      pseudo: 0,
+      ok: 0,
+    });
   });
 });

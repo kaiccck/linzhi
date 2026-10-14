@@ -22,7 +22,7 @@ import {
   WALK_SPEED,
 } from './constants.js';
 import type { BrowserPoiStats } from './browser.js';
-import { LIVELIHOOD_CATEGORIES } from './facilities.js';
+import { LIVELIHOOD_CATEGORIES, SERVICE_CATEGORIES } from './facilities.js';
 import type { FreshOutcome } from './fresh.js';
 import { ALIAS_RADIUS_M, type ResidentialDedupe } from './residential.js';
 import type { Profile } from './types.js';
@@ -170,6 +170,19 @@ function livelihoodNote(l: LivelihoodNote | null | undefined): string {
   );
 }
 
+function servicesNote(l: LivelihoodNote | null | undefined): string {
+  const cats = SERVICE_CATEGORIES.join('、');
+  if (!l) return `本次没有检索${cats}（地点检索预算不足或检索失败），圈内设施统计不含这几类。`;
+  const cut = Object.entries(l.inventory)
+    .filter(([, inv]) => inv && !inv.complete)
+    .map(([cat, inv]) => `${cat}只统计到离中心 ${Math.round(inv!.radius_m)} 米`);
+  return (
+    `生活服务：${SERVICE_CATEGORIES.filter((c) => c !== '餐饮').join('、')}用一次地点检索（$ 并集），餐饮单独检索，半径 ${LIVELIHOOD_RADIUS_M} 米，补充 ${l.found} 处；` +
+    '餐饮不含咖啡厅、茶座、酒吧与甜品店，长者食堂计入养老，快递含菜鸟驿站与快递柜，银行不含 ATM。到每处的步行时间按步行时间场在其入口处的取值估算，不是逐处实测。' +
+    (cut.length ? `检索页数用完：${cut.join('，')}。` : '')
+  );
+}
+
 /** Which categories every community was checked for, and by what rule. */
 function checkedNote(): string {
   const rules = [...new Set(HARD_CATEGORIES.map((c) => TASK_RULE_M[c]))];
@@ -192,6 +205,8 @@ export function liveNotes(args: {
   communities_max: number;
   /** The 民生设施 search; null when it did not run. */
   livelihood?: LivelihoodNote | null;
+  /** The 生活服务 searches; undefined for callers that predate them (no note). */
+  services?: LivelihoodNote | null;
 }): string[] {
   const notes = [
     checkedNote(),
@@ -199,6 +214,7 @@ export function liveNotes(args: {
     `需求点是地点检索“住宅区$小区”得到的小区出入口：同名子点（××-1号门、××东门、××-3号楼）已合并，限于中心 ${DEMAND_RADIUS_M} 米内（15 分钟直线圈），取最近的 ${args.communities_max} 个；本次 ${args.demand} 个（检出 ${args.demand_found} 个）。`,
     `设施检索半径 ${args.facility_radius_m} 米，即需求点范围 ${DEMAND_RADIUS_M} 米外加 1 公里缓冲，避免边缘小区出现假盲区；菜场摊位并入所属菜市场，不单独计数。`,
     livelihoodNote(args.livelihood),
+    ...(args.services === undefined ? [] : [servicesNote(args.services)]),
     FIELD_NOTE,
     'verified = false 的判定与 site_suggestions 中 verified = false 的建议只是估算：前者还有候选设施没算路，或设施清单在该距离外可能不全；后者没有用实测路线核验。',
   ];

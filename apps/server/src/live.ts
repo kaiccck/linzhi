@@ -25,6 +25,7 @@ export function createLiveAnalyzer(
     official: data.lists ?? [],
     catchment: data.catchments ?? [],
     exclusions: data.exclusions ?? [],
+    communityReviews: data.communityReviews ?? [],
   });
   return {
     name: engine.name,

@@ -31,24 +31,28 @@ import type { EngineClient } from './types.js';
 /** Categories of the 民生设施 union (the facilities counted, never checked per community). */
 export type LivelihoodKey = '养老' | '地铁' | '公园' | '超市' | '公交';
 
+/** Everyday services counted from the centre (生活服务 searches, 2026-10-10). */
+export type ServiceKey = '中学' | '文化' | '健身' | '银行' | '快递' | '便利店' | '餐饮';
+
 /** Groups of the 买菜替代 search (engine fresh.ts): shops that name produce, then 超市. */
 export type FreshGroupKey = '果蔬店' | '超市';
 
-export type GroupKey = HardCategory | '生鲜超市' | LivelihoodKey | FreshGroupKey;
+export type GroupKey = HardCategory | '生鲜超市' | LivelihoodKey | ServiceKey | FreshGroupKey;
 
 export interface FacilityGroup {
   key: GroupKey;
   keywords: readonly string[];
 }
 
-const GROUPS: Readonly<Record<Exclude<GroupKey, LivelihoodKey | FreshGroupKey>, FacilityGroup>> = {
-  小学: { key: '小学', keywords: ['小学'] },
-  社区卫生: { key: '社区卫生', keywords: ['社区卫生服务中心', '社区卫生服务站'] },
-  幼儿园: { key: '幼儿园', keywords: ['幼儿园'] },
-  菜市场: { key: '菜市场', keywords: ['菜市场', '菜场', '农贸市场', '生鲜市场'] },
-  生鲜超市: { key: '生鲜超市', keywords: ['生鲜超市'] },
-  药店: { key: '药店', keywords: ['药店', '药房'] },
-};
+const GROUPS: Readonly<Record<Exclude<GroupKey, LivelihoodKey | ServiceKey | FreshGroupKey>, FacilityGroup>> =
+  {
+    小学: { key: '小学', keywords: ['小学'] },
+    社区卫生: { key: '社区卫生', keywords: ['社区卫生服务中心', '社区卫生服务站'] },
+    幼儿园: { key: '幼儿园', keywords: ['幼儿园'] },
+    菜市场: { key: '菜市场', keywords: ['菜市场', '菜场', '农贸市场', '生鲜市场'] },
+    生鲜超市: { key: '生鲜超市', keywords: ['生鲜超市'] },
+    药店: { key: '药店', keywords: ['药店', '药房'] },
+  };
 
 /**
  * Keyword groups in query order: every checked category in one union of exactly 10 keywords (Baidu's
@@ -275,13 +279,14 @@ export function livelihoodPois(
   rows: readonly PlacePoi[],
   existing: readonly Poi[],
   frame: LocalFrame,
+  categories: readonly FacilityCategory[] = LIVELIHOOD_CATEGORIES,
 ): { pois: Poi[]; dropped: DroppedPoi[] } {
   const cleaned = cleanPois(rows.map(toPlaceResult), { project: frame.toXY });
   const dropped = cleaned.dropped.slice();
   const known = new Set(existing.flatMap((p) => [p.uid, ...(p.merged_uids ?? [])]));
   const pois: Poi[] = [];
   for (const p of cleaned.pois) {
-    if (!LIVELIHOOD_CATEGORIES.includes(p.cat)) {
+    if (!categories.includes(p.cat)) {
       dropped.push({ uid: p.uid, name: p.name, reason: `category:${p.cat}` });
       continue;
     }
@@ -375,6 +380,109 @@ export async function searchLivelihood(args: {
   };
 }
 
+// ------------------------------------------------------------------------------- 生活服务
+
+/**
+ * The everyday services a resident's 15 minutes are judged by beyond the 民生设施 (TD/T 1062-2021's
+ * 教育, 文体, 商业 and 服务 items): one "$" union of the scarce ones, scarcest first, and the
+ * restaurants on their own (a district holds a hundred within 1.1 km; they would crowd every other
+ * group out of a union). Pages per query; tags as Baidu answered around 申城佳苑 (research/category-probe).
+ */
+export const SERVICE_QUERIES: readonly {
+  id: 'services' | 'food';
+  groups: readonly (FacilityGroup & { key: ServiceKey })[];
+  pages: number;
+}[] = [
+  {
+    id: 'services',
+    groups: [
+      { key: '中学', keywords: ['中学'] },
+      { key: '文化', keywords: ['图书馆', '文化活动中心'] },
+      { key: '健身', keywords: ['健身', '体育馆'] },
+      { key: '银行', keywords: ['银行'] },
+      { key: '快递', keywords: ['快递', '驿站'] },
+      { key: '便利店', keywords: ['便利店'] },
+    ],
+    pages: 3,
+  },
+  { id: 'food', groups: [{ key: '餐饮', keywords: ['美食'] }], pages: 5 },
+];
+
+export const SERVICE_CATEGORIES: readonly FacilityCategory[] = SERVICE_QUERIES.flatMap((q) =>
+  q.groups.map((g) => g.key),
+);
+
+export interface ServiceSearch {
+  pois: Poi[];
+  dropped: DroppedPoi[];
+  rows: PlacePoi[];
+  inventory: Inventory;
+  queries: PlaceQueryLog[];
+}
+
+/**
+ * The 生活服务 searches within LIVELIHOOD_RADIUS_M, in SERVICE_QUERIES order, each with its own pages
+ * while the `services` budget line has room. Optional like the 民生设施 union: null without budget or
+ * when Baidu fails transiently before any answer (a warning says what is missing).
+ */
+export async function searchServices(args: {
+  meter: Meter;
+  client: EngineClient;
+  center: LngLat;
+  frame: LocalFrame;
+  /** The inventory so far: never counted twice. */
+  existing: readonly Poi[];
+  warn: (message: string) => void;
+}): Promise<ServiceSearch | null> {
+  const { meter, client, center, frame } = args;
+  if (meter.room('services') < 1) return null;
+  const distOf = (p: PlacePoi) => Math.hypot(...frame.toXY(p.location[0], p.location[1]));
+  const rows: PlacePoi[] = [];
+  const inventory: Inventory = {};
+  const queries: PlaceQueryLog[] = [];
+  for (const q of SERVICE_QUERIES) {
+    const pages = Math.min(q.pages, meter.room('services'));
+    if (pages < 1) break;
+    const keywords = q.groups.flatMap((g) => g.keywords);
+    let r: PlaceSearchResult;
+    try {
+      r = await meter.run(
+        'services',
+        pages,
+        (o) =>
+          client.placeAround(keywords, center, {
+            ...o,
+            radius: LIVELIHOOD_RADIUS_M,
+            maxPages: pages,
+            pageSize: PLACE_PAGE_SIZE,
+          }),
+        (res) => res.apiCalls,
+        (res) => res.pages,
+      );
+    } catch (err) {
+      if (!isDegradable(err)) throw err;
+      args.warn(
+        `${q.groups.map((g) => g.key).join('、')}检索失败，圈内设施统计不含这几类：${describeError(err)}`,
+      );
+      continue;
+    }
+    rows.push(...r.pois);
+    for (const [k, v] of inventoryOf(q.groups, r, distOf, LIVELIHOOD_RADIUS_M)) inventory[k] = v;
+    queries.push({
+      keywords: keywords.join('$'),
+      max_pages: pages,
+      pages: r.pages,
+      billed: r.apiCalls,
+      total: r.total,
+      complete: r.complete,
+      capped: r.capped,
+    });
+  }
+  if (!queries.length) return null;
+  const { pois, dropped } = livelihoodPois(rows, args.existing, frame, SERVICE_CATEGORIES);
+  return { pois, dropped, rows, inventory, queries };
+}
+
 export const COUNTED_CATEGORIES: readonly FacilityCategory[] = [
   '幼儿园',
   '小学',
@@ -383,6 +491,7 @@ export const COUNTED_CATEGORIES: readonly FacilityCategory[] = [
   '药店',
   '社区卫生',
   ...LIVELIHOOD_CATEGORIES,
+  ...SERVICE_CATEGORIES,
 ];
 
 /** Distinct facilities per category: stalls fold into their market, dropped POIs never count. */

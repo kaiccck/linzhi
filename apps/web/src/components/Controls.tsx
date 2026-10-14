@@ -120,7 +120,7 @@ export function MapLegend({
     <div className="float legend" ref={ref} aria-label="图例" role="group">
       <b>
         <span className="lg-who">各小区到</span>
-        {cat} · 步行{' '}
+        {cat === '小学' ? '对口小学' : cat} · 步行{' '}
         {rule % 1000 === 0 ? (
           <>
             <span className="num">{rule / 1000}</span> 公里
@@ -179,7 +179,7 @@ export function MapLegend({
       ) : null}
       {grayItem}
       {methodItems}
-      <span className="sr-only">规则：{`${cat}步行 ${distWords(rule)}内`}</span>
+      <span className="sr-only">规则：{`${cat === '小学' ? '对口小学' : cat}步行 ${distWords(rule)}内`}</span>
     </div>
   );
 }
@@ -213,8 +213,8 @@ export interface LayerProps {
 export function LayerOptions({ flat = false, ...p }: LayerProps & { flat?: boolean }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const items: { id: string; label: string; on: boolean; set(on: boolean): void; note: string }[] = [
-    { id: 'circle', label: '直线圈', on: p.circle, set: p.onCircle, note: '直线画的 15′ 圈，按所选步速' },
-    { id: 'heat', label: '耗时色阶', on: p.heat, set: p.onHeat, note: '步行耗时由浓到淡；关掉只留 15′ 范围' },
+    { id: 'circle', label: '直线圈', on: p.circle, set: p.onCircle, note: '片区中心直线画的 15′ 圈' },
+    { id: 'heat', label: '耗时色阶', on: p.heat, set: p.onHeat, note: '越近越浓；关掉只留 15′ 等时圈' },
   ];
   if (p.gray !== null)
     items.push({
@@ -222,14 +222,14 @@ export function LayerOptions({ flat = false, ...p }: LayerProps & { flat?: boole
       label: '灰色区域',
       on: p.gray,
       set: p.onGray,
-      note: '步行 1 公里内缺少某类设施的地方',
+      note: '步行 1 公里内缺设施的地方',
     });
   items.push({
     id: 'method',
     label: '采样点与阻隔',
     on: p.method,
     set: p.onMethod,
-    note: '百度实测的采样点和路线，以及由此推断的阻隔',
+    note: '百度实测的点和路线，推断的阻隔',
   });
   const options: { id: Profile; label: string; kmh: string }[] = [
     { id: 'adult', label: '成人', kmh: (p.vAdult * 3.6).toFixed(1) },
@@ -458,7 +458,7 @@ export function WalkCard({
         <span className="ro-t">
           <b className="num">{minutes}′</b>
           <span>
-            {who}走得到{' '}
+            {who}等时圈{' '}
             <span className="num">
               {est}
               {area.toFixed(2)}
@@ -469,7 +469,7 @@ export function WalkCard({
         <span className="ro-s">
           {T === 900 ? (
             <>
-              片区中心直线圈 <span className="num">{circleKm2.toFixed(2)}</span> km²，圈里{' '}
+              直线圈 <span className="num">{circleKm2.toFixed(2)}</span> km²，圈里{' '}
               <span className="num">
                 {est}
                 {Math.round(missShare * 100)}%
@@ -522,6 +522,14 @@ export function StageCard({
 
 const NICE = [5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000];
 
+export function RetryBasemap({ onRetry, retrying }: { onRetry(): void; retrying: boolean }) {
+  return (
+    <button type="button" className="recentre retry-basemap" onClick={onRetry} disabled={retrying}>
+      {retrying ? '正在重试…' : '重试底图'}
+    </button>
+  );
+}
+
 export function MapMeta({
   ref,
   bottom = null,
@@ -529,6 +537,8 @@ export function MapMeta({
   canReset,
   onReset,
   lines,
+  onRetry,
+  retrying = false,
 }: {
   ref?: Ref<HTMLDivElement>;
   /** stood on the 走一遍 card (px from the map's foot) when it leaves no room beside it */
@@ -538,12 +548,15 @@ export function MapMeta({
   onReset(): void;
   /** provenance: the sources that must stay on the map, in one line */
   lines: string[];
+  onRetry?(): void;
+  retrying?: boolean;
 }) {
   const m = [...NICE].reverse().find((d) => d * pxPerM <= 160) ?? NICE[0]!;
   const label = m >= 1000 ? `${m / 1000} km` : `${m} m`;
   return (
     <div className="map-meta" ref={ref} style={bottom === null ? undefined : { bottom }}>
       <div className="meta-row">
+        {onRetry ? <RetryBasemap onRetry={onRetry} retrying={retrying} /> : null}
         {canReset ? (
           <button type="button" className="recentre" onClick={onReset} title="回到片区中心（上北）">
             <Ui id="ui-locate" />

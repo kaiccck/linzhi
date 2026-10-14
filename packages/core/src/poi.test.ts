@@ -142,9 +142,25 @@ describe('categories and blacklists', () => {
     expect(categorize('张江镇长者照护之家', '生活服务;其他')).toEqual({ cat: '养老' });
     expect(categorize('孙桥社区长者食堂', '美食;中餐厅')).toEqual({ cat: '养老' });
     expect(categorize('张江镇综合为老服务中心', '生活服务;其他')).toEqual({ cat: '养老' });
-    expect(categorize('金钱豹自助餐', '美食;自助餐')).toEqual({ cat: '其他' });
+    // a buffet is a restaurant (餐饮), never an elderly meal point (助餐)
+    expect(categorize('金钱豹自助餐', '美食;自助餐')).toEqual({ cat: '餐饮' });
     expect(categorize('鹏海绿地公园', '旅游景点;公园')).toEqual({ cat: '公园' });
     expect(categorize('万科翡翠公园', '房地产;住宅区')).toEqual({ cat: '其他' });
+    // the everyday services counted from the centre (tags as Baidu answered, research/category-probe)
+    expect(categorize('华东师范大学附属东昌中学(南校张江校区)', '教育培训;中学')).toEqual({ cat: '中学' });
+    expect(categorize('全家便利店(孙桥路店)', '购物;便利店')).toEqual({ cat: '便利店' });
+    expect(categorize('沙县小吃(申城佳苑店)', '美食;小吃快餐店')).toEqual({ cat: '餐饮' });
+    expect(categorize('孙桥长者食堂', '美食;中餐厅')).toEqual({ cat: '养老' });
+    // a produce shop Baidu tags 美食 is no restaurant (清美生鲜 around 万科翡翠公园)
+    expect(categorize('清美生鲜(荣科路店)', '美食;其他')).toEqual({ cat: '其他' });
+    expect(categorize('菜鸟驿站(孙环路34号店)', '生活服务;物流公司')).toEqual({ cat: '快递' });
+    expect(categorize('孙耀路居民区党群服务站', '政府机构')).toEqual({ cat: '其他' });
+    expect(categorize('中国农业银行(上海孙桥现代农业开发区支行)', '金融;银行')).toEqual({ cat: '银行' });
+    expect(categorize('中国农业银行24小时自助银行', '金融;atm')).toEqual({ cat: '其他' });
+    expect(categorize('张江镇市民健身中心', '运动健身;健身中心')).toEqual({ cat: '健身' });
+    expect(categorize('麦8赫桌球棋牌(高木桥路店)', '运动健身;其他')).toEqual({ cat: '其他' });
+    expect(categorize('张江图书馆', '教育培训;图书馆')).toEqual({ cat: '文化' });
+    expect(categorize('浦东新区张江镇社区文化活动中心', '政府机构')).toEqual({ cat: '文化' });
 
     // a recorded union of the same kinds (社区卫生服务中心$养老院$幼儿园$超市$公交站$地铁站$公园$菜场)
     const mix = search('06d_place_v3_around_community_mix_p0.json');

@@ -57,6 +57,8 @@ interface CategoryRule {
   cat: FacilityCategory;
   tag: RegExp;
   name?: RegExp;
+  /** A name this matches is not this category: the search goes on to the next rules (not dropped). */
+  skip?: RegExp;
   exclude?: RegExp;
   /** A name this matches is never excluded: the facility's own name (whatever business words it holds). */
   keep?: RegExp;
@@ -69,6 +71,11 @@ interface CategoryRule {
  */
 const KINDERGARTEN_NAME =
   /幼儿园(?:[-－—]?[^()（）\-－—]{0,8}(?:部|分园|园区|校区)|[(（][^()（）]{0,12}[)）])?$/;
+
+/** Elderly meal points (长者食堂 …), which Baidu files under 美食. Not "自助餐". */
+const ELDER_MEAL = /长者食堂|老年食堂|社区食堂|老年助餐|助餐点|助餐服务/;
+/** 美食 rows that are no restaurant: the elderly meal points and the produce shops. */
+const NOT_A_MEAL = new RegExp(`${ELDER_MEAL.source}|生鲜|果蔬|蔬菜|水果|鲜果`);
 
 // Order matters: the first rule whose tag pattern matches wins.
 const RULES: readonly CategoryRule[] = [
@@ -100,6 +107,22 @@ const RULES: readonly CategoryRule[] = [
     name: /养老院|敬老院|日间照料|长者照护|为老服务|长者食堂|老年食堂|社区食堂|老年助餐|助餐点|助餐服务/,
   },
   { cat: '公园', tag: /公园/ },
+  // everyday services counted from the centre (2026-10-10), tags as Baidu answered around 申城佳苑
+  // (research/category-probe): 教育培训;中学, 购物;便利店, 美食;…, 生活服务;物流公司, 金融;银行,
+  // 运动健身;…, 教育培训;图书馆
+  // a school's 小学部 that Baidu tags 中学 stays a 小学 (the name rule above decides)
+  { cat: '中学', tag: /中学/, name: /中学/, skip: /小学/, exclude: /培训|辅导|托管|兴趣|英语/ },
+  { cat: '便利店', tag: /便利店/ },
+  // meals: restaurants and snack bars, not cafés, tea houses, bars or dessert shops; the elderly meal
+  // points Baidu files under 美食 are 养老 (by name, above), and the produce shops it files there
+  // (清美生鲜 …) sell vegetables, not meals (the 买菜替代 search finds them by name)
+  { cat: '餐饮', tag: /^美食(?!;(?:咖啡厅|茶座|酒吧|冷饮店|蛋糕甜品店))/, skip: NOT_A_MEAL },
+  // parcel points: 菜鸟驿站, lockers; 党群服务驿站 and 工会驿站 are 政府机构, never matched
+  { cat: '快递', tag: /物流公司|快递/, name: /菜鸟驿站|快递(?:超市|驿站|服务站|代收)|妈妈驿站|兔喜|丰巢/ },
+  // a branch, not its ATM (金融;atm)
+  { cat: '银行', tag: /金融;银行|^银行/ },
+  { cat: '健身', tag: /运动健身/, skip: /棋牌|桌球|台球|麻将/ },
+  { cat: '文化', tag: /图书馆|文化宫|美术馆|博物馆/, name: /图书馆|文化活动中心|文化中心|社区书房|书屋/ },
 ];
 
 /** "(孙桥菜市场店)" / "（孙桥菜场店）": a shop named after the market it sits in. */
@@ -136,9 +159,9 @@ const ACCESS_NAME_RE =
  * for a gate or a car park, which carries the facility's name without being it.
  */
 export function categorize(name: string, tag: string): Categorized {
-  const byTag = RULES.find((r) => r.tag.test(tag));
+  const byTag = RULES.find((r) => r.tag.test(tag) && !r.skip?.test(name));
   if (!byTag && (ACCESS_TAG_RE.test(tag) || ACCESS_NAME_RE.test(name))) return { cat: '其他' };
-  const rule = byTag ?? RULES.find((r) => r.name?.test(name));
+  const rule = byTag ?? RULES.find((r) => r.name?.test(name) && !r.skip?.test(name));
   if (!rule) return { cat: stallMarketName(name) ? '菜市场' : '其他' };
   const hit = rule.keep?.test(name) ? null : rule.exclude?.exec(name);
   return hit ? { cat: rule.cat, excluded: hit[0] } : { cat: rule.cat };

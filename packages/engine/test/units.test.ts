@@ -17,6 +17,7 @@ import {
   TASK_CATEGORIES,
   TASK_RULE_M,
   type Community,
+  type CommunityReview,
   type FacilityCheck,
   type FacilityExclusion,
   type HardCategory,
@@ -408,19 +409,14 @@ describe('residential dedupe: phases, parents and aliases', () => {
       home('s1', '花园', [500, 500]),
       home('s2', '某某公寓', [505, 500], { address: '某路1号花园' }),
     ]);
+    // 江苑社区 and 华顺社区 are residents' committees (two characters and 社区): never compounds
     expect(names(r)).toEqual(
-      [
-        '玉兰香苑-一期',
-        '玉兰香苑-四期',
-        '江苑社区',
-        '东窑新村',
-        '华陇小区',
-        '华顺社区',
-        '川杨兰苑',
-        '花园',
-        '某某公寓',
-      ].sort(),
+      ['玉兰香苑-一期', '玉兰香苑-四期', '东窑新村', '华陇小区', '川杨兰苑', '花园', '某某公寓'].sort(),
     );
+    expect(r.dropped.filter((d) => d.reason === 'committee').map((d) => d.name)).toEqual([
+      '江苑社区',
+      '华顺社区',
+    ]);
     const y = r.demand.find((d) => d.name === '玉兰香苑-一期')!;
     expect(y).toMatchObject({ uid: 'Y', label_xy: [9, 202] });
     expect(y.merged.sort()).toEqual(['al', 'ya']);
@@ -431,6 +427,67 @@ describe('residential dedupe: phases, parents and aliases', () => {
       uid: 'al',
       into: '玉兰香苑-一期',
     });
+  });
+});
+
+describe("community review: what is no one's home, 商办 compounds, official addresses", () => {
+  const review = (uid: string, action: CommunityReview['action'], more: Partial<CommunityReview> = {}) =>
+    ({
+      uid,
+      name: uid,
+      action,
+      kind: 'unverified',
+      reason: `r-${uid}`,
+      source: 's',
+      date: 'd',
+      ...more,
+    }) as CommunityReview;
+  const home = (uid: string, name: string, xy: XY, address: string | null = null) => ({
+    ...placePoi(uid, name, '房地产;住宅区', xy),
+    parentId: null,
+    address,
+  });
+
+  it('drops committees by name and reviewed points by uid, and passes the rest on with the verdict', () => {
+    const r = residentialDemand(
+      [
+        home('a', '江夏社区', [0, 100]),
+        home('b', '江春居委会', [0, 200]),
+        // a compound may be called 社区 when its name is longer
+        home('c', '张江国际社区', [0, 300]),
+        home('d', '梦想园', [0, 400], '盛夏路570号'),
+        home('e', '张江公馆', [0, 500], '高科中路2810弄'),
+        home('f', '日月光集团-员工生活区', [0, 600], '银冬路568号'),
+      ],
+      {
+        frame,
+        extent_m: 1600,
+        max: 30,
+        reviews: [
+          review('d', 'exclude', { kind: 'not_residential' }),
+          review('e', 'no_catchment', { kind: 'commercial', reason: '商办产权，没有对口小学' }),
+          review('f', 'address', { kind: 'address', address: '银东路568号' }),
+        ],
+      },
+    );
+    expect(r.demand.map((d) => d.name)).toEqual(['张江国际社区', '张江公馆', '日月光集团-员工生活区']);
+    expect(r.dropped).toEqual(
+      expect.arrayContaining([
+        { name: '江夏社区', reason: 'committee' },
+        { name: '江春居委会', reason: 'committee' },
+        { name: '梦想园', reason: 'reviewed:not_residential' },
+      ]),
+    );
+    expect(r.demand[1]).toMatchObject({ no_catchment: '商办产权，没有对口小学', address: '高科中路2810弄' });
+    expect(r.demand[2]).toMatchObject({ address: '银东路568号' });
+    const named = residentialDemand([home('g', '益江路511弄', [0, 100], '益江路555号')], {
+      frame,
+      extent_m: 1600,
+      max: 30,
+      reviews: [review('g', 'name', { kind: 'name', official_name: '玉兰香苑二期A块' })],
+    });
+    expect(named.demand[0]).toMatchObject({ id: '玉兰香苑二期A块', name: '玉兰香苑二期A块', uid: 'g' });
+    expect(r.demand[2]!.no_catchment).toBeUndefined();
   });
 });
 
@@ -569,7 +626,7 @@ describe('browser POIs: validation, choice within the budget, cleaning', () => {
     expect(byName.has('火锅店')).toBe(false);
     expect(out.rows).toHaveLength(5);
     expect(out.dropped.map((d) => d.reason)).toEqual(
-      expect.arrayContaining([`browser:beyond ${LIVELIHOOD_RADIUS_M} m`, 'uncategorized']),
+      expect.arrayContaining([`browser:beyond ${LIVELIHOOD_RADIUS_M} m`, 'browser:service 餐饮']),
     );
     expect(withBrowserRows(searched, [], frame)).toBe(searched);
   });
@@ -1320,31 +1377,49 @@ describe('budgets and the quota estimate', () => {
       place: 1,
       residentialPages: 1,
       livelihoodPages: 0,
+      servicesPages: 0,
       freshPages: 0,
       refine: 0,
       paths: 6,
       coverage: 650,
     });
-    expect(stepCaps(b)).toMatchObject({ facilities: 0, livelihood: 0, residential: 1, fresh: 0 });
-    // the defaults keep 6 pages for the five checked categories, 2 for the 民生设施, 2 for compounds
-    // and 2 for the 买菜替代 search
+    expect(stepCaps(b)).toMatchObject({
+      facilities: 0,
+      livelihood: 0,
+      services: 0,
+      residential: 1,
+      fresh: 0,
+    });
+    // the defaults keep 6 pages for the five checked categories, 2 for the 民生设施, 8 for the 生活服务,
+    // 2 for compounds and 2 for the 买菜替代 search
     expect(stepCaps(resolveBudget('personal'))).toMatchObject({
       facilities: 6,
       livelihood: 2,
+      services: 8,
       residential: 2,
       fresh: 2,
     });
-    // a smaller place budget gives up the 买菜替代 pages before the checked categories'
+    // a smaller place budget gives up the 买菜替代 pages, then the 生活服务, before the checked categories'
     expect(stepCaps(resolveBudget('personal', { place: 5 }))).toMatchObject({
       facilities: 1,
       livelihood: 2,
+      services: 0,
       residential: 2,
       fresh: 0,
     });
     expect(stepCaps(resolveBudget('personal', { place: 9 }))).toMatchObject({ facilities: 5, fresh: 0 });
-    expect(stepCaps(resolveBudget('personal', { place: 11 }))).toMatchObject({ facilities: 6, fresh: 1 });
+    expect(stepCaps(resolveBudget('personal', { place: 11 }))).toMatchObject({
+      facilities: 6,
+      services: 1,
+      fresh: 0,
+    });
+    expect(stepCaps(resolveBudget('personal', { place: 18 }))).toMatchObject({
+      facilities: 6,
+      services: 8,
+      fresh: 0,
+    });
     // a larger one goes to the checked categories
-    expect(stepCaps(resolveBudget('personal', { place: 14 }))).toMatchObject({ facilities: 8, fresh: 2 });
+    expect(stepCaps(resolveBudget('personal', { place: 24 }))).toMatchObject({ facilities: 10, fresh: 2 });
     expect(stepCaps(resolveBudget('personal', { freshPages: 0 }))).toMatchObject({ facilities: 8, fresh: 0 });
     expect(stepCaps(resolveBudget('enterprise'))).toMatchObject({ facilities: 9, fresh: 3 });
     // five categories share the siting routes: up to two verified sites each
@@ -1360,11 +1435,12 @@ describe('budgets and the quota estimate', () => {
     // the coverage check of five categories expects about 12 routes per compound
     expect(task.steps.find((s) => s.step === 'coverage')).toMatchObject({ expected: 12 * 30 });
     expect(task.steps.find((s) => s.step === 'siting')).toMatchObject({ expected: 30, max: 100 });
-    expect(planQuota({ center_bd09: CITY_ORIGIN }, { tier: 'enterprise' }).max.place).toBe(17);
-    expect(task.max.place).toBe(12);
+    expect(planQuota({ center_bd09: CITY_ORIGIN }, { tier: 'enterprise' }).max.place).toBe(25);
+    expect(task.max.place).toBe(20);
     // the union of the five checked categories takes about three pages, 生鲜超市 one more
     expect(task.steps.find((s) => s.step === 'facilities')).toMatchObject({ expected: 4, max: 6 });
-    expect(task.expected.place).toBe(10);
+    // + 2 民生设施, 6 生活服务 (the services union and the restaurants), 2 compounds, 2 买菜替代
+    expect(task.expected.place).toBe(16);
     // the notes name what the pages and routes buy
     const note = (step: string) => task.steps.find((s) => s.step === step)!.note;
     expect(note('facilities')).toMatch(/逐小区检查的幼儿园、小学、菜市场、药店、社区卫生/);
@@ -1783,7 +1859,8 @@ describe('official list fusion', () => {
     expect(by('sj')).toMatchObject({ official: { name: '上海市浦东新区孙桥小学（申江校区）' } });
     expect(by('zc')).toMatchObject({ official: { name: '上海市浦东新区张江镇中心小学' } });
     expect(by('zq')).toMatchObject({ official: { name: '上海浦东新区民办筑桥实验小学' } });
-    expect(by('dx')).toMatchObject({ cat: '小学', official: { reclassified_from: '教育培训' } });
+    // a 九年一贯制 school Baidu tags 中学: the list makes it the 小学 it names
+    expect(by('dx')).toMatchObject({ cat: '小学', official: { reclassified_from: '中学' } });
     // Baidu's 小学 that the list does not know stays as Baidu has it (exclusions handle proven errors)
     expect(by('yh')!.official).toBeUndefined();
     expect(by('gov:schools:6')).toMatchObject({ name: '上海市浦东新区观澜小学东校', source: 'gov' });
@@ -1800,7 +1877,7 @@ describe('official list fusion', () => {
     });
     expect(out.notes[0]).toBe(
       '小学名录（上海市浦东新区教育局《2026年浦东新区义务教育阶段学校招生入学信息公示（小学）》）：范围内 6 所，' +
-        '与百度 POI 一致 4 所，百度标为教育培训而改类 1 所，百度检索未返回、按官方地址补充 1 所；另有 1 所特殊教育，未计入。' +
+        '与百度 POI 一致 4 所，百度标为中学而改类 1 所，百度检索未返回、按官方地址补充 1 所；另有 1 所特殊教育，未计入。' +
         '名录中另有 1 条尚无坐标，没有参与融合。',
     );
     // a name alone is not enough beyond 800 m

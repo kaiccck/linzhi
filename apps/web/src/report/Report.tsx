@@ -9,7 +9,7 @@
  * Every number is computed from the analysis on screen, none is typed in.
  */
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { FRESH_RULE_TEXT, type FacilityCheck, type HardCategory } from '@zoudedao/core';
+import { FRESH_RULE_TEXT, schoolPendingReason, type FacilityCheck, type HardCategory } from '@zoudedao/core';
 import { Le } from '../components/Le.js';
 import { Tally } from '../components/Facilities.js';
 import { BRAND, BrandMark } from '../components/Brand.js';
@@ -109,20 +109,18 @@ function Verdict({ model }: { model: Model }) {
   );
 }
 
-/** The four numbers of the cover as one sentence: what walking reaches against what the circle draws. */
+/** Keep the cover on one comparison; derived radii belong in the methods appendix. */
 function Figures({ model, scale }: { model: Model; scale: number }) {
   const { stats } = model.data;
   const reach = scale === 1 ? stats.area_iso15_km2 : reachArea(model.raster, 900, scale);
   const circle = scale === 1 ? stats.area_circle15_km2 : circleKm2(model, scale);
-  const radius = Math.sqrt((reach * 1e6) / Math.PI);
   return (
     <p className="rp-figline">
       <N>15′</N> 真正走得到 <b className="num">{reach.toFixed(2)}</b> km²，
       <span className="muted">
         直线圈画的是 <b className="num">{circle.toFixed(2)}</b> km²
       </span>
-      ，高估 <b className="num">{(circle / reach).toFixed(2)}</b> 倍；按面积折算，等效步行半径{' '}
-      <b className="num">{fmtInt(radius)}</b> m（直线圈 <N>{fmtInt(circleR(model, scale))}</N> m）。
+      。直线圈面积是实际可达面积的 <b className="num">{(circle / reach).toFixed(2)}</b> 倍。
     </p>
   );
 }
@@ -169,19 +167,10 @@ function MapKey({ model }: { model: Model }) {
 
 /* ------------------------------------------------------------------ 01 圈内设施 */
 
-function FacilitySection({ model, scale, kmh }: { model: Model; scale: number; kmh: string }) {
+function FacilitySection({ model, scale }: { model: Model; scale: number }) {
   const s = useMemo(() => facilitySummary(model, scale), [model, scale]);
   return (
-    <Sec
-      n="01"
-      id="rp-fac"
-      title="圈内设施"
-      aside={
-        <>
-          从片区中心出发 · 步速 <N>{kmh}</N> km/h · 直线圈半径 <N>{fmtInt(s.radiusM)}</N> m
-        </>
-      }
-    >
+    <Sec n="01" id="rp-fac" title="圈内设施" aside="从片区中心出发">
       <p className="rp-lead">
         {s.circle > s.walk ? (
           <>
@@ -287,17 +276,19 @@ function DirCell({ cat, s }: { cat: HardCategory; s: FacilityCheck }) {
       <td className="c-cell">
         <div
           className="rp-cell s-pending"
-          aria-label={`${cat} 待核：已测路线 ${fmtInt(s.route_m)} 米只是上限`}
+          aria-label={schoolPendingReason(s) ?? `${cat} 待核：已测路线 ${fmtInt(s.route_m)} 米只是上限`}
         >
           <span className="top">
             <b className="word">待核</b>
-            <N>
-              {bound ?? <Le />}
-              {fmtInt(s.route_m)} m
-            </N>
+            {s.route_m >= 0 ? (
+              <N>
+                {bound ?? <Le />}
+                {fmtInt(s.route_m)} m
+              </N>
+            ) : null}
           </span>
           <span className="bot">
-            <em>未单独实测</em>
+            <em>{schoolPendingReason(s)?.split('，')[0] ?? '未单独实测'}</em>
           </span>
         </div>
       </td>
@@ -351,21 +342,17 @@ function DirectorySection({ model }: { model: Model }) {
       title={
         model.cats.length > 3 ? `各小区 × ${model.cats.length} 类设施` : `小区 × ${model.cats.join('、')}`
       }
-      aside={<>{ruleWords(model)} · 由重到轻</>}
+      aside="由重到轻"
     >
       <p className="rp-lead">
-        <span className="muted">
-          画圈只找到 <N>{model.circleGaps}</N> 项缺口；
-        </span>
-        实测步行找到 <N>{model.walkGaps}</N> 项，在 <N>{model.tally.units}</N> 个小区
+        共 <N>{model.walkGaps}</N> 项缺口，按「小区 × 设施类别」计数。
         {pending ? (
           <>
-            ，另有 <N>{pending}</N> 项待核，不计入
+            另有 <N>{pending}</N> 项待核，不计入缺口。
           </>
         ) : null}
-        。
       </p>
-      <div className="rp-scroll">
+      <div className="rp-scroll rp-directory" role="region" aria-label="各小区设施明细" tabIndex={0}>
         <table className="rp-table rp-dir" style={{ ['--n' as string]: model.cats.length }}>
           <thead>
             <tr>
@@ -424,7 +411,7 @@ function DirectorySection({ model }: { model: Model }) {
         </li>
         <li>
           <span className="sw s-pending" aria-hidden="true" />
-          <span>待核：尚未对该小区单独算路</span>
+          <span>待核：对口信息或步行路线尚待核实</span>
         </li>
       </ul>
       <p className="rp-note">
@@ -481,7 +468,7 @@ function GraySection({ model }: { model: Model }) {
   const levels = useMemo(() => grayLevels(model), [model]);
   const outer = levels.find((g) => g.kind === 'gap');
   return (
-    <Sec n="03" id="rp-gray" title="灰色区域" aside={grayRuleText(model)}>
+    <Sec n="03" id="rp-gray" title="灰色区域" aside={`步行 ${distWords(model.ruleM)}内缺任一类`}>
       {outer ? (
         <>
           <p className="rp-lead">
@@ -570,7 +557,7 @@ function SiteSection({
   const rule = distWords(model.ruleM);
   const gaps = model.units.some((u) => model.cats.some((c) => isWalkGap(u.checks[c], model.ruleOf[c])));
   return (
-    <Sec n="04" id="rp-site" title="规划建议" aside="贪心最大覆盖（MCLP）选址">
+    <Sec n="04" id="rp-site" title="规划建议">
       {whatif ? (
         <div className="rp-sites rp-whatif" style={{ ['--c' as string]: CAT_COLOR[whatif.cat] }}>
           <h3>
@@ -599,9 +586,6 @@ function SiteSection({
       ) : null}
       {groups.length ? (
         <>
-          <p className="rp-lead">
-            在这些位置补上设施，更多小区步行 <N>{rule}</N>内走得到。
-          </p>
           {groups.map(({ cat, list }) => (
             <div className="rp-sites" key={cat} style={{ ['--c' as string]: CAT_COLOR[cat] }}>
               <h3>
@@ -617,7 +601,7 @@ function SiteSection({
                     <div className="what">
                       <b>{p.label ?? `选址点 ${p.rank}`}</b>
                       <span>
-                        新增后 <N>{p.covers.length}</N> 个小区步行 <N>{rule}</N>内走得到：
+                        新增后 <N>{p.covers.length}</N> 个小区走得到：
                         {p.covers.map(({ name, unit }) =>
                           unit ? (
                             <Code key={name} u={unit} />
@@ -661,41 +645,37 @@ export function sourceLines(attribution: readonly string[], measuredOn: string):
 
 /* ------------------------------------------------------------------ 05 方法与局限 */
 
-function MethodSection({ model, profile, date }: { model: Model; profile: Profile; date: string }) {
+function MethodSection({
+  model,
+  profile,
+  scale,
+  date,
+}: {
+  model: Model;
+  profile: Profile;
+  scale: number;
+  date: string;
+}) {
   const { meta, stats } = model.data;
   const notes = (meta as { notes?: unknown }).notes;
   const warnings = (meta as { warnings?: unknown }).warnings;
   const list = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
-  const kmh = (model.vAdult * 3.6).toFixed(1);
+  const kmh = ((profile === 'elder' ? V_ELDER : model.vAdult) * 3.6).toFixed(1);
+  const reach = scale === 1 ? stats.area_iso15_km2 : reachArea(model.raster, 900, scale);
   return (
     <Sec n="05" id="rp-method" title="方法与局限">
       <ul className="rp-method">
         <li>
-          步行时间来自百度地图批量算路与轻量步行路线，共 <N>{fmtInt(stats.n_samples)}</N> 个实测样本，
-          按绕行系数去趋势插值成耗时场
-          {typeof stats.loo_mae_s === 'number' ? (
-            <>
-              （留一交叉验证平均误差 <N>{Math.round(stats.loo_mae_s)}</N> 秒）
-            </>
-          ) : null}
-          。
+          可达范围由 <N>{fmtInt(stats.n_samples)}</N> 个百度步行路线实测样本估算。
         </li>
         <li>
-          步速按百度批量算路的 <N>{model.vAdult.toFixed(2)}</N> m/s（<N>{kmh}</N> km/h）
-          {profile === 'elder' ? (
-            <>
-              ，本报告按老人 <N>{V_ELDER}</N> m/s（<N>{(V_ELDER * 3.6).toFixed(1)}</N>{' '}
-              km/h）换算，直线圈随之缩为 <N>{fmtInt(900 * V_ELDER)}</N> m
-            </>
-          ) : null}
-          ；直线画的 <N>15′</N> 圈半径 = <N>900</N> 秒 × 步速 = <N>{fmtInt(model.r15)}</N> m（成人）。
+          本报告按{profile === 'elder' ? '老人' : '成人'}步速 <N>{kmh}</N> km/h 换算步行时间，不含红绿灯等候。
         </li>
         <li>
           判定规则（赛题）：{ruleWords(model)}；步行距离与规则距离相差不到 <N>50</N> m
           的标为临界，需实地核实。
         </li>
-        <li>步行时间按路线距离 ÷ 步速计，不含红绿灯等候。</li>
-        {freshLine(model) ? <li>{FRESH_RULE_TEXT}</li> : null}
+        {freshLine(model) ? <li>生鲜店仅作买菜参考，不改变菜市场缺口判定。</li> : null}
       </ul>
       {list(warnings).length ? (
         <>
@@ -717,19 +697,34 @@ function MethodSection({ model, profile, date }: { model: Model; profile: Profil
           <N>{date}</N>。
         </li>
       </ul>
-      {list(notes).length ? (
-        // how the data was made, field by field: folded on screen, printed in full at the end
-        <details className="rp-appx">
-          <summary>
-            附录 · 数据处理说明 <span className="num">{list(notes).length}</span> 条
-          </summary>
-          <ul className="rp-notes">
-            {list(notes).map((n) => (
-              <li key={n}>{n}</li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
+      {/* Full methods stay available on screen and are always expanded for printing. */}
+      <details className="rp-appx">
+        <summary>附录 · 计算方法与数据处理</summary>
+        <ul className="rp-notes">
+          <li>
+            百度地图批量算路与轻量步行路线提供实测样本，按绕行系数去趋势插值成耗时场。
+            {typeof stats.loo_mae_s === 'number' ? (
+              <>
+                留一交叉验证平均误差 <N>{Math.round(stats.loo_mae_s)}</N> 秒。
+              </>
+            ) : null}
+          </li>
+          <li>
+            成人步速取百度批量算路的 <N>{model.vAdult.toFixed(2)}</N> m/s；老人步速取 <N>{V_ELDER}</N> m/s。
+            步行时间 = 路线距离 ÷ 步速；直线圈半径 = <N>900</N> 秒 × 本报告步速，为{' '}
+            <N>{fmtInt(circleR(model, scale))}</N> m。
+          </li>
+          <li>
+            按本报告可达面积折算，等效步行半径为 <N>{fmtInt(Math.sqrt((reach * 1e6) / Math.PI))}</N>{' '}
+            m；仅用于面积比较，不代表任一方向实际能走的距离。
+          </li>
+          <li>规划建议采用贪心最大覆盖（MCLP）选址；未核验点位按本次体检的绕行系数估算可达范围。</li>
+          {freshLine(model) ? <li>{FRESH_RULE_TEXT}</li> : null}
+          {list(notes).map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+        </ul>
+      </details>
     </Sec>
   );
 }
@@ -901,11 +896,11 @@ export default function Report({
         </section>
 
         <div className="rp-flow">
-          <FacilitySection model={model} scale={scale} kmh={kmh} />
+          <FacilitySection model={model} scale={scale} />
           <DirectorySection model={model} />
           <GraySection model={model} />
           <SiteSection model={model} pins={pins} whatif={whatif} />
-          <MethodSection model={model} profile={profile} date={date} />
+          <MethodSection model={model} profile={profile} scale={scale} date={date} />
           <footer className="rp-end">
             <BrandMark size={18} />
             {BRAND} · 按真实路网体检 15 分钟生活圈 · {sourceTag ?? `样例 ${model.code}`} · 百度地图实测{' '}

@@ -109,7 +109,9 @@ export function TourCard({
       </ol>
       <div className="tour-main" key={step.id} aria-live="polite">
         <p className="tour-kicker">
-          <span className="num">{i + 1}</span> / <span className="num">{steps.length}</span> · {step.kicker}
+          <span className="num">{i + 1}</span> / <span className="num">{steps.length}</span>
+          {/* the step's name: the step bar above names it on a wide map, only a narrow one needs it here */}
+          <span className="tk-name"> · {step.kicker}</span>
         </p>
         <h2 className="tour-head">
           <Parts parts={step.head} />

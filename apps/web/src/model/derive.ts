@@ -8,6 +8,9 @@
  */
 import {
   checkedCategories,
+  withSchoolCheck,
+  isPendingCheck,
+  schoolUnjudged,
   HARD_CATEGORIES,
   type AnalysisResult,
   type CheckStatus,
@@ -44,7 +47,13 @@ export type IconId =
   | 'pg-bus'
   | 'pg-park'
   | 'pg-pin'
-  | 'pg-plus';
+  | 'pg-plus'
+  | 'pg-food'
+  | 'pg-store'
+  | 'pg-parcel'
+  | 'pg-bank'
+  | 'pg-gym'
+  | 'pg-library';
 
 /** Categories that get a mark on the 体检 map (the rest stay off it, so the map keeps its density). */
 export const CAT_ICON: Partial<Record<FacilityCategory, IconId>> = {
@@ -69,6 +78,13 @@ export const STAT_ICON: Record<Exclude<FacilityCategory, '其他'>, IconId> = {
   公交: 'pg-bus',
   地铁: 'pg-metro',
   公园: 'pg-park',
+  中学: 'pg-school',
+  便利店: 'pg-store',
+  餐饮: 'pg-food',
+  快递: 'pg-parcel',
+  银行: 'pg-bank',
+  健身: 'pg-gym',
+  文化: 'pg-library',
 };
 
 /**
@@ -88,6 +104,13 @@ export const CAT_COLOR: Record<Exclude<FacilityCategory, '其他'>, string> = {
   公交: '#6b7585',
   地铁: '#6b7585',
   公园: '#6b7585',
+  中学: '#6d5bd0',
+  便利店: '#6b7585',
+  餐饮: '#6b7585',
+  快递: '#6b7585',
+  银行: '#6b7585',
+  健身: '#6b7585',
+  文化: '#6b7585',
 };
 export const catColor = (cat: FacilityCategory) => (cat === '其他' ? '#6b7585' : CAT_COLOR[cat]);
 
@@ -239,7 +262,8 @@ export const distWords = (m: number) => (m % 1000 === 0 ? `${m / 1000} 公里` :
  */
 export const isWalkGap = (s: FacilityCheck, rule: number) =>
   s.verified !== false && (s.route_m > rule || s.route_m < 0);
-export const isCircleGap = (s: FacilityCheck, rule: number) => s.straight_m > rule || s.straight_m < 0;
+export const isCircleGap = (s: FacilityCheck, rule: number) =>
+  !schoolUnjudged(s) && (s.straight_m > rule || s.straight_m < 0);
 
 type Verdicts = Pick<
   Model,
@@ -269,7 +293,7 @@ function verdicts(base: Pick<Model, 'ruleM' | 'cats'>, units: Unit[]): Verdicts 
   const tally: VerdictTally = {
     blind: walk.filter(({ k, s }) => isCircleGap(s, ruleOf[k])).length,
     pseudo: walk.filter(({ k, s }) => !isCircleGap(s, ruleOf[k])).length,
-    pending: pairs.filter(({ s }) => s.verified === false).length,
+    pending: pairs.filter(({ s }) => isPendingCheck(s)).length,
     units: new Set(walk.map(({ u }) => u.code)).size,
     circleUnits: new Set(walk.filter(({ k, s }) => isCircleGap(s, ruleOf[k])).map(({ u }) => u.code)).size,
   };
@@ -280,7 +304,7 @@ function verdicts(base: Pick<Model, 'ruleM' | 'cats'>, units: Unit[]): Verdicts 
     return {
       cat,
       ok: measured.length - gaps.length,
-      pending: units.length - measured.length,
+      pending: units.filter((u) => isPendingCheck(u.checks[cat])).length,
       pseudo: gaps.filter((s) => !isCircleGap(s, rule)).length,
       blind: gaps.filter((s) => isCircleGap(s, rule)).length,
       edge: measured.filter((s) => s.route_m >= 0 && Math.abs(s.route_m - rule) <= 50).length,
@@ -314,6 +338,7 @@ export function deriveModel(data: AnalysisResult, id: string): Model {
   const frame = frameFromMeta(data.meta);
   const vAdult = data.meta.walk_speed_mps || 1.17;
   const ruleM = data.baseline.rule_radius_m || 1000;
+  data = { ...data, communities: data.communities.map((c) => withSchoolCheck(c, ruleM)) };
   // sample ids look like zj-a → codes A-01 …; a live check uses A as well
   const letter = /^[a-z]+-([a-z])$/i.exec(id)?.[1]?.toUpperCase();
   const prefix = letter ?? 'A';

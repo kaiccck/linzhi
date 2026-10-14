@@ -43,9 +43,9 @@ describe('analysisGeoJSON', () => {
     const p = fc.features.find((f) => f.properties.code === 'A-11')!.properties;
     expect(p).toMatchObject({
       name: '申城佳苑三期B块',
-      小学_status: '伪覆盖',
-      小学_route_m: 1676,
-      小学_straight_m: 819,
+      小学_status: '待核实',
+      小学_route_m: null,
+      小学_straight_m: null,
     });
     expect(p.catchment_school).toContain('孙桥小学');
     const live = analysisGeoJSON(b, { scale: 1 });

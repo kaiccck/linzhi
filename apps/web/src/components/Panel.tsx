@@ -24,6 +24,7 @@ import { GapList } from './GapList.js';
 import { Planning } from './Planning.js';
 import { RunBoard } from './RunBoard.js';
 import { Verdict, VerdictBrief } from './Verdict.js';
+import { Chev } from './Icons.js';
 
 /** A live check on its way: what the panel shows instead of a verdict. */
 export interface PanelRun {
@@ -111,7 +112,7 @@ function Checkup({
           aria-hidden={walking || undefined}
           tabIndex={walking ? -1 : undefined}
         >
-          为这 <span className="num">{gaps}</span> 个小区找补点 →
+          去规划补点 →
         </button>
       ) : null}
       <FacilityEntry model={model} scale={scale} onOpen={onFacilities} />
@@ -151,6 +152,7 @@ export interface PanelProps {
   estimate: WhatIfEstimate | null;
   measureBlocked: string | null;
   onPlace(): void;
+  onUseSite?(site: SitePin): void;
   onClearSite(): void;
   onMeasure(): void;
   onHotSite(key: string | null): void;
@@ -180,13 +182,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
       aria-label={mode === 'ask' ? '问询' : mode === 'plan' ? '规划' : '体检结论'}
     >
       {run ? (
-        <RunBoard
-          label={run.label}
-          stream={run.stream}
-          model={run.model}
-          note={run.note}
-          onCancel={props.onCancelRun}
-        />
+        <RunBoard label={run.label} stream={run.stream} model={run.model} note={run.note} />
       ) : (
         <>
           <Place model={model} sourceTag={props.sourceTag} />
@@ -207,9 +203,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           ) : null}
           {mode === 'check' && props.sub === 'fac' ? (
             <button type="button" className="fac-back" onClick={() => props.onSub('sheet')}>
-              <svg className="chev" viewBox="0 0 10 10" aria-hidden="true" focusable="false">
-                <path d="M6.5 2 3.5 5 6.5 8" />
-              </svg>
+              <Chev dir="left" />
               各小区缺口
             </button>
           ) : null}
@@ -235,6 +229,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
                 estimate={props.estimate}
                 measureBlocked={props.measureBlocked}
                 onPlace={props.onPlace}
+                onUseSite={props.onUseSite}
                 onClear={props.onClearSite}
                 onMeasure={props.onMeasure}
                 onHot={props.onHot}

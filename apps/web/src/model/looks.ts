@@ -8,7 +8,7 @@ import { checkState } from './checks.js';
 import { type Unit } from './derive.js';
 
 /** `edge-over`: borderline and past the line (tinted as 伪覆盖, ringed as 临界). */
-export type Look = 'ok' | 'pseudo' | 'blind' | 'edge' | 'edge-over' | 'pending' | 'none' | 'neutral';
+export type Look = 'ok' | 'pseudo' | 'blind' | 'edge' | 'edge-over' | 'pending' | 'none' | 'na' | 'neutral';
 
 export function checkLook(s: FacilityCheck): Look {
   const { state, over } = checkState(s);
@@ -37,6 +37,7 @@ export function lookClass(l: Look): string {
     case 'edge-over':
       return 's-edge over';
     case 'neutral':
+    case 'na':
       return 's-quiet';
     default:
       return 's-' + l;
@@ -52,5 +53,6 @@ export const LOOK_WORD: Record<Look, string> = {
   'edge-over': '临界（已超出）',
   pending: '待核',
   none: '清单里没有',
+  na: '无对口小学',
   neutral: '',
 };

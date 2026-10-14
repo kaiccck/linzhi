@@ -92,8 +92,9 @@ export const FRESH_RULE_TEXT =
 
 const CONVENIENCE_TAG = /便利店/;
 /** Convenience brands (联华快客 is 联华's convenience chain) and variety / daily-goods chains. */
+// (no lookbehind: the mini program runs on JavaScript engines without it — iOS before 16.4)
 const NOT_GROCERY_NAME =
-  /便利|快客|全家(?!福)|罗森|(?<![0-9])7-?(?:eleven|11)(?![0-9])|好德|可的|喜士多|美宜佳|全球优品|名创优品|屈臣氏|九木杂物社|无印良品|KKV/i;
+  /便利|快客|全家(?!福)|罗森|(?:^|[^0-9])7-?(?:eleven|11)(?![0-9])|好德|可的|喜士多|美宜佳|全球优品|名创优品|屈臣氏|九木杂物社|无印良品|KKV/i;
 /** Shops that sell one line only, whatever their name says (雨润生鲜精选 is a butcher). */
 const SINGLE_LINE_TAG = /肉店|水产|海鲜|禽|蛋品|豆制品|熟食/;
 const PRODUCE_TAG = /果蔬|蔬菜|菜店/;

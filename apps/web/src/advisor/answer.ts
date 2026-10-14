@@ -255,9 +255,13 @@ const MEASURE: Record<HardCategory, string> = {
   社区卫生: '家',
 };
 
-/** The category a unit misses worst: 盲区 before 伪覆盖, then the longer walk; verified checks only. */
-export function worstCategory(unit: Model['units'][number]): HardCategory | null {
+/**
+ * The category a unit misses worst: 盲区 before 伪覆盖, then the longer walk; verified checks only.
+ * `plannable`: only what a new facility fixes — not 小学, which is the assigned school, never a nearer one.
+ */
+export function worstCategory(unit: Model['units'][number], plannable = false): HardCategory | null {
   const bad = (Object.keys(unit.checks) as HardCategory[])
+    .filter((cat) => !plannable || cat !== '小学')
     .map((cat) => ({ cat, c: unit.checks[cat] }))
     .filter(({ c }) => c.verified !== false && c.status_main !== '覆盖')
     .sort((a, b) => (RANK[a.c.status_main] ?? 3) - (RANK[b.c.status_main] ?? 3) || b.c.route_m - a.c.route_m);
@@ -268,8 +272,9 @@ export function worstCategory(unit: Model['units'][number]): HardCategory | null
 export function suggestionsFor(model: Model): Suggestion[] {
   const area = model.data.meta.name;
   const out: Suggestion[] = [{ question: `${area}的老人买菜方便吗？`, short: '老人买菜方便吗？' }];
-  const worst = model.boardOrder.find((u) => worstCategory(u));
-  const cat = worst && worstCategory(worst);
+  // what opening a facility would fix: never 小学 (the assigned school decides, not distance)
+  const worst = model.boardOrder.find((u) => worstCategory(u, true));
+  const cat = worst && worstCategory(worst, true);
   if (worst && cat) {
     out.push({
       question: `如果在 ${worst.code} ${worst.name}附近开一${MEASURE[cat]}${cat}呢？`,

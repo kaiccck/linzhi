@@ -26,18 +26,19 @@ export function verdictLines(model: Model): {
   claim: (string | { n: number })[];
   walk: (string | { n: number; pseudo?: boolean })[];
 } {
-  const { circleGaps, walkGaps, tally } = model;
+  const { tally } = model;
   const claim =
-    circleGaps === 0
+    tally.circleUnits === 0
       ? ['画圈没有找到缺口，']
-      : [tally.pseudo ? '画圈只找到 ' : '画圈找到 ', { n: circleGaps }, ' 项缺口，'];
-  const where = [' 项，在 ', { n: tally.units }, ' 个小区。'];
+      : [
+          tally.units > tally.circleUnits ? '画圈只找到 ' : '画圈找到 ',
+          { n: tally.circleUnits },
+          ' 个小区缺设施，',
+        ];
   const walk =
-    walkGaps === 0
+    tally.units === 0
       ? ['走一遍也没有。']
-      : walkGaps === circleGaps && !tally.pseudo
-        ? ['走一遍也是 ', { n: walkGaps }, ...where]
-        : ['走一遍找到 ', { n: walkGaps }, ...where];
+      : [tally.units === tally.circleUnits ? '走一遍也是 ' : '走一遍找到 ', { n: tally.units }, ' 个小区。'];
   return { claim, walk };
 }
 

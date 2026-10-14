@@ -64,12 +64,24 @@ function Panel({ model, live, onClose }: { model: Model; live: boolean; onClose(
         </button>
       </div>
       <section>
-        <h3>两种范围，别混在一起</h3>
+        <h3>怎么用</h3>
+        <ul>
+          <li>点小区代号或列表里的一行，画出它的步行路线；Esc 关闭。</li>
+          <li>「规划」中选点，估算新增设施能补齐哪些小区的缺口。</li>
+          <li>
+            「新体检」：点地图选中心，或搜索地址、经纬度。
+            {live ? '确认后开始，消耗百度配额。' : '样例模式不能体检新地点。'}
+          </li>
+          <li>「演示」：← → 翻页，Esc 退出。</li>
+        </ul>
+      </section>
+      <section>
+        <h3>两种范围</h3>
         <p>
-          沙色是从片区中心步行 <NumText text="15′" /> 走得到的地方，虚线圈是同一中心直线画的{' '}
-          <NumText text="15′" /> 圈。小区的颜色是另一件事：每个小区从自己出发，步行到最近一处设施有多远（
+          沙色是片区中心步行 <NumText text="15′" /> 的等时圈，虚线圈是同一中心直线画的 <NumText text="15′" />{' '}
+          圈。小区的颜色另算：小学只计算到官方对口学校，其余类别计算到最近一处设施，以{' '}
           <NumText text={distWords(model.ruleM)} />
-          为界）。点一个小区，地图会画出它自己的直线圈和实际步行路线。
+          为界。点一个小区，会画出它的直线 <NumText text={distWords(model.ruleM)} /> 圈和实际步行路线。
         </p>
       </section>
       <section>
@@ -79,7 +91,7 @@ function Panel({ model, live, onClose }: { model: Model; live: boolean; onClose(
             <i className="sw s-pseudo" />
             伪覆盖
           </dt>
-          <dd>直线在规则距离内，实际步行却超出：画圈说“有”，走一遍才发现走不到。</dd>
+          <dd>直线在规则距离内，实际步行超出：圈里有、走不到。</dd>
           <dt>
             <i className="sw s-blind" />
             盲区
@@ -96,20 +108,20 @@ function Panel({ model, live, onClose }: { model: Model; live: boolean; onClose(
             <i className="sw s-pending" />
             待核
           </dt>
-          <dd>还没有对这个小区单独算路，只知道上限（≤），不计入缺口。</dd>
+          <dd>对口学校、校区或步行路线尚待核实，不计入缺口。小学不会用最近学校替代对口学校。</dd>
         </dl>
       </section>
       <section>
         <h3>判定规则</h3>
         <p>
-          {f.task}，按百度实测的步行距离判定，不按直线。
+          {f.task}，按百度实测的步行距离，不按直线。
           {f.added.length
-            ? `其中${f.asked.join('、')}是赛题要求，${f.added.join('、')}按同一距离一并检查。`
+            ? `${f.asked.join('、')}是赛题要求，${f.added.join('、')}按同一距离一并检查。`
             : '（赛题要求）'}
         </p>
       </section>
-      <section>
-        <h3>数据来源与日期</h3>
+      <details className="help-sources">
+        <summary>数据来源与日期</summary>
         <ul>
           <li>
             步行路线：百度地图批量算路与步行路线，实测 <span className="num">{f.measuredOn}</span>。
@@ -149,22 +161,7 @@ function Panel({ model, live, onClose }: { model: Model; live: boolean; onClose(
             ，路名、地名由百度绘制；地图上的代号、名称与设施标记是本应用自己的。
           </li>
         </ul>
-      </section>
-      <section>
-        <h3>怎么用</h3>
-        <ul>
-          <li>
-            顶栏搜索框输入地址，或输入经纬度（如 <span className="num">121.6442, 31.1901</span>
-            ），再选坐标系：百度 BD-09 / 高德·腾讯 GCJ-02 / GPS WGS-84。
-          </li>
-          <li>
-            也可以在地图上点一下选中心
-            {live ? '（会先确认：每次体检消耗百度配额）。' : '（样例模式只标出位置，不重新计算）。'}
-          </li>
-          <li>点小区代号或列表里的一行，地图上画出它到所选设施的真实步行路线；Esc 关闭。</li>
-          <li>「演示」进入路演模式：← → 翻页，Esc 退出。</li>
-        </ul>
-      </section>
+      </details>
     </div>
   );
 }

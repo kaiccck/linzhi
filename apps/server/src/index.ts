@@ -34,7 +34,7 @@ if (config.mode === 'live' && config.baidu.live) {
 
 const official = baidu
   ? loadOfficialData(config.officialDir, (message) => warn(message))
-  : { lists: [], catchments: [], exclusions: [] };
+  : { lists: [], catchments: [], exclusions: [], communityReviews: [] };
 const app = await buildApp({
   config,
   baidu,
@@ -58,6 +58,7 @@ app.log.info(
       ...official.lists.map((l) => `${l.id}（${l.entries.length} 条）`),
       ...official.catchments.map((c) => `${c.id}（对口地段，${c.schools.length} 所学校）`),
       ...(official.exclusions.length ? [`exclusions（${official.exclusions.length} 条）`] : []),
+      ...(official.communityReviews.length ? [`小区核实（${official.communityReviews.length} 条）`] : []),
     ],
     webDistDir: config.webDistDir,
     trustProxy: config.trustProxy,

@@ -65,18 +65,18 @@ describe('MCP server over an in-memory transport', () => {
     const r = await client.callTool({ name: 'analyze_life_circle', arguments: { sample_id: 'zj-a' } });
     expect(r.isError).toBeFalsy();
     expect(textOf(r)).toContain(
-      '画圆法（直线 1 km）只找到 1 个服务缺口，按实测步行距离已核实 9 个，画圆漏掉了其中 8 个（88.9%）',
+      '画圆法（直线 1 km）只找到 0 个服务缺口，按实测步行距离已核实 3 个，画圆漏掉了其中 3 个（100%）',
     );
     const data = r.structuredContent as Structured;
     expect(data).toMatchObject({
       status: 'ok',
       analysis_id: 'zj-a',
       checked_categories: [...HARD_CATEGORIES],
-      headline: { categories: 5, straight_gaps: 1, walking_gaps: 9, missed_share_pct: 88.9, pending: 0 },
+      headline: { categories: 5, straight_gaps: 0, walking_gaps: 3, missed_share_pct: 100, pending: 12 },
       isochrone: { area_iso15_km2: 1.857, area_circle15_km2: 3.483, overstate_x: 1.88 },
     });
     const facts = (r._meta as { 'zoudedao/facts': { label: string; value: number }[] })['zoudedao/facts'];
-    expect(facts.find((f) => f.label === '画圆漏掉的比例')?.value).toBe(88.9);
+    expect(facts.find((f) => f.label === '画圆漏掉的比例')?.value).toBe(100);
     await client.close();
   });
 
@@ -111,7 +111,7 @@ describe('MCP server over an in-memory transport', () => {
     expect(resource.uri).toBe('zoudedao://analysis/zj-a/report.md');
     expect(resource.mimeType).toBe('text/markdown');
     expect(resource.text.startsWith('# 申城佳苑片区 · 15 分钟生活圈体检报告')).toBe(true);
-    expect(resource.text).toContain('画圆漏掉了其中 8 个（88.9%）');
+    expect(resource.text).toContain('画圆漏掉了其中 3 个（100%）');
     const geo = await client.callTool({
       name: 'export_report',
       arguments: { analysis_id: 'zj-a', format: 'geojson' },
@@ -255,7 +255,7 @@ describe('Streamable HTTP', () => {
       await client.connect(new StreamableHTTPClientTransport(new URL(url)));
       expect((await client.listTools()).tools).toHaveLength(7);
       const r = await client.callTool({ name: 'analyze_life_circle', arguments: { sample_id: 'zj-a' } });
-      expect((r.structuredContent as { headline: { walking_gaps: number } }).headline.walking_gaps).toBe(9);
+      expect((r.structuredContent as { headline: { walking_gaps: number } }).headline.walking_gaps).toBe(3);
       await client.close();
     }
   });

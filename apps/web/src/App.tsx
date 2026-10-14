@@ -443,11 +443,12 @@ export function App() {
   );
   const askBlocked = askGate(loaded.source, analysisId);
   const measureBlocked = measureGate(loaded.source, health, analysisId);
+  // where the numbers come from, as a hover says it to a reader (the endpoints live in the console)
   const sourceNote = {
-    api: `数据：服务端 /api/analysis/${loaded.id}`,
-    bundled: `数据：内置样例 data/samples/${loaded.id}.json（未连接服务端）`,
-    live: '数据：服务端实时体检（POST /api/analyze）',
-    replay: '数据：样例回放（服务端尚未接入实时分析器）',
+    api: '数据：样例（百度实测，存档）',
+    bundled: '数据：内置样例（未连接服务端）',
+    live: '数据：实时体检',
+    replay: '数据：样例回放（服务端没有接入实时分析）',
   }[loaded.source];
   return (
     <>

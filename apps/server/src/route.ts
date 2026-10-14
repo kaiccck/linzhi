@@ -14,6 +14,7 @@ import {
   checkedCategories,
   haversine,
   routingPoint,
+  schoolCheck,
   type AnalysisResult,
   type CheckStatus,
   type FacilityCategory,
@@ -121,16 +122,29 @@ export function checkPair(
   const index = findRouteCommunity(result, id, input.community);
   if (index < 0) return { kind: 'no_community', names: result.communities.map((c) => c.name) };
   const c = result.communities[index]!;
-  const check = c.checks?.[input.category];
+  const check =
+    input.category === '小学' ? schoolCheck(c, ruleOf(result, '小学')) : c.checks?.[input.category];
   if (!check) return { kind: 'no_check', checked: checkedCategories(result) };
   const basis = check.route_basis ?? 'routed';
   if (basis !== 'routed' || !check.via || !(check.route_m > 0)) {
     return { kind: 'not_routed', status: check.status };
   }
-  const poi = viaPoi(result.pois ?? [], check);
+  const poi =
+    viaPoi(result.pois ?? [], check) ??
+    (input.category === '小学' && c.catchment?.school_xy
+      ? {
+          uid: c.catchment.school_uid ?? `school:${c.catchment.school_xy.join(',')}`,
+          name: c.catchment.school,
+          cat: '小学' as const,
+          xy: c.catchment.school_xy,
+          navi_xy: c.catchment.school_xy,
+          source: 'gov' as const,
+        }
+      : undefined);
   if (!poi) return { kind: 'no_facility', via: check.via };
   const frame = frameOf(result.meta);
-  const entrance = routingPoint(poi);
+  const entrance =
+    input.category === '小学' ? (c.catchment?.school_xy ?? routingPoint(poi)) : routingPoint(poi);
   const from = bd(frame.toLngLat(c.centroid[0], c.centroid[1]));
   const to = bd(frame.toLngLat(entrance[0], entrance[1]));
   return {

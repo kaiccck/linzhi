@@ -33,6 +33,7 @@ import {
   type Poi,
 } from '@zoudedao/core';
 
+import { SERVICE_CATEGORIES } from './facilities.js';
 import { r1 } from './round.js';
 
 /** One facility of an official list (data/official/*.json). */
@@ -156,10 +157,16 @@ const MEASURE: Partial<Record<FacilityCategory, string>> = { 小学: '所', 幼�
 const measureOf = (cat: FacilityCategory) => MEASURE[cat] ?? '家';
 
 /** Baidu categories a listed facility may hide under ('其他' = no category, e.g. a plain 购物 tag). */
+/**
+ * Categories a list entry may claim a Baidu row from. The everyday services (中学 … 餐饮) were 其他
+ * until 2026-10-10 and stay as open to a list as 其他 was: a 九年一贯制 school Baidu tags 中学 is still
+ * the 小学 the catchment list names (the name or street must match either way).
+ */
 function compatible(cat: FacilityCategory): ReadonlySet<FacilityCategory> {
+  const open: FacilityCategory[] = ['其他', ...SERVICE_CATEGORIES];
   if (cat === '菜市场' || cat === '生鲜超市')
-    return new Set<FacilityCategory>(['菜市场', '生鲜超市', '超市', '其他']);
-  return new Set<FacilityCategory>([cat, '其他']);
+    return new Set<FacilityCategory>(['菜市场', '生鲜超市', '超市', ...open]);
+  return new Set<FacilityCategory>([cat, ...open]);
 }
 
 // brand and format words go, the branch name stays: 浦商生鲜(申城佳苑店) → 申城佳苑

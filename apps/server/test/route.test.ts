@@ -26,13 +26,38 @@ const COMMUNITY = '川杨新苑四期';
 const pair = checkPair(zj, 'zj-a', { community: COMMUNITY, category: '菜市场' });
 if ('kind' in pair) throw new Error('fixture: 川杨新苑四期 has a routed 菜市场 check');
 
+describe('policy-only school route endpoints', () => {
+  it('refuses a legacy nearest-school route when the assigned campus is unresolved', () => {
+    const data = zjA();
+    const c = data.communities[0]!;
+    const poi = data.pois.find((p) => p.cat === '小学')!;
+    c.checks.小学 = { ...c.checks.药店, via: poi.name, via_uid: poi.uid, route_basis: 'routed' };
+    expect(checkPair(data, 'zj-a', { community: c.name, category: '小学' })).toMatchObject({
+      kind: 'not_routed',
+    });
+  });
+  it('uses the assigned school gate even if an old check points to another primary school', () => {
+    const data = JSON.parse(readFileSync(join(SAMPLES_DIR, 'zj-b.json'), 'utf8')) as AnalysisResult;
+    const c = data.communities.find((c) => c.catchment?.assignment_status === 'confirmed')!;
+    const wrong = data.pois.find((p) => p.cat === '小学' && p.uid !== c.catchment!.school_uid)!;
+    c.checks.小学 = { ...c.checks.小学, via: wrong.name, via_uid: wrong.uid, route_m: 1, dur_s: 1 };
+    const pair = checkPair(data, 'zj-b', { community: c.name, category: '小学' });
+    expect(pair).not.toHaveProperty('kind');
+    if ('kind' in pair) return;
+    expect(pair.facility.uid).toBe(c.catchment!.school_uid);
+    expect(pair.facility.entrance_xy).toEqual(c.catchment!.school_xy);
+    expect(pair.check.route_m).toBe(c.catchment!.route_m);
+    expect(pair.facility.uid).not.toBe(wrong.uid);
+  });
+});
+
 /**
  * Temp samples dir: zj-a, a copy whose 药店 checks were never routed, copies checked for the task's
  * three categories and for all five, and a stored route.
  */
 let dir: string;
 let dbPath: string;
-const storedPair = checkPair(zj, 'zj-a', { community: '申城佳苑二期B块', category: '小学' });
+const storedPair = checkPair(zj, 'zj-a', { community: '申城佳苑二期B块', category: '菜市场' });
 beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), 'zdd-route-'));
   dbPath = join(dir, 'history.sqlite');
@@ -58,7 +83,7 @@ beforeAll(() => {
       routes: [
         {
           community: '申城佳苑二期B块',
-          category: '小学',
+          category: '菜市场',
           from_bd09: storedPair.from,
           to_bd09: storedPair.to,
           distance_m: 1250,
@@ -169,14 +194,14 @@ describe('GET /api/route', () => {
 
   it('serves the routes stored with the samples in sample mode; anything else is 409', async () => {
     const app = await makeApp({ samplesDir: dir });
-    const hit = await app.inject(get(checkQuery('申城佳苑二期B块', '小学')));
+    const hit = await app.inject(get(checkQuery('申城佳苑二期B块', '菜市场')));
     expect(hit.statusCode).toBe(200);
     expect(hit.json()).toMatchObject({
       source: 'stored',
       distance_m: 1250,
       fetched_at: '2026-09-28T12:00:00.000Z',
       community: { name: '申城佳苑二期B块' },
-      facility: { name: '孙桥小学(张江校区)' },
+      facility: { name: '浦商生鲜(申城佳苑店)' },
     });
     const miss = await app.inject(get(checkQuery()));
     expect(miss.statusCode).toBe(409);
@@ -191,9 +216,9 @@ describe('GET /api/route', () => {
   it('accepts rules=task from older clients, by map code too, and refuses the retired gb50180', async () => {
     const { walker, calls } = fakeWalker();
     const app = await makeApp({ mode: 'live', samplesDir: dir }, { walker });
-    const task = checkPair(zj, 'zj-a', { community: '申城佳苑一期A块', category: '小学' });
+    const task = checkPair(zj, 'zj-a', { community: '申城佳苑一期A块', category: '菜市场' });
     if ('kind' in task) throw new Error('fixture');
-    const res = await app.inject(get({ ...checkQuery(task.community.code, '小学'), rules: 'task' }));
+    const res = await app.inject(get({ ...checkQuery(task.community.code, '菜市场'), rules: 'task' }));
     expect(res.statusCode).toBe(200);
     expect(res.json()).toMatchObject({
       rules: 'task',
@@ -343,11 +368,11 @@ describe('GET /api/route', () => {
     );
     // stored routes never count: the judges at the venue share one IP
     for (let k = 0; k < 5; k++) {
-      expect((await app.inject(get(checkQuery('申城佳苑二期B块', '小学')))).statusCode).toBe(200);
+      expect((await app.inject(get(checkQuery('申城佳苑二期B块', '菜市场')))).statusCode).toBe(200);
     }
     expect((await app.inject(get(checkQuery()))).statusCode).toBe(200); // Baidu, counted
     expect((await app.inject(get(checkQuery()))).statusCode).toBe(200); // now stored: free
-    const limited = await app.inject(get(checkQuery('申城佳苑一期A块', '小学')));
+    const limited = await app.inject(get(checkQuery('申城佳苑一期A块', '菜市场')));
     expect(limited.statusCode).toBe(429);
     expect(limited.json()).toEqual({
       error: 'rate_limited',
@@ -356,7 +381,7 @@ describe('GET /api/route', () => {
     expect(Number(limited.headers['retry-after'])).toBeGreaterThan(500);
     expect(calls).toHaveLength(1);
     // another IP has its own budget
-    expect((await app.inject(get(checkQuery('申城佳苑一期A块', '小学'), '10.0.0.9'))).statusCode).toBe(200);
+    expect((await app.inject(get(checkQuery('申城佳苑一期A块', '菜市场'), '10.0.0.9'))).statusCode).toBe(200);
     await app.close();
   });
 
@@ -382,7 +407,7 @@ describe('GET /api/route', () => {
       for (const c of r.communities) {
         for (const category of checkedCategories(r)) {
           const k = c.checks[category];
-          if (!k.verified || k.status_main !== '伪覆盖') continue;
+          if (!k.verified || (k.status_main !== '伪覆盖' && category !== '小学')) continue;
           const what = `${id} ${c.name} ${category}`;
           const res = await app.inject(get({ analysis_id: id, community: c.name, category }));
           // proven by a lower bound (every entrance beyond the rule, so nothing was routed): no walk
@@ -395,16 +420,18 @@ describe('GET /api/route', () => {
           }
           expect(res.statusCode, what).toBe(200);
           const body = res.json() as RouteResponse;
-          expect(body, what).toMatchObject({ source: 'stored', facility: { name: k.via } });
+          expect(body, what).toMatchObject({ source: 'stored', facility: { uid: k.via_uid } });
           // the walk Baidu draws is the one the check measured, give or take the engines' rounding
           expect(Math.abs(body.distance_m - k.route_m), what).toBeLessThan(50);
           walked[category] = (walked[category] ?? 0) + 1;
         }
       }
     }
-    // the task's three as ever (27), and the 20 routes stored for 幼儿园 and 社区卫生
-    expect(walked).toEqual({ 幼儿园: 4, 小学: 11, 菜市场: 13, 药店: 3, 社区卫生: 16 });
-    expect(bounds).toEqual(['zj-v 川杨兰苑 社区卫生']);
+    // after the community review (data/official/community-review.json): committee offices, gates,
+    // offices, duplicates and points with no official record are no longer communities, and with
+    // them went the 药店 gaps of the mislocated points east of 玉兰香苑
+    expect(walked).toEqual({ 幼儿园: 1, 小学: 22, 菜市场: 6, 社区卫生: 8 });
+    expect(bounds).toEqual([]);
     await app.close();
   });
 

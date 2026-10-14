@@ -52,8 +52,9 @@ export function loadBaidu(ak: string | undefined, timeoutMs = 12000): Promise<BM
       reject(new BaiduLoadError('unsupported', '浏览器不支持 WebGL'));
       return;
     }
-    if (window.BMap?.Map) {
-      resolve(window.BMap);
+    const loaded = window.BMap?.Map ? window.BMap : window.BMapGL;
+    if (loaded?.Map) {
+      resolve(loaded);
       return;
     }
     let settled = false;
@@ -64,11 +65,12 @@ export function loadBaidu(ak: string | undefined, timeoutMs = 12000): Promise<BM
       settled = true;
       window.clearTimeout(timer);
       delete window[CALLBACK];
+      script.remove();
       reject(new BaiduLoadError(reason, message));
     }
     window[CALLBACK] = () => {
       if (settled) return;
-      const ns = window.BMap ?? window.BMapGL;
+      const ns = window.BMap?.Map ? window.BMap : window.BMapGL;
       if (!ns?.Map) {
         fail('network', '百度地图脚本不完整');
         return;

@@ -11,6 +11,7 @@ import {
   LayerOptions,
   MapLegend,
   MapMeta,
+  RetryBasemap,
   StageCard,
   WalkCard,
   type LayerProps,
@@ -41,12 +42,13 @@ import { categoryLook, neutralLook, type Look } from '../model/looks.js';
 import type { SitePin, WhatIfEstimate } from '../model/siting.js';
 import { spotWords, type MapSpot } from '../model/spots.js';
 import type { CheckView, Mode, UiState } from '../state.js';
-import { BaiduBasemap } from './BaiduBasemap.js';
+import type { BaiduBasemap } from './BaiduBasemap.js';
 import { evidenceItem, type EvidenceView } from './evidenceCard.js';
 import { EvidenceLayer, SpotLayer, SpotMarks } from './EvidenceLayer.js';
 import { findingItems, type FindingItem } from './findings.js';
 import { labelBoxes, layoutOverlay, rectQuads, type Rect } from './layout.js';
-import { BaiduLoadError, loadBaidu } from './loadBaidu.js';
+import { BaiduLoadError } from './loadBaidu.js';
+import { mountBaidu } from './mountBaidu.js';
 import { CardContent, cardClass, MapOverlay } from './MapOverlay.js';
 import { ScenePainter } from './paint.js';
 import { PlanLines, siteInputs } from './PlanLayer.js';
@@ -118,7 +120,6 @@ interface Props {
 /** A composition moved by a local offset (the centre of a streaming check in this frame). */
 const shifted = (c: Composition, [dx, dy]: XY): Composition => ({ ...c, cx: c.cx + dx, cy: c.cy + dy });
 
-const TILE_TIMEOUT_MS = 15000;
 /** 路演 on a wide map: the span that fits the reach in the part the step card leaves free */
 const TOUR_SPAN = 2400;
 const REDUCED = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -173,6 +174,9 @@ export function MapPanel(props: Props) {
   const [basemap, setBasemap] = useState<BasemapState>(() =>
     FORCE_OFFLINE ? { kind: 'offline', reason: '网址指定' } : { kind: 'loading' },
   );
+  const [retrying, setRetrying] = useState(false);
+  const retryRef = useRef<(() => void) | null>(null);
+  const retryBasemap = useCallback(() => retryRef.current?.(), []);
   const [liveView, setLiveView] = useState<View | null>(null);
   const [userMoved, setUserMoved] = useState(false);
   const userMovedRef = useRef(false);
@@ -249,6 +253,13 @@ export function MapPanel(props: Props) {
       : null;
   const planRef = useRef(plan);
   planRef.current = plan;
+
+  // On a phone the planner sits below the map; bring the placement target and its hint into view.
+  useEffect(() => {
+    if (plan.placing && window.matchMedia('(max-width: 760px)').matches) {
+      panelRef.current?.scrollIntoView({ block: 'start' });
+    }
+  }, [plan.placing]);
 
   /* ---------- panel size ---------- */
   useLayoutEffect(() => {
@@ -459,33 +470,26 @@ export function MapPanel(props: Props) {
   const frameRef = useRef(model.frame);
   frameRef.current = model.frame;
   useEffect(() => {
-    if (FORCE_OFFLINE) return;
-    let cancelled = false;
-    let bm: BaiduBasemap | null = null;
-    let watchdog = 0;
-    const goOffline = (reason: string) => {
-      if (cancelled) return;
-      window.clearTimeout(watchdog);
-      bm?.destroy();
-      bmInst.current = null;
-      setBasemap({ kind: 'offline', reason });
-    };
-    loadBaidu(import.meta.env.VITE_BAIDU_BROWSER_AK as string | undefined)
-      .then((B) => {
-        if (cancelled || !bmRef.current) return;
-        bm = new BaiduBasemap(B, bmRef.current, frameRef.current, {
-          onChange: scheduleSync,
-          onTilesLoaded: () => {
-            window.clearTimeout(watchdog);
-            if (!cancelled) setBasemap({ kind: 'baidu' });
-            // Baidu adds its logo control asynchronously; offsets sent before that are dropped
-            placeCopyright();
-            window.setTimeout(placeCopyright, 400);
-            scheduleSync();
-          },
-          onUserMove: () => setUserMoved(true),
-          onClick: (lng, lat) => pickRef.current(lng, lat),
-        });
+    if (FORCE_OFFLINE || !bmRef.current) return;
+    let copyrightTimer = 0;
+    const session = mountBaidu({
+      key: import.meta.env.VITE_BAIDU_BROWSER_AK as string | undefined,
+      container: bmRef.current,
+      frame: () => frameRef.current,
+      events: {
+        onChange: scheduleSync,
+        onTilesLoaded: () => {
+          setBasemap({ kind: 'baidu' });
+          setRetrying(false);
+          // Baidu adds its logo asynchronously; offsets sent before that are dropped.
+          placeCopyright();
+          copyrightTimer = window.setTimeout(placeCopyright, 400);
+          scheduleSync();
+        },
+        onUserMove: () => setUserMoved(true),
+        onClick: (lng, lat) => pickRef.current(lng, lat),
+      },
+      onCreate: (bm) => {
         bmInst.current = bm;
         // dev-only handle for interaction checks (pan/zoom sync) from the capture scripts
         if (import.meta.env.DEV) (window as unknown as Record<string, unknown>).__zddBasemap = bm;
@@ -496,16 +500,23 @@ export function MapPanel(props: Props) {
         }
         placeCopyright();
         scheduleSync();
-        watchdog = window.setTimeout(() => {
-          if (!bm?.tilesLoaded) goOffline('百度瓦片加载超时，请检查网络或 AK 的 Referer 白名单');
-        }, TILE_TIMEOUT_MS);
-      })
-      .catch((err: unknown) => goOffline(describeFailure(err)));
+      },
+      onDestroy: () => {
+        window.clearTimeout(copyrightTimer);
+        bmInst.current = null;
+      },
+      onRetrying: () => setRetrying(true),
+      onOffline: (err) => {
+        const reason = describeFailure(err);
+        console.warn(`[邻至] 百度底图没有加载，改用离线底图：${reason}`);
+        setRetrying(false);
+        setBasemap({ kind: 'offline', reason });
+      },
+    });
+    retryRef.current = session.retry;
     return () => {
-      cancelled = true;
-      window.clearTimeout(watchdog);
-      bm?.destroy();
-      bmInst.current = null;
+      retryRef.current = null;
+      session.dispose();
     };
   }, [scheduleSync, placeCopyright]);
 
@@ -668,6 +679,9 @@ export function MapPanel(props: Props) {
         return s ? [{ ...it.spec, ...s }] : [];
       }),
       route: evidence?.facts?.path ?? model.detour?.path.pts ?? null,
+      ring: evidence
+        ? { at: evidence.base.from, r: model.ruleOf[evidence.base.cat], code: evidence.base.unit.code }
+        : null,
       timeScale,
       logo: baiduUp
         ? tourWide
@@ -896,7 +910,7 @@ export function MapPanel(props: Props) {
   // no provenance on the map (the user's call, 2026-10-01): the 审图号 and the OpenStreetMap credit are
   // in 说明. Only a basemap that failed says so, and whose map stands in for it.
   const attribution = offline
-    ? [`离线底图（${basemap.kind === 'offline' ? basemap.reason : ''}）`, '© OpenStreetMap 贡献者']
+    ? [FORCE_OFFLINE ? '离线底图' : '百度地图没有加载，显示离线底图', '© OpenStreetMap 贡献者']
     : [];
   // 图层: the layers and the walker (the map's top right; laid flat under a phone's map)
   const layerProps: LayerProps = {
@@ -1083,6 +1097,8 @@ export function MapPanel(props: Props) {
           canReset={!offline && userMoved}
           onReset={refit}
           lines={attribution}
+          onRetry={offline && !FORCE_OFFLINE ? retryBasemap : undefined}
+          retrying={retrying}
         />
         {/* the confirmation card and the route evidence dock here on narrow maps, over the 走一遍 card */}
         <div
@@ -1119,6 +1135,7 @@ export function MapPanel(props: Props) {
           </div>
         </details>
         {attribution.length ? <p className="attrib">{attribution.join(' · ')}</p> : null}
+        {offline && !FORCE_OFFLINE ? <RetryBasemap onRetry={retryBasemap} retrying={retrying} /> : null}
       </div>
     </>
   );

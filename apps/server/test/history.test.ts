@@ -88,19 +88,19 @@ describe('HistoryStore', () => {
     expect(h).toMatchObject({
       communities: 12,
       categories: ['幼儿园', '小学', '菜市场', '药店', '社区卫生'],
-      walking_gaps: 9,
-      pseudo: 8,
-      blind: 1,
-      pending: 0,
+      walking_gaps: 3,
+      pseudo: 3,
+      blind: 0,
+      pending: 12,
     });
     expect(h.categories).toEqual(checkedCategories(zjA()));
     // the task's three alone: 8 gaps as ever; the ninth is 虹御公寓's 社区卫生 (伪覆盖)
     expect(historyHeadline(withCategories(zjA(), TASK_CATEGORIES))).toMatchObject({
       categories: ['小学', '菜市场', '药店'],
-      walking_gaps: 8,
-      pseudo: 7,
-      blind: 1,
-      pending: 0,
+      walking_gaps: 2,
+      pseudo: 2,
+      blind: 0,
+      pending: 12,
     });
     expect(zjA().communities.find((c) => c.name === '虹御公寓')!.checks['社区卫生']).toMatchObject({
       status_main: '伪覆盖',
@@ -113,7 +113,7 @@ describe('HistoryStore', () => {
     const open = zjA();
     const k = open.communities.find((c) => c.name === '虹御公寓')!.checks['药店'];
     Object.assign(k, { status: '伪覆盖', status_main: '伪覆盖', route_m: 1124, verified: false });
-    expect(historyHeadline(open)).toMatchObject({ walking_gaps: 9, pending: 1 });
+    expect(historyHeadline(open)).toMatchObject({ walking_gaps: 3, pending: 13 });
   });
 
   it('names the categories an analysis was checked for, so 3- and 5-category analyses tell apart', async () => {

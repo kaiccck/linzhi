@@ -277,10 +277,7 @@ export async function runCoverage(args: {
     return out;
   });
 
-  const status = communities.map((c) => ({ xy: c.centroid, ...gapCount(c.checks) }));
-  const gray_areas = status.length
-    ? grayAreaPolygons(statusRaster(status, { cell_m: GRAY_CELL_M, maxDist_m: GRAY_REACH_M }))
-    : [];
+  const gray_areas = communityGrayAreas(communities);
 
   return {
     communities,
@@ -292,6 +289,14 @@ export async function runCoverage(args: {
     unverified_by_inventory: main.unverified,
     routes,
   };
+}
+
+/** Recompute after policy-school checks replace proximity checks. */
+export function communityGrayAreas(communities: readonly Community[]): GrayArea[] {
+  const status = communities.map((c) => ({ xy: c.centroid, ...gapCount(c.checks) }));
+  return status.length
+    ? grayAreaPolygons(statusRaster(status, { cell_m: GRAY_CELL_M, maxDist_m: GRAY_REACH_M }))
+    : [];
 }
 
 /** Worst verdict among the verified checks (unverified ones are never painted as a verdict). */
@@ -326,6 +331,11 @@ export function statusCounts(
     for (const cat of categories) {
       const k = checks[cat];
       if (!k) continue;
+      if (k.school_assignment && k.school_assignment !== 'confirmed') {
+        unverified++;
+        total++;
+        continue;
+      }
       all[k.status]++;
       main[k.status_main]++;
       by_category[cat]![k.status]++;

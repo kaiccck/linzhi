@@ -14,6 +14,7 @@ import {
   grayLayers,
   headline,
   inventoryOf,
+  lifeCircleScore,
   profileOf,
   reach15,
   ruleText,
@@ -23,6 +24,7 @@ import {
   type CategoryCounts,
   type GrayLayer,
   type Headline,
+  type LifeCircleScore,
 } from './analysis.js';
 import { FactBook, beijingDate, round } from './format.js';
 import type { Profile, ZddMeta } from './types.js';
@@ -92,6 +94,8 @@ export interface Overview {
     late_inside_circle_share_pct: number;
   } | null;
   headline: Headline;
+  /** 体检评分 as the app shows it (see lifeCircleScore). */
+  score: LifeCircleScore;
   /** How the rule reads in a sentence, e.g. "1 km". */
   rule_text: string;
   /**
@@ -189,6 +193,7 @@ export function overview(result: AnalysisResult, id: string): Overview {
         }
       : null,
     headline: headline(result),
+    score: lifeCircleScore(result),
     rule_text: ruleText(result),
     checked_categories: checked,
     by_category: categoryCounts(result),
@@ -283,6 +288,7 @@ export function categorySentence(
         (k) => `${k} ${book.num(`${p}${cat}${k}数（已核实）`, n[k], '个')}`,
       );
       if (n.待核实) items.push(`待核实 ${book.num(`${p}${cat}待核实数`, n.待核实, '项')}`);
+      if (n.不适用) items.push(`商办产权没有对口小学 ${book.num(`${p}${cat}不适用数`, n.不适用, '个')}`);
       return `${cat}：${items.join('、')}`;
     });
   return `各类设施（按小区计，已核实）——${parts.join('；')}。`;

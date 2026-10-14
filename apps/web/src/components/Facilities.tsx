@@ -6,10 +6,9 @@
  * its category on the map: every kind at once is too crowded to read.
  */
 import { memo, useMemo } from 'react';
-import { CAT_COLOR, fmtInt, type Model } from '../model/derive.js';
-import { NumText } from './NumText.js';
+import { CAT_COLOR, type Model } from '../model/derive.js';
 import { facilitySummary, rowLabel, type FacilityRow, type Mark } from '../model/facilities.js';
-import { Pg, Ui } from './Icons.js';
+import { Chev, Pg, Ui } from './Icons.js';
 
 /** Squares shown before the tally folds into "+n" (the numbers beside it always carry the count). */
 export const TALLY_MAX = 12;
@@ -82,12 +81,10 @@ export function FacilityEntry({ model, scale, onOpen }: { model: Model; scale: n
     <button type="button" className="fac-entry" onClick={onOpen}>
       <span className="fe-t">中心周边设施</span>
       <span className="fe-s">
-        直线圈里 <span className="num">{s.circle}</span> 处 · <span className="num">15′</span> 走得到{' '}
+        圈里 <span className="num">{s.circle}</span> 处 · <span className="num">15′</span> 走得到{' '}
         <span className="num">{s.walk}</span> 处
       </span>
-      <svg className="chev" viewBox="0 0 10 10" aria-hidden="true" focusable="false">
-        <path d="M3.5 2 6.5 5 3.5 8" />
-      </svg>
+      <Chev dir="right" />
     </button>
   );
 }
@@ -141,20 +138,19 @@ export const FacilityView = memo(function FacilityView({
         </span>
         <span className="vc-n num">{s.walk}</span>
       </div>
-      <p className="v-note" aria-hidden="true">
-        <NumText text={`直线圈半径 ${fmtInt(s.radiusM)} m；圈里有 ${s.circle - s.walk} 处 15′ 走不到`} />
-      </p>
-      <div className="fac-cols" aria-hidden="true">
-        <span className="keys">
-          <span>
-            <i className="mk mk-walk" />
-            走得到
-          </span>
-          <span>
-            <i className="mk mk-claim" />
-            画圈有，走不到
-          </span>
+      {/* the bars say how many the circle claims and the walk misses; the map's circle tag its radius */}
+      <div className="fac-key keys" aria-hidden="true">
+        <span>
+          <i className="mk mk-walk" />
+          走得到
         </span>
+        <span>
+          <i className="mk mk-claim" />
+          画圈有，走不到
+        </span>
+      </div>
+      <div className="fac-cols" aria-hidden="true">
+        <span>地图显示</span>
         <span className="c-right">
           <span>走得到/圈里</span>
           <span>最近</span>

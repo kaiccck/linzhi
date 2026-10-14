@@ -1,0 +1,266 @@
+.rp {
+  min-height: 100vh;
+  background: var(--bg);
+}
+.rp-empty {
+  padding: 40px 20px;
+  color: var(--ink-2);
+}
+.rp-cover {
+  padding: 22px 20px 18px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+.rp-title {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+.rp-meta {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.rp-card {
+  margin: 12px 12px 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--card);
+}
+.rp-card.wide {
+  padding: 16px 0 12px;
+}
+.rp-h {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.rp-h.pad {
+  padding: 0 16px;
+}
+.rp-big {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.rp-big-n {
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--pseudo-text);
+  line-height: 1.1;
+}
+.rp-big-t {
+  font-size: 16px;
+  font-weight: 600;
+}
+.rp-p {
+  display: block;
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+.quiet {
+  color: var(--ink-3);
+}
+.rp-heads {
+  display: flex;
+  flex-direction: column;
+}
+.rp-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border-bottom: 1px solid var(--line);
+}
+.rp-head:last-child {
+  border-bottom: 0;
+}
+.rp-head-cat {
+  width: 64px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.rp-head-n {
+  flex: 1;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.rp-table-wrap {
+  width: 100%;
+}
+.rp-table {
+  display: inline-flex;
+  flex-direction: column;
+  padding: 0 16px;
+}
+.rp-tr {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border-bottom: 1px solid var(--line);
+}
+.rp-tr.head {
+  min-height: 34px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.rp-td {
+  width: 76px;
+  flex: none;
+  font-size: 13px;
+  text-align: right;
+  padding-right: 6px;
+}
+.rp-td.unit {
+  width: 150px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+}
+.rp-code {
+  flex: none;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.rp-uname {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cell {
+  font-family: var(--num);
+  font-weight: 600;
+}
+.rc-ok {
+  color: var(--ok-text);
+}
+.rc-pseudo {
+  color: var(--pseudo-text);
+}
+.rc-blind {
+  color: var(--blind);
+}
+.rc-pending,
+.rc-na {
+  color: var(--ink-4);
+}
+.rp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding: 10px 16px 0;
+  font-size: 12px;
+}
+.rp-fac {
+  display: flex;
+  flex-direction: column;
+}
+.rp-fac-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.rp-fac-row:last-child {
+  border-bottom: 0;
+}
+.rp-fac-cat {
+  width: 70px;
+}
+.rp-fac-n {
+  flex: 1;
+}
+.rp-fac-near {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.rp-pin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  border-bottom: 1px solid var(--line);
+}
+.rp-pin:last-child {
+  border-bottom: 0;
+}
+.rp-pin-cat {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--fill);
+  font-size: 12px;
+  font-weight: 600;
+}
+.rp-pin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.rp-pin-t {
+  font-size: 14px;
+}
+.rp-pin-n {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.rp-small {
+  display: block;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+.rp-src {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--ink-4);
+}
+.rp-share {
+  margin: 18px 12px 0;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.rp-end {
+  height: calc(30px + env(safe-area-inset-bottom));
+}
+
+.rp-radar {
+  display: flex;
+  justify-content: center;
+  margin: 6px 0;
+}
+.rp-big-n.g-ok {
+  color: var(--ok-text);
+}
+.rp-big-n.g-edge {
+  color: #8a5f0a;
+}
+.rp-big-n.g-blind {
+  color: var(--blind);
+}
+
+.rp-claim {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-3);
+}

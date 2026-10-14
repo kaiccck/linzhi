@@ -154,10 +154,10 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
         ex.kind === 'pseudo'
           ? [
               { code: unit.code },
-              ` ${unit.name} → ${via}：百度步行路线约 `,
+              ` ${unit.name} → ${via}：步行约 `,
               n(`${minutes}′`),
               ...(times ? ['，是直线的 ', n(times), ' 倍'] : []),
-              `。画圈算它在 ${exRule}内，走一遍才知道走不到。`,
+              '。',
             ]
           : [
               { code: unit.code },
@@ -212,7 +212,7 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
       ? [
           '涉及 ',
           n(outer.units.length),
-          ` 个小区：步行 ${rule}内缺${listWords(model.cats, '或')}`,
+          ' 个小区',
           ...(deeper ? ['；其中 ', n(deeper.areaKm2.toFixed(2)), ' km² 缺两类以上'] : []),
           '。',
         ]
@@ -234,8 +234,8 @@ export function tourSteps(model: Model, opts: { scale: number; pins: readonly Si
       : ['没有需要新增设施的建议'],
     body: pin
       ? [
-          `位置见地图上的 ${pin.rank} 号${pin.label ? `（${pin.label}）` : ''}。`,
-          pin.verified ? '已用实测路线核验。' : '按这次体检的绕行系数估算，落地前需实测核验。',
+          `地图上的 ${pin.rank} 号${pin.label ? `，${pin.label}` : ''}。`,
+          pin.verified ? '已实测核验。' : '估算，落地前需实测核验。',
         ]
       : model.walkGaps === 0
         ? [`每个小区步行都走得到这 ${model.cats.length} 类设施。`]

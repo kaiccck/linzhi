@@ -89,15 +89,15 @@ describe('图层: the layers and the walker behind one button', () => {
     const html = renderToStaticMarkup(<LayerMenu {...layers()} />);
     expect(html).toMatch(/<button[^>]*class="layers-btn" aria-expanded="false" aria-controls="layer-pop"/);
     expect(html).toMatch(/id="layer-pop" role="group" aria-label="图层与步速" hidden=""/);
-    expect(html).toContain('<small>步行耗时由浓到淡；关掉只留 15′ 范围</small>');
+    expect(html).toContain('<small>越近越浓；关掉只留 15′ 等时圈</small>');
     expect(html.match(/class="layer-btn /g)).toHaveLength(4);
     expect(html).toMatch(/role="radiogroup" aria-label="步行人群"/);
   });
 
   it('lays the same choices flat under a phone’s map, their lines as titles', () => {
     const html = renderToStaticMarkup(<LayerOptions {...layers({ gray: null })} flat />);
-    expect(html).not.toContain('<small>步行耗时');
-    expect(html).toContain('title="步行耗时由浓到淡；关掉只留 15′ 范围"');
+    expect(html).not.toContain('<small>越近越浓');
+    expect(html).toContain('title="越近越浓；关掉只留 15′ 等时圈"');
     expect(html).not.toContain('灰色区域');
   });
 });
@@ -152,11 +152,9 @@ describe('体检单 rows draw a unit’s route', () => {
         selected="A-11"
       />,
     );
-    expect(html).toMatch(
-      /aria-label="A-11 申城佳苑三期B块：[^"]*对口：孙桥小学（申江校区） · 步行 1,676 m（地图上已画出到小学的步行路线）"/,
-    );
+    expect(html).toContain('2026 年对口：孙桥小学 · 校区待核实');
     expect(html).toMatch(/class="gl-row sel"[^>]*data-code="A-11"/);
-    expect(html).toContain('（回车：在地图上画出到小学的步行路线）');
+    expect(html).not.toContain('已画出到小学');
   });
 });
 
@@ -171,7 +169,7 @@ describe('规划 lists the saved what-if measurements', () => {
     newly_covered: ['川杨新苑四期'],
     quota: { routes: 12, cached: 0 },
   };
-  const render = (plan = initialPlan, cat: '小学' | '药店' = '药店') =>
+  const render = (plan = initialPlan, cat: '小学' | '药店' | '菜市场' = '药店') =>
     renderToStaticMarkup(
       <Planning
         model={a}
@@ -197,8 +195,9 @@ describe('规划 lists the saved what-if measurements', () => {
     expect(html).toContain('已核验');
   });
   it('and marks the browser’s own suggestions as estimates', () => {
-    const html = render(initialPlan, '小学');
-    expect(html).toContain('建议选址 · 小学</h2>');
+    const html = render(initialPlan, '菜市场');
+    // the category is on the tile and in the answer above: the heading does not repeat it
+    expect(html).toContain('建议选址</h2>');
     expect(html).toContain('<span class="badge est"');
     // no unit lacks a pharmacy on foot: nothing to suggest, and it says so
     expect(render()).toContain('这次体检没有需要新增药店的小区。');
@@ -232,7 +231,7 @@ describe('the top bar’s help and 演示', () => {
     const f = helpFacts(a);
     expect(f.measuredOn).toBe(a.measuredOn);
     expect(f.osm).toBe('2026-09-26');
-    expect(f.lists).toContain('《2025年浦东新区公办小学招生地段公示》（2025-04-07）');
+    expect(f.lists).toContain('《2026年浦东新区小学招生地段公示》（2026-04-07）');
     expect(helpFacts(b).outlines).toBe(false);
     expect(officialLists(['《一》（2026-01-01）', '《一》（2026-01-01）；《二》（2025-02-02）'])).toEqual([
       '《一》（2026-01-01）',
@@ -255,8 +254,12 @@ describe('the 路演 card', () => {
         evidence={null}
       />,
     );
-    expect(html).toContain('<span class="num">3</span> / <span class="num">6</span> · 伪覆盖一例');
-    expect(html).toContain('直线 <span class="num">819</span> m，实际要走 <span class="num">1,676</span> m');
+    // the step's name rides on the step bar; the kicker carries it for a narrow map only
+    expect(html).toContain(
+      '<span class="num">3</span> / <span class="num">6</span><span class="tk-name"> · 伪覆盖一例</span>',
+    );
+    expect(html).toContain('实际要走');
+    expect(html).not.toContain('孙桥小学');
     expect(html.match(/aria-current="step"/g)).toHaveLength(1);
     expect(html).toContain('aria-label="退出演示（Esc）"');
   });

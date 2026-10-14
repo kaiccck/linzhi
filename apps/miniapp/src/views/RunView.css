@@ -1,0 +1,90 @@
+.run-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.run-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.run-titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.run-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+.run-msg {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.run-x {
+  flex: none;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  background: var(--fill);
+  font-size: 13px;
+  line-height: 32px;
+  color: var(--ink-2);
+}
+.run-bar {
+  height: 4px;
+  margin-top: 14px;
+  border-radius: 2px;
+  background: var(--fill-2);
+  overflow: hidden;
+}
+.run-bar-in {
+  height: 100%;
+  background: var(--blue);
+  transition: width 400ms ease-out;
+}
+.run-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 12px;
+}
+.run-step {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--ink-4);
+}
+.run-step.done {
+  color: var(--ink-2);
+}
+.run-step.now {
+  color: var(--blue);
+  font-weight: 600;
+}
+.rs-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: currentColor;
+}
+.run-facts {
+  display: block;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.run-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-3);
+}

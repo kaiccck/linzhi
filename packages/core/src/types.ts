@@ -24,8 +24,28 @@ export type MainStatus = '覆盖' | '伪覆盖' | '盲区';
  * the same rule. An analysis may carry fewer (older ones: the task's three) — see checkedCategories.
  */
 export type HardCategory = '幼儿园' | '小学' | '菜市场' | '药店' | '社区卫生';
+/**
+ * Facility categories of the inventory. The hard ones are checked per community; the rest are counted
+ * from the analysis centre (圈内设施): the 民生设施 of the first search (养老 … 公园), and the
+ * everyday services added 2026-10-10 for a resident's own 15 minutes (中学 … 餐饮), after the
+ * categories of TD/T 1062-2021《社区生活圈规划技术指南》.
+ */
 export type FacilityCategory =
-  HardCategory | '生鲜超市' | '幼儿园' | '社区卫生' | '养老' | '超市' | '公交' | '地铁' | '公园' | '其他';
+  | HardCategory
+  | '生鲜超市'
+  | '养老'
+  | '超市'
+  | '公交'
+  | '地铁'
+  | '公园'
+  | '中学'
+  | '便利店'
+  | '餐饮'
+  | '快递'
+  | '银行'
+  | '健身'
+  | '文化'
+  | '其他';
 
 export interface AnalysisMeta {
   /** Display name of the analysed area, e.g. 申城佳苑片区. */
@@ -81,6 +101,13 @@ export interface FreshAlternative {
 }
 
 export interface FacilityCheck {
+  /**
+   * Primary-school checks use the official assignment, never the nearest school. not_applicable: the
+   * compound has no 对口地段 at all (商办产权: commercial land, no 户籍, so no assigned school) — a fact,
+   * not a pending check; it counts in neither the gaps nor the pending.
+   */
+  school_assignment?:
+    'confirmed' | 'unmatched' | 'campus_pending' | 'location_pending' | 'route_pending' | 'not_applicable';
   /** Straight-line distance to the nearest facility of the category, metres. */
   straight_m: number;
   nearest_straight?: string;
@@ -133,6 +160,15 @@ export interface Community {
 /** Walk to the assigned primary school (对口地段), which is not necessarily the nearest one. */
 export interface CatchmentCheck {
   school: string;
+  /**
+   * Whether the policy identifies a routable school/campus; absent on historical results.
+   * not_applicable: no 对口地段 by law (商办产权), from the curated community review; `note` says why.
+   */
+  assignment_status?: 'confirmed' | 'campus_pending' | 'location_pending' | 'not_applicable';
+  /** The assigned school's routing point in the analysis frame. */
+  school_xy?: XY;
+  published?: string;
+  source_url?: string;
   school_uid?: string;
   /** Measured walking route to the school's entrance; null when not routed. */
   route_m: number | null;
@@ -146,7 +182,7 @@ export interface CatchmentCheck {
    * (the name matched without its 期/区, every such row assigns the same school).
    */
   matched_by: string;
-  /** Chinese caveat, e.g. the table names no campus and the nearer of two was taken, or why route_m is null. */
+  /** Why the campus or walking route has not been confirmed. */
   note?: string;
 }
 
@@ -330,6 +366,8 @@ export interface Venue {
 
 /** Optional preview geometry (OpenStreetMap, ODbL) used by the sample/offline mode only. */
 export interface BaseLayers {
+  /** Half-width of the square covered by the offline extract, independent of the analysis extent. */
+  extent_m?: number;
   roads: { cls: string; elevated: boolean; bridge: boolean; name: string | null; pts: XY[] }[];
   water_areas: { pts: XY[] }[];
   waterways: { name: string | null; kind: string; pts: XY[] }[];

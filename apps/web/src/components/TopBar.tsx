@@ -8,8 +8,9 @@
 import { Fragment, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import type { Centre } from '../centre.js';
 import { CRS_OPTIONS, parseCoords } from '../data/coords.js';
-import { headlineGaps, shortTime, type HistoryItem } from '../data/history.js';
+import type { HistoryItem } from '../data/history.js';
 import type { SampleInfo } from '../data/loadAnalysis.js';
+import { areaOptions, type AreaOption } from '../model/areas.js';
 import type { Model } from '../model/derive.js';
 import type { Mode } from '../state.js';
 import { HelpButton } from './Help.js';
@@ -17,6 +18,7 @@ import { BRAND, BrandMark } from './Brand.js';
 import { Pg, Ui } from './Icons.js';
 
 export type TopTab = Mode | 'report';
+export { areaOptions, letterOf, type AreaOption } from '../model/areas.js';
 
 const MODES: { id: TopTab; label: string }[] = [
   { id: 'check', label: '体检' },
@@ -24,10 +26,6 @@ const MODES: { id: TopTab; label: string }[] = [
   { id: 'report', label: '报告' },
   { id: 'ask', label: '问询' },
 ];
-
-/** Sample letter from its id: zj-b → B. */
-export const letterOf = (id: string) =>
-  /^[a-z]+-([a-z0-9]+)$/i.exec(id)?.[1]?.toUpperCase() ?? id.toUpperCase();
 
 /** Radiogroup keyboard model: arrows move the selection, one tab stop. */
 export function arrowSelect<T>(
@@ -42,78 +40,6 @@ export function arrowSelect<T>(
   const step = e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 1;
   const k = (i + step + options.length) % options.length;
   select(options[k]!, k);
-}
-
-/** One row of the area menu: a sample, a live check from the history, or the live result on screen. */
-export interface AreaOption {
-  key: string;
-  code: string;
-  name: string;
-  note: string;
-  live: boolean;
-  /** "画圈 x → 走一遍 y" under the rule set on screen, when the history knows it */
-  gaps: { circle: number; walk: number } | null;
-  current: boolean;
-  /** what choosing it does (nothing for the row on screen) */
-  open: (() => void) | null;
-}
-
-/**
- * The area menu's rows: the recent live checks the server remembers (newest first), then the samples,
- * each with its headline from GET /api/history. The live result on screen leads when the history does
- * not list it (yet).
- */
-export function areaOptions(opts: {
-  samples: SampleInfo[];
-  history: HistoryItem[] | null;
-  active: string | null;
-  activeLive: string | null;
-  current: { code: string; name: string; live: boolean };
-  onOpen(id: string): void;
-  onOpenHistory?(item: HistoryItem): void;
-}): { live: AreaOption[]; samples: AreaOption[] } {
-  const { history } = opts;
-  const lives = (history ?? []).filter((h) => !h.sample).slice(0, 8);
-  const byId = new Map((history ?? []).map((h) => [h.id, h]));
-  const live: AreaOption[] = lives.map((h) => ({
-    key: h.id,
-    code: '实时',
-    name: h.name,
-    note: [shortTime(h.created_at), h.label, h.profile === 'elder' ? '老人步速' : null]
-      .filter(Boolean)
-      .join(' · '),
-    live: true,
-    gaps: headlineGaps(h.headline),
-    current: opts.current.live && opts.activeLive === h.id,
-    open: opts.current.live && opts.activeLive === h.id ? null : () => opts.onOpenHistory?.(h),
-  }));
-  if (opts.current.live && !live.some((o) => o.current)) {
-    live.unshift({
-      key: '__live',
-      code: opts.current.code,
-      name: opts.current.name,
-      note: '当前实时体检',
-      live: true,
-      gaps: null,
-      current: true,
-      open: null,
-    });
-  }
-  const samples: AreaOption[] = opts.samples.map((s) => {
-    const h = byId.get(s.id);
-    const current = !opts.current.live && s.id === opts.active;
-    return {
-      key: s.id,
-      code: letterOf(s.id),
-      name: s.name,
-      note: s.center_label ? `样例 · 中心 ${s.center_label}` : '样例',
-      live: false,
-      gaps: h ? headlineGaps(h.headline) : null,
-      current,
-      open: current ? null : () => opts.onOpen(s.id),
-    };
-  });
-  return { live, samples };
 }
 
 function Gaps({ g }: { g: { circle: number; walk: number } }) {

@@ -12,7 +12,7 @@
  *   - roads joined end to end per render class, clipped and simplified (Douglas-Peucker 1.5 m, like
  *     waterways and rail), water and land-use rings clipped and simplified at 1 m, 0.1 m rounding,
  *     zj-a's draw order;
- *   - clip box: the extent square (±meta.extent_m) plus MARGIN_M.
+ *   - clip box: the extent square (±meta.extent_m) plus MARGIN_M, or explicit --extent=METRES.
  *
  * A sample is skipped, never guessed, when its clip box is not inside the query bbox of every snapshot
  * (only there is an Overpass extract complete) or its frame formula is not core localFrame's. Besides
@@ -25,9 +25,11 @@
  *
  *   cd apps/server
  *   node --conditions=source --import tsx scripts/add-osm-base.ts [zj-b …] [--dry-run] [--verify]
+ *   node --conditions=source --import tsx scripts/add-osm-base.ts zj-a --extent=4000
  *
- * --dry-run writes nothing. --verify first rebuilds zj-a's base with zj-a's own box (no margin) and
- * stops unless it is byte-identical to the stored one (this port checked against build-zj-a.ts).
+ * --dry-run writes nothing. --verify first rebuilds zj-a's base with its stored base.extent_m (or
+ * the analysis extent for the original extract) and stops unless it is byte-identical.
+ * --extent explicitly replaces even a curated base. Reruns preserve the stored base extent.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -534,8 +536,13 @@ function withLine(
 
 const args = process.argv.slice(2);
 const options = args.filter((a) => a.startsWith('--'));
-const unknown = options.filter((a) => a !== '--dry-run' && a !== '--verify');
-if (unknown.length) throw new Error(`unknown option ${unknown.join(' ')} (use --dry-run, --verify)`);
+const unknown = options.filter((a) => a !== '--dry-run' && a !== '--verify' && !a.startsWith('--extent='));
+if (unknown.length)
+  throw new Error(`unknown option ${unknown.join(' ')} (use --dry-run, --verify, --extent=METRES)`);
+const extentArg = options.find((a) => a.startsWith('--extent='));
+const extent = extentArg ? Number(extentArg.slice('--extent='.length)) : undefined;
+if (extent !== undefined && (!Number.isFinite(extent) || extent <= 0))
+  throw new Error('--extent must be a positive number of metres');
 const dryRun = options.includes('--dry-run');
 const ids = args.filter((a) => !a.startsWith('--'));
 const samples = ids.length ? ids : DEFAULT_SAMPLES;
@@ -553,12 +560,12 @@ const NO_OSM_LINE =
   '底图的街道、水系与用地 © OpenStreetMap 贡献者，仅用于显示（离线底图与报告地图）。';
 const NOTE_HEAD = '底图（base：';
 const isBaseNote = (n: string) => n.startsWith(NOTE_HEAD);
-const baseNote = (half: number) =>
+const baseNote = (half: number, analysisHalf: number) =>
   `${NOTE_HEAD}道路、水系、铁路、用地与地名）取自 OpenStreetMap 的 Overpass 快照（${snapshot}，` +
   'research/zhangjiang/raw/osm_*.json），由 apps/server/scripts/add-osm-base.ts 离线补入，做法与 zj-a 相同：' +
   `WGS84 按公开公式转 GCJ-02 再转 BD-09，投影到本样例的局部坐标，裁剪到中心 ±${half} 米的方框` +
-  `（分析范围外扩 ${MARGIN_M} 米），道路、水道与铁路按 ${LINE_TOL_M} 米、水面与用地按 ${RING_TOL_M} 米容差简化。` +
-  '底图只用于离线底图与打印报告的地图，不参与分析：耗时场、小区判定与阻隔推断仍然只用百度数据，小区仍然没有轮廓；' +
+  `（分析范围外扩 ${half - analysisHalf} 米），道路、水道与铁路按 ${LINE_TOL_M} 米、水面与用地按 ${RING_TOL_M} 米容差简化。` +
+  '底图只用于离线底图与打印报告的地图，不改变分析范围、步行耗时、设施判定与小区轮廓；' +
   'OSM 的道路与百度的步行路网不一定一致。';
 console.log(
   `OSM snapshot ${snapshot}: complete inside S ${covered.s} W ${covered.w} N ${covered.n} E ${covered.e} (WGS-84)`,
@@ -567,12 +574,13 @@ console.log(
 if (options.includes('--verify')) {
   const a = readSample('zj-a').data;
   const [lng, lat] = a.meta.center_bd09;
-  const got = JSON.stringify(buildBase(osm, localFrame(lng, lat), squareBox(a.meta.extent_m)));
+  const rebuilt = buildBase(osm, localFrame(lng, lat), squareBox(a.base?.extent_m ?? a.meta.extent_m));
+  const got = JSON.stringify(a.base?.extent_m ? { extent_m: a.base.extent_m, ...rebuilt } : rebuilt);
   const want = JSON.stringify(a.base ?? null);
   if (got !== want) {
     throw new Error(
       `verify: rebuilt zj-a base has ${Buffer.byteLength(got)} bytes, the stored one ${Buffer.byteLength(want)}: ` +
-        'this script no longer matches build-zj-a.ts',
+        'this script no longer reproduces the stored basemap',
     );
   }
   console.log(
@@ -600,12 +608,12 @@ for (const id of samples) {
     skip(`meta.frame_formula is not core localFrame at meta.center_bd09: ${meta.frame_formula}`);
     continue;
   }
-  if (data.base && !(meta.notes ?? []).some(isBaseNote)) {
+  if (data.base && extent === undefined && !(meta.notes ?? []).some(isBaseNote)) {
     skip('it already has a base this script did not write (zj-a: build-zj-a.ts); leaving it alone');
     continue;
   }
   const frame = localFrame(lng, lat);
-  const half = meta.extent_m + MARGIN_M;
+  const half = extent ?? data.base?.extent_m ?? meta.extent_m + MARGIN_M;
   const clear = clearance(frame, half, covered);
   if (clear < 0) {
     skip(
@@ -615,7 +623,7 @@ for (const id of samples) {
     continue;
   }
   const box = squareBox(half);
-  const base = buildBase(osm, frame, box);
+  const base = { extent_m: half, ...buildBase(osm, frame, box) };
   const { meta: _meta, base: _old, ...rest } = data;
   const next: Sample = {
     meta: {
@@ -623,7 +631,7 @@ for (const id of samples) {
       attribution: withLine(meta.attribution ?? [], isOsmAttribution, ATTRIBUTION, 'first').map((a) =>
         isNoOsmLine(a) ? NO_OSM_LINE : a,
       ),
-      notes: withLine(meta.notes ?? [], isBaseNote, baseNote(half), 'last'),
+      notes: withLine(meta.notes ?? [], isBaseNote, baseNote(half, meta.extent_m), 'last'),
     },
     base,
     ...rest,
@@ -649,6 +657,7 @@ for (const id of samples) {
   const before = Buffer.byteLength(text);
   const after = Buffer.byteLength(out);
   const counts = Object.entries(base)
+    .filter(([, v]) => Array.isArray(v))
     .map(([k, v]) => `${k} ${(v as unknown[]).length}`)
     .join(', ');
   console.log(

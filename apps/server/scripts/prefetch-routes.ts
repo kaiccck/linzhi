@@ -87,7 +87,7 @@ function wanted(): Want[] {
     for (const c of r.communities) {
       for (const category of checkedCategories(r)) {
         const k = c.checks[category];
-        if (!k?.verified || k.status_main !== '伪覆盖') continue;
+        if (!k?.verified || (k.status_main !== '伪覆盖' && category !== '小学')) continue;
         const pair = checkPair(r, sample, { community: c.name, category });
         if ('kind' in pair) {
           console.warn(`${sample} ${c.name} ${category}: no routed facility (${pair.kind})`);

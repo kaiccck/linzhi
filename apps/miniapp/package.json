@@ -1,0 +1,47 @@
+{
+  "name": "@zoudedao/miniapp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "走得到微信小程序：15 分钟生活圈体检、规划与问询（Taro + React）。",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "taro build --type weapp --watch",
+    "build": "taro build --type weapp",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "browserslist": [
+    "last 3 versions",
+    "Android >= 4.1",
+    "ios >= 8"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.24.4",
+    "@tarojs/components": "4.3.0",
+    "@tarojs/helper": "4.3.0",
+    "@tarojs/plugin-framework-react": "4.3.0",
+    "@tarojs/plugin-platform-weapp": "4.3.0",
+    "@tarojs/react": "4.3.0",
+    "@tarojs/runtime": "4.3.0",
+    "@tarojs/shared": "4.3.0",
+    "@tarojs/taro": "4.3.0",
+    "@zoudedao/core": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.4",
+    "@babel/preset-react": "^7.24.1",
+    "@baidumap/jsapi-v4-types": "^4.0.4",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.5",
+    "@tarojs/cli": "4.3.0",
+    "@tarojs/taro-loader": "4.3.0",
+    "@tarojs/webpack5-runner": "4.3.0",
+    "@types/react": "^19.3.0",
+    "babel-preset-taro": "4.3.0",
+    "miniprogram-automator": "^0.12.1",
+    "postcss": "^8.4.38",
+    "react-refresh": "^0.14.0",
+    "webpack": "5.91.0"
+  }
+}

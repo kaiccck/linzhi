@@ -55,7 +55,8 @@ export function EvidenceLayer({
     >
       {ruleM ? (
         // this community's own straight 1 km: a pale disc in its verdict colour, unlike the centre's
-        // dashed 15′ circle (which steps aside while a route is shown)
+        // dashed 15′ circle (which steps aside while a route is shown); its tag ("A-11 · 直线 1 公里")
+        // is placed with the other labels (layout.ts), clear of codes, names and cards
         <circle className={`ev-ring t-${tone}`} cx={fx} cy={fy} r={ruleM * view.s} strokeWidth={1.2} />
       ) : null}
       {to ? (

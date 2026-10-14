@@ -24,6 +24,9 @@ import {
   rhoSamplesOf,
   sampleGrid,
   segDist2,
+  schoolCheck,
+  schoolNotApplicable,
+  schoolUnjudged,
   type AnalysisMeta,
   type AnalysisResult,
   type Community,
@@ -140,7 +143,8 @@ export function checkRows(result: AnalysisResult): CheckRow[] {
   const checked = checkedCategories(result);
   result.communities.forEach((community, index) => {
     for (const category of checked) {
-      const check = community.checks?.[category];
+      const check =
+        category === '小学' ? schoolCheck(community, ruleOf(result, category)) : community.checks?.[category];
       if (check) rows.push({ community, index, category, check });
     }
   });
@@ -150,12 +154,18 @@ export function checkRows(result: AnalysisResult): CheckRow[] {
 /** Not routed for this community on its own yet: 待核实, never a gap (types.ts FacilityCheck.verified). */
 export const isPending = (c: FacilityCheck): boolean => c.verified === false;
 
+/**
+ * A 商办 compound's 小学: no 对口小学 by law. No verdict (isPending is true, so it is never a gap), but
+ * nothing is pending on it either: counted as 不适用, never as 待核实.
+ */
+export const isNotApplicable = (c: FacilityCheck): boolean => !!schoolNotApplicable(c);
+
 /** A verified check that is not walkable within the rule. */
 export const isWalkGap = (c: FacilityCheck): boolean => !isPending(c) && c.status_main !== '覆盖';
 
 /** The circle method's verdict: no facility within the rule by straight line (or none known at all). */
 export const isStraightGap = (c: FacilityCheck, rule_m: number): boolean =>
-  !(c.straight_m >= 0) || c.straight_m > rule_m;
+  !schoolUnjudged(c) && (!(c.straight_m >= 0) || c.straight_m > rule_m);
 
 /** Rule distance the result's checks used for a category (meta.rule_m of live results, else 1 km). */
 export function ruleOf(result: AnalysisResult, category: HardCategory): number {
@@ -189,6 +199,8 @@ export interface CategoryCounts {
   /** Verified checks flagged 临界 (|route − rule| ≤ 50 m), on top of their main status. */
   临界: number;
   待核实: number;
+  /** 小学 of 商办 compounds (no 对口小学): neither a verdict nor pending. */
+  不适用: number;
 }
 
 /**
@@ -197,19 +209,81 @@ export interface CategoryCounts {
  */
 export function categoryCounts(result: AnalysisResult): Record<HardCategory, CategoryCounts> {
   const out = Object.fromEntries(
-    checkedCategories(result).map((c) => [c, { total: 0, 覆盖: 0, 伪覆盖: 0, 盲区: 0, 临界: 0, 待核实: 0 }]),
+    checkedCategories(result).map((c) => [
+      c,
+      { total: 0, 覆盖: 0, 伪覆盖: 0, 盲区: 0, 临界: 0, 待核实: 0, 不适用: 0 },
+    ]),
   ) as Record<HardCategory, CategoryCounts>;
   for (const { category, check } of checkRows(result)) {
     const n = out[category];
     n.total++;
     if (isPending(check)) {
-      n.待核实++;
+      if (isNotApplicable(check)) n.不适用++;
+      else n.待核实++;
       continue;
     }
     n[check.status_main]++;
     if (check.borderline) n.临界++;
   }
   return out;
+}
+
+/** 体检评分 bands, as the app shows them: ≥ 90 良好, ≥ 75 基本达标, ≥ 60 需关注, else 待改善. */
+export type ScoreGrade = '良好' | '基本达标' | '需关注' | '待改善';
+export const gradeOf = (score: number): ScoreGrade =>
+  score >= 90 ? '良好' : score >= 75 ? '基本达标' : score >= 60 ? '需关注' : '待改善';
+
+/**
+ * 体检评分, the app's number: per checked category the coverage — verified communities walking to one
+ * within the rule ÷ verified communities — and the score, the mean coverage × 100 (categories without
+ * a verified check left out). `circle` is the same with straight-line distance: what drawing circles
+ * would score. Pending checks count in neither.
+ */
+export interface LifeCircleScore {
+  walk: number;
+  circle: number;
+  grade: ScoreGrade;
+  coverage: {
+    category: HardCategory;
+    /** coverage on foot and by straight line, percent (null: no verified check) */
+    walk_pct: number | null;
+    circle_pct: number | null;
+    verified: number;
+    pending: number;
+  }[];
+}
+
+export function lifeCircleScore(result: AnalysisResult): LifeCircleScore {
+  const rows = checkRows(result);
+  const coverage = checkedCategories(result).map((category) => {
+    const rule = ruleOf(result, category);
+    const mine = rows.filter((r) => r.category === category);
+    const verified = mine.filter((r) => !isPending(r.check));
+    const share = (n: number) => (verified.length ? (100 * n) / verified.length : null);
+    return {
+      category,
+      walk: share(verified.filter((r) => !isWalkGap(r.check)).length),
+      circle: share(verified.filter((r) => !isStraightGap(r.check, rule)).length),
+      verified: verified.length,
+      pending: mine.filter((r) => isPending(r.check) && !isNotApplicable(r.check)).length,
+    };
+  });
+  const scored = coverage.filter((c) => c.walk !== null);
+  const mean = (f: (c: (typeof coverage)[number]) => number) =>
+    scored.length ? Math.round(scored.reduce((s, c) => s + f(c), 0) / scored.length) : 0;
+  const walk = mean((c) => c.walk!);
+  return {
+    walk,
+    circle: mean((c) => c.circle!),
+    grade: gradeOf(walk),
+    coverage: coverage.map((c) => ({
+      category: c.category,
+      walk_pct: c.walk === null ? null : Math.round(c.walk),
+      circle_pct: c.circle === null ? null : Math.round(c.circle),
+      verified: c.verified,
+      pending: c.pending,
+    })),
+  };
 }
 
 /**
@@ -233,6 +307,8 @@ export interface Headline {
   /** missed_by_circle / walking_gaps in percent, one decimal; null without walking gaps. */
   missed_share_pct: number | null;
   pending: number;
+  /** 小学 checks of 商办 compounds: no 对口小学, neither a gap nor pending. */
+  not_applicable: number;
   borderline: number;
 }
 
@@ -242,11 +318,13 @@ export function headline(result: AnalysisResult): Headline {
   let pseudo = 0;
   let blind = 0;
   let pending = 0;
+  let notApplicable = 0;
   let borderline = 0;
   for (const { category, check } of rows) {
     if (isStraightGap(check, ruleOf(result, category))) straight++;
     if (isPending(check)) {
-      pending++;
+      if (isNotApplicable(check)) notApplicable++;
+      else pending++;
       continue;
     }
     if (check.borderline) borderline++;
@@ -266,6 +344,7 @@ export function headline(result: AnalysisResult): Headline {
     missed_by_circle: pseudo,
     missed_share_pct: walking ? round((pseudo / walking) * 100, 1) : null,
     pending,
+    not_applicable: notApplicable,
     borderline,
   };
 }
@@ -297,8 +376,10 @@ export function within15(
   let total = 0;
   for (const row of checkRows(result)) {
     if (row.category !== category) continue;
-    total++;
     const c = row.check;
+    // a 商办 compound's 小学 is not anyone's to reach: it is not in the count
+    if (isNotApplicable(c)) continue;
+    total++;
     const routed = c.route_basis === undefined || c.route_basis === 'routed';
     if (!isPending(c) && routed && c.route_m >= 0 && c.route_m <= limit) {
       within++;
@@ -380,6 +461,17 @@ export function deriveProfile(
     baseline: { ...base.baseline, circle_r15_m: Math.round(LIMIT_S * speed) },
     communities: base.communities.map((c) => ({
       ...c,
+      ...(c.catchment
+        ? {
+            catchment: {
+              ...c.catchment,
+              dur_s:
+                c.catchment.route_m !== null && c.catchment.dur_s !== null
+                  ? scaleDur(c.catchment.route_m, c.catchment.dur_s)
+                  : null,
+            },
+          }
+        : {}),
       checks: Object.fromEntries(
         Object.entries(c.checks).map(([cat, check]) => [
           cat,

@@ -1,0 +1,102 @@
+/* 邻至 mini program: tokens and the few base rules; components carry their own sheets.
+   World: a map app at the craft of 高德 / Apple 地图 — white sheets over the map, one blue, the
+   verdict colours (伪覆盖 red, 盲区 slate, 走得到 teal) and the warm sand of the walk. */
+page {
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --fill: #f2f3f5;
+  --fill-2: #e9ebef;
+  --line: #eceef2;
+  --line-2: #dfe2e7;
+  --ink: #16191f;
+  --ink-2: #4e5662;
+  --ink-3: #7a828e;
+  --ink-4: #a9afb8;
+  --blue: #2468f2;
+  --blue-press: #1b55cc;
+  --blue-tint: #eaf1fe;
+  --pseudo: #e0483e;
+  --pseudo-text: #c4382f;
+  --pseudo-tint: #fdecea;
+  --blind: #3f4a5a;
+  --blind-tint: #e3e7ed;
+  --ok: #1f9a8c;
+  --ok-text: #17776c;
+  --ok-tint: #e4f3f0;
+  --edge: #b98010;
+  --edge-tint: #fbf2df;
+  --pending: #98a2b0;
+  --sand: #eac47c;
+  --sand-deep: #a27b47;
+  --sand-tint: #fbf3e3;
+  --sans: -apple-system, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+  --num: 'DIN Alternate', 'DIN Condensed', 'Roboto', -apple-system, 'PingFang SC', sans-serif;
+  --shadow-float: 0 2px 8px rgba(16, 24, 40, 0.12);
+  --shadow-sheet: 0 -4px 20px rgba(16, 24, 40, 0.1);
+
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.45;
+}
+view,
+text,
+scroll-view,
+image,
+input,
+textarea,
+button {
+  box-sizing: border-box;
+}
+button {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  line-height: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+button::after {
+  border: 0;
+}
+.num {
+  font-family: var(--num);
+  font-variant-numeric: tabular-nums;
+}
+.icon {
+  display: inline-block;
+  flex: none;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.pressed {
+  opacity: 0.6;
+}
+.row-pressed {
+  background: var(--fill);
+}
+
+.radar {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* shared inline accents: bold figures, the 伪覆盖 red, the circle's number crossed out by the walk's */
+.b {
+  font-weight: 700;
+  color: var(--ink);
+}
+.pseudo {
+  color: var(--pseudo-text);
+}
+.struck {
+  font-weight: 700;
+  color: var(--ink-2);
+  text-decoration: line-through;
+  text-decoration-color: var(--pseudo);
+  text-decoration-thickness: 2px;
+}

@@ -25,6 +25,7 @@ import {
   FACILITY_BUFFER_M,
   FRESH_KEYWORDS,
   LIVELIHOOD_KEYWORDS,
+  SERVICE_QUERIES,
   LIVELIHOOD_RADIUS_M,
   planQuota,
   STAGES,
@@ -136,7 +137,7 @@ describe('live analysis of a synthetic river city', () => {
     const { client, result } = main;
     const billed = client.billed;
     expect(billed.routematrix_walking).toBeLessThanOrEqual(1030);
-    expect(billed.place).toBeLessThanOrEqual(12);
+    expect(billed.place).toBeLessThanOrEqual(20);
     expect(billed.directionlite_walking).toBeLessThanOrEqual(6);
     expect(billed.reverse_geocoding).toBe(1);
     const byStep = result.stats.quota_by_step as Record<string, number>;
@@ -149,9 +150,13 @@ describe('live analysis of a synthetic river city', () => {
     // the 41 rows of the five checked categories take three pages, 生鲜超市 the fourth
     expect(byStep.facilities).toBe(4);
     expect(byStep.livelihood).toBe(2);
+    // the 生活服务: the services union's ~30 rows take two pages, the 75 restaurants four
+    expect(byStep.services).toBe(6);
     // the 买菜替代 search: the city's shops fit one page
     expect(byStep.fresh).toBe(1);
-    expect(byStep.facilities! + byStep.livelihood! + byStep.residential! + byStep.fresh!).toBe(billed.place);
+    expect(
+      byStep.facilities! + byStep.livelihood! + byStep.services! + byStep.residential! + byStep.fresh!,
+    ).toBe(billed.place);
     // the engine's own count is what the client billed
     expect(result.stats.quota_used).toEqual({
       reverse_geocoding: billed.reverse_geocoding,
@@ -220,14 +225,8 @@ describe('live analysis of a synthetic river city', () => {
     const r = main.result;
     const byName = new Map(r.communities.map((c) => [c.name, c]));
     const school = byName.get('滨河花园')!.checks['小学'];
-    expect(school).toMatchObject({ status_main: '伪覆盖', verified: true, nearest_straight: '河东实验小学' });
-    expect(school.straight_m).toBeLessThan(500);
-    // across the bridge 河东实验小学 is over 1.5 km on foot; 临河第一小学 on this bank, more than 1 km away
-    // even in a straight line (so the rule's early stop never routed it), is the nearest walk
-    expect(school).toMatchObject({ via: '临河第一小学', route_upper_bound: false });
-    expect(school.route_m).toBeGreaterThan(1200);
-    const walk = nearestWalk(r, byName.get('滨河花园')!.centroid, '小学');
-    expect(Math.abs(school.route_m - walk)).toBeLessThanOrEqual(1);
+    expect(school).toMatchObject({ school_assignment: 'unmatched', verified: false, route_m: -1 });
+    expect(school.via).toBeUndefined();
     const market = byName.get('东岸新村')!.checks['菜市场'];
     expect(market).toMatchObject({ status_main: '伪覆盖', verified: true, nearest_straight: '河西生鲜市场' });
     // the campus 东岸幼儿园(滨江部) is 522 m away in a straight line, across the river; this bank's
@@ -243,14 +242,14 @@ describe('live analysis of a synthetic river city', () => {
     for (const c of r.communities) {
       // a fresh run checks every community for all five categories
       expect(Object.keys(c.checks), c.name).toEqual([...HARD_CATEGORIES]);
-      for (const cat of HARD_CATEGORIES) {
+      for (const cat of HARD_CATEGORIES.filter((c) => c !== '小学')) {
         const k = c.checks[cat];
         expect(k.verified, `${c.name} ${cat}`).toBe(true);
         expect(k.status_main, `${c.name} ${cat}`).toBe(truth(r, c.centroid, cat, 1000));
         n++;
       }
     }
-    expect(n).toBe(150);
+    expect(n).toBe(120);
     expect(checkedCategories(r)).toEqual([...HARD_CATEGORIES]);
     const counts = r.stats.community_status_counts as {
       main: Record<string, number>;
@@ -272,11 +271,7 @@ describe('live analysis of a synthetic river city', () => {
       /^逐小区检查 5 类设施：幼儿园、小学、菜市场、药店、社区卫生/,
     );
     expect(
-      main.events.some(
-        (e) =>
-          e.event === 'stage' &&
-          /30 个小区 × 5 类设施（幼儿园、小学、菜市场、药店、社区卫生）/.test(e.data.message),
-      ),
+      main.events.some((e) => e.event === 'stage' && /30 个小区，小学按官方对口/.test(e.data.message)),
     ).toBe(true);
   });
 
@@ -284,7 +279,7 @@ describe('live analysis of a synthetic river city', () => {
     const r = main.result;
     let routed = 0;
     for (const c of r.communities) {
-      for (const cat of HARD_CATEGORIES) {
+      for (const cat of HARD_CATEGORIES.filter((c) => c !== '小学')) {
         const k = c.checks[cat];
         const what = `${c.name} ${cat}`;
         expect(k.unrouted_nearer, what).toBeUndefined();
@@ -294,7 +289,7 @@ describe('live analysis of a synthetic river city', () => {
         routed++;
       }
     }
-    expect(routed).toBeGreaterThan(140);
+    expect(routed).toBeGreaterThan(110);
     const nearest = r.stats.coverage_nearest_routes as number;
     expect(nearest).toBeGreaterThan(0);
     expect(nearest).toBeLessThan((r.stats.quota_by_step as Record<string, number>).coverage! / 2);
@@ -306,7 +301,7 @@ describe('live analysis of a synthetic river city', () => {
     const counts = { gaps: 0, with_alt: 0, none: 0, not_looked: 0 };
     for (const c of r.communities) {
       expect(c.checks_gb, c.name).toBeUndefined();
-      for (const cat of HARD_CATEGORIES) {
+      for (const cat of HARD_CATEGORIES.filter((c) => c !== '小学')) {
         const k = c.checks[cat];
         const what = `${c.name} ${cat}`;
         if (cat !== '菜市场' || !k.verified || k.status_main === '覆盖') {
@@ -356,7 +351,7 @@ describe('live analysis of a synthetic river city', () => {
     const was = new Map(main.result.communities.map((c) => [c.name, c.checks]));
     let flagged = 0;
     for (const c of r.communities) {
-      for (const cat of HARD_CATEGORIES) {
+      for (const cat of HARD_CATEGORIES.filter((c) => c !== '小学')) {
         const k = c.checks[cat];
         if (k.unrouted_nearer) flagged++;
         expect(k.route_upper_bound).toBe(!!k.unrouted_nearer);
@@ -402,8 +397,9 @@ describe('live analysis of a synthetic river city', () => {
       complete: true,
     });
     expect(queries[1]).toMatchObject({ keywords: '生鲜超市', complete: true });
-    expect(queries.slice(-2).map((q) => q.keywords)).toEqual([
+    expect(queries.slice(-4).map((q) => q.keywords)).toEqual([
       LIVELIHOOD_KEYWORDS.join('$'),
+      ...SERVICE_QUERIES.map((q) => q.groups.flatMap((g) => g.keywords).join('$')),
       FRESH_KEYWORDS.join('$'),
     ]);
     const inventory = r.stats.facility_inventory as Record<string, { complete: boolean; radius_m: number }>;
@@ -569,7 +565,7 @@ describe('live analysis of a synthetic river city', () => {
           expect(s.verified ? (row.route_m ?? 0) : row.est_m).toBeLessThanOrEqual(1000);
       }
     }
-    expect(sites['小学']!.some((s) => s.verified && s.covers.includes('滨河花园'))).toBe(true);
+    expect(sites['小学']).toBeUndefined();
   });
 
   it('builds a result the web renders, reproducing its own field from its samples', () => {
@@ -628,7 +624,7 @@ describe('live analysis of a synthetic river city', () => {
     const plan = planQuota(INPUT);
     expect(plan.max).toEqual({
       reverse_geocoding: 1,
-      place: 12,
+      place: 20,
       directionlite_walking: 6,
       routematrix_walking: 1030,
     });
@@ -643,6 +639,7 @@ describe('live analysis of a synthetic river city', () => {
       'locate',
       'facilities',
       'livelihood',
+      'services',
       'residential',
       'fresh',
       'detail',
@@ -659,7 +656,7 @@ describe('live analysis of a synthetic river city', () => {
       ...INPUT,
       browser_pois: [{ uid: 'a'.repeat(24), name: '某超市', keyword: '超市', bd09: INPUT.center_bd09 }],
     });
-    expect(withBrowser.max.place).toBe(17);
+    expect(withBrowser.max.place).toBe(25);
     expect(withBrowser.steps.find((s) => s.step === 'detail')).toMatchObject({
       stage: 'facilities',
       service: 'place',
@@ -721,7 +718,7 @@ describe('official lists: multi-source POI fusion', () => {
     expect(after).toMatchObject({ status_main: '覆盖', verified: true, via: '浦商生鲜东岸店' });
     expect(after.route_m).toBeLessThan(200);
     for (const c of fused.result.communities) {
-      for (const cat of HARD_CATEGORIES) {
+      for (const cat of HARD_CATEGORIES.filter((c) => c !== '小学')) {
         const k = c.checks[cat];
         expect(k.verified, `${c.name} ${cat}`).toBe(true);
         expect(k.status_main, `${c.name} ${cat}`).toBe(truth(fused.result, c.centroid, cat, 1000));
@@ -901,21 +898,29 @@ describe('cancellation and failures', () => {
     expect(c.result.pois.some((p) => p.cat === '公交' || p.cat === '养老')).toBe(false);
     // 社区卫生 is checked, from the facility union: the 民生设施 union failing costs it nothing
     expect(c.result.stats.facility_counts).toMatchObject({ 社区卫生: 5 });
+    // the 生活服务 have searches of their own: the union failing costs them nothing either
     expect(c.result.stats.facility_stats!.map((s) => s.category)).toEqual([
       '小学',
       '幼儿园',
+      '中学',
       '菜市场',
       '生鲜超市',
       '超市',
+      '便利店',
+      '餐饮',
       '药店',
       '社区卫生',
+      '快递',
+      '银行',
+      '健身',
+      '文化',
     ]);
     expect(c.result.communities).toEqual(a.result.communities);
   });
 
   it('skips the 民生设施 union up front when the place quota only fits the checks', async () => {
-    // personal soft limit 90 %: 9 of 10 pages — the 8 pages without the 买菜替代 search and the union
-    // still fit (6 for the five checked categories, 2 for the compounds)
+    // personal soft limit 90 %: 9 of 10 pages — the 8 pages without the 买菜替代 search, the 生活服务 and
+    // the union still fit (6 for the five checked categories, 2 for the compounds)
     const ledger = new QuotaLedger({ tier: 'personal', limits: { place: 10 } });
     const r = await run(INPUT, { ledger });
     const meta = r.result.meta as LiveMeta;
@@ -924,6 +929,7 @@ describe('cancellation and failures', () => {
     );
     const byStep = r.result.stats.quota_by_step as Record<string, number>;
     expect(byStep.livelihood).toBe(0);
+    expect(byStep.services).toBe(0);
     expect(byStep.fresh).toBe(0);
     expect(r.client.billed.place).toBeLessThanOrEqual(8);
     expect(r.result.communities).toHaveLength(30);
@@ -959,7 +965,7 @@ describe('profiles and clients', () => {
     expect(elder.stats.area_iso15_km2).toBeLessThan(e.result.stats.area_iso15_km2);
     // coverage is about metres, not minutes: the verdicts do not depend on the profile
     const byName = new Map(e.result.communities.map((c) => [c.name, c]));
-    expect(byName.get('滨河花园')!.checks['小学'].status_main).toBe('伪覆盖');
+    expect(byName.get('滨河花园')!.checks['小学'].verified).toBe(false);
   });
 
   it('runs without a ledger: quota events count this run against its caps', async () => {
@@ -1048,7 +1054,7 @@ describe('curated exclusions by name pattern', () => {
     for (const c of r.communities) {
       // the warehouse the 买菜替代 search finds again stays excluded there too
       expect(c.checks['菜市场'].alt?.name).not.toBe('叮咚生鲜超市');
-      for (const cat of HARD_CATEGORIES) {
+      for (const cat of HARD_CATEGORIES.filter((c) => c !== '小学')) {
         const k = c.checks[cat];
         expect(k.via).not.toBe('叮咚生鲜超市');
         if (!k.verified) continue;
@@ -1056,7 +1062,7 @@ describe('curated exclusions by name pattern', () => {
         expect(k.status_main, `${c.name} ${cat}`).toBe(truth(r, c.centroid, cat, 1000));
       }
     }
-    expect(verified).toBeGreaterThan(140);
+    expect(verified).toBeGreaterThan(110);
   });
 });
 
@@ -1104,22 +1110,45 @@ describe('对口小学, exclusions and school / health lists in a live run', () 
   });
   const byName = (name: string) => r.communities.find((c) => c.name === name)!;
 
-  it('assigns matched compounds their school, routed to its gate, the nearer campus when the table names none', () => {
-    const binhe = byName('滨河花园').catchment!;
-    const gate = byName('滨河花园').centroid;
-    const west = Math.round(campusCity.walk(gate, [-700, 330]));
-    const north = Math.round(campusCity.walk(gate, [-300, 700]));
-    expect(north).toBeLessThan(west);
-    expect(binhe).toMatchObject({
-      school: '临河第一小学（北校区）',
-      school_uid: 's1n',
-      route_m: north,
-      source: 'linhe-catchment-2026',
-      matched_by: 'name:滨河花园',
-    });
-    expect(binhe.note).toBe(
-      `对口表未写校区，找到 2 个校区，取步行较近的一个（另：临河第一小学 步行 ${west} 米）`,
+  it('prefers the newest official table and respects an explicitly assigned campus', async () => {
+    const newer: CatchmentList = {
+      ...table,
+      id: 'newer-table',
+      published: '2026-09-01',
+      schools: [{ school: '临河第一小学（北校区）', entries: [{ lane: '河西路1弄', compound: '滨河花园' }] }],
+    };
+    const result = await analyze(
+      INPUT,
+      { client: new FakeClient({ city: campusCity }), now: NOW, catchment: [table, newer] },
+      () => {},
     );
+    const c = result.communities.find((c) => c.name === '滨河花园')!;
+    expect(c.catchment).toMatchObject({
+      source: 'newer-table',
+      assignment_status: 'confirmed',
+      school_uid: 's1n',
+    });
+    expect(c.checks.小学).toMatchObject({
+      via_uid: 's1n',
+      school_assignment: 'confirmed',
+      route_m: c.catchment!.route_m,
+      dur_s: c.catchment!.dur_s,
+      verified: true,
+    });
+  });
+
+  it('routes only assigned schools and leaves ambiguous campuses pending', () => {
+    const binhe = byName('滨河花园').catchment!;
+    expect(binhe).toMatchObject({
+      school: '临河第一小学',
+      assignment_status: 'campus_pending',
+      route_m: null,
+    });
+    expect(byName('滨河花园').checks.小学).toMatchObject({
+      verified: false,
+      school_assignment: 'campus_pending',
+    });
+    expect(byName('滨河花园').checks.小学.via).toBeUndefined();
     expect(byName('东岸新村').catchment).toMatchObject({
       school: '河东实验小学',
       route_m: Math.round(campusCity.walk(byName('东岸新村').centroid, [700, 330])),
@@ -1136,7 +1165,8 @@ describe('对口小学, exclusions and school / health lists in a live run', () 
       ambiguous: ['枫林苑'],
     });
     expect(stats.unmatched).toHaveLength(24);
-    expect(stats.routed).toBe(4);
+    expect(stats.routed).toBe(2);
+    expect(stats.campus_pending).toBe(2);
     expect(stats.school_not_found).toBe(1);
     // routes the coverage check measured are reused; the rest come from the catchment budget line
     const byStep = r.stats.quota_by_step as Record<string, number>;
@@ -1168,7 +1198,7 @@ describe('对口小学, exclusions and school / health lists in a live run', () 
       { budget: { catchment: 0 } },
     );
     expect((dry.stats.quota_by_step as Record<string, number>).catchment).toBe(0);
-    const ck = dry.communities.find((c) => c.name === '滨河花园')!.catchment!;
+    const ck = dry.communities.find((c) => c.name === '东岸新村')!.catchment!;
     // the nearer campus was never routed: straight lines only, and the note says why
     expect(ck.note).toMatch(/预算已用完/);
   });
@@ -1271,10 +1301,10 @@ describe('对口小学, exclusions and school / health lists in a live run', () 
       uid: 'gov:linhe-schools-2026:1',
     });
     // the added school is a candidate of the checks, and the verdicts still follow the street graph
-    expect(res.communities.some((c) => c.checks['小学'].via === '河西新村小学')).toBe(true);
+    expect(res.communities.every((c) => !c.checks['小学'].verified)).toBe(true);
     for (const c of res.communities) {
       expect(Object.keys(c.checks), c.name).toEqual([...HARD_CATEGORIES]);
-      for (const cat of HARD_CATEGORIES) {
+      for (const cat of HARD_CATEGORIES.filter((c) => c !== '小学')) {
         expect(c.checks[cat].verified, `${c.name} ${cat}`).toBe(true);
         expect(c.checks[cat].status_main, `${c.name} ${cat}`).toBe(truth(res, c.centroid, cat, 1000));
       }
@@ -1421,8 +1451,8 @@ describe('browser POIs: what place search omits, detailed and cleaned like searc
   });
 
   it('is the first thing given up when the day’s place quota is short', async () => {
-    // personal soft limit 90 %: 12 of 14 pages — the run fits without the 5 detail requests
-    const ledger = new QuotaLedger({ tier: 'personal', limits: { place: 14 } });
+    // personal soft limit 90 %: 21 of 23 pages — the run's 20 fit without the 5 detail requests
+    const ledger = new QuotaLedger({ tier: 'personal', limits: { place: 23 } });
     const x = await run(WITH, { city: bcity, ledger });
     const meta = x.result.meta as LiveMeta;
     expect(meta.warnings.join('\n')).toMatch(/本次不查询地图前端补充的设施详情/);

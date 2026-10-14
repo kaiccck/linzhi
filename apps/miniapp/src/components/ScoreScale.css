@@ -1,0 +1,237 @@
+/* ================================================================ score block */
+.sb-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.sb-n {
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+.sb-u {
+  margin-right: 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.sb-line .grade {
+  align-self: center;
+}
+.sb-claim {
+  margin-left: auto;
+  align-self: center;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.sb-n.g-ok {
+  color: var(--ok-text);
+}
+.sb-n.g-edge {
+  color: #8a5f0a;
+}
+.sb-n.g-pseudo {
+  color: var(--pseudo-text);
+}
+.sb-n.g-blind {
+  color: var(--blind);
+}
+.sb-n.g-quiet {
+  color: var(--ink-4);
+}
+
+.sb-how {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+.sb-row {
+  display: flex;
+  gap: 8px;
+}
+.sb-k {
+  flex: none;
+  width: 28px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--ink-3);
+}
+.sb-v {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-2);
+}
+.sb-cats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  row-gap: 6px;
+  margin: -2px 0 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--card);
+}
+.sb-cat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.grade {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 22px;
+}
+.grade.g-ok {
+  color: var(--ok-text);
+  background: var(--ok-tint);
+}
+.grade.g-edge {
+  color: #8a5f0a;
+  background: var(--edge-tint);
+}
+.grade.g-pseudo {
+  color: var(--pseudo-text);
+  background: var(--pseudo-tint);
+}
+.grade.g-blind {
+  color: #fff;
+  background: var(--blind);
+}
+
+/* ================================================================ scale */
+.ss {
+  margin: 12px 0 0;
+}
+.ss-tags {
+  position: relative;
+  height: 20px;
+}
+.ss-tag {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.ss-tag.claim {
+  color: var(--ink-3);
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-color: var(--pseudo);
+}
+.ss-track {
+  position: relative;
+  display: flex;
+  height: 10px;
+}
+.ss-band {
+  height: 100%;
+}
+.ss-band.b0 {
+  border-radius: 5px 0 0 5px;
+  background: var(--blind-tint);
+}
+.ss-band.b1 {
+  background: #f8d3cf;
+}
+.ss-band.b2 {
+  background: #f3dfb2;
+}
+.ss-band.b3 {
+  border-radius: 0 5px 5px 0;
+  background: #bfe3dc;
+}
+.ss-band + .ss-band {
+  border-left: 2px solid var(--card);
+}
+.ss-mark {
+  position: absolute;
+  top: -4px;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  border-radius: 9px;
+}
+.ss-mark.walk {
+  background: var(--ink);
+  border: 3px solid var(--card);
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.35);
+}
+.ss-mark.claim {
+  background: var(--card);
+  border: 2px dashed var(--ink-3);
+}
+.ss-words {
+  display: flex;
+  margin-top: 7px;
+}
+.ss-word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+.ss-w {
+  font-size: 11px;
+  line-height: 15px;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+.ss-r {
+  font-size: 10px;
+  line-height: 13px;
+  color: var(--ink-4);
+}
+
+/* ================================================================ radar head */
+.rh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+}
+.rh-t {
+  font-size: 14px;
+  font-weight: 600;
+}
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.lg-k {
+  width: 14px;
+  height: 0;
+  margin-left: 6px;
+}
+.lg-k.walk {
+  height: 8px;
+  border-radius: 2px;
+  background: var(--ok);
+}
+.lg-k.miss {
+  height: 8px;
+  border-radius: 2px;
+  background: var(--pseudo);
+}

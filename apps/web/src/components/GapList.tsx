@@ -7,13 +7,12 @@
  * on the map.
  */
 import { memo, useEffect, useState } from 'react';
-import type { FacilityCheck, HardCategory } from '@zoudedao/core';
+import { schoolPendingReason, type FacilityCheck, type HardCategory } from '@zoudedao/core';
 import { distWords, fmtInt, poiName, type Model, type Unit } from '../model/derive.js';
 import { catchmentText } from '../model/evidence.js';
 import { checkLook, lookClass, LOOK_WORD, type Look } from '../model/looks.js';
-import { Ui } from './Icons.js';
+import { Chev, Ui } from './Icons.js';
 import { Le } from './Le.js';
-import { NumText } from './NumText.js';
 
 /** Looks that need no attention: within the rule (临界 within it too). */
 const FINE: ReadonlySet<Look> = new Set(['ok', 'edge']);
@@ -24,6 +23,8 @@ export const needsLook = (u: Unit, cat: HardCategory) => !FINE.has(checkLook(u.c
 /** What a check says in words (a row's title and spoken label). */
 export function cellWords(cat: HardCategory, s: FacilityCheck, scale: number): string {
   const look = checkLook(s);
+  const pending = schoolPendingReason(s);
+  if (pending) return pending;
   if (look === 'none') return `${cat}：设施清单里没有`;
   if (look === 'pending')
     return `${cat} 待核：已测路线 ${fmtInt(s.route_m)} 米只是上限，附近还有更近的设施未测`;
@@ -41,6 +42,7 @@ function Value({ s, walking }: { s: FacilityCheck; walking: boolean }) {
   // 走一遍 plays: no walk is told before it lands
   if (walking) return <span className="gl-v num s-quiet wait">—</span>;
   const look = checkLook(s);
+  if (schoolPendingReason(s)) return <span className="gl-v s-pending">待核</span>;
   if (look === 'none') return <span className="gl-v num s-blind">无</span>;
   const bound =
     look === 'pending' || s.route_upper_bound ? (
@@ -86,7 +88,7 @@ function Row({
   const school = cat === '小学' && u.catchment ? `；${catchmentText(u.catchment)}` : '';
   const label =
     `${u.code} ${u.name}：${words}${school}` +
-    (open
+    (open && !schoolPendingReason(s)
       ? selected
         ? `（地图上已画出到${cat}的步行路线）`
         : `（回车：在地图上画出到${cat}的步行路线）`
@@ -162,9 +164,11 @@ export const GapList = memo(function GapList({
   const rest = model.units
     .filter((u) => !needsLook(u, cat))
     .sort((a, b) => walk(b.checks[cat]) - walk(a.checks[cat]) || a.code.localeCompare(b.code));
-  const [open, setOpen] = useState(false);
-  useEffect(() => setOpen(false), [model, cat]);
-  const shown = open || rest.some((u) => u.code === selected);
+  const [open, setOpen] = useState(() => rest.some((u) => u.code === selected));
+  useEffect(() => {
+    // Reveal a newly selected route once; a later manual collapse must still win.
+    setOpen(model.units.some((u) => u.code === selected && !needsLook(u, cat)));
+  }, [model, cat, selected]);
   const rule = distWords(model.ruleOf[cat]);
   const row = (u: Unit) => (
     <Row
@@ -185,7 +189,7 @@ export const GapList = memo(function GapList({
       className={'gl' + (walking ? ' walking' : '')}
       aria-label={
         main.length
-          ? `步行 ${rule}内走不到${cat}的 ${main.length} 个小区，由远到近`
+          ? `${cat}有缺口或待核实的 ${main.length} 个小区，由远到近`
           : `${model.units.length} 个小区步行 ${rule}内都走得到${cat}`
       }
     >
@@ -195,24 +199,23 @@ export const GapList = memo(function GapList({
           <button
             type="button"
             className={main.length ? undefined : 'all-ok'}
-            aria-expanded={shown}
-            onClick={() => setOpen(!shown)}
+            aria-expanded={open}
+            aria-label={`${main.length ? '其余 ' : ''}${rest.length} 个小区步行 ${rule}内${main.length ? '' : '都'}走得到${cat}`}
+            onClick={() => setOpen((v) => !v)}
           >
             {main.length ? null : (
               <span className="gl-ok" aria-hidden="true">
                 <Ui id="ui-check" />
               </span>
             )}
+            {/* the category and the rule are on the tile and the legend: not said again here */}
             {main.length ? '其余 ' : ''}
-            <span className="num">{rest.length}</span> 个小区
-            <NumText text={`步行 ${rule}内${main.length ? '' : '都'}走得到${cat}`} />
-            <svg className="chev" viewBox="0 0 10 10" aria-hidden="true" focusable="false">
-              <path d="M3.5 2 6.5 5 3.5 8" />
-            </svg>
+            <span className="num">{rest.length}</span> 个小区{main.length ? '走得到' : '都走得到'}
+            <Chev dir="right" />
           </button>
         </li>
       ) : null}
-      {shown ? rest.map(row) : null}
+      {open ? rest.map(row) : null}
     </ol>
   );
 });

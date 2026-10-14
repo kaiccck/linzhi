@@ -19,3 +19,7 @@ design/mockups/**/_m.html
 
 # finished demo videos are published as links (too large for the repo)
 docs/*.mp4
+
+# Taro/SWC compile cache and WeChat devtools per-user settings
+.swc/
+project.private.config.json

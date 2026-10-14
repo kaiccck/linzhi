@@ -10,8 +10,16 @@ import type {
   HardCategory,
   MainStatus,
 } from '@zoudedao/core';
-import { viaName } from '@zoudedao/core';
-import { HARD_CATEGORIES, checkRows, isPending, isWalkGap, ruleOf, speedOf } from './analysis.js';
+import { viaName, schoolPendingReason } from '@zoudedao/core';
+import {
+  HARD_CATEGORIES,
+  checkRows,
+  isNotApplicable,
+  isPending,
+  isWalkGap,
+  ruleOf,
+  speedOf,
+} from './analysis.js';
 import { round } from './format.js';
 
 /** 买菜替代 of a 菜市场 gap: a shop within the rule on foot that sells vegetables. Not coverage. */
@@ -142,6 +150,8 @@ export function gapRows(result: AnalysisResult, filter: RowFilter = {}): GapRow[
 }
 
 export function pendingReason(c: FacilityCheck): string {
+  const school = schoolPendingReason(c);
+  if (school) return school;
   if (c.route_basis === 'estimated') return '候选设施还没有从该小区算路，步行距离只是按绕行系数估算';
   if (c.unrouted_nearer?.length) return '有更近的同类设施还没有从该小区算路，实际最短步行可能更短';
   return '该小区的这一项还没有单独算路核实';
@@ -149,7 +159,9 @@ export function pendingReason(c: FacilityCheck): string {
 
 export function pendingRows(result: AnalysisResult, filter: RowFilter = {}): PendingRow[] {
   return checkRows(result)
-    .filter((r) => keep(filter, r.community.name, r.category) && isPending(r.check))
+    .filter(
+      (r) => keep(filter, r.community.name, r.category) && isPending(r.check) && !isNotApplicable(r.check),
+    )
     .map(({ community, category, check }) => ({
       community: community.name,
       category,
@@ -185,8 +197,8 @@ export function coveredRows(result: AnalysisResult, filter: RowFilter = {}): Cov
 /** One line per community: what "哪些小区都方便" needs, without one call per community. */
 export interface CommunityStatusRow {
   community: string;
-  /** Verdict per category: 覆盖 / 伪覆盖 / 盲区, or 待核实 (not a verdict yet). */
-  status: Partial<Record<HardCategory, MainStatus | '待核实'>>;
+  /** Verdict per category: 覆盖 / 伪覆盖 / 盲区, 待核实 (not a verdict yet), or 不适用 (商办, no 对口小学). */
+  status: Partial<Record<HardCategory, MainStatus | '待核实' | '不适用'>>;
   /**
    * Minutes to the facility reached on foot, at the analysis' walking speed; null when the walk was
    * not measured (待核实, or nothing within the rule).
@@ -201,7 +213,7 @@ export function communityStatusRows(result: AnalysisResult, filter: RowFilter = 
     if (!keep(filter, community.name, category)) continue;
     const row = by.get(community.name) ?? { community: community.name, status: {}, walk_min: {} };
     const pending = isPending(check);
-    row.status[category] = pending ? '待核实' : check.status_main;
+    row.status[category] = isNotApplicable(check) ? '不适用' : pending ? '待核实' : check.status_main;
     row.walk_min[category] =
       pending || basis(check) !== 'routed' || check.route_m < 0 ? null : round(check.route_m / speed / 60, 1);
     by.set(community.name, row);

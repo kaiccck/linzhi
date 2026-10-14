@@ -140,16 +140,12 @@ describe('siting on the zj-a gaps', () => {
     ...zj.communities.map((c) => ({ id: `c:${c.name}`, xy: c.centroid, label: c.name })),
   ];
 
-  it('finds one school site that would serve all six communities without a walkable 小学', () => {
+  it('does not invent primary-school gaps for unresolved campuses', () => {
     const gaps = zj.communities
-      .filter((c) => c.checks.小学.status_main !== '覆盖')
+      .filter((c) => c.checks.小学.verified && c.checks.小学.status_main !== '覆盖')
       .map((c) => ({ id: c.name, xy: c.centroid }));
-    expect(gaps).toHaveLength(6);
-    const [top, ...rest] = suggestSites(candidates, gaps, { category: '小学', estimator });
-    expect(rest).toEqual([]);
-    expect(top!.covers.sort()).toEqual(gaps.map((g) => g.id).sort());
-    expect(top!.routes.every((r) => r.est_m <= 1000 && r.est_m >= r.straight_m)).toBe(true);
-    expect(top!.rho_local).toBeGreaterThanOrEqual(1);
+    expect(gaps).toHaveLength(0);
+    expect(suggestSites(candidates, gaps, { category: '小学', estimator })).toEqual([]);
   });
 
   it('samples candidate sites along the walked routes', () => {

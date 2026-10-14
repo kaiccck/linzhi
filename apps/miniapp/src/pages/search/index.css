@@ -1,0 +1,151 @@
+.search {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+}
+.s-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.s-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 20px;
+  background: var(--fill);
+}
+.s-field {
+  flex: 1;
+  font-size: 15px;
+  color: var(--ink);
+}
+.s-ph {
+  color: var(--ink-4);
+}
+.s-go {
+  flex: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--blue);
+  padding: 0 4px;
+}
+.s-body {
+  flex: 1;
+  min-height: 0;
+}
+.s-mine {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 16px 4px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--blue-tint);
+}
+.s-mine-ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  background: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.s-mine-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.s-mine-t {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--blue);
+}
+.s-mine-n {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.s-note {
+  display: block;
+  margin: 12px 16px 0;
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.s-h {
+  display: block;
+  padding: 20px 16px 6px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.s-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.s-row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.s-row-t {
+  font-size: 16px;
+  font-weight: 500;
+}
+.s-row-n {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.s-row-go {
+  flex: none;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 15px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 30px;
+}
+.s-code {
+  flex: none;
+  min-width: 32px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--fill);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 28px;
+  text-align: center;
+  color: var(--blue);
+}
+.s-code.live {
+  font-size: 11px;
+}
+.s-end {
+  height: 40px;
+}
+
+.s-crs {
+  flex: none;
+  display: block;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--ink-3);
+}

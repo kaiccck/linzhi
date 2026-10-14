@@ -31,6 +31,7 @@ const zeroSteps = (): Record<Step, number> => ({
   locate: 0,
   facilities: 0,
   livelihood: 0,
+  services: 0,
   residential: 0,
   fresh: 0,
   detail: 0,

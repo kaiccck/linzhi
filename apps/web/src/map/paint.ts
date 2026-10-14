@@ -46,6 +46,7 @@ export const TINT: Record<Exclude<Look, 'edge' | 'edge-over'>, string> = {
   blind: 'rgba(212,218,227,0.97)',
   pending: 'rgba(255,255,255,0.78)',
   none: 'rgba(212,218,227,0.97)',
+  na: 'rgba(255,255,255,0.3)',
   neutral: 'rgba(255,255,255,0.3)',
 };
 const EDGE: Record<Exclude<Look, 'edge' | 'edge-over'>, string> = {
@@ -54,6 +55,7 @@ const EDGE: Record<Exclude<Look, 'edge' | 'edge-over'>, string> = {
   blind: COL.blind,
   pending: COL.pending,
   none: COL.blind,
+  na: '#a4adb9',
   neutral: '#a4adb9',
 };
 

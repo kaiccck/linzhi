@@ -17,7 +17,7 @@ import type { EvidenceView } from './map/evidenceCard.js';
 import { MapPanel, type MapPlan, type MapStream } from './map/MapPanel.js';
 import { profileScale, type Model } from './model/derive.js';
 import { evidenceBase, evidenceFacts, noRouteReason } from './model/evidence.js';
-import { sitePins, whatIf } from './model/siting.js';
+import { sitePins, whatIf, type SitePin } from './model/siting.js';
 import type { MapSpot } from './model/spots.js';
 import { tourSteps } from './model/tour.js';
 import {
@@ -308,6 +308,13 @@ export function Screen({
     measureCtl.current?.abort();
     setPlan((p) => ({ ...p, placing: false, site: { xy, bd09 }, measure: { status: 'idle' } }));
   }, []);
+  const onUseSite = useCallback(
+    (site: SitePin) => {
+      centreRef.current.stopPick();
+      onPlaceAt(site.xy, model.frame.toLngLat(...site.xy));
+    },
+    [model, onPlaceAt],
+  );
   const onCancelPlacing = useCallback(() => setPlan((p) => (p.placing ? { ...p, placing: false } : p)), []);
   const onClearSite = useCallback(() => {
     measureCtl.current?.abort();
@@ -320,11 +327,12 @@ export function Screen({
   // a measurement answers one category: choosing another starts over (a saved branch that brings its
   // own category along stays)
   useEffect(() => {
+    if (touring) return;
     const m = planRef.current.measure;
     if (m.status === 'idle' || m.cat === cat) return;
     measureCtl.current?.abort();
     setPlan((p) => ({ ...p, measure: { status: 'idle' } }));
-  }, [cat]);
+  }, [cat, touring]);
   const onMeasure = useCallback(() => {
     const site = plan.site;
     if (!site || !analysisId || measureBlocked) return;
@@ -562,9 +570,9 @@ export function Screen({
     active: mode === 'plan',
     pins,
     hotSite: plan.hotSite,
-    placing: plan.placing,
-    estimate: mode === 'plan' ? estimate : null,
-    measured,
+    placing: plan.placing && !touring,
+    estimate: mode === 'plan' && !touring ? estimate : null,
+    measured: mode === 'plan' && !touring ? measured : null,
   };
 
   /* ---------- a live check streaming in ---------- */
@@ -628,7 +636,7 @@ export function Screen({
           />
         </Suspense>
       ) : (
-        <div className="workspace">
+        <div className="workspace" data-mode={mode}>
           <Panel
             model={model}
             mode={mode}
@@ -657,6 +665,7 @@ export function Screen({
             estimate={estimate}
             measureBlocked={measureBlocked}
             onPlace={onPlace}
+            onUseSite={onUseSite}
             onClearSite={onClearSite}
             onMeasure={onMeasure}
             onHotSite={onHotSite}

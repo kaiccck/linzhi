@@ -33,7 +33,7 @@ const facilitiesByCategory = Object.fromEntries(
 ) as Record<HardCategory, Poi[]>;
 
 describe('four-state rule', () => {
-  it('reproduces all 60 stored zj-a statuses from their own straight/route numbers', () => {
+  it('reproduces the 48 verified zj-a statuses from their own straight/route numbers', () => {
     // zj-a checks all five categories: the task's three from the research calls, 幼儿园 and 社区卫生
     // from the engine's coverage check
     expect(checkedCategories(zj)).toEqual([...HARD_CATEGORIES]);
@@ -41,6 +41,7 @@ describe('four-state rule', () => {
     for (const c of zj.communities) {
       for (const cat of HARD_CATEGORIES) {
         const k = c.checks[cat];
+        if (!k.verified) continue;
         const v = classifyCheck({
           straight_m: k.straight_m,
           route_m: k.route_m,
@@ -56,8 +57,8 @@ describe('four-state rule', () => {
         n[cat] = (n[cat] ?? 0) + 1;
       }
     }
-    expect(Object.values(n).reduce((a, b) => a + b, 0)).toBe(60);
-    expect(TASK_CATEGORIES.reduce((t, cat) => t + n[cat]!, 0)).toBe(36);
+    expect(Object.values(n).reduce((a, b) => a + b, 0)).toBe(48);
+    expect(TASK_CATEGORIES.reduce((t, cat) => t + (n[cat] ?? 0), 0)).toBe(24);
   });
 
   it('draws the lines where the design doc does', () => {
@@ -167,8 +168,8 @@ function nearestRoutes(): RoutedPair[] {
 }
 
 describe('merging routematrix answers into FacilityChecks', () => {
-  it('rebuilds the 36 zj-a checks from the raw Baidu answers, flags included', () => {
-    for (const cat of TASK_CATEGORIES) {
+  it('rebuilds the 24 non-school zj-a checks from the raw Baidu answers, flags included', () => {
+    for (const cat of TASK_CATEGORIES.filter((c) => c !== '小学')) {
       const research =
         cat === '菜市场' ? [...researchRoutes(cat), ...officialMarketRoutes()] : researchRoutes(cat);
       const routes = [...research, ...nearestRoutes()];
@@ -447,20 +448,20 @@ describe('灰色区域', () => {
     const c = zj.communities.find((x) => x.name === '川杨新苑四期')!;
     // 小学 and 菜市场 are verified 伪覆盖; the pharmacy (192 m), the kindergarten (260 m) and the health
     // station (131 m) are within the rule on foot
-    expect(gapCount(c.checks)).toEqual({ missing: 2, pseudo: true });
+    expect(gapCount(c.checks)).toEqual({ missing: 1, pseudo: true });
     // an unverified gap is left out, not guessed
     const open = { ...c.checks, 药店: { ...c.checks.药店, status_main: '伪覆盖' as const, verified: false } };
-    expect(gapCount(open)).toEqual({ missing: 2, pseudo: true });
+    expect(gapCount(open)).toEqual({ missing: 1, pseudo: true });
     expect(gapCount({ ...open, 药店: { ...open.药店, verified: true } })).toEqual({
-      missing: 3,
+      missing: 2,
       pseudo: true,
     });
     // 8 of the 12 communities have a gap: 7 in the task's three, and 虹御公寓, whose 社区卫生 is a
     // 1,083 m walk for 874 m in a straight line (伪覆盖)
-    expect(points.filter((p) => p.missing > 0)).toHaveLength(8);
+    expect(points.filter((p) => p.missing > 0)).toHaveLength(3);
     const task = (k: (typeof zj.communities)[number]) =>
       gapCount(Object.fromEntries(TASK_CATEGORIES.map((cat) => [cat, k.checks[cat]])));
-    expect(zj.communities.filter((k) => task(k).missing > 0)).toHaveLength(7);
+    expect(zj.communities.filter((k) => task(k).missing > 0)).toHaveLength(2);
     const hy = zj.communities.find((x) => x.name === '虹御公寓')!;
     expect(task(hy).missing).toBe(0);
     expect(gapCount(hy.checks)).toEqual({ missing: 1, pseudo: true });
@@ -468,7 +469,11 @@ describe('灰色区域', () => {
   });
 
   it('draws nested polygons per number of missing categories plus a 伪覆盖 layer', () => {
-    const raster = statusRaster(points, { cell_m: 25, maxDist_m: 200 });
+    const nested = points.map((p, i) => ({
+      ...p,
+      missing: zj.communities[i]!.name === '川杨新苑四期' ? 2 : p.missing,
+    }));
+    const raster = statusRaster(nested, { cell_m: 25, maxDist_m: 200 });
     const layers = grayAreaPolygons(raster);
     const gap1 = layers.find((l) => l.kind === 'gap' && l.min_missing === 1)!;
     const gap2 = layers.find((l) => l.kind === 'gap' && l.min_missing === 2)!;

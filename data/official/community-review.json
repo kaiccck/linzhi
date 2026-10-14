@@ -1,0 +1,498 @@
+{
+  "id": "community-review",
+  "kind": "community_review",
+  "title": "人工核实的小区清单",
+  "note": "百度地点检索“住宅区”返回的点并不都是住宅小区：居委会办公点、工业园大门、写字楼、酒店、已动迁的村宅、同一小区的楼栋、位置标错的点。逐条对照张江镇人民政府《张江镇住宅小区非生活垃圾规范化清运招标文件》所附住宅小区清单（104 个小区，含弄号与房屋性质）、浦东新区教育局《2026年浦东新区小学招生地段公示》（全区 6993 行）与张江镇居村委地址一览表核实。action：exclude 不计入小区；no_catchment 是住宅但没有对口小学（商办产权），小学一项写明原因、不算待核；address 按官方地段表的写法匹配地址；name 用官方表登记的小区名（同一期有几个条目时括注弄号）。引擎在识别小区时按百度 uid 应用（名称为“两个字＋社区／居委会／居民区”的另按居委会剔除，无需列入）；样例由 apps/server/scripts/review-communities.ts 应用。每条都写明理由、来源与核实日期。",
+  "entries": [
+    {
+      "uid": "f733f44e0b5bfe87f503b882",
+      "name": "江夏社区",
+      "action": "exclude",
+      "kind": "committee",
+      "reason": "居民委员会，不是住宅小区：张江镇居村委地址一览表中江夏居委办公地址益江路250号；百度把居委会办公点也标为“房地产;住宅区”。它所在的小区另有自己的条目，计入会重复。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/jgjj-zjz/2025/315/347784.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "3b23e1c6caa7ce7bb75f1e75",
+      "name": "江丰社区",
+      "action": "exclude",
+      "kind": "committee",
+      "reason": "居民委员会，不是住宅小区：张江镇居村委地址一览表中江丰居委办公地址益江路299弄95号（益丰新村内）；百度把居委会办公点也标为“房地产;住宅区”。它所在的小区另有自己的条目，计入会重复。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/jgjj-zjz/2025/315/347784.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "78b2d7bd005b565d8bfc066c",
+      "name": "江衡社区",
+      "action": "exclude",
+      "kind": "committee",
+      "reason": "居民委员会，不是住宅小区：张江镇居村委地址一览表中江衡居委办公地址盛夏路2006号；百度把居委会办公点也标为“房地产;住宅区”。它所在的小区另有自己的条目，计入会重复。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/jgjj-zjz/2025/315/347784.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "05a9c4d26be8f36ee812e409",
+      "name": "江苑社区",
+      "action": "exclude",
+      "kind": "committee",
+      "reason": "居民委员会，不是住宅小区：张江镇居村委地址一览表中江苑居委办公地址张东路2281弄80号（玉兰香苑四期内）；百度把居委会办公点也标为“房地产;住宅区”。它所在的小区另有自己的条目，计入会重复。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/jgjj-zjz/2025/315/347784.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "5e84ea94eaa42cf582a12e42",
+      "name": "江益社区",
+      "action": "exclude",
+      "kind": "committee",
+      "reason": "居民委员会，不是住宅小区：张江镇居村委地址一览表中江益居委办公地址益江路466号；百度把居委会办公点也标为“房地产;住宅区”。它所在的小区另有自己的条目，计入会重复。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/jgjj-zjz/2025/315/347784.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "18eeff259866ecade50738b1",
+      "name": "江春社区",
+      "action": "exclude",
+      "kind": "committee",
+      "reason": "居民委员会，不是住宅小区：张江镇居村委地址一览表中江春居委办公地址益丰路50号；百度把居委会办公点也标为“房地产;住宅区”。它所在的小区另有自己的条目，计入会重复。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/jgjj-zjz/2025/315/347784.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "d9e8f8fa33ddc2ace8f853fe",
+      "name": "华顺社区",
+      "action": "exclude",
+      "kind": "committee",
+      "reason": "名称是居委会的叫法（两个字＋社区），百度没有给出门牌；张江镇住宅小区清单与浦东新区 2026 年小学招生地段中都没有名为华顺的小区，附近的川杨新苑另有条目。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "ff135fee81d0875838e4a649",
+      "name": "益丰工业小区",
+      "action": "exclude",
+      "kind": "not_residential",
+      "reason": "百度类别为“出入口;门”，地址创新西路1016号，是工业园区的大门；不在张江镇住宅小区清单中，也不在浦东新区任何小学招生地段中。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "3c2a4acc311cb8e045e27460",
+      "name": "梦想园",
+      "action": "exclude",
+      "kind": "not_residential",
+      "reason": "地址盛夏路570号是张江国家数字出版基地／895 创新基地写字楼（“张江梦想园”为其招租名称），不是住宅；不在张江镇住宅小区清单与浦东新区小学招生地段中。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://shanghai.11467.com/info/28462683.htm"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "886da49b630decc94151c00d",
+      "name": "旺辰公寓",
+      "action": "exclude",
+      "kind": "unverified",
+      "reason": "百度地址益江路1弄12号；张江镇住宅小区清单与浦东新区 2026 年全区小学招生地段（6993 行）中都没有这个住宅，公开资料中只见到以酒店身份列出的同名场所。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "ba2a482260d90c1f26d2bbcc",
+      "name": "2049翡翠公园南区",
+      "action": "exclude",
+      "kind": "not_residential",
+      "reason": "地址荣科路280号是万科翡翠公园的 2049 商业街；翡翠公园的住宅各期（川和路322、333、388、399弄，荣科路177弄，环科路677弄）另有条目。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "2298ad1c39bebbc7715e8060",
+      "name": "科荣园",
+      "action": "exclude",
+      "kind": "not_residential",
+      "reason": "百度地址为纳贤路科荣大厦，是办公楼；不在张江镇住宅小区清单与浦东新区小学招生地段中。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "9d09472e20525334a21de93f",
+      "name": "华夏中路顾家宅",
+      "action": "exclude",
+      "kind": "demolished",
+      "reason": "顾家宅是已动迁的村宅：浦东新区 2026 年小学招生地段中张江镇的“川北路顾家宅”注明“已动迁”，张江镇住宅小区清单中也没有它。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "de21b4baddecbfdf3913fdd1",
+      "name": "益江路55弄113号",
+      "action": "exclude",
+      "kind": "duplicate",
+      "reason": "百度地址为“春港丽园”，是春港丽园（益丰路55弄）的一栋楼，与春港丽园条目重复。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13",
+      "duplicate_of": "春港丽园"
+    },
+    {
+      "uid": "b0178cb577a8579f9e95de75",
+      "name": "益丰路55弄109号",
+      "action": "exclude",
+      "kind": "duplicate",
+      "reason": "益丰路55弄即春港丽园（张江镇住宅小区清单：春港丽园 1、2 期，益丰路55弄），此条是其中一栋楼，与春港丽园条目重复。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13",
+      "duplicate_of": "春港丽园"
+    },
+    {
+      "uid": "ba2aaffd43f951c5f119376f",
+      "name": "张江荣科苑",
+      "action": "exclude",
+      "kind": "duplicate",
+      "reason": "环科路677弄即张江荣科苑一期，也就是万科翡翠公园一期；与“万科翡翠公园-1期”条目同弄、相距 8 米，重复。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13",
+      "duplicate_of": "万科翡翠公园-1期"
+    },
+    {
+      "uid": "b89e3171b003b0f27369d323",
+      "name": "华陇小区",
+      "action": "exclude",
+      "kind": "mislocated",
+      "reason": "华陇小区（建中小区）在建中路461弄（张江镇住宅小区清单、浦东新区小学招生地段），位于金科路站附近；百度此点标在玉兰香苑以东 4 公里外的龚卢路旁（地址写作“将中路461弄”），位置错误。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "00dd6c8ec8fac810fbf0cb37",
+      "name": "东窑新村",
+      "action": "exclude",
+      "kind": "unverified",
+      "reason": "地址龚卢路310号临（唐镇一侧），张江镇住宅小区清单、浦东新区 2026 年全区小学招生地段（6993 行）与公开资料中都查不到这个小区。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "b8954abac770966cc61b757e",
+      "name": "创新公寓",
+      "action": "exclude",
+      "kind": "unverified",
+      "reason": "地址创新西路799号，浦东新区 2026 年全区小学招生地段中没有这个门牌，张江镇住宅小区清单与公开资料中也查不到这个住宅。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "6830bcd6585ca91c0c0e6bb9",
+      "name": "川杨兰苑",
+      "action": "exclude",
+      "kind": "unverified",
+      "reason": "地址中科路2130号，张江镇住宅小区清单与浦东新区 2026 年全区小学招生地段中都没有；附近的川杨新苑一期（中科路2166、2195弄）另有条目。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "ab9435113878d5ffa1046490",
+      "name": "丁家花园",
+      "action": "exclude",
+      "kind": "unverified",
+      "reason": "百度地址为祥科路298号佑越国际（办公楼）；张江镇住宅小区清单与浦东新区 2026 年全区小学招生地段中都查不到这个小区（公开资料中的“丁家花园”是川沙的文物建筑）。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf",
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "bef0850fc9e49eefdf1e52b5",
+      "name": "张江公馆",
+      "action": "no_catchment",
+      "kind": "commercial",
+      "reason": "商办产权，没有对口小学：高科中路2810弄，50 年产权的商住公寓（商业用地，不能落户），浦东新区 2026 年全区小学招生地段（6993 行）中没有它。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://m.ke.com/sh/xiaoqu/5011000002354/"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "ab66a221982dbe9e7bb55c22",
+      "name": "绿地MTOWN",
+      "action": "no_catchment",
+      "kind": "commercial",
+      "reason": "商办产权，没有对口小学：金科路788号，40 年产权的商务公寓（商业用地，不能落户），浦东新区 2026 年全区小学招生地段（6993 行）中没有它。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://sh.focus.cn/zixun/041594be30bc9ce4.html"
+      ],
+      "date": "2026-10-13"
+    },
+    {
+      "uid": "99c58af63455f7a8b11e36ae",
+      "name": "日月光集团-员工生活区",
+      "action": "address",
+      "kind": "address",
+      "reason": "百度地址写作“银冬路568号”；浦东新区 2026 年小学招生地段张江镇有“银东路568号”（对口张江镇中心小学）。张江镇只有银冬路（玉兰香苑北侧），没有银东路，门牌号与街镇一致，按地段表的写法匹配。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-13",
+      "address": "银东路568号"
+    },
+    {
+      "uid": "5ffb1816c6a115226f47600a",
+      "name": "益江路511弄",
+      "action": "name",
+      "kind": "name",
+      "official_name": "玉兰香苑二期A块",
+      "reason": "浦东新区 2026 年小学招生地段：益江路511弄 为“玉兰香苑二期A块”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "a41300666d5d4bfd4207c174",
+      "name": "张江玉兰香苑-二期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "玉兰香苑二期B块",
+      "reason": "百度地址益江路516弄；浦东新区 2026 年小学招生地段：益江路516弄 为“玉兰香苑二期B块”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "c879fa014601604bc809f0ae",
+      "name": "玉兰香苑一期B组",
+      "action": "name",
+      "kind": "name",
+      "official_name": "玉兰香苑一期B块",
+      "reason": "百度地址益江路126弄1-112号；浦东新区 2026 年小学招生地段：益江路126弄 为“玉兰香苑一期B块”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "f6302a1ea63cd4e08b36ee7a",
+      "name": "玉兰香苑-一期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "玉兰香苑一期",
+      "reason": "统一写法：张江镇住宅小区清单作“玉兰香苑一期”（益江路126、286弄）；百度的一期A组已并入此条。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "2157bbf3e43da64736b06cd5",
+      "name": "玉兰香苑3期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "玉兰香苑三期",
+      "reason": "百度地址盛夏路1107弄；浦东新区 2026 年小学招生地段：盛夏路1107弄 为“玉兰香苑三期”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "20ba5225d0d8ecbeab0dd8d7",
+      "name": "玉兰香苑-四期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "玉兰香苑四期",
+      "reason": "统一写法：张江镇住宅小区清单作“玉兰香苑四期”（张东路2201、2281弄）。",
+      "source": [
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "97a76d148c16bbff28d7ab94",
+      "name": "顺和路60弄",
+      "action": "name",
+      "kind": "name",
+      "official_name": "川杨新苑二期（顺和路60弄）",
+      "reason": "浦东新区 2026 年小学招生地段：顺和路60弄 为“川杨新苑二期”。同一期另有顺和路126弄条目，括注弄号区分。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "91f841ed2d81cf8dbbbd6369",
+      "name": "顺和路126弄",
+      "action": "name",
+      "kind": "name",
+      "official_name": "川杨新苑二期（顺和路126弄）",
+      "reason": "浦东新区 2026 年小学招生地段：顺和路126弄 为“川杨新苑二期”。同一期另有顺和路60弄条目，括注弄号区分。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "d219bb1d2f509a88f50e772e",
+      "name": "川杨新苑-南区",
+      "action": "name",
+      "kind": "name",
+      "official_name": "川杨新苑一期（中科路2166弄）",
+      "reason": "百度地址中科路2166弄1～43号；浦东新区 2026 年小学招生地段：中科路2166弄 为“川杨新苑一期”。同一期另有中科路2195弄条目，括注弄号区分。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "38e480371d45eb4a373a712e",
+      "name": "川杨新苑-北区",
+      "action": "name",
+      "kind": "name",
+      "official_name": "川杨新苑一期（中科路2195弄）",
+      "reason": "百度地址中科路2195弄1～53号；浦东新区 2026 年小学招生地段：中科路2195弄 为“川杨新苑一期”。同一期另有中科路2166弄条目，括注弄号区分。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "b4b294905f81c00be60738f2",
+      "name": "万科·翡翠公园-3期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "万科翡翠公园三期",
+      "reason": "统一写法（期数用汉字、去掉标点）。官方文件对这几期的登记名不一致（招生地段作“兴科苑”“荣科苑”，张江镇住宅小区清单作“张江兴科苑”“张江荣科苑”且期数不同），沿用通行的楼盘名“万科翡翠公园”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "a3c267d9d32e0c10aecb663b",
+      "name": "万科翡翠公园-六期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "万科翡翠公园六期",
+      "reason": "统一写法（期数用汉字、去掉标点）。官方文件对这几期的登记名不一致（招生地段作“兴科苑”“荣科苑”，张江镇住宅小区清单作“张江兴科苑”“张江荣科苑”且期数不同），沿用通行的楼盘名“万科翡翠公园”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "69f930532c6e3e3b95ca0705",
+      "name": "万科翡翠公园-四期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "万科翡翠公园四期",
+      "reason": "统一写法（期数用汉字、去掉标点）。官方文件对这几期的登记名不一致（招生地段作“兴科苑”“荣科苑”，张江镇住宅小区清单作“张江兴科苑”“张江荣科苑”且期数不同），沿用通行的楼盘名“万科翡翠公园”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "df69f36473acee695af6be2e",
+      "name": "万科翡翠公园-五期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "万科翡翠公园五期",
+      "reason": "统一写法（期数用汉字、去掉标点）。官方文件对这几期的登记名不一致（招生地段作“兴科苑”“荣科苑”，张江镇住宅小区清单作“张江兴科苑”“张江荣科苑”且期数不同），沿用通行的楼盘名“万科翡翠公园”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "cf456a3abf93452e6140a9ee",
+      "name": "万科翡翠公园-二期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "万科翡翠公园二期",
+      "reason": "统一写法（期数用汉字、去掉标点）。官方文件对这几期的登记名不一致（招生地段作“兴科苑”“荣科苑”，张江镇住宅小区清单作“张江兴科苑”“张江荣科苑”且期数不同），沿用通行的楼盘名“万科翡翠公园”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-14"
+    },
+    {
+      "uid": "ae05c174938941522b06ce68",
+      "name": "万科翡翠公园-1期",
+      "action": "name",
+      "kind": "name",
+      "official_name": "万科翡翠公园一期",
+      "reason": "统一写法（期数用汉字、去掉标点）。官方文件对这几期的登记名不一致（招生地段作“兴科苑”“荣科苑”，张江镇住宅小区清单作“张江兴科苑”“张江荣科苑”且期数不同），沿用通行的楼盘名“万科翡翠公园”。",
+      "source": [
+        "https://www.pudong.gov.cn/zwgk/ywjy-jyjzdgz/2026/97/354039.html",
+        "https://sh-gov-open-doc.oss-cn-shanghai.aliyuncs.com/1108QZ/d9037d5b-03a6-429a-914c-88f0612ad7b1.pdf"
+      ],
+      "date": "2026-10-14"
+    }
+  ]
+}

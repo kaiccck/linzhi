@@ -100,7 +100,7 @@ function methodLines(result: AnalysisResult, o: Overview): string[] {
     `设施可达：从每个小区出发，逐类检查${cats.join('、')}（${taskScope(cats)}），对直线距离在判定距离内的候选设施做批量算路（步行距离不会短于直线距离，更远的候选不必算）。判定距离按赛题口径 1 km：步行最短距离不超过判定距离为覆盖；直线在判定距离内、步行超出为伪覆盖；直线就已超出为盲区；步行距离与判定距离相差不超过 50 m 另标临界。${cats.join('、')}任一类缺失，即记为该小区的服务缺口。`,
   );
   parts.push(
-    '待核实：还有更近的候选设施没有从该小区算路，实际最短步行可能更短。这些检查单独列出，不计入缺口，也不画结论颜色。',
+    '小学只检查官方对口学校；未明确学校或校区时不以最近学校替代。待核实包括对口信息不全、路线未测或还有更近的候选设施未测，不计入缺口，也不画结论颜色。',
   );
   if (o.facilities) {
     parts.push(
@@ -230,7 +230,23 @@ function table(head: readonly string[], rows: readonly (readonly string[])[]): s
 
 function keyNumbers(o: Overview): string {
   const i = o.isochrone;
-  const rows: string[][] = [
+  const sc = o.score;
+  const covered = sc.coverage.filter((c) => c.walk_pct !== null);
+  const rows: string[][] = covered.length
+    ? [
+        [
+          '体检评分（实测步行）',
+          `${sc.walk} 分（${sc.grade}）`,
+          `各类设施覆盖率的平均：${covered.map((c) => `${c.category} ${c.walk_pct}%`).join('、')}；覆盖率＝步行 ${o.rule_text} 内走得到的小区 ÷ 已核实的小区；≥90 良好、≥75 基本达标、≥60 需关注、其余待改善`,
+        ],
+        [
+          '体检评分（按直线距离）',
+          `${sc.circle} 分`,
+          '同样的设施和判定距离，只把步行距离换成直线距离：画圆法会给出的分数',
+        ],
+      ]
+    : [];
+  rows.push(
     ['15 分钟步行可达面积', `${fmtNumber(i.area_iso15_km2, 3)} km²`, '由实测步行耗时插值得到的等时圈'],
     [
       '直线 15 分钟圆面积',
@@ -239,7 +255,7 @@ function keyNumbers(o: Overview): string {
     ],
     ['画圆高估倍数', `${fmtNumber(i.overstate_x, 2)} 倍`, '直线圆面积 ÷ 实际可达面积'],
     ['可达面积占直线圆的比例', pct(i.reach_share_pct), ''],
-  ];
+  );
   if (i.reach15) {
     rows.push([
       '15 分钟有效步行半径（中位数）',
@@ -349,7 +365,7 @@ function checksSection(model: ReportModel): string {
   out.push(
     `## 二、${h.communities} 个小区 × ${h.categories} 类必需设施`,
     '',
-    `判定规则：步行最短距离不超过判定距离（${o.rule_text}）为**覆盖**；直线在判定距离内、步行超出为**伪覆盖**；直线就已超出为**盲区**；步行距离与判定距离相差不超过 50 m 另标**临界**。未核实的检查记为**待核实**，不计入缺口。`,
+    `判定规则：小学计算到官方对口学校，其余类别取最近设施。步行距离不超过判定距离（${o.rule_text}）为**覆盖**；直线在判定距离内、步行超出为**伪覆盖**；直线就已超出为**盲区**；步行距离与判定距离相差不超过 50 m 另标**临界**。未核实的检查记为**待核实**，不计入缺口。`,
     '',
     '### 各类别统计（按小区计）',
     '',
@@ -374,7 +390,7 @@ function checksSection(model: ReportModel): string {
           '直线距离',
           '步行距离',
           `步行时间（${fmtNumber(o.speed_mps, 2, true)} m/s）`,
-          '最近可达设施',
+          '判定目标设施',
         ],
         model.gaps.map((g) => [
           g.community,
@@ -403,7 +419,11 @@ function checksSection(model: ReportModel): string {
         model.pending.map((p) => [
           p.community,
           p.category,
-          p.route_basis === 'estimated' ? `约 ${m(p.route_m)}（估算）` : `${m(p.route_m)}（上界）`,
+          p.route_m < 0
+            ? '未测'
+            : p.route_basis === 'estimated'
+              ? `约 ${m(p.route_m)}（估算）`
+              : `${m(p.route_m)}（上界）`,
           p.reason,
           p.unrouted_nearer.length
             ? p.unrouted_nearer.map((u) => `${u.name}（直线 ${m(u.straight_m, 1)}）`).join('、')
@@ -447,7 +467,7 @@ function sitingSection(model: ReportModel): string {
     const n = o.by_category[s.category];
     if (s.source === 'none') {
       lines.push(
-        `- **${s.category}**：没有已核实的缺口${n.待核实 ? `；${n.待核实} 项待核实，建议先补测这些小区到更近${s.category}的步行路线，再决定是否需要新增` : '，暂不需要新增'}。`,
+        `- **${s.category}**：没有已核实的缺口${n.待核实 ? `；${n.待核实} 项待核实，建议先${s.category === '小学' ? '核实对口校区并测量步行路线' : '补测这些小区到更近设施的步行路线'}，再决定是否需要新增` : '，暂不需要新增'}。`,
       );
       continue;
     }

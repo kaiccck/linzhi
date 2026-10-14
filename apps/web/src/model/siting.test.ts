@@ -21,11 +21,11 @@ describe('siting suggestions as pins', () => {
     expect(pins.map((p) => p.cat)).toEqual(
       [...pins.map((p) => p.cat)].sort((x, y) => order.indexOf(x) - order.indexOf(y)),
     );
-    const market = pins.filter((p) => p.cat === '菜市场');
-    expect(market.map((p) => p.rank)).toEqual([1, 2, 3]);
-    expect(market[0]!.covers.map((c) => c.name)).toEqual(data['菜市场']![0]!.covers);
+    const clinic = pins.filter((p) => p.cat === '社区卫生');
+    expect(clinic.map((p) => p.rank)).toEqual([1, 2, 3]);
+    expect(clinic[0]!.covers.map((c) => c.name)).toEqual(data['社区卫生']![0]!.covers);
     // the communities are the units on the map: each name finds its code
-    expect(market[0]!.covers.every((c) => c.unit !== null)).toBe(true);
+    expect(clinic[0]!.covers.every((c) => c.unit !== null)).toBe(true);
   });
 
   it('runs the engine’s search here, as an estimate, for a result made before siting existed', () => {
@@ -46,10 +46,10 @@ describe('siting suggestions as pins', () => {
       const ranks = pins.filter((p) => p.cat === cat).map((p) => p.rank);
       expect(ranks).toEqual(ranks.map((_, i) => i + 1));
     }
-    // zj-b's own suggestions cover the task's three; 幼儿园 and 社区卫生, checked later, are estimated here
+    // zj-b stores no 小学 suggestion (the assigned school is the policy): it is estimated here
     const own = b.data.site_suggestions!;
     for (const p of sitePins(b)) expect(p.origin).toBe(own[p.cat] ? 'engine' : 'local');
-    expect(sitePins(b).some((p) => p.cat === '社区卫生' && p.origin === 'local' && !p.verified)).toBe(true);
+    expect(sitePins(b).some((p) => p.cat === '小学' && p.origin === 'local' && !p.verified)).toBe(true);
   });
 });
 
@@ -71,8 +71,10 @@ describe('假如在这里开一家… (estimate)', () => {
       { category: '菜市场', rule_m: 1000, estimator: estimatorFor(b) },
     );
     expect(e.flips.map((f) => f.unit.code)).toEqual(cov.covers);
-    // the engine's own greedy pick covers 6 there; the browser's estimate sees the same place
-    expect(e.flips.length).toBeGreaterThanOrEqual(4);
+    // the engine's own greedy pick covers 张江公馆 and 日月光 there; the browser's estimate sees the same
+    expect(e.flips.map((f) => f.unit.name).sort()).toEqual(
+      [...b.data.site_suggestions!['菜市场']![0]!.covers].sort(),
+    );
     expect(e.routable).toBeGreaterThanOrEqual(e.flips.length);
   });
 

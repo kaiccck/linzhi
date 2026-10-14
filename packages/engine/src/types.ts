@@ -3,7 +3,13 @@
  * (apps/server/src/analyzer.ts) structurally, so the server passes its own emit and AbortSignal in.
  */
 import type { BaiduClient, BaiduService, BaiduTier, QuotaLedger } from '@zoudedao/baidu';
-import type { AnalysisResult, CatchmentList, FacilityExclusion, LngLat } from '@zoudedao/core';
+import type {
+  AnalysisResult,
+  CatchmentList,
+  CommunityReview,
+  FacilityExclusion,
+  LngLat,
+} from '@zoudedao/core';
 
 import type { OfficialList } from './official.js';
 
@@ -117,6 +123,8 @@ export interface EngineDeps {
   catchment?: readonly CatchmentList[];
   /** Curated exclusions (data/official/exclusions.json), applied after cleaning and fusion. */
   exclusions?: readonly FacilityExclusion[];
+  /** Curated verdicts on Baidu's compounds (data/official/community-review.json; core community-review). */
+  communityReviews?: readonly CommunityReview[];
 }
 
 /**
@@ -124,7 +132,7 @@ export interface EngineDeps {
  * what Baidu bills) for routematrix. Defaults per tier in TIER_BUDGETS.
  */
 export interface EngineBudget {
-  /** place/v3 pages for the whole run (facilities + 民生设施 + residential + 买菜替代). */
+  /** place/v3 pages for the whole run (facilities + 民生设施 + 生活服务 + residential + 买菜替代). */
   place: number;
   /** Of `place`, pages kept for the residential (demand point) search. */
   residentialPages: number;
@@ -133,6 +141,11 @@ export interface EngineBudget {
    * stats.facility_stats; 0 skips it. The search of the checked categories gets the rest.
    */
   livelihoodPages: number;
+  /**
+   * Of `place`, pages kept for the 生活服务 searches (中学, 文化, 健身, 银行, 快递, 便利店 in one union,
+   * then 餐饮 on its own) behind stats.facility_stats; 0 skips them.
+   */
+  servicesPages: number;
   /**
    * Of `place`, pages kept for the 买菜替代 search (shops that sell vegetables, for 菜市场 checks that are
    * a gap), spent only when a 菜市场 check is one; 0 skips it. It only gets what `place` leaves beyond

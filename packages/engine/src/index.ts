@@ -30,6 +30,9 @@ export {
   LIVELIHOOD_KEYWORDS,
   livelihoodPois,
   searchLivelihood,
+  searchServices,
+  SERVICE_CATEGORIES,
+  SERVICE_QUERIES,
   toPlaceResult,
 } from './facilities.js';
 export type {
@@ -42,6 +45,8 @@ export type {
   LivelihoodKey,
   LivelihoodSearch,
   PlaceQueryLog,
+  ServiceKey,
+  ServiceSearch,
 } from './facilities.js';
 export { FRESH_GROUPS, FRESH_KEYWORDS, freshPool, runFreshAlternatives } from './fresh.js';
 export type { FreshCounts, FreshOutcome } from './fresh.js';
@@ -62,7 +67,7 @@ export type { FusionResult, MatchRadii, OfficialEntry, OfficialList, OfficialSum
 export { runCatchment } from './catchment.js';
 export type { CatchmentOutcome, CatchmentStats } from './catchment.js';
 export type { Job } from './input.js';
-export { runCoverage, setCategories, statusCounts, worstStatus } from './coverage.js';
+export { runCoverage, setCategories, statusCounts, worstStatus, communityGrayAreas } from './coverage.js';
 export type { CheckSet, CoverageOutcome, LiveCommunity, MatrixFn } from './coverage.js';
 export {
   areaName,
@@ -95,5 +100,5 @@ export type {
 } from './residential.js';
 export { matrixSample, pathLabel, SampleSet, walkedRoute } from './samples.js';
 export type { LiveWalkPath } from './samples.js';
-export { direction8, pathCandidates } from './siting.js';
+export { direction8, pathCandidates, runSiting } from './siting.js';
 export * from './types.js';

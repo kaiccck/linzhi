@@ -1,7 +1,8 @@
 /**
  * Quota budgets per tier and the dry-run estimate (技术设计文档 §4.4). One cold personal-tier analysis
- * may spend at most 12 place pages (6 for the five checked categories, 2 民生设施, 2 residential, 2
- * 买菜替代 — the last only when a 菜市场 check is a gap), 1,030 routematrix routes (seed, refinement,
+ * may spend at most 20 place pages (6 for the five checked categories, 2 民生设施, 8 生活服务 — 3 for
+ * the services union, 5 for restaurants — 2 residential, 2 买菜替代, the last only when a 菜市场 check
+ * is a gap), 1,030 routematrix routes (seed, refinement,
  * the coverage check of five categories with its 买菜替代 routes, siting for five categories, 对口小学),
  * 6 directionlite walks and 1 reverse geocoding call; a typical one spends less because refinement
  * and the coverage check stop early.
@@ -12,19 +13,21 @@ import type { BaiduTier } from '@zoudedao/baidu';
 import { HARD_CATEGORIES } from '@zoudedao/core';
 
 import { DEMAND_RADIUS_M, FACILITY_BUFFER_M, MAX_VERIFY_SITES } from './constants.js';
-import { LIVELIHOOD_CATEGORIES } from './facilities.js';
+import { LIVELIHOOD_CATEGORIES, SERVICE_CATEGORIES, SERVICE_QUERIES } from './facilities.js';
 import { validateInput } from './input.js';
 import type { EngineBudget, EngineInput, EngineScope, EngineService, Stage } from './types.js';
 
 const FACILITY_RADIUS_M = DEMAND_RADIUS_M + FACILITY_BUFFER_M;
 
 export const TIER_BUDGETS: Readonly<Record<BaiduTier, Readonly<EngineBudget>>> = {
-  // 100 place calls a day are the scarcest personal quota: about 8 cold runs (each reserves its 12-page
-  // cap and spends ~10); 5,000 routes cover ~5 runs at the 1,030-route cap, more of the typical ~580
+  // place calls were the scarcest personal quota (100 a day until the 2026-09-29 work order raised it
+  // to 5,000); a cold run reserves its 20-page cap and spends ~16; 5,000 routes cover ~5 runs at the
+  // 1,030-route cap, more of the typical ~580
   personal: {
-    place: 12,
+    place: 20,
     residentialPages: 2,
     livelihoodPages: 2,
+    servicesPages: 8,
     freshPages: 2,
     detailCalls: 5,
     reverse_geocoding: 1,
@@ -40,9 +43,10 @@ export const TIER_BUDGETS: Readonly<Record<BaiduTier, Readonly<EngineBudget>>> =
     communities: 30,
   },
   enterprise: {
-    place: 17,
+    place: 25,
     residentialPages: 3,
     livelihoodPages: 2,
+    servicesPages: 8,
     freshPages: 3,
     detailCalls: 10,
     reverse_geocoding: 1,
@@ -61,12 +65,13 @@ export const TIER_BUDGETS: Readonly<Record<BaiduTier, Readonly<EngineBudget>>> =
 /** Place pages the hard-category search keeps before the 买菜替代 search gets any (the tier's own share). */
 function facilityShare(tier: BaiduTier): number {
   const t = TIER_BUDGETS[tier];
-  return t.place - t.residentialPages - t.livelihoodPages - t.freshPages;
+  return t.place - t.residentialPages - t.livelihoodPages - t.servicesPages - t.freshPages;
 }
 
 /**
  * Tier defaults with overrides applied (non-negative integers). A smaller `place` shrinks the
- * 买菜替代 pages first, then the hard-category search (residential and 民生设施 keep theirs).
+ * 买菜替代 pages first, then the 生活服务, then the hard-category search (residential and 民生设施
+ * keep theirs).
  */
 export function resolveBudget(tier: BaiduTier, overrides: Partial<EngineBudget> = {}): EngineBudget {
   const out = { ...TIER_BUDGETS[tier] };
@@ -75,10 +80,11 @@ export function resolveBudget(tier: BaiduTier, overrides: Partial<EngineBudget> 
   }
   out.residentialPages = Math.min(out.residentialPages, out.place);
   out.livelihoodPages = Math.min(out.livelihoodPages, out.place - out.residentialPages);
-  out.freshPages = Math.min(
-    out.freshPages,
-    Math.max(0, out.place - out.residentialPages - out.livelihoodPages - facilityShare(tier)),
-  );
+  // what `place` leaves beyond the hard-category search's share goes to the 生活服务 first, then to
+  // the 买菜替代: a smaller budget gives up those two, in that order, before the checked categories
+  const spare = () => out.place - out.residentialPages - out.livelihoodPages - facilityShare(tier);
+  out.servicesPages = Math.min(out.servicesPages, Math.max(0, spare()));
+  out.freshPages = Math.min(out.freshPages, Math.max(0, spare() - out.servicesPages));
   out.paths = Math.min(out.paths, out.directionlite_walking);
   return out;
 }
@@ -99,6 +105,7 @@ export function scopedBudget(
     place: 0,
     residentialPages: 0,
     livelihoodPages: 0,
+    servicesPages: 0,
     freshPages: 0,
     detailCalls: 0,
     coverage: 0,
@@ -113,6 +120,7 @@ export type Step =
   | 'locate'
   | 'facilities'
   | 'livelihood'
+  | 'services'
   | 'residential'
   | 'fresh'
   | 'detail'
@@ -127,6 +135,7 @@ export const STEP_SERVICE: Readonly<Record<Step, EngineService>> = {
   locate: 'reverse_geocoding',
   facilities: 'place',
   livelihood: 'place',
+  services: 'place',
   residential: 'place',
   fresh: 'place',
   detail: 'place',
@@ -146,6 +155,7 @@ export const STEP_STAGE: Readonly<Record<Step, Stage>> = {
   locate: 'locate',
   facilities: 'facilities',
   livelihood: 'facilities',
+  services: 'facilities',
   residential: 'coverage',
   fresh: 'coverage',
   detail: 'facilities',
@@ -160,8 +170,12 @@ export const STEP_STAGE: Readonly<Record<Step, Stage>> = {
 export function stepCaps(b: EngineBudget): Record<Step, number> {
   return {
     locate: b.reverse_geocoding,
-    facilities: Math.max(0, b.place - b.residentialPages - b.livelihoodPages - b.freshPages),
+    facilities: Math.max(
+      0,
+      b.place - b.residentialPages - b.livelihoodPages - b.servicesPages - b.freshPages,
+    ),
     livelihood: b.livelihoodPages,
+    services: b.servicesPages,
     residential: b.residentialPages,
     fresh: b.freshPages,
     detail: b.detailCalls,
@@ -197,6 +211,9 @@ export function serviceCaps(b: EngineBudget): Record<EngineService, number> {
 // the 买菜替代 search runs and fills its pages with the 超市 of a city district.
 const EXPECTED_FACILITY_PAGES = 4;
 const EXPECTED_LIVELIHOOD_PAGES = 2;
+// the services union holds ~40 rows within 1.1 km of a 张江 centre (2 pages, research/category-probe),
+// the restaurants ~70–150 (4–5 pages)
+const EXPECTED_SERVICES_PAGES = 6;
 const EXPECTED_FRESH_PAGES = 2;
 // the browser lists ~10–30 POIs within 2.1 km that place/v3/around left out (around 万科翡翠公园:
 // 盒马鲜生, 火星荟森生鲜, 联华超市 among them), most of them 超市: two requests of 10 uids
@@ -250,6 +267,7 @@ export function planQuota(
     locate: caps.locate,
     facilities: Math.min(caps.facilities, EXPECTED_FACILITY_PAGES),
     livelihood: Math.min(caps.livelihood, EXPECTED_LIVELIHOOD_PAGES),
+    services: Math.min(caps.services, EXPECTED_SERVICES_PAGES),
     residential: caps.residential,
     fresh: Math.min(caps.fresh, EXPECTED_FRESH_PAGES),
     detail: Math.min(caps.detail, EXPECTED_DETAIL_CALLS),
@@ -265,6 +283,7 @@ export function planQuota(
     locate: '逆地理编码：中心点所在街道、小区',
     facilities: `地点检索：逐小区检查的${checked}（一次 $ 并集，半径 ${(FACILITY_RADIUS_M / 1000).toFixed(1)} 公里，分页，被挤掉的类别单独检索）；有余量时加查生鲜超市`,
     livelihood: `地点检索：${LIVELIHOOD_CATEGORIES.join('、')}（一次 $ 并集，半径 1.1 公里，最多 2 页），用于圈内设施统计`,
+    services: `地点检索：${SERVICE_CATEGORIES.filter((c) => c !== '餐饮').join('、')}（一次 $ 并集，最多 ${SERVICE_QUERIES[0]!.pages} 页）与餐饮（单独检索，最多 ${SERVICE_QUERIES[1]!.pages} 页），半径 1.1 公里，用于圈内设施统计`,
     residential: '地点检索：住宅区与小区出入口，作为盲区判定的需求点',
     fresh: `地点检索：蔬菜、果蔬、生鲜、超市（一次 $ 并集，半径 ${(FACILITY_RADIUS_M / 1000).toFixed(1)} 公里，最多 ${caps.fresh} 页），只在有菜市场缺口时检索，为缺口小区找判定距离内能买菜的店（买菜替代，只作参考）`,
     detail: `地点详情：地图前端（JSAPI）找到、服务端检索没有返回的设施，按 uid 查询标签后与检索结果一起清洗（每次 10 个，最多 ${caps.detail} 次，只在请求带 browser_pois 时查询）`,

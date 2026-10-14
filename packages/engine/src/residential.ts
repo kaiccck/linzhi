@@ -26,7 +26,16 @@
  *             102 m from 六期, and neighbours (东窑新村 / 华陇小区, 30 m) keep their own names
  */
 import type { PlacePoi } from '@zoudedao/baidu';
-import { normalizeName, phaseNumerals, type LngLat, type LocalFrame, type XY } from '@zoudedao/core';
+import {
+  COMMITTEE_NAME,
+  normalizeName,
+  phaseNumerals,
+  reviewOf,
+  type CommunityReview,
+  type LngLat,
+  type LocalFrame,
+  type XY,
+} from '@zoudedao/core';
 
 import { r1 } from './round.js';
 
@@ -38,8 +47,13 @@ export interface DemandSite {
   name: string;
   /** Baidu uid of the compound POI. */
   uid: string | null;
-  /** Baidu address of the compound POI (often names its 弄, which catchment tables list). */
+  /**
+   * Baidu address of the compound POI (often names its 弄, which catchment tables list); the official
+   * table's spelling where the community review corrects it.
+   */
   address?: string | null;
+  /** The community review says it has no 对口小学 by law (商办产权): why. */
+  no_catchment?: string;
   /** Gate in the local frame. */
   xy: XY;
   /**
@@ -118,6 +132,8 @@ export interface ResidentialOptions {
   max: number;
   /** Same base name farther apart than this is another compound. */
   mergeRadius_m?: number;
+  /** Curated verdicts on Baidu's compounds (core community-review): excluded, no catchment, address. */
+  reviews?: readonly CommunityReview[];
 }
 
 /** One merge or drop of the dedupe rules (numerals, parent, alias), for the explanation. */
@@ -195,6 +211,16 @@ export function residentialDemand(pois: readonly PlacePoi[], opts: ResidentialOp
     const id = poi.uid ?? `${poi.name}@${poi.location.join(',')}`;
     if (seen.has(id)) continue;
     seen.add(id);
+    // not anyone's home: a residents' committee by its name, or what the community review excluded
+    if (COMMITTEE_NAME.test(poi.name.trim())) {
+      dropped.push({ name: poi.name, reason: 'committee' });
+      continue;
+    }
+    const review = reviewOf(opts.reviews ?? [], [poi.uid]);
+    if (review?.action === 'exclude') {
+      dropped.push({ name: poi.name, reason: `reviewed:${review.kind}` });
+      continue;
+    }
     const tag = `${poi.classifiedTag ?? ''};${poi.tag ?? ''}`;
     const kind = RESIDENTIAL_TAG.test(tag)
       ? 'home'
@@ -403,11 +429,15 @@ export function residentialDemand(pois: readonly PlacePoi[], opts: ResidentialOp
         ? { xy: g.xy, bd09: [g.poi.location[0], g.poi.location[1]], source: 'gate_poi' }
         : { xy: main.xy, bd09: [main.poi.location[0], main.poi.location[1]], source: 'location' };
     }
+    const review = reviewOf(opts.reviews ?? [], [main.poi.uid]);
+    // the official name where the review gives one (益江路511弄 → 玉兰香苑二期A块)
+    const name = review?.action === 'name' ? review.official_name! : base;
     sites.push({
-      id: base,
-      name: base,
+      id: name,
+      name,
       uid: main.poi.uid,
-      address: main.poi.address ?? null,
+      address: review?.action === 'address' ? review.address! : (main.poi.address ?? null),
+      ...(review?.action === 'no_catchment' ? { no_catchment: review.reason } : {}),
       xy: [r1(gate.xy[0]), r1(gate.xy[1])],
       label_xy: [r1(main.xy[0]), r1(main.xy[1])],
       bd09: gate.bd09,

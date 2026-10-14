@@ -349,7 +349,7 @@ function AnswerMeta({ a, ctx, aboutOther }: { a: AskAnswer; ctx: RenderCtx; abou
   const g = a.grounding;
   const made =
     a.mode === 'llm'
-      ? `大模型回答 · ${a.model ?? '已配置的模型'}${a.repaired ? '（初稿有数字找不到出处，已按工具结果改写）' : ''}`
+      ? `${modelName(a.model)} 回答${a.repaired ? '（初稿有数字找不到出处，已按工具结果改写）' : ''}`
       : a.fallback
         ? `模板回答（已配置大模型${a.model ? ` ${a.model}` : ''}，这次没有采用它的回答）`
         : '模板回答（未配置大模型）';
@@ -409,7 +409,7 @@ function AnswerMeta({ a, ctx, aboutOther }: { a: AskAnswer; ctx: RenderCtx; abou
     <div className="ask-meta">
       {a.citations.length ? (
         <p className="ask-src">
-          <span className="lbl">依据</span>
+          <span className="lbl">依据 · 点引用查看来源</span>
           {a.citations.map((c) => (
             <span className="src" key={c.id}>
               <CitePlate id={c.id} ctx={ctx} />
@@ -418,7 +418,7 @@ function AnswerMeta({ a, ctx, aboutOther }: { a: AskAnswer; ctx: RenderCtx; abou
           ))}
         </p>
       ) : null}
-      <p className="ask-made">
+      <p className="ask-made" title={a.model ?? undefined}>
         {made}
         {aboutOther ? ` · 按${aboutOther}回答` : ''}
       </p>
@@ -554,7 +554,6 @@ export const AdvisorPanel = memo(function AdvisorPanel({
   model,
   analysisId,
   blocked,
-  advisor,
   samples,
   hidden,
   onHot,
@@ -716,23 +715,8 @@ export const AdvisorPanel = memo(function AdvisorPanel({
     return samples.find((s) => s.id === base)?.name ?? base;
   };
 
-  // who words the answers, and where the numbers come from (they never come from the model)
-  const modeLine =
-    advisor?.mode === 'llm'
-      ? `措辞：${modelName(advisor.model)} · 数字来自体检结果`
-      : advisor?.mode === 'template'
-        ? '模板回答 · 未配置大模型'
-        : null;
-
   return (
     <section className="advisor" id="panel-ask" role="tabpanel" aria-labelledby="tab-ask" hidden={hidden}>
-      {modeLine && !disabled ? (
-        <div className="ask-head">
-          <span className="ask-mode" title={advisor?.model ? `模型 ${advisor.model}` : undefined}>
-            {modeLine}
-          </span>
-        </div>
-      ) : null}
       <div className="ask-scroll" ref={scrollRef}>
         {exchanges.length === 0 ? (
           <div className="ask-intro">
@@ -742,13 +726,7 @@ export const AdvisorPanel = memo(function AdvisorPanel({
                 {blocked}
               </p>
             ) : (
-              <p className="ask-lead">
-                每个数字都标出处
-                <span className="cite num static" aria-hidden="true">
-                  T1
-                </span>
-                ，悬停可以核对。
-              </p>
+              <p className="ask-lead">基于本次体检回答</p>
             )}
             <ul className="ask-suggest" aria-label="可以这样问">
               {suggestions.map((s: Suggestion) => (

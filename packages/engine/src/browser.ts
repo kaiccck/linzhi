@@ -27,7 +27,12 @@ import {
 
 import { LIVELIHOOD_RADIUS_M } from './constants.js';
 import { describeError, isDegradable } from './errors.js';
-import { LIVELIHOOD_CATEGORIES, toPlaceResult, type FacilitySearch } from './facilities.js';
+import {
+  LIVELIHOOD_CATEGORIES,
+  SERVICE_CATEGORIES,
+  toPlaceResult,
+  type FacilitySearch,
+} from './facilities.js';
 import type { Meter } from './meter.js';
 import type { BrowserPoi, EngineClient } from './types.js';
 
@@ -172,6 +177,12 @@ export function withBrowserRows(
   const pois = cleaned.pois.filter((p) => {
     const mine = browser.has(p.uid) && !(p.merged_uids ?? []).some((u) => searched.has(u));
     if (!mine) return true;
+    // the browser tops up the checked categories and the 民生设施; the everyday services (中学 … 餐饮)
+    // have searches of their own, whose completeness a stray row must not blur
+    if (SERVICE_CATEGORIES.includes(p.cat)) {
+      dropped.push({ uid: p.uid, name: p.name, reason: `browser:service ${p.cat}` });
+      return false;
+    }
     if (counted.includes(p.cat) && (p.straight_m ?? 0) > LIVELIHOOD_RADIUS_M) {
       dropped.push({ uid: p.uid, name: p.name, reason: `browser:beyond ${LIVELIHOOD_RADIUS_M} m` });
       return false;

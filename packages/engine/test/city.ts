@@ -489,6 +489,51 @@ export function cityPois(): CityPoi[] {
       });
     }
   }
+  // the everyday services (2026-10-10), as dense as around 申城佳苑 (research/category-probe): ~30 in
+  // the services union — two pages — and 75 restaurants, four pages of the 美食 search
+  const SERVICES: [string, string][] = [
+    ['河西中学', '教育培训;中学'],
+    ['滨河实验中学', '教育培训;中学'],
+    ['河西图书馆', '教育培训;图书馆'],
+    ['滨河图书馆分馆', '教育培训;图书馆'],
+    ['河西社区文化活动中心', '政府机构'],
+    ['乐动健身(河西店)', '运动健身;健身中心'],
+    ['河西市民健身中心', '运动健身;健身中心'],
+    ['滨河体育馆', '运动健身;体育场馆'],
+    ['飞跃健身工作室', '运动健身;健身中心'],
+    ['河东健身房', '运动健身;健身中心'],
+    ['工商银行(河西支行)', '金融;银行'],
+    ['农业银行(滨河支行)', '金融;银行'],
+    ['建设银行(河东支行)', '金融;银行'],
+    ['农商银行(河西支行)', '金融;银行'],
+    ...Array.from({ length: 8 }, (_, k): [string, string] => [
+      `菜鸟驿站(横${k + 1}路店)`,
+      '生活服务;物流公司',
+    ]),
+    ...Array.from({ length: 8 }, (_, k): [string, string] => [`全家便利店(纵${k + 1}路店)`, '购物;便利店']),
+  ];
+  SERVICES.forEach(([name, tag], k) => {
+    const a = (k * 137.5 * Math.PI) / 180;
+    const r = 180 + ((k * 263) % 820);
+    const xy: XY = [Math.round(r * Math.cos(a)), Math.round(r * Math.sin(a))];
+    if (Math.abs(xy[0] - 450) < 60) xy[0] += 140;
+    pois.push({ uid: `sv${k}`, name, tag, xy });
+  });
+  const FOOD = ['面馆', '小吃', '饺子馆', '川菜馆', '本帮菜', '烧烤', '火锅', '早点'];
+  let food = 0;
+  for (let gy = -990; gy <= 990 && food < 75; gy += 180) {
+    for (let gx = -990; gx <= 990 && food < 75; gx += 180) {
+      const xy: XY = [gx + 30, gy + 30];
+      if (Math.hypot(xy[0], xy[1]) > 1040 || Math.abs(xy[0] - 450) < 60) continue;
+      pois.push({
+        uid: `fd${food}`,
+        name: `河西${FOOD[food % FOOD.length]}${food}号`,
+        tag: '美食;中餐厅',
+        xy,
+      });
+      food++;
+    }
+  }
   // the other compounds on a jittered 270 m lattice inside the demand radius, clear of the ones above
   // and of the river. The nearest 28 are kept: with the placed ones, 33 gates lie within 1100 m, so
   // the cap of 30 bites, and the 住宅区 group fills 36 of the two residential pages' 40 rows, leaving

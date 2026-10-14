@@ -68,7 +68,7 @@ describe('official facility lists', () => {
     expect(health.entries.find((e) => e.name === '张江社区卫生服务中心')).toMatchObject({
       address: '益江路458号',
     });
-    expect(data.catchments.map((c) => c.id)).toEqual(['pudong-catchment-2025']);
+    expect(data.catchments.map((c) => c.id)).toEqual(['pudong-catchment-2025', 'pudong-catchment-2026']);
     const catchment = data.catchments[0]!;
     expect(catchment.coverage?.towns).toEqual(['张江镇']);
     expect(catchment.schools.reduce((n, s) => n + s.entries.length, 0)).toBe(232);
@@ -154,6 +154,32 @@ describe('official facility lists', () => {
         }),
       );
       writeFileSync(join(dir, 'd.json'), JSON.stringify({ kind: 'weird', id: 'w' }));
+      writeFileSync(
+        join(dir, 'e.json'),
+        JSON.stringify({
+          kind: 'community_review',
+          entries: [
+            {
+              uid: 'c1',
+              name: '江夏社区',
+              action: 'exclude',
+              kind: 'committee',
+              reason: 'r',
+              source: 's',
+              date: 'd',
+            },
+            {
+              uid: 'c2',
+              name: '某公寓',
+              action: 'address',
+              kind: 'address',
+              reason: 'r',
+              source: 's',
+              date: 'd',
+            },
+          ],
+        }),
+      );
       const warnings: string[] = [];
       const data = loadOfficialData(dir, (m) => warnings.push(m));
       expect(data).toEqual({
@@ -163,8 +189,12 @@ describe('official facility lists', () => {
           expect.objectContaining({ uid: 'u' }),
           expect.objectContaining({ name_pattern: '^前置仓' }),
         ],
+        communityReviews: [expect.objectContaining({ uid: 'c1' })],
       });
-      expect(warnings).toHaveLength(6);
+      expect(warnings).toHaveLength(7);
+      expect(warnings.join('\n')).toMatch(
+        /小区核实清单 e.json 第 2 条：action 为 address 时要给出官方表的地址/,
+      );
       expect(warnings.every((w) => /跳过/.test(w))).toBe(true);
       expect(warnings.join('\n')).toMatch(/第 3 条：name_pattern 不是有效的正则表达式/);
     } finally {

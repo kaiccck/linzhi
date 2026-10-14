@@ -455,7 +455,7 @@ export function MapOverlay(props: Props) {
                 ['--land' as string]: `${Math.round(Math.min(420, Math.hypot(x - L.here.x, y - L.here.y) * 0.9))}ms`,
               }}
               title={unit.name + detail}
-              aria-label={`${unit.code} ${unit.name}${word ? `（${word}）` : ''}${props.onPick ? '，画出步行路线' : ''}`}
+              aria-label={`${unit.code} ${unit.name}${word ? `（${word}）` : ''}${props.onPick ? (l === 'pending' ? '，查看待核原因' : '，画出步行路线') : ''}`}
               aria-pressed={props.onPick ? props.selected === unit.code : undefined}
               onClick={props.onPick ? () => props.onPick!(unit.code) : undefined}
               onMouseEnter={() => onHot(unit.code)}

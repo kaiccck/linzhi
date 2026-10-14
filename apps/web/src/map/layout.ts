@@ -12,7 +12,7 @@
  */
 import { HARD_CATEGORIES, type HardCategory, type XY } from '@zoudedao/core';
 import type { View } from '../geo/view.js';
-import { circleR, poiName, spotOf, type IconId, type Model, type Unit } from '../model/derive.js';
+import { circleR, poiName, spotOf, STAT_ICON, type IconId, type Model, type Unit } from '../model/derive.js';
 import type { FacilityMark, StatCategory } from '../model/facilities.js';
 
 export interface Rect {
@@ -187,6 +187,11 @@ export interface LayoutInput {
   cards?: (CardSpec & { w: number; h: number })[];
   /** the measured route a card quotes: its dots are soft obstacles */
   route?: readonly (readonly number[])[] | null;
+  /**
+   * a picked community's own straight circle (its rule distance around its point): it takes the
+   * circle's tag, named for the community, while the centre's circle steps aside
+   */
+  ring?: { at: XY; r: number; code: string } | null;
   /**
    * Baidu's logo: the band it sits in (its top edge, above the 走一遍 card) and its size. The layout
    * slides it along that band to the first stretch no unit code covers — the logo must stay visible
@@ -664,16 +669,22 @@ export function layoutOverlay(inp: LayoutInput): OverlayLayout {
     }
   }
 
-  // 6 · the circle's own tag, on its north-west arc, at the profile's radius
+  // 6 · the circle's own tag, on its north-west arc, at the profile's radius; with a community picked,
+  //     its own straight circle is the one on the map and the tag names it (an unnamed circle reads
+  //     as nothing)
   let circleTag: OverlayLayout['circleTag'] = null;
-  if (circle && !narrow && !playing) {
-    const R = circleR(model, scale);
-    const text = `片区中心 · 直线 15′ 圈 · ${Math.round(R).toLocaleString('en-US')} m`;
+  const ring = inp.ring ?? null;
+  if ((circle || ring) && !narrow && !playing) {
+    const [cx, cy] = ring ? ring.at : [0, 0];
+    const R = ring ? ring.r : circleR(model, scale);
+    const text = ring
+      ? `${ring.code} · 直线 ${ring.r % 1000 === 0 ? `${ring.r / 1000} 公里` : `${Math.round(ring.r)} 米`}`
+      : `片区中心 · 直线 15′ 圈 · ${Math.round(R).toLocaleString('en-US')} m`;
     const w = textWidth(text, 12) + 18;
-    for (const b of [312, 322, 302, 332, 292, 238, 228, 248, 45, 58, 135, 148, 20]) {
+    for (const b of [312, 322, 302, 332, 292, 238, 228, 248, 45, 58, 135, 148, 20, 0, 180, 90, 270]) {
       const a = (b * Math.PI) / 180;
-      const x = v.x(Math.sin(a) * R);
-      const y = v.y(Math.cos(a) * R);
+      const x = v.x(cx + Math.sin(a) * R);
+      const y = v.y(cy + Math.cos(a) * R);
       const r = centered(x, y, w, 22);
       if (!inside(r, W, H, 8) || taken.some((t) => hit(r, t))) continue;
       circleTag = { x, y, text };
@@ -786,20 +797,7 @@ export function labelBoxes(L: OverlayLayout): Rect[] {
   });
 }
 
-const ICON: Record<StatCategory, IconId> = {
-  小学: 'pg-school',
-  幼儿园: 'pg-kinder',
-  菜市场: 'pg-market',
-  生鲜超市: 'pg-fresh',
-  超市: 'pg-super',
-  药店: 'pg-pharmacy',
-  社区卫生: 'pg-clinic',
-  养老: 'pg-elder',
-  公交: 'pg-bus',
-  地铁: 'pg-metro',
-  公园: 'pg-park',
-};
-const iconOf = (cat: StatCategory) => ICON[cat];
+const iconOf = (cat: StatCategory): IconId => STAT_ICON[cat];
 
 /* ---------------- finding cards ---------------- */
 

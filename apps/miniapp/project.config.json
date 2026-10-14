@@ -1,0 +1,8 @@
+{
+  "miniprogramRoot": "dist/",
+  "projectname": "zoudedao-miniapp",
+  "description": "邻至：15 分钟生活圈体检（微信小程序）",
+  "appid": "wx08246ff4b78cad10",
+  "setting": { "urlCheck": false, "es6": false, "enhance": false, "postcss": false, "minified": false },
+  "compileType": "miniprogram"
+}

@@ -111,7 +111,10 @@ describe('FacilityView rendering', () => {
   it('is a page of its own with the walk and the circle side by side for every category', () => {
     expect(html).toContain('id="panel-fac" aria-label="中心周边设施"');
     expect(html.match(/class="fac-row( on)?"/g)).toHaveLength(s.rows.length);
-    for (const r of s.rows) expect(html).toContain(`aria-label="${rowLabel(r, s.radiusM)}。在地图上显示"`);
+    // names are escaped in the markup (lisa舞蹈&成人瑜伽)
+    const esc = (t: string) => t.replace(/&/g, '&amp;');
+    for (const r of s.rows)
+      expect(html).toContain(`aria-label="${esc(rowLabel(r, s.radiusM))}。在地图上显示"`);
   });
 
   it('ticks the categories the map shows, and only those', () => {
@@ -138,7 +141,10 @@ describe('FacilityView rendering', () => {
     expect(html).toContain(
       `从片区中心出发，直线画的 15 分钟圈里有 ${s.circle} 处设施，15 分钟步行只走得到 ${s.walk} 处。`,
     );
-    expect(html).toContain('直线圈半径 <span class="num n">1,053 m</span>');
+    // the bars carry the difference and the map's circle tag the radius: no note restating them; the
+    // rows still say the radius to a screen reader
+    expect(html).not.toContain('直线圈半径');
+    expect(html).toContain('直线 1053 米的圈里');
   });
 
   it('names the elder circle’s radius when the elder is chosen', () => {
@@ -153,7 +159,7 @@ describe('FacilityView rendering', () => {
         onShow={noop}
       />,
     );
-    expect(e).toContain('圈半径 <span class="num n">810 m</span>');
+    expect(e).toContain('直线 810 米的圈里');
     expect(e).toContain('老人 <span class="num">3.2</span> km/h');
   });
 

@@ -1,0 +1,119 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex: none;
+}
+.chip-s {
+  height: 19px;
+  padding: 0 5px;
+  font-size: 11px;
+  border-radius: 5px;
+}
+.chip-ok {
+  color: var(--ok-text);
+  background: var(--ok-tint);
+}
+.chip-edge {
+  color: #8a5f0a;
+  background: var(--edge-tint);
+}
+.chip-pseudo {
+  color: var(--pseudo-text);
+  background: var(--pseudo-tint);
+}
+.chip-blind {
+  color: #fff;
+  background: var(--blind);
+}
+.chip-pending {
+  color: var(--ink-3);
+  background: var(--fill);
+}
+
+.sec-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 0 10px;
+}
+.sec-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.sec-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+.sec-note {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.sec-action {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 14px;
+  color: var(--blue);
+  flex: none;
+  padding-bottom: 1px;
+}
+
+.seg {
+  display: flex;
+  padding: 2px;
+  gap: 2px;
+  border-radius: 9px;
+  background: var(--fill);
+}
+.seg-b {
+  flex: 1;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.seg-b.on {
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+}
+
+.back-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  margin: -4px 0 2px;
+}
+.back {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -4px;
+  font-size: 15px;
+  color: var(--blue);
+}
+
+/* a check that does not apply (商办 compound, no 对口小学): stated, not waiting */
+.chip-na {
+  color: var(--ink-3);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}

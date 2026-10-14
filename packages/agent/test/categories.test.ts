@@ -68,11 +68,11 @@ describe('five checked categories (the samples as stored)', () => {
     expect(Object.keys(o.by_category)).toEqual(FIVE);
     expect(Object.keys(o.within_15min)).toEqual(FIVE);
     expect(Object.keys(o.headline.rule_m)).toEqual(FIVE);
-    expect(o.headline).toMatchObject({ communities: 12, categories: 5, checks: 60, walking_gaps: 9 });
+    expect(o.headline).toMatchObject({ communities: 12, categories: 5, checks: 60, walking_gaps: 3 });
     expect(o.by_category.幼儿园).toMatchObject({ 覆盖: 12, 伪覆盖: 0, 盲区: 0, 临界: 0, 待核实: 0 });
     expect(o.by_category.社区卫生).toMatchObject({ 覆盖: 11, 伪覆盖: 1, 盲区: 0, 临界: 0, 待核实: 0 });
     expect(r.summary).toContain(
-      '各类设施（按小区计，已核实）——幼儿园：覆盖 12、伪覆盖 0、盲区 0；小学：覆盖 6、伪覆盖 5、盲区 1；',
+      '各类设施（按小区计，已核实）——幼儿园：覆盖 12、伪覆盖 0、盲区 0；小学：覆盖 0、伪覆盖 0、盲区 0、待核实 12；',
     );
     expect(r.summary).toContain('；社区卫生：覆盖 11、伪覆盖 1、盲区 0。');
     expect(r.facts).toContainEqual({ label: '社区卫生伪覆盖数（已核实）', value: 1, unit: '个' });
@@ -80,7 +80,7 @@ describe('five checked categories (the samples as stored)', () => {
     const e = await run('analyze_life_circle', { sample_id: 'zj-a', profile: 'elder' }, ctx);
     expect(Object.keys((e.data as Overview).within_15min)).toEqual(FIVE);
     expect(e.summary).toContain(
-      '15 分钟内能走到的小区：幼儿园 12 个、小学 5 个、菜市场 7 个、药店 12 个、社区卫生 9 个。',
+      '15 分钟内能走到的小区：幼儿园 12 个、小学 0 个（另 12 个待核实）、菜市场 7 个、药店 12 个、社区卫生 9 个。',
     );
   });
 
@@ -90,9 +90,9 @@ describe('five checked categories (the samples as stored)', () => {
     const d = all.data as GapsData;
     expect(d.checked_categories).toEqual(FIVE);
     expect(Object.keys(d.rule_m)).toEqual(FIVE);
-    expect(d.counts).toMatchObject({ checks: 60, gaps: 9, pseudo: 8, blind: 1, borderline: 0 });
-    expect(new Set(d.gaps.map((g) => g.category))).toEqual(new Set(['小学', '菜市场', '社区卫生']));
-    expect(d.communities_with_gaps).toHaveLength(8);
+    expect(d.counts).toMatchObject({ checks: 60, gaps: 3, pseudo: 3, blind: 0, borderline: 0 });
+    expect(new Set(d.gaps.map((g) => g.category))).toEqual(new Set(['菜市场', '社区卫生']));
+    expect(d.communities_with_gaps).toHaveLength(3);
     expect(d.communities_with_gaps.find((c) => c.community === '虹御公寓')!.missing).toEqual(['社区卫生']);
     expect(all.summary).toContain('5 类设施，判定距离 步行 ≤ 1,000 m');
     const hongyu = d.by_community.find((c) => c.community === '虹御公寓')!;
@@ -111,13 +111,9 @@ describe('five checked categories (the samples as stored)', () => {
     expect(kinder.summary).toContain('幼儿园，判定距离 步行 ≤ 1,000 m：12 个小区中，没有已核实的缺口');
     const yulan = (await run('list_service_gaps', { analysis_id: 'zj-b', category: '幼儿园' }, ctx))
       .data as GapsData;
-    expect(yulan.counts).toMatchObject({ checks: 28, gaps: 4, pseudo: 4, blind: 0, borderline: 1 });
-    expect(yulan.gaps.map((g) => [g.community, g.borderline])).toEqual([
-      ['创新公寓', false],
-      ['东窑新村', false],
-      ['华陇小区', false],
-      ['日月光集团-员工生活区', true],
-    ]);
+    // 14 compounds after the community review (data/official/community-review.json)
+    expect(yulan.counts).toMatchObject({ checks: 14, gaps: 1, pseudo: 1, blind: 0, borderline: 1 });
+    expect(yulan.gaps.map((g) => [g.community, g.borderline])).toEqual([['日月光集团-员工生活区', true]]);
 
     const one = await run('list_service_gaps', { analysis_id: 'zj-a', community: '虹御公寓' }, ctx);
     expect(one.summary).toContain('幼儿园能走到：浦东新区浦电幼儿园，步行 396 m');
@@ -151,11 +147,11 @@ describe('five checked categories (the samples as stored)', () => {
     expect(clinic.facts).toContainEqual({ label: '新增设施数', value: 1, unit: '处' });
     const kinder = await run(
       'simulate_facility',
-      { analysis_id: 'zj-b', category: '幼儿园', near_community: '创新公寓' },
+      { analysis_id: 'zj-b', category: '幼儿园', near_community: '日月光集团-员工生活区' },
       ctx,
     );
     expect(kinder.summary).toContain('新增 1 所幼儿园');
-    expect((kinder.data as SimulateData).counts).toMatchObject({ newly_covered: 3, still_gap: 1 });
+    expect((kinder.data as SimulateData).counts).toMatchObject({ newly_covered: 1, still_gap: 0 });
     // a checked category without gaps: nothing to fix, said as such
     const none = await run(
       'simulate_facility',
@@ -170,7 +166,7 @@ describe('five checked categories (the samples as stored)', () => {
     const md = ((await run('export_report', { analysis_id: 'zj-a' }, ctx)).data as ReportData)
       .content as string;
     expect(md.split('\n')[2]).toContain(
-      '有 8 个步行 1 km 内缺少至少一类必需设施（幼儿园、小学、菜市场、药店或社区卫生）',
+      '有 3 个步行 1 km 内缺少至少一类必需设施（幼儿园、小学、菜市场、药店或社区卫生）',
     );
     const checks = section(md, '## 二、');
     expect(checks.startsWith('## 二、12 个小区 × 5 类必需设施')).toBe(true);
@@ -188,12 +184,13 @@ describe('five checked categories (the samples as stored)', () => {
     expect(siting).toContain('- **药店**：没有已核实的缺口，暂不需要新增。');
     const model = buildReportModel(await ctx.backend.getAnalysis('zj-b'), 'zj-b');
     expect(model.siting.map((s) => s.category)).toEqual(FIVE);
-    // zj-b stores suggestions for the task's three only: the added ones are estimated, never "none"
+    // zj-b stores the suggestions searched again after the community review (幼儿园, 菜市场,
+    // 社区卫生); 小学 is never a stored suggestion (the assigned school is the policy), so estimated
     expect(Object.fromEntries(model.siting.map((s) => [s.category, s.source]))).toMatchObject({
-      幼儿园: 'estimated',
-      小学: 'analysis',
+      幼儿园: 'analysis',
+      小学: 'estimated',
       菜市场: 'analysis',
-      社区卫生: 'estimated',
+      社区卫生: 'analysis',
     });
 
     const fc = (
@@ -209,7 +206,7 @@ describe('five checked categories (the samples as stored)', () => {
       missing_count: 1,
     });
     const sites = fc.features.filter((f) => f.properties.kind === 'site_suggestion');
-    expect(new Set(sites.map((f) => f.properties.category))).toEqual(new Set(['小学', '菜市场', '社区卫生']));
+    expect(new Set(sites.map((f) => f.properties.category))).toEqual(new Set(['菜市场', '社区卫生']));
     const colour = (cat: string) =>
       new Set(
         fc.features
@@ -228,20 +225,20 @@ describe('five checked categories (the samples as stored)', () => {
     const d = r.data as CompareData;
     expect(d.common_categories).toEqual(THREE);
     const [five, three] = d.rows;
-    expect(five).toMatchObject({ checked_categories: FIVE, walking_gaps: 44, common_gaps: 19 });
+    expect(five).toMatchObject({ checked_categories: FIVE, walking_gaps: 16, common_gaps: 5 });
     expect(Object.keys(five!.gaps_by_category)).toEqual(FIVE);
-    expect(five!.gaps_by_category).toMatchObject({ 幼儿园: 4, 社区卫生: 21 });
-    expect(three).toMatchObject({ checked_categories: THREE, walking_gaps: 8, common_gaps: 8 });
+    expect(five!.gaps_by_category).toMatchObject({ 幼儿园: 1, 社区卫生: 10 });
+    expect(three).toMatchObject({ checked_categories: THREE, walking_gaps: 2, common_gaps: 2 });
     expect(Object.keys(three!.gaps_by_category)).toEqual(THREE);
-    expect(r.summary).toContain('逐小区检查幼儿园、小学、菜市场、药店、社区卫生，步行已核实缺口 44 个');
+    expect(r.summary).toContain('逐小区检查幼儿园、小学、菜市场、药店、社区卫生，步行已核实缺口 16 个');
     expect(r.summary).toContain(
-      '各分析逐小区检查的设施类别不同，已核实缺口总数不能直接比较——只看共同检查的小学、菜市场、药店：玉兰香苑片区 19 个、申城佳苑片区 8 个，最多的是 玉兰香苑片区。',
+      '各分析逐小区检查的设施类别不同，已核实缺口总数不能直接比较——只看共同检查的小学、菜市场、药店：玉兰香苑片区 5 个、申城佳苑片区 2 个，最多的是 玉兰香苑片区。',
     );
     expect(r.summary).not.toContain('已核实步行缺口最多的是');
     // the same categories on both sides: totals compare as before
     const same = await run('compare_sites', { analysis_ids: ['zj-a', 'zj-a~elder'] }, ctx);
     expect((same.data as CompareData).common_categories).toEqual(FIVE);
-    expect(same.summary).toContain('各分析的已核实步行缺口数相同（都是 9 个）');
+    expect(same.summary).toContain('各分析的已核实步行缺口数相同（都是 3 个）');
   });
 
   it('the advisor reads 看病 and kindergarten questions as checks of their own', async () => {

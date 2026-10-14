@@ -16,3 +16,5 @@ export * from './facility-stats.js';
 export * from './names.js';
 export * from './exclusions.js';
 export * from './catchment.js';
+export * from './school-check.js';
+export * from './community-review.js';

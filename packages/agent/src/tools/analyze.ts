@@ -132,7 +132,8 @@ export const analyzeLifeCircle = defineTool<typeof analyzeSchema, AnalyzeData>({
   description:
     '对一个社区做 15 分钟步行生活圈体检，或读取已有结果，返回 analysis_id 和核心数字：15 分钟步行可达面积与直线圆面积、' +
     '画圆高估倍数、15 分钟有效步行半径中位数、逐小区检查的各类设施在已核实检查中的覆盖/伪覆盖/盲区数（by_category）、待核实数，' +
-    '以及“画圆法找到的缺口 vs 实测步行核实的缺口”；' +
+    '以及“画圆法找到的缺口 vs 实测步行核实的缺口”；体检评分 score（walk 实测评分 0–100、circle 按直线距离算的评分、grade 等级、' +
+    'coverage 各类设施覆盖率 walk_pct/circle_pct：走得到的小区占已核实小区的百分比；评分是各类覆盖率的平均）；' +
     `圈内设施统计 facilities.rows（从分析中心出发统计清单里的设施：逐小区检查的类别以及${COUNTED_ONLY.join('、')}；清单数 found、直线 15 分钟圆内 circle、` +
     '15 分钟步行可达 walk、最近一处 nearest 与步行分钟 nearest_min；complete=false 表示清单被检索页数截断，数量是下限），' +
     '以及灰色区域 gray_areas（缺至少 n 类必需设施或有伪覆盖的范围：面积、块数、涉及小区）。' +

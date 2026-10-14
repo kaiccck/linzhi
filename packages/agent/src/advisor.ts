@@ -294,19 +294,27 @@ function gapsAnswer(
     const parts = cats.map((cat) => {
       const gap = data.gaps.find((g) => g.category === cat);
       if (gap)
-        return `${cat}步行 ${fmtNumber(gap.rule_m)} m 内走不到（${gap.status}）：${gap.via ? `最近能走到的是${gap.via}，` : ''}${walk(gap)}`;
+        return `${cat}步行 ${fmtNumber(gap.rule_m)} m 内走不到（${gap.status}）：${gap.via ? `${cat === '小学' ? '对口学校是' : '最近能走到的是'}${gap.via}，` : ''}${walk(gap)}`;
       const ok = data.covered.find((c) => c.category === cat);
       if (ok)
         return `${cat}能走到：${ok.via ?? '最近的设施'}，步行 ${m1(ok.route_m)} m，约 ${m1(ok.walk_min)} 分钟`;
       return data.pending.some((p) => p.category === cat) ? `${cat}待核实` : `${cat}没有检查结果`;
     });
-    const verdict = n.gaps ? '不太方便' : data.pending.length ? '已核实的部分方便' : '方便';
+    const verdict = n.gaps
+      ? '不太方便'
+      : data.pending.length
+        ? data.covered.length
+          ? '已核实的部分方便'
+          : '尚待核实'
+        : '方便';
     lead = `${verdict}：${community}${parts.length > 1 ? '——' : '的'}${parts.join('；')} [${cite}]。`;
   } else if (category) {
     const rule = fmtNumber(data.rule_m[category]);
     lead = n.gaps
       ? `不太方便：${data.name} ${n.checks} 个小区中，有 ${n.gaps} 个步行 ${rule} m 内走不到${category}（伪覆盖 ${n.pseudo}、盲区 ${n.blind}）[${cite}]。`
-      : `比较方便：${data.name} 已核实的检查里，没有步行 ${rule} m 内走不到${category}的小区 [${cite}]。`;
+      : n.pending === n.checks
+        ? `${data.name}的${category}尚待核实，暂不能判断步行是否方便 [${cite}]。`
+        : `比较方便：${data.name} 已核实的检查里，没有步行 ${rule} m 内走不到${category}的小区 [${cite}]。`;
   } else {
     lead = n.gaps
       ? `${data.name} 按实测步行距离有 ${n.gaps} 个已核实的服务缺口（伪覆盖 ${n.pseudo}、盲区 ${n.blind}），涉及 ${data.communities_with_gaps.length} 个小区 [${cite}]。`
@@ -327,7 +335,7 @@ function gapsAnswer(
   }
   if (data.pending.length) {
     bullets.push(
-      `待核实、不计入缺口：${data.pending.map((p) => `${p.community}的${p.category}`).join('、')}——还有更近的设施没有算路 [${cite}]。`,
+      `待核实、不计入缺口：${data.pending.map((p) => `${p.community}的${p.category}（${p.reason}）`).join('、')} [${cite}]。`,
     );
   }
   return { lead, bullets };
@@ -618,12 +626,12 @@ export function systemPrompt(available: string, current?: string): string {
     '2. 问“差多少、少了多少、占几成”时，并列写出工具里的两个原值；工具已经算好的倍数、比例、超出距离（如 overstate_x、reach_share_pct、excess_m）可以直接引用。',
     '3. 每一句含数字的话（以“。”结尾的一句，或列表的一行）末尾都要标注数字来自哪个工具结果，如“……1.857 km² [T1]。”，编号见工具结果的 "id"；第一行的结论也一样。',
     '4. 历史对话里的数字和 [T#] 编号只属于那一轮：本轮要用，就重新调用工具，本轮的编号从 T1 重新开始。',
-    '5. 工具没有的数据（综合评分、等级、排名、房价、人口等）不要编造，也不要自己给出“优秀、中等偏弱”之类的评级：直说现有工具没有这项数据，再给出相关的实测指标。',
+    '5. 体检评分只引用 analyze_life_circle 的 score：walk 是实测评分、circle 是按直线距离算的评分、grade 是等级（≥90 良好、≥75 基本达标、≥60 需关注、其余待改善），coverage 是各类设施的覆盖率（走得到的小区 ÷ 已核实的小区）；评分＝各类覆盖率的平均。工具没有的数据（排名、房价、人口等）不要编造，也不要自己给出别的评级：直说现有工具没有这项数据，再给出相关的实测指标。',
     '',
     '## 口径',
-    '6. verified=false 的检查是“待核实”，不是缺口：不能算进伪覆盖或盲区，也不能说成走不到。',
+    '6. verified=false 的检查是“待核实”，不是缺口：不能算进伪覆盖或盲区，也不能说成走不到。小学一项标为“不适用”的是商办产权的小区（没有对口小学），既不是缺口，也不是待核实。',
     '7. simulate_facility 的结果都是估算（L̂）：回答以“估算（未经实测核验）：”开头，并提醒落地前需要实测核验。',
-    '8. 术语：伪覆盖＝直线距离在判定距离内、实际步行超出；盲区＝直线距离就已超出；临界＝步行距离与判定距离相差不超过 50 m。',
+    '8. 术语：伪覆盖＝直线距离在判定距离内、实际步行超出；盲区＝直线距离就已超出；临界＝步行距离与判定距离相差不超过 50 m。界面上把伪覆盖叫“绕路太远”、盲区叫“直线也远”：回答里用这两个说法，第一次出现时括号注明（伪覆盖）（盲区）。',
     '9. 问到老人时用老年人画像：在 analysis_id 后加 ~elder（如 zj-a~elder），所有工具都可以直接使用它。',
     `10. 体检的范围：list_service_gaps 逐个小区核对各类设施能否在判定距离内步行走到，核对了哪些见工具结果的 checked_categories——${CHECKED_SCOPE}；分析没有核对的类别不能说成“没有缺口”，要说明这份分析没有逐小区检查它。圈内设施统计（analyze_life_circle 的 facilities）按从分析中心出发的步行时间统计清单里的设施，除了逐小区检查的类别，还统计${COUNTED_ONLY.join('、')}。“看病”看社区卫生和药店，没有医院的数据。`,
     '10a. 菜市场缺口可能带 alt（买菜替代：判定距离内步行能到的能买菜的店及步行距离）：它不算覆盖，缺口仍是缺口，任何计数都不变；只能写成“可在××买菜（步行 ×× m）”，alt 为 null 就说判定距离内步行也没有能买菜的店。',

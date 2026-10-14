@@ -61,14 +61,12 @@ export function RunBoard({
   stream,
   model,
   note,
-  onCancel,
 }: {
   label: string;
   stream: StreamState;
   model: StreamModel;
   /** replay / coordinate conversion notes */
   note: string | null;
-  onCancel(): void;
 }) {
   const { stage } = stream;
   const matrix = stream.quota['routematrix_walking'];
@@ -76,8 +74,9 @@ export function RunBoard({
     <section className="run" aria-labelledby="run-h">
       <header className="run-head">
         <h1 id="run-h">{label}</h1>
-        <p role="status">
-          正在体检{stage ? ` · ${stage.message}` : ''}
+        {/* the stage itself is said on the map's card (with its 取消), not twice */}
+        <p>
+          正在体检
           {note ? ` · ${note}` : ''}
         </p>
         <span className="progress" aria-hidden="true">
@@ -106,17 +105,7 @@ export function RunBoard({
           </span>
         </li>
       </ul>
-      <p className="run-reach">
-        <span className="num">15′</span> 可达范围目前{' '}
-        {model.areaKm2 === null ? (
-          '还没有算出'
-        ) : (
-          <>
-            <b className="num">{model.areaKm2.toFixed(2)}</b> km²
-          </>
-        )}
-        ，直线圈 <span className="num">{((Math.PI * model.r15 ** 2) / 1e6).toFixed(2)}</span> km²。
-      </p>
+      {/* the reach so far is the chart's own last bar, against the circle's line */}
       {stream.areas.length ? (
         <ReachSteps areas={stream.areas} circleKm2={(Math.PI * model.r15 ** 2) / 1e6} />
       ) : null}
@@ -136,9 +125,6 @@ export function RunBoard({
           </>
         ) : null}
       </p>
-      <button type="button" className="btn" onClick={onCancel}>
-        取消体检
-      </button>
     </section>
   );
 }

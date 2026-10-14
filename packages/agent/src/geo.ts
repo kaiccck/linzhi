@@ -23,6 +23,7 @@ import {
   facilityTimer,
   frameOf,
   grayLayers,
+  isNotApplicable,
   isPending,
   isWalkGap,
   profileOf,
@@ -145,6 +146,7 @@ const STATUS_COLOR: Record<string, string> = {
   盲区: '#1F1F1F',
   覆盖: '#1446B0',
   待核实: '#8A8A8A',
+  不适用: '#BBBBBB',
 };
 
 export interface IsochroneOptions {
@@ -249,7 +251,7 @@ function communityProperties(rows: CheckRow[]): Record<string, unknown> {
   const pending: string[] = [];
   let worst = '覆盖';
   for (const { category, check } of rows) {
-    const status = isPending(check) ? '待核实' : check.status_main;
+    const status = isNotApplicable(check) ? '不适用' : isPending(check) ? '待核实' : check.status_main;
     props[`${category}_status`] = status;
     props[`${category}_verified`] = !isPending(check);
     props[`${category}_borderline`] = check.borderline;
@@ -257,7 +259,7 @@ function communityProperties(rows: CheckRow[]): Record<string, unknown> {
     props[`${category}_route_m`] = check.route_m;
     const via = viaName(check);
     if (via) props[`${category}_via`] = via;
-    if (isPending(check)) pending.push(category);
+    if (isPending(check) && !isNotApplicable(check)) pending.push(category);
     if (isWalkGap(check)) missing.push(category);
     if ((STATUS_RANK[status] ?? 0) > (STATUS_RANK[worst] ?? 0)) worst = status;
   }

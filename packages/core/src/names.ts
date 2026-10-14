@@ -90,11 +90,20 @@ function chineseNumber(s: string): number | null {
   return m[2] ? (m[1] ? digit(m[1]) : 1) * 10 + digit(m[3]) : digit(m[1]);
 }
 
-// a separator, an optional 第, then the number (not the tail of a longer one) and what it counts
-const PHASE_NUMERAL = new RegExp(
-  String.raw`[-－—_\s]*第?(?:(?<![0-9])([0-9]{1,3})|(?<![${CN_DIGITS}十])([${CN_DIGITS}十]{1,3})|(?<![A-Za-z])(I{1,3}|IV|VI|V))(期|区|组|块)`,
-  'giu',
-);
+// a separator, an optional 第, then the number (not the tail of a longer one) and what it counts.
+// Built on first use: an engine without lookbehind (the mini program on iOS before 16.4) must not
+// fail the whole bundle at load; it gets the same pattern without the "not the tail" guards.
+let phaseNumeral: RegExp | null = null;
+function phaseRe(): RegExp {
+  if (phaseNumeral) return phaseNumeral;
+  const guarded = String.raw`[-－—_\s]*第?(?:(?<![0-9])([0-9]{1,3})|(?<![${CN_DIGITS}十])([${CN_DIGITS}十]{1,3})|(?<![A-Za-z])(I{1,3}|IV|VI|V))(期|区|组|块)`;
+  try {
+    phaseNumeral = new RegExp(guarded, 'giu');
+  } catch {
+    phaseNumeral = new RegExp(guarded.replace(/\(\?<!\[[^\]]*\]\)/g, ''), 'giu');
+  }
+  return phaseNumeral;
+}
 
 /**
  * Phase numbers spelled one way: a Roman (I–VI, full-width Ⅰ–Ⅵ too), Arabic or Chinese number before
@@ -106,7 +115,7 @@ export function phaseNumerals(name: string): string {
   return name
     .normalize('NFKC')
     .replace(
-      PHASE_NUMERAL,
+      phaseRe(),
       (all, arabic: string | undefined, cn: string | undefined, roman: string | undefined, unit: string) => {
         const n = arabic ? Number(arabic) : cn ? chineseNumber(cn) : (ROMAN[roman!.toUpperCase()] ?? null);
         return n === null ? all : `${n}${unit}`;

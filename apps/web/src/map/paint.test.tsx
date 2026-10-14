@@ -218,14 +218,7 @@ describe('gray levels of a live result', () => {
   const levels = grayLevels(withGray);
   it('orders the nested gap levels by severity, then the 伪覆盖 part', () => {
     // five checked categories: a place can lack up to five
-    expect(levels.map((g) => `${g.kind}${g.min}`)).toEqual([
-      'gap1',
-      'gap2',
-      'gap3',
-      'gap4',
-      'gap5',
-      'pseudo1',
-    ]);
+    expect(levels.map((g) => `${g.kind}${g.min}`)).toEqual(['gap1', 'gap2', 'gap3', 'gap4', 'pseudo1']);
     const gaps = levels.filter((g) => g.kind === 'gap');
     for (let i = 1; i < gaps.length; i++) expect(gaps[i]!.areaKm2).toBeLessThanOrEqual(gaps[i - 1]!.areaKm2);
   });

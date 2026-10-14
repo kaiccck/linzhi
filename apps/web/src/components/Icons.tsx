@@ -82,6 +82,34 @@ export function IconSprite() {
           <path d="M10.8 13.5h2.4v6.4h-2.4z" />
           <path d="M5.5 19.6h13v2H5.5z" />
         </symbol>
+        {/* the everyday services counted from the centre (2026-10-10) */}
+        <symbol id="pg-food" viewBox="0 0 24 24">
+          <path d="M14.3 2.2l1.5.9-4.3 6.9-1.5-.9zM18.6 3.4l1.3 1.1-5.6 5.7-1.2-1.1z" />
+          <path d="M2.5 11h19a9.5 9.5 0 0 1-19 0z" />
+          <path d="M8 20.4h8v1.8H8z" />
+        </symbol>
+        <symbol id="pg-store" viewBox="0 0 24 24">
+          <path d="M3.2 3.5h17.6l1.7 5.2a3 3 0 0 1-5.3 1.9 3 3 0 0 1-5.2 0 3 3 0 0 1-5.2 0A3 3 0 0 1 1.5 8.7z" />
+          <path
+            d="M3.5 12.4a4.6 4.6 0 0 0 4.2-.3 4.6 4.6 0 0 0 4.3.3 4.6 4.6 0 0 0 4.3-.3 4.6 4.6 0 0 0 4.2.3V21h-17zm6.5 2.6V21h4v-6z"
+            fillRule="evenodd"
+          />
+        </symbol>
+        <symbol id="pg-parcel" viewBox="0 0 24 24">
+          <path d="M12 2.4 21 7l-9 4.5L3 7z" />
+          <path d="M2.4 8.6l8.6 4.3v9.3l-8.6-4.4zM13 12.9l8.6-4.3v9.2L13 22.2z" />
+        </symbol>
+        <symbol id="pg-bank" viewBox="0 0 24 24">
+          <path d="M12 2.2 22 7.6v1.9H2V7.6z" />
+          <path d="M3.8 11h2.6v6.8H3.8zM8.6 11h2.6v6.8H8.6zM12.8 11h2.6v6.8h-2.6zM17.6 11h2.6v6.8h-2.6z" />
+          <path d="M2.4 19.2h19.2v2.4H2.4z" />
+        </symbol>
+        <symbol id="pg-gym" viewBox="0 0 24 24">
+          <path d="M1.6 9.3h2.5v5.4H1.6zM4.9 6.6h3.2v10.8H4.9zM8.1 10.9h7.8v2.2H8.1zM15.9 6.6h3.2v10.8h-3.2zM19.9 9.3h2.5v5.4h-2.5z" />
+        </symbol>
+        <symbol id="pg-library" viewBox="0 0 24 24">
+          <path d="M11 6.4C9 5 6.2 4.5 2.8 4.7v13.9c3.1-.2 5.9.3 8.2 1.7zM13 6.4c2-1.4 4.8-1.9 8.2-1.7v13.9c-3.1-.2-5.9.3-8.2 1.7z" />
+        </symbol>
         <symbol id="pg-play" viewBox="0 0 24 24">
           <path d="M7.5 4.6c0-.9 1-1.5 1.8-1l11 7.1c.7.5.7 1.5 0 2l-11 7.1c-.8.5-1.8 0-1.8-1z" />
         </symbol>
@@ -244,6 +272,15 @@ export function Ui({ id }: { id: UiId }) {
   return (
     <svg className="ui" aria-hidden="true" focusable="false">
       <use href={`#${id}`} />
+    </svg>
+  );
+}
+
+/** The small chevron of a link-like button: back (left) or on (right). */
+export function Chev({ dir }: { dir: 'left' | 'right' }) {
+  return (
+    <svg className="chev" viewBox="0 0 10 10" aria-hidden="true" focusable="false">
+      <path d={dir === 'left' ? 'M6.5 2 3.5 5 6.5 8' : 'M3.5 2 6.5 5 3.5 8'} />
     </svg>
   );
 }

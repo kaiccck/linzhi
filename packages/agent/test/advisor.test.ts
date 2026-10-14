@@ -64,7 +64,7 @@ describe('template mode (no LLM configured)', () => {
     const a = await advisor.ask('导出体检报告');
     expect(a.citations.map((c) => c.tool)).toEqual(['export_report']);
     expect(a.answer).toContain('没有指明社区，以下按样例“申城佳苑片区”（zj-a）回答。');
-    expect(a.answer).toContain('画圆漏掉了其中 8 个（88.9%）');
+    expect(a.answer).toContain('画圆漏掉了其中 3 个（100%）');
     expect(a.attachments).toHaveLength(1);
     expect(a.attachments![0]).toMatchObject({
       filename: 'zoudedao-zj-a-report.md',
@@ -135,23 +135,21 @@ describe('template mode (no LLM configured)', () => {
       expect(a.citations.map((c) => [c.tool, c.args])).toEqual([
         ['list_service_gaps', { analysis_id: 'zj-c', category: '菜市场' }],
       ]);
-      expect(a.answer).toContain('万科翡翠公园片区 12 个小区中，有 12 个步行 1,000 m 内走不到菜市场');
+      expect(a.answer).toContain('万科翡翠公园片区 7 个小区中，有 7 个步行 1,000 m 内走不到菜市场');
       expect(a.grounding).toMatchObject({ ok: true, uncited: [] });
     }
   });
 
   it('handles communities, unknown places, reach and profile comparison', async () => {
     const school = await advisor.ask('申城佳苑三期B块的孩子上学方便吗');
-    expect(school.answer).toContain(
-      '结论：不太方便：申城佳苑三期B块的小学步行 1,000 m 内走不到（伪覆盖）：最近能走到的是孙桥小学(申江校区)，直线 818.5 m，实际步行 1,676 m，约 23.9 分钟 [T1]。',
-    );
+    expect(school.answer).toContain('结论：尚待核实：申城佳苑三期B块的小学待核实 [T1]。');
     const unknown = await advisor.ask('陆家嘴怎么样？');
     expect(unknown.answer).toContain('没有找到“陆家嘴”');
     expect(unknown.citations.map((c) => c.tool)).toEqual(['locate_place']);
     const reach = await advisor.ask('15分钟能走多远？');
     expect(reach.answer).toContain('15 分钟有效步行半径中位数 775 m');
     const compare = await advisor.ask('对比一下老人和成人');
-    expect(compare.answer).toContain('两种画像的已核实缺口都是 9 个');
+    expect(compare.answer).toContain('两种画像的已核实缺口都是 3 个');
     for (const a of [school, unknown, reach, compare])
       expect(a.grounding).toMatchObject({ ok: true, uncited: [] });
   });
@@ -165,7 +163,7 @@ describe('LLM mode with a scripted OpenAI-compatible endpoint', () => {
       analyzeCall,
       {
         content:
-          '结论：画圆法只找到 1 个缺口，按实测步行距离已核实 9 个 [T1]。\n- 15 分钟步行实际可达 1.857 km²，画圆高估 1.88 倍 [T1]。',
+          '结论：画圆法只找到 0 个缺口，按实测步行距离已核实 3 个 [T1]。\n- 15 分钟步行实际可达 1.857 km²，画圆高估 1.88 倍 [T1]。',
       },
     ]);
     const advisor = createAdvisor({ backend: backend(), llm: { ...LLM, fetch: llm.fetch } });
@@ -206,7 +204,7 @@ describe('LLM mode with a scripted OpenAI-compatible endpoint', () => {
       facts: unknown[];
     };
     expect(payload).toMatchObject({ id: 'T1', tool: 'analyze_life_circle' });
-    expect(payload.summary).toContain('画圆漏掉了其中 8 个（88.9%）');
+    expect(payload.summary).toContain('画圆漏掉了其中 3 个（100%）');
   });
 
   it('repairs a hallucinated number once, listing it for the model', async () => {
@@ -260,17 +258,17 @@ describe('LLM mode with a scripted OpenAI-compatible endpoint', () => {
       {
         tool_calls: [
           { name: 'analyze_life_circle', arguments: { sample_id: 'zj-a' } },
-          { name: 'list_service_gaps', arguments: { analysis_id: 'zj-a', category: '小学' } },
+          { name: 'list_service_gaps', arguments: { analysis_id: 'zj-a', category: '菜市场' } },
         ],
       },
-      // 1.88 倍 uncited; 23.9 分钟 is in T2 but cites T1 (a real draft had this shape)
-      { content: '结论：画圆高估 1.88 倍。\n- 申城佳苑三期B块到小学约 23.9 分钟 [T1]。' },
+      // 1.88 倍 uncited; 18.2 分钟 is in T2 but cites T1 (a real draft had this shape)
+      { content: '结论：画圆高估 1.88 倍。\n- 川杨新苑四期到菜市场约 18.2 分钟 [T1]。' },
     ]);
     const a = await createAdvisor({ backend: backend(), llm: { ...LLM, fetch: llm.fetch } }).ask(
       '高估多少？',
     );
-    expect(a.answer).toBe('结论：画圆高估 1.88 倍 [T1]。\n- 申城佳苑三期B块到小学约 23.9 分钟 [T1][T2]。');
-    expect(a.citationsAdded).toEqual(['1.88 倍 → T1', '23.9 分钟 → T2']);
+    expect(a.answer).toBe('结论：画圆高估 1.88 倍 [T1]。\n- 川杨新苑四期到菜市场约 18.2 分钟 [T1][T2]。');
+    expect(a.citationsAdded).toEqual(['1.88 倍 → T1', '18.2 分钟 → T2']);
     expect(a.grounding).toMatchObject({ ok: true, uncited: [] });
     expect(a.repaired).toBeUndefined();
     expect(llm.requests).toHaveLength(2);

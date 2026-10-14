@@ -31,7 +31,11 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "esbuild"
+      "esbuild",
+      "@tarojs/binding",
+      "@tarojs/cli",
+      "@swc/core",
+      "@parcel/watcher"
     ]
   }
 }

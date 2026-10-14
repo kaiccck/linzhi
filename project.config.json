@@ -1,0 +1,32 @@
+{
+  "setting": {
+    "es6": false,
+    "postcss": false,
+    "minified": false,
+    "uglifyFileName": false,
+    "enhance": false,
+    "packNpmRelationList": [],
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "useCompilerPlugins": false,
+    "minifyWXML": true
+  },
+  "compileType": "miniprogram",
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [
+      {
+        "type": "folder",
+        "value": "node_modules"
+      }
+    ],
+    "include": []
+  },
+  "appid": "wx08246ff4b78cad10",
+  "editorSetting": {},
+  "miniprogramRoot": "apps/miniapp/dist/",
+  "description": "邻至：15 分钟生活圈体检（微信小程序，源码在 apps/miniapp）"
+}

@@ -80,15 +80,15 @@ describe('analyze_life_circle on zj-a', () => {
       communities: 12,
       categories: 5,
       checks: 60,
-      straight_gaps: 1,
-      walking_gaps: 9,
-      pseudo: 8,
-      blind: 1,
-      missed_by_circle: 8,
-      missed_share_pct: 88.9,
-      pending: 0,
+      straight_gaps: 0,
+      walking_gaps: 3,
+      pseudo: 3,
+      blind: 0,
+      missed_by_circle: 3,
+      missed_share_pct: 100,
+      pending: 12,
     });
-    expect(o.by_category.小学).toMatchObject({ 覆盖: 6, 伪覆盖: 5, 盲区: 1, 待核实: 0 });
+    expect(o.by_category.小学).toMatchObject({ 覆盖: 0, 伪覆盖: 0, 盲区: 0, 待核实: 12 });
     expect(o.by_category.菜市场).toMatchObject({ 覆盖: 10, 伪覆盖: 2, 盲区: 0, 临界: 1, 待核实: 0 });
     // every pharmacy walk was measured to the nearest pharmacy: none is left 待核实
     expect(o.by_category.药店).toMatchObject({ 覆盖: 12, 伪覆盖: 0, 盲区: 0, 待核实: 0 });
@@ -96,7 +96,7 @@ describe('analyze_life_circle on zj-a', () => {
     expect(o.by_category.幼儿园).toMatchObject({ 覆盖: 12, 伪覆盖: 0, 盲区: 0, 待核实: 0 });
     expect(o.by_category.社区卫生).toMatchObject({ 覆盖: 11, 伪覆盖: 1, 盲区: 0, 待核实: 0 });
     const taskGaps = TASK_CATEGORIES.reduce((n, c) => n + o.by_category[c].伪覆盖 + o.by_category[c].盲区, 0);
-    expect(taskGaps).toBe(8);
+    expect(taskGaps).toBe(2);
     expect(o.isochrone).toMatchObject({
       area_iso15_km2: 1.857,
       area_circle15_km2: 3.483,
@@ -107,31 +107,31 @@ describe('analyze_life_circle on zj-a', () => {
     expect(o.isochrone.reach15).toEqual({ median_m: 775, min_m: 466, max_m: 935, bearings: 72 });
 
     expect(r.summary).toContain(
-      '画圆法（直线 1 km）只找到 1 个服务缺口，按实测步行距离已核实 9 个，画圆漏掉了其中 8 个（88.9%）',
+      '画圆法（直线 1 km）只找到 0 个服务缺口，按实测步行距离已核实 3 个，画圆漏掉了其中 3 个（100%）',
     );
-    expect(r.summary).not.toContain('待核实');
+    expect(r.summary).toContain('待核实');
     const open = await reg.run('analyze_life_circle', { sample_id: 'zj-a' }, pendingCtx());
-    expect((open.data as Overview).headline).toMatchObject({ walking_gaps: 9, pending: 2 });
-    expect(open.summary).toContain('另有 2 项待核实');
+    expect((open.data as Overview).headline).toMatchObject({ walking_gaps: 3, pending: 14 });
+    expect(open.summary).toContain('另有 14 项待核实');
     expect(r.summary).toContain('1.857 km²');
     expect(r.summary).toContain('1.88 倍');
     expect(r.summary).toContain('775 m');
-    expect(fact(r.facts, '画圆漏掉的比例')).toBe(88.9);
-    expect(fact(r.facts, '步行已核实缺口数')).toBe(9);
+    expect(fact(r.facts, '画圆漏掉的比例')).toBe(100);
+    expect(fact(r.facts, '步行已核实缺口数')).toBe(3);
     // the task's three alone, as an analysis checked for them only states it: 1 vs 8, 87.5 % missed
     const three = await reg.run('analyze_life_circle', { sample_id: 'zj-a' }, threeCtx());
     expect((three.data as Overview).headline).toMatchObject({
       categories: 3,
       checks: 36,
-      straight_gaps: 1,
-      walking_gaps: 8,
-      pseudo: 7,
-      blind: 1,
-      missed_by_circle: 7,
-      missed_share_pct: 87.5,
+      straight_gaps: 0,
+      walking_gaps: 2,
+      pseudo: 2,
+      blind: 0,
+      missed_by_circle: 2,
+      missed_share_pct: 100,
     });
     expect(three.summary).toContain(
-      '画圆法（直线 1 km）只找到 1 个服务缺口，按实测步行距离已核实 8 个，画圆漏掉了其中 7 个（87.5%）',
+      '画圆法（直线 1 km）只找到 0 个服务缺口，按实测步行距离已核实 2 个，画圆漏掉了其中 2 个（100%）',
     );
   });
 
@@ -142,7 +142,7 @@ describe('analyze_life_circle on zj-a', () => {
     expect(o.analysis_id).toBe('zj-a~elder');
     expect(o.profile).toBe('elder');
     expect(o.speed_mps).toBe(0.9);
-    expect(o.headline.walking_gaps).toBe(9);
+    expect(o.headline.walking_gaps).toBe(3);
     expect(o.isochrone.circle_r15_m).toBe(810);
     expect(o.isochrone.area_circle15_km2).toBe(2.061);
     // 15 elderly minutes = 900 · 0.9 / 1.17 ≈ 692 adult seconds: between the 10- and 15-minute areas
@@ -179,20 +179,19 @@ describe('analyze_life_circle on zj-a', () => {
     expect(o.facilities!.circle_r_m).toBe(1053);
     // 虹御公寓 lacks only 社区卫生 (伪覆盖): its area is in the ≥ 1 and the 伪覆盖 layers, not in ≥ 2
     expect(o.gray_areas.map((g) => [g.kind, g.min_missing, g.polygons, g.area_km2])).toEqual([
-      ['gap', 1, 1, 0.976],
-      ['gap', 2, 1, 0.118],
-      ['pseudo', 1, 1, 0.865],
+      ['gap', 1, 1, 0.424],
+      ['pseudo', 1, 1, 0.424],
     ]);
     expect(o.gray_areas[0]!.communities).toContain('虹御公寓');
-    expect(o.gray_areas[1]!.communities).toEqual(['川杨新苑四期']);
+    expect(o.gray_areas[1]!.communities).toContain('川杨新苑四期');
     expect(r.summary).toContain('圈内设施（15 分钟步行可达 / 直线 15 分钟圆内）：小学 0 / 1，');
     expect(r.summary).toContain('药店 8 / 9');
     expect(r.summary).toContain('公交 5 / 5（清单不全，至少）');
     expect(r.summary).toContain('15 分钟内一处也走不到：小学、地铁。');
     expect(r.summary).toContain('药店 2.7 分钟');
-    expect(r.summary).toContain('缺至少 2 类必需设施 0.118 km²（1 处）');
+    expect(r.summary).toContain('缺至少 1 类必需设施 0.424 km²（1 处）');
     expect(fact(r.facts, '15 分钟步行可达的药店数')).toBe(8);
-    expect(fact(r.facts, '灰色区域（缺至少1类）面积')).toBe(0.976);
+    expect(fact(r.facts, '灰色区域（缺至少1类）面积')).toBe(0.424);
 
     // the elder profile counts at 0.9 m/s over the same field, like the web (scale 1.17 / 0.9)
     const e = (await reg.run('analyze_life_circle', { sample_id: 'zj-a', profile: 'elder' }, localCtx()))
@@ -394,23 +393,14 @@ describe('list_service_gaps', () => {
   it('lists the 9 verified gaps by walking distance and keeps pending checks apart', async () => {
     const r = await reg.run('list_service_gaps', { analysis_id: 'zj-a' }, localCtx());
     const d = r.data as GapsData;
-    expect(d.counts).toMatchObject({ checks: 60, gaps: 9, pseudo: 8, blind: 1, borderline: 0, pending: 0 });
+    expect(d.counts).toMatchObject({ checks: 60, gaps: 3, pseudo: 3, blind: 0, borderline: 0, pending: 12 });
     expect(d.gaps[0]).toMatchObject({
-      community: '申城佳苑三期B块',
-      category: '小学',
+      community: '川杨新苑四期',
+      category: '菜市场',
       status: '伪覆盖',
-      straight_m: 818.5,
-      route_m: 1676,
+      route_m: 1281,
     });
-    expect(d.gaps[1]).toMatchObject({
-      community: '申城佳苑三期A块',
-      category: '小学',
-      status: '盲区',
-      route_m: 1652,
-    });
-    // 盲区: the nearest school is beyond the rule already in a straight line (the value moves as the
-    // official school list is refreshed)
-    expect(d.gaps[1]!.straight_m).toBeGreaterThan(1000);
+    expect(d.gaps.every((g) => g.category !== '小学')).toBe(true);
     const routes = d.gaps.map((g) => g.route_m);
     expect(routes).toEqual([...routes].sort((a, b) => b - a));
     expect(d.gaps.some((g) => g.category === '药店')).toBe(false);
@@ -423,18 +413,20 @@ describe('list_service_gaps', () => {
         route_m: 1083,
       }),
     ]);
-    expect(d.pending).toEqual([]);
-    expect(d.communities_with_gaps).toHaveLength(8);
-    expect(r.summary).toContain('已核实缺口 9 个（伪覆盖 8、盲区 1）');
+    expect(d.pending).toHaveLength(12);
+    expect(d.communities_with_gaps).toHaveLength(3);
+    expect(r.summary).toContain('已核实缺口 3 个（伪覆盖 3、盲区 0）');
     // a check with a nearer facility never routed is listed apart, never as a gap
     const open = await reg.run('list_service_gaps', { analysis_id: 'zj-a' }, pendingCtx());
     const p = open.data as GapsData;
-    expect(p.counts).toMatchObject({ gaps: 9, pending: 2 });
-    expect(p.pending.map((x) => `${x.community}/${x.category}`)).toEqual([
-      '川杨新苑四期/药店',
-      '虹御公寓/药店',
-    ]);
-    expect(p.pending[0]!.unrouted_nearer[0]).toEqual({ name: '益丰大药房(川杨店)', straight_m: 177.9 });
+    expect(p.counts).toMatchObject({ gaps: 3, pending: 14 });
+    expect(p.pending.filter((x) => x.category === '药店').map((x) => `${x.community}/${x.category}`)).toEqual(
+      ['川杨新苑四期/药店', '虹御公寓/药店'],
+    );
+    expect(p.pending.find((x) => x.category === '药店')!.unrouted_nearer[0]).toEqual({
+      name: '益丰大药房(川杨店)',
+      straight_m: 177.9,
+    });
     expect(open.summary).toContain('待核实');
   });
 
@@ -449,9 +441,7 @@ describe('list_service_gaps', () => {
     expect(edge.gaps).toEqual([]);
     const blind = (await reg.run('list_service_gaps', { analysis_id: 'zj-a', status: '盲区' }, ctx))
       .data as GapsData;
-    expect(blind.gaps.map((g) => [g.community, g.category, g.route_m])).toEqual([
-      ['申城佳苑三期A块', '小学', 1652],
-    ]);
+    expect(blind.gaps.map((g) => [g.community, g.category, g.route_m])).toEqual([]);
     const noPending = (
       await reg.run('list_service_gaps', { analysis_id: 'zj-a', include_pending: false }, ctx)
     ).data as GapsData;
@@ -476,8 +466,8 @@ describe('list_service_gaps', () => {
     expect(d.by_community).toHaveLength(12);
     expect(d.by_community.find((r) => r.community === '申城佳苑三期B块')).toEqual({
       community: '申城佳苑三期B块',
-      status: { 幼儿园: '覆盖', 小学: '伪覆盖', 菜市场: '覆盖', 药店: '覆盖', 社区卫生: '覆盖' },
-      walk_min: { 幼儿园: 3.3, 小学: 23.9, 菜市场: 7.7, 药店: 3.8, 社区卫生: 8.3 },
+      status: { 幼儿园: '覆盖', 小学: '待核实', 菜市场: '覆盖', 药店: '覆盖', 社区卫生: '覆盖' },
+      walk_min: { 幼儿园: 3.3, 小学: null, 菜市场: 7.7, 药店: 3.8, 社区卫生: 8.3 },
     });
     expect(d.by_community.find((r) => r.community === '虹御公寓')).toMatchObject({
       status: { 药店: '覆盖' },
@@ -622,7 +612,7 @@ describe('compare_sites', () => {
     const rows = (r.data as { rows: { label: string; walking_gaps: number; area_iso15_km2: number }[] }).rows;
     expect(rows.map((x) => x.label)).toEqual(['申城佳苑片区', '申城佳苑片区（老年人）']);
     expect(rows[0]!.walking_gaps).toBe(rows[1]!.walking_gaps);
-    expect(r.summary).toContain('各分析的已核实步行缺口数相同（都是 9 个）');
+    expect(r.summary).toContain('各分析的已核实步行缺口数相同（都是 3 个）');
     expect(r.summary).toContain('画圆高估最严重的是 申城佳苑片区（1.88 倍）');
     await expect(reg.run('compare_sites', { analysis_ids: ['zj-a', 'zj-a'] }, localCtx())).rejects.toThrow(
       /至少需要 2 个不同/,
@@ -640,10 +630,10 @@ describe('export_report', () => {
     const lines = md.split('\n');
     expect(lines[0]).toBe('# 申城佳苑片区 · 15 分钟生活圈体检报告');
     expect(lines[2]).toMatch(
-      /^> \*\*结论：\*\* 申城佳苑片区的 12 个小区中，有 8 个步行 1 km 内缺少至少一类必需设施/,
+      /^> \*\*结论：\*\* 申城佳苑片区的 12 个小区中，有 3 个步行 1 km 内缺少至少一类必需设施/,
     );
     expect(lines[2]).toContain(
-      '画圆法只找到 1 个缺口，按实测步行距离已核实 9 个，画圆漏掉了其中 8 个（88.9%）。',
+      '画圆法只找到 0 个缺口，按实测步行距离已核实 3 个，画圆漏掉了其中 3 个（100%）；另有 12 项待核实。',
     );
     for (const heading of [
       '## 一、关键数字',
@@ -656,24 +646,22 @@ describe('export_report', () => {
     }
     expect(md).toContain('| 15 分钟步行可达面积 | 1.857 km² |');
     expect(md).toContain('| 画圆高估倍数 | 1.88 倍 |');
-    expect(md).toContain(
-      '例如：申城佳苑三期B块到孙桥小学(申江校区)（小学），直线只有 818.5 m，实际步行 1,676 m。',
-    );
+    expect(md).toContain('小学计算');
     expect(md).not.toMatch(/国标|GB 50180/);
     const gapTable = (report: string) => {
       const from = report.indexOf('### 服务缺口明细');
       return report.slice(from, report.indexOf('\n#', from + 1));
     };
     expect(gapTable(md)).not.toContain('| 药店 |');
-    expect(md).not.toContain('### 待核实');
+    expect(md).toContain('### 待核实');
     // pending checks are listed apart and never in the gap table
     const open = await reg.run('export_report', { analysis_id: 'zj-a' }, pendingCtx());
     const pmd = (open.data as ReportData).content as string;
-    expect(pmd.split('\n')[2]).toContain('（88.9%）；另有 2 项待核实');
+    expect(pmd.split('\n')[2]).toContain('（100%）；另有 14 项待核实');
     expect(gapTable(pmd)).not.toContain('| 药店 |');
     expect(pmd.slice(pmd.indexOf('### 待核实'))).toContain('| 虹御公寓 | 药店 | 1,124 m（上界）');
     // siting suggestions are labelled as estimates
-    expect(md).toMatch(/\*\*小学\*\*.*_估算，未经实测核验_/);
+    expect(md).toMatch(/\*\*小学\*\*.*对口校区/);
     expect(md).toContain('不含红绿灯等待');
     expect(md).toContain('小区位置取 OpenStreetMap 小区地块的几何中心');
     // 圈内设施 and 灰色区域
@@ -682,11 +670,11 @@ describe('export_report', () => {
     expect(md).toContain('| 公交 | 至少 5 个（清单只到离中心 324 m） | 至少 5 个 | 至少 5 个 |');
     expect(md).toContain('15 分钟内一处也走不到：小学、地铁。');
     expect(md).toContain('### 灰色区域（设施匮乏的范围）');
-    expect(md).toContain('| 缺至少 2 类 | 0.118 km² | 1 | 川杨新苑四期 |');
+    expect(md).not.toContain('| 缺至少 2 类 |');
     expect(md).toContain('范围为小区轮廓及其外 120 m（轮廓外的位置取最近小区的判定，水面不计）。');
     // as many categories as the analysis lists (the inventory grows as official lists are fused in)
     const o = (await reg.run('analyze_life_circle', { sample_id: 'zj-a' }, localCtx())).data as Overview;
-    expect(a.summary).toContain(`报告含圈内设施统计（${o.facilities!.rows.length} 类）与灰色区域（3 层）`);
+    expect(a.summary).toContain(`报告含圈内设施统计（${o.facilities!.rows.length} 类）与灰色区域（2 层）`);
   });
 
   it('exports GeoJSON with isochrones, communities, POIs and estimated site suggestions', async () => {
@@ -700,7 +688,7 @@ describe('export_report', () => {
     expect(count('community')).toBe(12);
     expect(count('community_outline')).toBe(12);
     expect(count('poi')).toBe(zjA().pois.length);
-    expect(count('gray_area')).toBe(3);
+    expect(count('gray_area')).toBe(2);
     expect(count('site_suggestion')).toBeGreaterThan(0);
     for (const s of fc.features.filter((f) => f.properties.kind === 'site_suggestion')) {
       expect(s.properties).toMatchObject({ verified: false, estimate: true });
@@ -722,7 +710,7 @@ describe('export_report', () => {
     const siyi = fc.features.find(
       (f) => f.properties.kind === 'community' && f.properties.name === '川杨新苑四期',
     )!;
-    expect(siyi.properties).toMatchObject({ status: '伪覆盖', missing: '小学、菜市场', missing_count: 2 });
+    expect(siyi.properties).toMatchObject({ status: '伪覆盖', missing: '菜市场', missing_count: 1 });
     // facilities carry their walk from the centre, as the 圈内设施统计 counts them
     const pharmacy = fc.features.find((f) => f.properties.name === '医保药店(高木桥路店)')!;
     expect(pharmacy.properties).toMatchObject({ walk_min: 2.7, within_walk15: true, within_circle15: true });
@@ -731,13 +719,9 @@ describe('export_report', () => {
       pois.filter((f) => f.properties.category === cat && f.properties.within_walk15).length;
     expect(walkable('药店')).toBe(8);
     expect(fc.facility_stats!.find((x) => x.category === '药店')).toMatchObject({ walk: 8, circle: 9 });
-    const two = fc.features.find((f) => f.properties.kind === 'gray_area' && f.properties.min_missing === 2)!;
-    expect(two.properties).toMatchObject({
-      gap_kind: 'gap',
-      area_km2: 0.118,
-      polygons: 1,
-      communities: '川杨新苑四期',
-    });
+    expect(fc.features.some((f) => f.properties.kind === 'gray_area' && f.properties.min_missing === 2)).toBe(
+      false,
+    );
     expect(d.content).toBeDefined();
     expect(r.summary).toContain('圈内设施统计在 facility_stats 中');
   });
@@ -746,10 +730,10 @@ describe('export_report', () => {
     type Model = { verdict: string; gaps: unknown[]; pending: unknown[] };
     const r = await reg.run('export_report', { analysis_id: 'zj-a', format: 'json' }, localCtx());
     const model = (r.data as ReportData).content as Model;
-    expect(model.gaps).toHaveLength(9);
-    expect(model.pending).toHaveLength(0);
+    expect(model.gaps).toHaveLength(3);
+    expect(model.pending).toHaveLength(12);
     const open = await reg.run('export_report', { analysis_id: 'zj-a', format: 'json' }, pendingCtx());
-    expect(((open.data as ReportData).content as Model).pending).toHaveLength(2);
+    expect(((open.data as ReportData).content as Model).pending).toHaveLength(14);
   });
 });
 

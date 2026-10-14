@@ -948,8 +948,13 @@ textarea {
 
 /* categories: one tile each, side by side — pictogram and the communities that cannot reach one, over
    the name */
-.cats {
+.cats-label {
   margin-top: 12px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.cats {
+  margin-top: 6px;
   display: grid;
   grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
   gap: 5px;
@@ -1080,7 +1085,7 @@ textarea {
 }
 
 /* 体检单: one category at a time — the communities that cannot walk to one, the rest folded */
-.checkup .cats {
+.checkup .cats-label {
   margin-top: 20px;
 }
 .gl {
@@ -1411,6 +1416,14 @@ textarea {
   display: flex;
   gap: 14px;
 }
+.fac-key {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.fac-key + .fac-cols {
+  margin-top: 6px;
+}
 .mk {
   width: 10px;
   height: 10px;
@@ -1573,13 +1586,21 @@ textarea {
   margin-top: 4px;
 }
 .plan-verdict .v-top {
-  align-items: flex-start;
+  align-items: center;
 }
-.plan-verdict .v-lines {
-  padding-top: 2px;
+.plan-proposal {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 17px;
+  font-weight: 500;
 }
 .plan-verdict .badge {
-  margin: 6px 0 0 auto;
+  margin-left: auto;
+}
+.site-use {
+  display: block;
+  min-height: 32px;
 }
 /* the planner's own question after the suggestions */
 .plan > .whatif {
@@ -1612,9 +1633,6 @@ textarea {
   font-size: 13px;
   line-height: 20px;
   color: var(--ink-2);
-}
-.whatif.placing .wi-hint {
-  margin-bottom: 0;
 }
 .wi-big {
   display: flex;
@@ -1846,15 +1864,6 @@ textarea {
   font-weight: 600;
   color: var(--ink);
 }
-.run-reach {
-  font-size: 14px;
-  line-height: 24px;
-  color: var(--ink);
-}
-.run-reach b.num {
-  font-size: 20px;
-  font-weight: 600;
-}
 .sd {
   width: 8px;
   height: 8px;
@@ -1950,13 +1959,6 @@ textarea {
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--line);
-}
-.ask-head {
-  padding: 8px 0 0;
-}
-.ask-mode {
-  font-size: 12px;
-  color: var(--ink-3);
 }
 .ask-scroll {
   flex: 1;
@@ -2961,6 +2963,10 @@ button.cite:focus-visible {
   height: 15px;
   color: var(--ink-2);
 }
+.retry-basemap:disabled {
+  cursor: wait;
+  color: var(--ink-2);
+}
 .attrib {
   line-height: 17px;
   text-align: right;
@@ -3921,10 +3927,20 @@ button.cite:focus-visible {
   width: 16px;
   height: 16px;
 }
-.help-pop section {
+.help-pop section,
+.help-sources {
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid var(--line);
+}
+.help-sources summary {
+  padding: 4px 0;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+}
+.help-sources[open] summary {
+  margin-bottom: 6px;
 }
 .help-pop h3 {
   margin-bottom: 6px;
@@ -3990,6 +4006,9 @@ button.cite:focus-visible {
   max-height: calc(100% - 40px);
   display: flex;
   overflow-y: auto;
+}
+.map[data-tour='wide'] .tour-kicker .tk-name {
+  display: none;
 }
 .map[data-tour='wide'] .legend {
   left: auto;
@@ -4529,6 +4548,10 @@ button.cite:focus-visible {
     font-size: 12px;
     color: var(--ink-3);
   }
+  .map-strip .retry-basemap {
+    min-height: 40px;
+    margin-bottom: 10px;
+  }
   .map > .layers,
   .map-meta {
     display: none;
@@ -4541,6 +4564,9 @@ button.cite:focus-visible {
   }
   .panel.m-ask {
     overflow: visible;
+  }
+  .workspace[data-mode='ask'] .panel {
+    order: 0;
   }
   .advisor {
     min-height: 60vh;
@@ -4559,7 +4585,8 @@ button.cite:focus-visible {
   }
   /* a thumb's reach: the rows, the fold and the way into 中心周边设施 at 44px */
   .gl-row,
-  .gl-fold button {
+  .gl-fold button,
+  .site-use {
     height: 44px;
   }
   .sheet-next {

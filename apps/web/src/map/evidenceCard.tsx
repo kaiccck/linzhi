@@ -75,7 +75,11 @@ export function evidenceItem(
   const bare = (s: string) => s.replace(/[（(]/g, '(').replace(/[）)]/g, ')').replace(/\s/g, '');
   if (cat === '小学' && unit.catchment) {
     const same = !!base.facility && bare(base.facility).includes(bare(poiName(unit.catchment.school)));
-    foot.push(same ? '这所就是对口小学' : catchmentText(unit.catchment));
+    foot.push(
+      same && check.school_assignment === 'confirmed'
+        ? `按 ${unit.catchment.published?.slice(0, 4) ?? '官方'} 年招生地段对口`
+        : catchmentText(unit.catchment),
+    );
   }
   if (facts?.checkRouteM) foot.push(`判定距离 ${fmtInt(facts.checkRouteM)} m`);
   // a 菜市场 gap: where vegetables can still be bought on foot (the verdict stays)

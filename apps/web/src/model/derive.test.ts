@@ -35,17 +35,17 @@ describe('frame', () => {
 });
 
 describe('derived sign numbers (every number is computed, none typed in)', () => {
-  it('verdict: the circle finds 1 gap, walking finds 9 (8 of them among 小学, 菜市场, 药店)', () => {
+  it('verdict: unresolved school campuses contribute no gaps', () => {
     expect(model.cats).toEqual(['幼儿园', '小学', '菜市场', '药店', '社区卫生']);
-    expect(model.circleGaps).toBe(1);
-    expect(model.walkGaps).toBe(9);
+    expect(model.circleGaps).toBe(0);
+    expect(model.walkGaps).toBe(3);
     const task = model.heads.filter((h) => ['小学', '菜市场', '药店'].includes(h.cat));
-    expect(task.reduce((n, h) => n + h.pseudo + h.blind, 0)).toBe(8);
+    expect(task.reduce((n, h) => n + h.pseudo + h.blind, 0)).toBe(2);
   });
   it('directory heads: five categories side by side, nothing pending since every nearer pharmacy was routed', () => {
     expect(model.heads.map((h) => [h.cat, h.ok, h.pending])).toEqual([
       ['幼儿园', 12, 0],
-      ['小学', 6, 0],
+      ['小学', 0, 12],
       ['菜市场', 10, 0],
       ['药店', 12, 0],
       ['社区卫生', 11, 0],
@@ -60,7 +60,7 @@ describe('derived sign numbers (every number is computed, none typed in)', () =>
       Array.from({ length: 12 }, (_, i) => `A-${String(i + 1).padStart(2, '0')}`),
     );
     // A-10 申城佳苑三期A块 holds the one blind spot left (no primary school within 1 km even by straight line)
-    expect(model.boardOrder[0]?.code).toBe('A-10');
+    expect(model.boardOrder[0]?.code).toBe('A-01');
     expect(model.boardOrder.at(-1)?.code).toBe('A-12');
   });
   it('findings quote the measured facts of the mockup', () => {
@@ -72,8 +72,8 @@ describe('derived sign numbers (every number is computed, none typed in)', () =>
     const reach = detourReach(model, 1);
     expect(reach && Math.round(reach / 10) * 10).toBe(470);
     expect(towards(model.detour!.bearing)).toBe('向东');
-    expect(worstUnit(model, '小学')?.unit.code).toBe('A-11');
-    expect(worstUnit(model, '小学')?.kind).toBe('pseudo');
+    expect(worstUnit(model, '小学')).toBeNull();
+    expect(model.heads.find((h) => h.cat === '小学')?.pending).toBe(12);
     expect(Math.round(reachArea(model.raster, 900, 1) * 100) / 100).toBeCloseTo(1.86, 2);
     // the readout: the circle's 3.48 km², 47 % of it not walkable in 15′
     expect(circleKm2(model, 1)).toBeCloseTo(data.stats.area_circle15_km2, 2);

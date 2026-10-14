@@ -46,19 +46,20 @@ export function fromCentre(x: number, y: number): string {
   return d < 1000 ? `${dir} ${fmtInt(d)} m` : `${dir} ${(d / 1000).toFixed(1)} km`;
 }
 
-function sampleNote(model: Model, dataNote: string | null, live: boolean, lead = ''): Note {
+function sampleNote(dataNote: string | null, live: boolean, lead = ''): Note {
   return {
     id: 'sample',
+    // the place on screen is the panel's own title: not said again here
     text: live ? (
       <>
         {lead}
-        换一个更完整的地址（带路名或门牌）再试。当前显示：{model.place.title}。
+        换一个更完整的地址（带路名或门牌）再试。
       </>
     ) : (
       <>
         {lead}
-        <strong>样例模式</strong>只查样例社区；检索任意地址、重新算路需要服务端 live 模式（见 README）。当前：
-        {model.place.title}。{dataNote ? ` ${dataNote}` : ''}
+        <strong>样例模式</strong>只能看样例；体检新地点需要服务端配置百度 Key（见 README）。
+        {dataNote ? ` ${dataNote}` : ''}
       </>
     ),
   };
@@ -143,11 +144,11 @@ export function useCentre({
         id: 'sample',
         text: (
           <>
-            <strong>地图点选</strong> <span className="num">{coords}</span>（BD-09，在当前片区中心
-            {fromCentre(xy[0], xy[1])} 处）。
+            <strong>地图点选</strong> <span className="num">{coords}</span>（片区中心
+            {fromCentre(xy[0], xy[1])}）。
             <br />
-            <strong>样例模式</strong>不重新计算：以任意点为中心体检需要服务端配置百度 Key（live 模式，见
-            README）。当前：{model.place.title}。{dataNote ? ` ${dataNote}` : ''}
+            <strong>样例模式</strong>不重新计算：体检新地点需要服务端配置百度 Key（见 README）。
+            {dataNote ? ` ${dataNote}` : ''}
           </>
         ),
       });
@@ -159,7 +160,7 @@ export function useCentre({
   // check a new place, and says so instead of waiting
   const startPick = useCallback(() => {
     if (!live) {
-      show(sampleNote(model, dataNote, live, '体检新地点：'));
+      show(sampleNote(dataNote, live, '体检新地点：'));
       return;
     }
     clearSample();
@@ -230,7 +231,7 @@ export function useCentre({
     (text: string, frame: Crs) => {
       const q = text.trim();
       if (!q) {
-        show(sampleNote(model, dataNote, live));
+        show(sampleNote(dataNote, live));
         return;
       }
       searchCtl.current?.abort();
@@ -267,7 +268,7 @@ export function useCentre({
             if (ctl.signal.aborted) return;
             if (r.kind !== 'coordinate') {
               const why = r.kind === 'unavailable' ? r.message : '没有得到换算结果';
-              show(sampleNote(model, dataNote, live, `${why}，坐标没有换算。`));
+              show(sampleNote(dataNote, live, `${why}，坐标没有换算。`));
               return;
             }
             const p = r.point;
@@ -380,11 +381,11 @@ export function useCentre({
             });
           } else if (r.kind === 'place' || r.kind === 'coordinate') {
             const name = r.kind === 'place' ? r.best.name : r.point.name;
-            show(sampleNote(model, dataNote, live, `已定位：${name}。`));
+            show(sampleNote(dataNote, live, `已定位：${name}。`));
           } else if (r.kind === 'none') {
-            show(sampleNote(model, dataNote, live, `没有找到「${q}」。`));
+            show(sampleNote(dataNote, live, `没有找到「${q}」。`));
           } else {
-            show(sampleNote(model, dataNote, live, `${r.message}，无法检索地址。`));
+            show(sampleNote(dataNote, live, `${r.message}，无法检索地址。`));
           }
         })
         .catch(() => {});

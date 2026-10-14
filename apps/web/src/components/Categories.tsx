@@ -53,55 +53,58 @@ export function CategoryCards({
     refs.current[next]?.focus();
   };
   return (
-    <div
-      className={'cats' + (n > 16 ? ' dense' : '')}
-      role="radiogroup"
-      aria-label="设施类别"
-      style={{ ['--n' as string]: model.heads.length }}
-      onKeyDown={onKey}
-    >
-      {model.heads.map((h, i) => {
-        const on = h.cat === cat;
-        const rule = model.ruleOf[h.cat];
-        const { gaps, pending } = cardNote(h);
-        return (
-          <button
-            key={h.cat}
-            ref={(el) => {
-              refs.current[i] = el;
-            }}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            tabIndex={on ? 0 : -1}
-            className="cat"
-            aria-label={cardLabel(h, n, rule)}
-            onClick={() => onCat(h.cat)}
-          >
-            <span className="cat-top" aria-hidden="true">
-              <Pg id={CAT_ICON[h.cat]!} color={CAT_COLOR[h.cat]} />
-              {walking ? (
-                <b className="cat-n num wait">·</b>
-              ) : (
-                <b className={'cat-n num' + (gaps ? '' : pending ? ' pending' : ' clear')}>
-                  {gaps || (pending ? 0 : '✓')}
-                </b>
-              )}
-            </span>
-            <span className="cat-name" aria-hidden="true">
-              {h.cat}
-            </span>
-            {gaps && !walking ? (
-              // the gaps as a share of the communities, in their materials: 伪覆盖 red, 盲区 slate
-              <span className="cat-share" aria-hidden="true">
-                <i className="sp" style={{ width: `${(100 * h.pseudo) / n}%` }} />
-                <i className="sb" style={{ width: `${(100 * h.blind) / n}%` }} />
+    <>
+      <p className="cats-label">缺口小区数</p>
+      <div
+        className={'cats' + (n > 16 ? ' dense' : '')}
+        role="radiogroup"
+        aria-label="设施类别"
+        style={{ ['--n' as string]: model.heads.length }}
+        onKeyDown={onKey}
+      >
+        {model.heads.map((h, i) => {
+          const on = h.cat === cat;
+          const rule = model.ruleOf[h.cat];
+          const { gaps, pending } = cardNote(h);
+          return (
+            <button
+              key={h.cat}
+              ref={(el) => {
+                refs.current[i] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              tabIndex={on ? 0 : -1}
+              className="cat"
+              aria-label={cardLabel(h, n, rule)}
+              onClick={() => onCat(h.cat)}
+            >
+              <span className="cat-top" aria-hidden="true">
+                <Pg id={CAT_ICON[h.cat]!} color={CAT_COLOR[h.cat]} />
+                {walking ? (
+                  <b className="cat-n num wait">·</b>
+                ) : (
+                  <b className={'cat-n num' + (gaps ? '' : pending ? ' pending' : ' clear')}>
+                    {gaps || (pending ? 0 : '✓')}
+                  </b>
+                )}
               </span>
-            ) : null}
-          </button>
-        );
-      })}
-    </div>
+              <span className="cat-name" aria-hidden="true">
+                {h.cat}
+              </span>
+              {gaps && !walking ? (
+                // the gaps as a share of the communities, in their materials: 伪覆盖 red, 盲区 slate
+                <span className="cat-share" aria-hidden="true">
+                  <i className="sp" style={{ width: `${(100 * h.pseudo) / n}%` }} />
+                  <i className="sb" style={{ width: `${(100 * h.blind) / n}%` }} />
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 }
 

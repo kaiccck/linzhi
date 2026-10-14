@@ -156,10 +156,10 @@ describe('makeInliner', () => {
 describe('suggestions and history', () => {
   it('derives the three questions from the analysis on screen', () => {
     const worst = model.boardOrder[0]!;
-    expect(worstCategory(worst)).toBe('小学');
+    expect(worstCategory(worst)).toBe('菜市场');
     expect(suggestionsFor(model).map((s) => s.question)).toEqual([
       '申城佳苑片区的老人买菜方便吗？',
-      `如果在 ${worst.code} ${worst.name}附近开一所小学呢？`,
+      `如果在 ${worst.code} ${worst.name}附近开一家菜市场呢？`,
       '导出体检报告',
     ]);
   });

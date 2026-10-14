@@ -120,11 +120,7 @@ function WhatIf({
           </button>
         ) : null}
       </div>
-      {plan.placing ? (
-        <p className="wi-hint" role="status">
-          在地图上点一个位置；<kbd>Esc</kbd> 取消。
-        </p>
-      ) : !estimate ? (
+      {plan.placing ? null : !estimate ? (
         <>
           <button type="button" className="btn" onClick={onPlace}>
             <Pg id="pg-pin" />
@@ -222,35 +218,23 @@ function PlanVerdict({ model, cat, list }: { model: Model; cat: HardCategory; li
   const demand = model.units.filter((u) => lacks(u, cat)).length;
   if (!demand || !list.length) return null;
   const covered = new Set(list.flatMap((p) => p.covers.map((c) => c.name))).size;
-  const all = covered >= demand;
+  const verified = list.every((p) => p.verified);
   const rule = distWords(model.ruleOf[cat]);
   return (
     <section className="verdict plan-verdict" aria-labelledby="plan-say">
       <p className="sr-only" id="plan-say">
-        {`新增 ${list.length} ${measureOf(cat)}${newNoun(cat)}，缺${cat}的 ${demand} 个小区中 ${covered} 个因此步行 ${rule}内走得到（${list.every((p) => p.verified) ? '已核验' : '估算'}）。`}
+        {`建议新增 ${list.length} ${measureOf(cat)}${newNoun(cat)}，${verified ? '按已核验路线可' : '预计可'}让缺${cat}的 ${demand} 个小区中 ${covered} 个步行 ${rule}内走得到。`}
       </p>
       <div className="v-top" aria-hidden="true">
-        <b className="v-n">{list.length}</b>
-        <p className="v-lines">
-          <span className="v-t1">
-            {measureOf(cat)}新{newNoun(cat)}
-            {all ? '就够' : ''}
-          </span>
-          <span className="v-t2">
-            缺{cat}的 <span className="num">{demand}</span> 个小区
-            {all ? (
-              '都'
-            ) : (
-              <>
-                里 <span className="num">{covered}</span> 个
-              </>
-            )}
-            能步行 <NumText text={rule} />
-            内走到
-          </span>
+        <p className="plan-proposal">
+          建议新增 <b className="v-n">{list.length}</b> {measureOf(cat)}
+          {newNoun(cat)}
         </p>
-        <Badge verified={list.every((p) => p.verified)} />
+        <Badge verified={verified} />
       </div>
+      <p className="v-t2" aria-hidden="true">
+        {verified ? '按已核验路线可' : '预计'}补齐 <span className="num">{covered}</span> 个小区的可达缺口
+      </p>
     </section>
   );
 }
@@ -318,6 +302,7 @@ export function Planning({
   onHotSite,
   branches,
   onRestoreBranch,
+  onUseSite,
 }: {
   model: Model;
   cat: HardCategory;
@@ -332,17 +317,21 @@ export function Planning({
   onHotSite(key: string | null): void;
   branches?: WhatIfBranch[] | null;
   onRestoreBranch?(b: WhatIfBranch): void;
+  onUseSite?(site: SitePin): void;
 }) {
   const list = pins.filter((p) => p.cat === cat);
+  const mixed = new Set(list.map((p) => p.verified)).size > 1;
   const m = plan.measure;
   const current = m.status === 'done' ? (m.saved?.id ?? m.result.branch_id ?? null) : null;
   return (
     <section className="plan" aria-label="规划">
       <PlanVerdict model={model} cat={cat} list={list} />
-      <h2 className="plan-h">建议选址 · {cat}</h2>
+      <h2 className="plan-h">建议选址</h2>
       {list.length ? (
         <ol className="sites">
           {list.map((p) => (
+            // where it goes, then the communities it brings within the rule (their codes are the
+            // count); its own badge only when the sites differ, the answer above carries a shared one
             <li
               key={p.key}
               className={plan.hotSite === p.key ? 'hot' : ''}
@@ -355,20 +344,33 @@ export function Planning({
               </span>
               <span className="what">
                 <b>
-                  新增后 <span className="num">{p.covers.length}</span> 个小区走得到
-                  <Badge verified={p.verified} />
+                  <NumText text={p.label ?? `选址点 ${p.rank}`} />
+                  {mixed ? <Badge verified={p.verified} /> : null}
                 </b>
-                <small>{p.label ?? `选址点 ${p.rank}`}</small>
                 <Chips units={p.covers} cat={cat} onHot={onHot} />
+                {onUseSite ? (
+                  <button
+                    type="button"
+                    className="link site-use"
+                    aria-label={`用${cat}选址点 ${p.rank} 模拟`}
+                    onClick={() => onUseSite(p)}
+                    onFocus={() => onHotSite(p.key)}
+                    onBlur={() => onHotSite(null)}
+                  >
+                    用此点模拟
+                  </button>
+                ) : null}
               </span>
             </li>
           ))}
         </ol>
       ) : (
         <p className="plan-none">
-          {model.data.site_suggestions || !model.units.some((u) => lacks(u, cat))
-            ? `这次体检没有需要新增${cat}的小区。`
-            : '没有找到合适的选址。'}
+          {cat === '小学' && model.heads.some((h) => h.cat === cat && h.pending > 0)
+            ? '部分小区的对口学校或校区待核实，暂不能据此判断是否需要新增小学。'
+            : model.data.site_suggestions || !model.units.some((u) => lacks(u, cat))
+              ? `这次体检没有需要新增${cat}的小区。`
+              : '没有找到合适的选址。'}
         </p>
       )}
       <WhatIf
