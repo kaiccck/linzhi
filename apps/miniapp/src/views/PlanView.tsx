@@ -124,7 +124,7 @@ export function PlanView({
           {measured ? (
             <Text className="wi-note">
               百度批量算路 {measured.quota.routes} 条
-              {measured.quota.cached ? `（缓存 ${measured.quota.cached} 条）` : ''}，已存为这次体检的分支
+              {measured.quota.cached ? `（缓存 ${measured.quota.cached} 条）` : ''}，已存入下方"核验过的位置"
             </Text>
           ) : (
             <Text className="wi-note">按绕行系数估算，步行 {rule}内的缺口小区才计入</Text>
