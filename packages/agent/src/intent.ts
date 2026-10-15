@@ -8,7 +8,7 @@ import { HARD_CATEGORIES, TASK_CATEGORIES, findCommunity, normName, toBd09 } fro
 import type { Profile } from './types.js';
 
 export type IntentKind =
-  'simulate' | 'compare' | 'report' | 'isochrone' | 'reach' | 'facilities' | 'gaps' | 'overview';
+  'simulate' | 'compare' | 'report' | 'isochrone' | 'score' | 'reach' | 'facilities' | 'gaps' | 'overview';
 
 export interface Intent {
   /** Main thing asked for. */
@@ -69,6 +69,8 @@ const SIMULATE =
 const COMPARE = /对比|比较|相比|比一比|哪个.{0,6}(?:好|差|方便|强)|区别|差别|差距/;
 const REPORT = /报告|导出|下载|生成.{0,4}(?:文档|文件)|体检单|markdown|geojson|\bjson\b/i;
 const ISOCHRONE = /等时圈|geojson|多边形|边界/i;
+/** "评分是怎么来的", "得了几分", "覆盖率多少": the 体检评分. */
+const SCORE = /评分|得分|几分|多少分|分数|打分|等级|覆盖率/;
 const REACH =
   /可达范围|走多远|能走到哪|多远的?范围|多大范围|可达面积|有效半径|15\s*分钟.{0,4}范围|十五分钟.{0,4}范围|高估/;
 
@@ -114,6 +116,7 @@ export function parseIntent(
   else if (SIMULATE.test(q) && categories.length) intent.kind = 'simulate';
   else if (COMPARE.test(q)) intent.kind = 'compare';
   else if (ISOCHRONE.test(q)) intent.kind = 'isochrone';
+  else if (SCORE.test(q)) intent.kind = 'score';
   else if (REACH.test(q)) intent.kind = 'reach';
   else if (!ABOUT_COMMUNITIES.test(q) && (FACILITY_COUNT.test(q) || counted.length > 0)) {
     intent.kind = 'facilities';

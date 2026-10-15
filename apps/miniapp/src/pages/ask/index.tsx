@@ -18,6 +18,7 @@ import {
 } from '@web/advisor/answer';
 import { ask, QUESTION_MAX, type AskAnswer, type AskCitation, type AskStep } from '@web/data/ask';
 import type { Model } from '@web/model/derive';
+import { unitNo } from '../../model/unitNo';
 import { Icon } from '../../platform/Icons';
 import * as store from '../../state/store';
 import './index.css';
@@ -33,10 +34,22 @@ interface Turn {
 function blocksOf(model: Model, a: AskAnswer): TBlock[] {
   const text = stripFooter(a.answer);
   try {
-    const inline = makeInliner(
-      model.units.map((u) => ({ code: u.code, name: u.name })),
+    const units = model.units.map((u) => ({ code: u.code, name: u.name }));
+    const nameOf = new Map(units.map((u) => [u.code, u.name]));
+    // a code the answer gives alone still shows as the community's name
+    const named = (xs: Inline[]): Inline[] =>
+      xs.map((x) =>
+        x.t === 'unit' && !x.name
+          ? { ...x, name: nameOf.get(x.code) ?? null }
+          : x.t === 'strong'
+            ? { ...x, parts: named(x.parts) }
+            : x,
+      );
+    const raw = makeInliner(
+      units,
       a.citations.map((c) => c.id),
     );
+    const inline = (text: string) => named(raw(text));
     return tokenizeBlocks(parseAnswer(text), inline);
   } catch {
     return text.split(/\n{2,}/).map((p) => ({ t: 'p', lines: p.split('\n').map((s) => [{ t: 'text', s }]) }));
@@ -77,7 +90,7 @@ function InlineText({
           case 'unit':
             return (
               <Text key={i} className="a-unit" onClick={() => onUnit(p.code)}>
-                {p.repeat ? p.name : `${p.code}${p.name ? ` ${p.name}` : ''}`}
+                {p.name || `${unitNo(p.code)} 号小区`}
               </Text>
             );
           case 'lhat':
@@ -253,7 +266,8 @@ export default function AskPage() {
       <View className="ask-ctx">
         <Text className="ask-area">{model.data.meta.name}</Text>
         <Text className="ask-brief">
-          {model.tally.units} 个小区步行 1 公里内缺设施 · 按直线距离只看出 {model.tally.circleUnits} 个
+          {model.tally.units} 个小区步行 1 公里内缺设施 · 按直线距离
+          {model.tally.circleUnits < model.tally.units ? '只看出' : '也是'} {model.tally.circleUnits} 个
         </Text>
       </View>
       <ScrollView scrollY className="ask-log" scrollIntoView={bottom} scrollWithAnimation>

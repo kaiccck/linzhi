@@ -12,7 +12,7 @@ export interface LayerFlags {
 
 const ROWS: { key: keyof LayerFlags; label: string; note: string }[] = [
   { key: 'circle', label: '直线 15 分钟圈', note: '画圈法的说法，虚线' },
-  { key: 'heat', label: '耗时色阶', note: '越远越淡，按实测步行时间' },
+  { key: 'heat', label: '耗时热力图', note: '每分钟一层，越深离中心越近，按实测步行时间' },
   { key: 'gray', label: '灰色区域', note: '步行 1 公里内缺设施的地方' },
   { key: 'crossing', label: '含过街等待', note: '步行时间加 5%，估算' },
 ];

@@ -18,6 +18,7 @@ import { Radar } from '../components/Radar';
 import { RadarHead, ScoreBlock } from '../components/ScoreScale';
 import { fmt, Segmented, StatusChip } from '../components/ui';
 import type { LifeCircleScore } from '../model/score';
+import { unitNo } from '../model/unitNo';
 import { Icon } from '../platform/Icons';
 import './AreaView.css';
 
@@ -134,7 +135,9 @@ export function AreaHead({
             <Text className="ah-note">
               {tally.units ? (
                 <>
-                  共 {model.units.length} 个小区，按直线距离只看得出{' '}
+                  {/* "只" only when the straight line sees fewer */}共 {model.units.length}{' '}
+                  个小区，按直线距离
+                  {tally.circleUnits < tally.units ? '只看得出' : '也是'}{' '}
                   <Text className="num b">{tally.circleUnits}</Text> 个
                 </>
               ) : (
@@ -513,7 +516,7 @@ const CODE_CLS: Partial<Record<Look, string>> = {
 export function UnitRow({ u, s, look, onTap }: { u: Unit; s: FacilityCheck; look: Look; onTap(): void }) {
   return (
     <View className="urow" onClick={onTap} hoverClass="row-pressed">
-      <Text className={`code num ${CODE_CLS[look] ?? 'c-quiet'}`}>{u.code}</Text>
+      <Text className={`code num ${CODE_CLS[look] ?? 'c-quiet'}`}>{unitNo(u.code)}</Text>
       <View className="u-name">
         <Text className="u-main">{u.nameMain}</Text>
         {u.nameSub ? <Text className="u-sub">{u.nameSub}</Text> : null}

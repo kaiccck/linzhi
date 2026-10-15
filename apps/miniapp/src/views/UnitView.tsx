@@ -10,6 +10,7 @@ import { CAT_COLOR, distWords, fmtInt, poiName, STAT_ICON, type Model } from '@w
 import { catchmentText } from '@web/model/evidence';
 import { freshText } from '@web/model/fresh';
 import { checkLook } from '@web/model/looks';
+import { unitNo } from '../model/unitNo';
 import { BackRow, fmt, StatusChip } from '../components/ui';
 import { Icon } from '../platform/Icons';
 import { walkText } from './AreaView';
@@ -47,7 +48,7 @@ export function UnitView({
       <View className="sub-head">
         <BackRow label={model.data.meta.name} onBack={onBack} />
         <View className="unit-head">
-          <Text className="unit-code num">{u.code}</Text>
+          <Text className="unit-code num">{unitNo(u.code)}</Text>
           <View className="unit-titles">
             <Text className="unit-title">{u.nameMain}</Text>
             <Text className="unit-sub">

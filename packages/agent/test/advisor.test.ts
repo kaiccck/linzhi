@@ -12,6 +12,19 @@ const LLM = { baseUrl: 'https://llm.example.com/v1', apiKey: 'sk-test-secret-123
 describe('template mode (no LLM configured)', () => {
   const advisor = createAdvisor({ backend: backend() });
 
+  it('explains the 体检评分 the app shows, with its standard and bands, even without an LLM', async () => {
+    const a = await advisor.ask('玉兰香苑片区的体检评分为什么是这个分数？');
+    expect(a.mode).toBe('template');
+    const [lead] = a.answer.split('\n');
+    expect(lead).toBe(
+      '结论：体检评分（实测步行）77 分，等级“基本达标”；同样的设施和判定距离按直线距离算是 90 分 [T1]。',
+    );
+    expect(a.answer).toContain('社区卫生 29%（按直线 71%）');
+    expect(a.answer).toContain('覆盖率＝步行 1 km 内走得到这类设施的小区 ÷ 已核实的小区');
+    expect(a.grounding).toMatchObject({ ok: true, unsupported: [] });
+    expect(parseIntent('得了几分？').kind).toBe('score');
+  });
+
   it('answers 申城佳苑的老人买菜方便吗？ with the elderly profile and the market gaps', async () => {
     const events: AdvisorEvent[] = [];
     const a = await advisor.ask('申城佳苑的老人买菜方便吗？', { onEvent: (e) => events.push(e) });

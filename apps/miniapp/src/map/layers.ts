@@ -21,6 +21,7 @@ import { circleR, type Model, type Unit } from '@web/model/derive';
 import { checkLook, type Look } from '@web/model/looks';
 import type { FacilityMark } from '@web/model/facilities';
 import type { SitePin, WhatIfEstimate } from '@web/model/siting';
+import { unitNo } from '../model/unitNo';
 
 export interface LatLng {
   latitude: number;
@@ -140,6 +141,63 @@ const PLATE: Record<Look, { color: string; border: string; bg: string }> = {
   neutral: { color: '#5B6675', border: '#C5CCD6', bg: '#FFFFFF' },
 };
 
+/** One entry of the map's legend: a swatch drawn as the map draws it, and its word. */
+export interface LegendItem {
+  key: string;
+  word: string;
+  kind: 'plate' | 'area' | 'line';
+  color: string;
+  border: string;
+  bg: string;
+  dashed?: boolean;
+}
+
+const LEGEND_PLATES: { looks: Look[]; word: string }[] = [
+  { looks: ['pseudo'], word: '绕路太远' },
+  { looks: ['blind', 'none'], word: '直线也远' },
+  { looks: ['edge', 'edge-over'], word: '临界' },
+  { looks: ['ok'], word: '走得到' },
+  { looks: ['pending'], word: '待核' },
+  { looks: ['na'], word: '无对口' },
+];
+
+/**
+ * What the map shows for this category, in words: the plate styles its communities actually take
+ * (a red plate means 绕路太远 …), then the 灰色区域 and the straight circle when they are drawn.
+ */
+export function legendItems(
+  model: Model,
+  cat: HardCategory,
+  on: { gray: boolean; circle: boolean },
+): LegendItem[] {
+  const looks = new Set(model.units.map((u) => checkLook(u.checks[cat])));
+  const out: LegendItem[] = LEGEND_PLATES.filter((g) => g.looks.some((l) => looks.has(l))).map((g) => {
+    const p = PLATE[g.looks[0]!];
+    return { key: g.looks[0]!, word: g.word, kind: 'plate', ...p, dashed: g.looks[0] === 'pending' };
+  });
+  if (on.gray && model.data.gray_areas?.some((g) => g.kind === 'gap'))
+    out.push({
+      key: 'gray',
+      word: '灰色区域',
+      kind: 'area',
+      color: '',
+      border: '#3F4A5A73',
+      bg: '#3F4A5A1F',
+      dashed: true,
+    });
+  if (on.circle)
+    out.push({
+      key: 'circle',
+      word: '直线圈',
+      kind: 'line',
+      color: '',
+      border: COL.circle,
+      bg: '',
+      dashed: true,
+    });
+  return out;
+}
+
 /** Map marker image per facility pictogram (scripts/gen-markers.mjs → /assets/markers). */
 const FAC_IMAGE: Record<string, string> = {
   'pg-food': 'food',
@@ -186,14 +244,82 @@ export function reachRings(model: Model, T: number, scale: number): XY[][] {
     const meta = model.data.contours_meta?.['900'];
     return model.data.contours['900'].filter((_, i) => !meta?.[i]?.hole);
   }
+  let byLevel = ringCache.get(model.data.field);
+  if (!byLevel) {
+    byLevel = new Map();
+    ringCache.set(model.data.field, byLevel);
+  }
+  const key = Math.round(level);
+  const hit = byLevel.get(key);
+  if (hit) return hit;
   let grid = grids.get(model.data.field);
   if (!grid) {
     grid = gridFromField(model.data.field);
     grids.set(model.data.field, grid);
   }
   const c = levelContours(grid, level, { chaikin: 1, simplify_m: 8, minRing_m2: 400 });
-  return c.rings.filter((_, i) => !c.meta[i]?.hole);
+  const rings = c.rings.filter((_, i) => !c.meta[i]?.hole);
+  // the heat map asks for every minute on each redraw: keep the rings of the steady levels
+  if (byLevel.size < 64) byLevel.set(key, rings);
+  return rings;
 }
+const ringCache = new WeakMap<TimeField, Map<number, XY[][]>>();
+
+/**
+ * Where each community's code plate sits around its point, so plates do not cover each other: the
+ * chosen and the gap communities first, each at the first of five spots (on the point, right, left,
+ * above, below) clear of the plates already placed. Measured in points at the area's own framing
+ * (the 15′ circle across the screen); codes that find no clear spot stay on their point, and a
+ * covered community's code still gives way where they crowd (marker collision).
+ */
+function codeSpots(model: Model, s: LayerInput, lookOf: (u: Unit) => Look): Map<string, [number, number]> {
+  // conservative: a narrow phone, the circle with its margin (about 9 m a point at 15′)
+  const mPerPt = (2 * circleR(model, 1) * 1.3) / 300;
+  const H = 19;
+  const width = (text: string) =>
+    [...text].reduce((w, ch) => w + (ch.charCodeAt(0) > 0x2e80 ? 11.5 : 6.6), 9);
+  const rank = (u: Unit) => {
+    if (s.hot === u.code || s.selected === u.code || s.lit?.has(u.code)) return 0;
+    const l = lookOf(u);
+    return l === 'ok' || l === 'edge' || l === 'neutral' ? 2 : 1;
+  };
+  const placed: [number, number, number, number][] = [];
+  const out = new Map<string, [number, number]>();
+  for (const u of [...model.units].sort((a, b) => rank(a) - rank(b))) {
+    const [x, y] = u.label_xy ?? u.centroid;
+    const px = x / mPerPt;
+    const py = -y / mPerPt;
+    const w = width(plateText(u, rank(u) === 0));
+    const tries: [number, number][] = [
+      [-w / 2, -H / 2],
+      [6, -H / 2],
+      [-w - 6, -H / 2],
+      [-w / 2, -H - 5],
+      [-w / 2, 5],
+    ];
+    const box = ([ax, ay]: [number, number]): [number, number, number, number] => [
+      px + ax,
+      py + ay,
+      px + ax + w,
+      py + ay + H,
+    ];
+    const clear = (b: [number, number, number, number]) =>
+      placed.every((q) => b[2] + 2 <= q[0] || q[2] + 2 <= b[0] || b[3] + 2 <= q[1] || q[3] + 2 <= b[1]);
+    const spot = tries.find((t) => clear(box(t))) ?? tries[0]!;
+    placed.push(box(spot));
+    out.set(u.code, [Math.round(spot[0]), Math.round(spot[1])]);
+  }
+  return out;
+}
+
+/**
+ * A community's plate: its number (the list and the report show the same number beside the
+ * name); the chosen or lit one adds the name, so the community in question reads on the map.
+ */
+const plateText = (u: Unit, named: boolean) => (named ? `${unitNo(u.code)} ${u.nameMain}` : unitNo(u.code));
+
+/** Alpha of one minute's layer of the heat map: 14 stacked deepen the centre to about 0.5. */
+const HEAT_ALPHA = '0F';
 
 /** A circle as a closed dashed line (the basemap's circles cannot be dashed). */
 function circlePoints(model: Model, r: number, n = 72): LatLng[] {
@@ -254,20 +380,31 @@ export function buildLayers(s: LayerInput): Layers {
   };
 
   /* ---------- the reach ---------- */
-  // 耗时色阶 as the minute steps the walk crosses: 5′, 10′ and 15′ (or the time shown) stacked in
-  // sand, deeper towards the centre — native polygons, which every runtime draws
+  // 耗时色阶: the walking-time field as a heat map — one faint sand layer per minute walked, stacked,
+  // so the colour deepens towards the centre (where the most minutes are left) and fades towards
+  // the edge; 5′ and 10′ as hairlines, the time shown as the edge. Native polygons, which every
+  // runtime draws (a ground overlay image is not drawn by the devtools simulator)
   if (s.heat && !s.playing) {
-    const steps = [300, 600, 900].filter((L) => L < s.T - 1);
-    for (const L of [s.T, ...steps.reverse()]) {
+    for (let L = 60; L < s.T - 1; L += 60) {
+      const hair = L % 300 === 0;
       for (const ring of reachRings(model, L, s.scale)) {
         polygons.push({
           points: ring.map((p) => toLatLng(model, p)),
-          fillColor: L === s.T ? '#F2DCAE66' : '#EAC47C40',
-          strokeColor: L === s.T ? COL.iso : '#A27B4740',
-          strokeWidth: L === s.T ? 2 : 1,
+          fillColor: '#E3B865' + HEAT_ALPHA,
+          strokeColor: hair ? '#A27B4759' : '#00000000',
+          strokeWidth: hair ? 1 : 0,
           zIndex: 1,
         });
       }
+    }
+    for (const ring of reachRings(model, s.T, s.scale)) {
+      polygons.push({
+        points: ring.map((p) => toLatLng(model, p)),
+        fillColor: '#F2DCAE59',
+        strokeColor: COL.iso,
+        strokeWidth: 2,
+        zIndex: 1,
+      });
     }
   } else {
     for (const ring of reachRings(model, s.T, s.scale)) {
@@ -317,6 +454,7 @@ export function buildLayers(s: LayerInput): Layers {
   /* ---------- communities ---------- */
   const flips = new Set(s.plan?.estimate?.flips.map((f) => f.unit.code) ?? []);
   const lookOf = (u: Unit): Look => (s.playing ? 'neutral' : checkLook(u.checks[s.cat]));
+  const spots = codeSpots(model, s, lookOf);
   for (const u of model.units) {
     const look = lookOf(u);
     const hot = s.hot === u.code || s.selected === u.code || !!s.lit?.has(u.code);
@@ -345,7 +483,7 @@ export function buildLayers(s: LayerInput): Layers {
           ? { collision: 'marker', collisionRelation: 'alone' as const }
           : {}),
         label: {
-          content: u.code,
+          content: plateText(u, hot),
           color: hot && look !== 'blind' && look !== 'none' ? '#FFFFFF' : p.color,
           bgColor: hot && look !== 'blind' && look !== 'none' ? p.border : p.bg,
           borderColor: p.border,
@@ -353,8 +491,8 @@ export function buildLayers(s: LayerInput): Layers {
           borderRadius: 9,
           fontSize: 11,
           padding: 3,
-          anchorX: -19,
-          anchorY: -10,
+          anchorX: spots.get(u.code)?.[0] ?? -10,
+          anchorY: spots.get(u.code)?.[1] ?? -10,
           textAlign: 'center',
         },
         ariaLabel: `${u.code} ${u.name}`,

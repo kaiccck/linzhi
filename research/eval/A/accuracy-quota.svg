@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 478" width="980" height="478" font-family="'Noto Sans SC', 'Source Han Sans SC', 'Noto Sans CJK SC', 'PingFang SC', 'Microsoft YaHei', sans-serif" role="img" aria-label="精度–配额曲线">
+<title>精度–配额曲线</title>
+<rect width="980" height="478" fill="#ECEEE9"/>
+<text x="24" y="36" font-size="17" font-weight="800" fill="#101316">精度–配额曲线 · 申城佳苑片区</text>
+<text x="24" y="58" font-size="12" fill="#4A5157">参考真值：100 米格点 × 1600 米圆内 796 点的百度批量算路实测；横轴为方法请求的批量算路条数（命中缓存也计数）</text>
+<line x1="24" y1="80" x2="40" y2="80" stroke="#1446B0" stroke-width="2"/>
+<circle cx="32" cy="80" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法（实时引擎，用满预算）</title></circle>
+<text x="46" y="84" font-size="12" fill="#101316">本方法（实时引擎，用满预算）</text>
+<path d="M242 74L248 80L242 86L236 80Z" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法·默认配置</title></path>
+<text x="256" y="84" font-size="12" fill="#101316">本方法·默认配置</text>
+<circle cx="374.7" cy="80" r="7.5" fill="none" stroke="#1446B0" stroke-width="2"><title>本方法·仅 48 点</title></circle>
+<text x="388.7" y="84" font-size="12" fill="#101316">本方法·仅 48 点</text>
+<rect x="503.3" y="73" width="14" height="14" fill="none" stroke="#1446B0" stroke-width="2"><title>本方法·无断裂检测</title></rect>
+<text x="524.3" y="84" font-size="12" fill="#101316">本方法·无断裂检测</text>
+<circle cx="655" cy="80" r="4.5" fill="#E23A2E" stroke="#ECEEE9" stroke-width="2"><title>16 方位射线法</title></circle>
+<text x="669" y="84" font-size="12" fill="#101316">16 方位射线法</text>
+<circle cx="777.2" cy="80" r="4.5" fill="#4A5157" stroke="#ECEEE9" stroke-width="2"><title>直线圆</title></circle>
+<text x="791.2" y="84" font-size="12" fill="#101316">直线圆</text>
+<text x="70" y="112" font-size="13" font-weight="800" fill="#101316">15 分钟区域 IoU（越高越好）</text>
+<line x1="70" y1="378" x2="470" y2="378" stroke="#B9C0BB" stroke-width="1"/>
+<text x="62" y="382" font-size="11" fill="#4A5157" text-anchor="end">0.80</text>
+<line x1="70" y1="315.5" x2="470" y2="315.5" stroke="#D6DAD3" stroke-width="1"/>
+<text x="62" y="319.5" font-size="11" fill="#4A5157" text-anchor="end">0.85</text>
+<line x1="70" y1="253" x2="470" y2="253" stroke="#D6DAD3" stroke-width="1"/>
+<text x="62" y="257" font-size="11" fill="#4A5157" text-anchor="end">0.90</text>
+<line x1="70" y1="190.5" x2="470" y2="190.5" stroke="#D6DAD3" stroke-width="1"/>
+<text x="62" y="194.5" font-size="11" fill="#4A5157" text-anchor="end">0.95</text>
+<line x1="70" y1="128" x2="470" y2="128" stroke="#D6DAD3" stroke-width="1"/>
+<text x="62" y="132" font-size="11" fill="#4A5157" text-anchor="end">1.00</text>
+<line x1="70" y1="378" x2="70" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="70" y="396" font-size="11" fill="#4A5157" text-anchor="middle">0</text>
+<line x1="170" y1="378" x2="170" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="170" y="396" font-size="11" fill="#4A5157" text-anchor="middle">200</text>
+<line x1="270" y1="378" x2="270" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="270" y="396" font-size="11" fill="#4A5157" text-anchor="middle">400</text>
+<line x1="370" y1="378" x2="370" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="370" y="396" font-size="11" fill="#4A5157" text-anchor="middle">600</text>
+<line x1="470" y1="378" x2="470" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="470" y="396" font-size="11" fill="#4A5157" text-anchor="middle">800</text>
+<text x="470" y="416" font-size="11" fill="#4A5157" text-anchor="end">批量算路（条）</text>
+<polyline points="94,303.9 120,255.3 170,240.5 270,218.5 420,213.4" fill="none" stroke="#1446B0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="94" cy="303.9" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 48 条：48 条，IoU 0.859</title></circle>
+<circle cx="120" cy="255.3" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 100 条：100 条，IoU 0.898</title></circle>
+<circle cx="170" cy="240.5" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 200 条：200 条，IoU 0.910</title></circle>
+<circle cx="270" cy="218.5" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 400 条：400 条，IoU 0.928</title></circle>
+<circle cx="420" cy="213.4" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 700 条：700 条，IoU 0.932</title></circle>
+<path d="M190 226.4L196 232.4L190 238.4L184 232.4Z" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法·默认：240 条，IoU 0.916</title></path>
+<circle cx="94" cy="322.4" r="7.5" fill="none" stroke="#1446B0" stroke-width="2"><title>本方法·仅 48 点：48 条，IoU 0.845</title></circle>
+<rect x="413" y="209.9" width="14" height="14" fill="none" stroke="#1446B0" stroke-width="2"><title>本方法 700 条·无断裂检测：700 条，IoU 0.929</title></rect>
+<circle cx="94" cy="320.5" r="4.5" fill="#E23A2E" stroke="#ECEEE9" stroke-width="2"><title>16 方位射线法：48 条，IoU 0.846</title></circle>
+<circle cx="70" cy="370" r="4.5" fill="#4A5157" stroke="#ECEEE9" stroke-width="2"><title>直线圆：0 条，IoU 0.516（超出纵轴范围）</title></circle>
+<text x="431" y="217.4" font-size="12" font-weight="800" fill="#101316" text-anchor="start">本方法 0.932</text>
+<text x="105" y="324.5" font-size="12" fill="#101316" text-anchor="start">射线法 0.846</text>
+<text x="81" y="374" font-size="12" fill="#101316" text-anchor="start">直线圆 0.516（超出纵轴）</text>
+<text x="560" y="112" font-size="13" font-weight="800" fill="#101316">耗时平均绝对误差 MAE（秒，越低越好）</text>
+<line x1="560" y1="378" x2="960" y2="378" stroke="#B9C0BB" stroke-width="1"/>
+<text x="552" y="382" font-size="11" fill="#4A5157" text-anchor="end">0</text>
+<line x1="560" y1="294.7" x2="960" y2="294.7" stroke="#D6DAD3" stroke-width="1"/>
+<text x="552" y="298.7" font-size="11" fill="#4A5157" text-anchor="end">50</text>
+<line x1="560" y1="211.3" x2="960" y2="211.3" stroke="#D6DAD3" stroke-width="1"/>
+<text x="552" y="215.3" font-size="11" fill="#4A5157" text-anchor="end">100</text>
+<line x1="560" y1="128" x2="960" y2="128" stroke="#D6DAD3" stroke-width="1"/>
+<text x="552" y="132" font-size="11" fill="#4A5157" text-anchor="end">150</text>
+<line x1="560" y1="378" x2="560" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="560" y="396" font-size="11" fill="#4A5157" text-anchor="middle">0</text>
+<line x1="660" y1="378" x2="660" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="660" y="396" font-size="11" fill="#4A5157" text-anchor="middle">200</text>
+<line x1="760" y1="378" x2="760" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="760" y="396" font-size="11" fill="#4A5157" text-anchor="middle">400</text>
+<line x1="860" y1="378" x2="860" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="860" y="396" font-size="11" fill="#4A5157" text-anchor="middle">600</text>
+<line x1="960" y1="378" x2="960" y2="382" stroke="#B9C0BB" stroke-width="1"/>
+<text x="960" y="396" font-size="11" fill="#4A5157" text-anchor="middle">800</text>
+<text x="960" y="416" font-size="11" fill="#4A5157" text-anchor="end">批量算路（条）</text>
+<polyline points="584,194.6 610,224.5 660,254.8 760,267.3 910,275.5" fill="none" stroke="#1446B0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="584" cy="194.6" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 48 条：48 条，MAE 110 秒</title></circle>
+<circle cx="610" cy="224.5" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 100 条：100 条，MAE 92 秒</title></circle>
+<circle cx="660" cy="254.8" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 200 条：200 条，MAE 74 秒</title></circle>
+<circle cx="760" cy="267.3" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 400 条：400 条，MAE 66 秒</title></circle>
+<circle cx="910" cy="275.5" r="4.5" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法 700 条：700 条，MAE 62 秒</title></circle>
+<path d="M680 248.3L686 254.3L680 260.3L674 254.3Z" fill="#1446B0" stroke="#ECEEE9" stroke-width="2"><title>本方法·默认：240 条，MAE 74 秒</title></path>
+<circle cx="584" cy="197.3" r="7.5" fill="none" stroke="#1446B0" stroke-width="2"><title>本方法·仅 48 点：48 条，MAE 108 秒</title></circle>
+<rect x="903" y="256.2" width="14" height="14" fill="none" stroke="#1446B0" stroke-width="2"><title>本方法 700 条·无断裂检测：700 条，MAE 69 秒</title></rect>
+<circle cx="560" cy="136" r="4.5" fill="#4A5157" stroke="#ECEEE9" stroke-width="2"><title>直线圆：0 条，MAE 297 秒（超出纵轴范围）</title></circle>
+<text x="899" y="292.5" font-size="12" font-weight="800" fill="#101316" text-anchor="end">本方法 62 秒</text>
+<text x="571" y="140" font-size="12" fill="#101316" text-anchor="start">直线圆 297 秒（超出纵轴）</text>
+<text x="560" y="436" font-size="11" fill="#4A5157">16 方位射线法只给出区域、不给出耗时场，没有 MAE。</text>
+<text x="24" y="464" font-size="11" fill="#4A5157">各点数值见 results.md 的表格；鼠标悬停在点上可看方法与数值。直线圆超出纵轴时画在边缘并标出数值。</text>
+</svg>

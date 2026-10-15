@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest';
 import type { AnalysisResult } from '@zoudedao/core';
 import { deriveModel } from '@web/model/derive';
 import { checkLook } from '@web/model/looks';
-import { buildLayers, reachRings, toLatLng, type LayerInput } from './layers';
+import { unitNo } from '../model/unitNo';
+import { buildLayers, legendItems, reachRings, toLatLng, type LayerInput } from './layers';
 
 const data = JSON.parse(
   readFileSync(fileURLToPath(new URL('../../../../data/samples/zj-a.json', import.meta.url)), 'utf8'),
@@ -52,10 +53,30 @@ describe('map layers', () => {
     const cat = model.cats.find((k) => model.units.some((u) => checkLook(u.checks[k]) === 'pseudo'))!;
     const pseudo = model.units.find((u) => checkLook(u.checks[cat]) === 'pseudo')!;
     const L = buildLayers({ ...base, cat });
-    const plate = L.markers.find((m) => m.label?.content === pseudo.code)!;
+    const plate = L.markers.find((m) => m.label?.content === unitNo(pseudo.code))!;
     expect(plate.label!.borderColor).toBe('#E0483E');
     const P = buildLayers({ ...base, cat, playing: true, T: 300 });
-    expect(P.markers.find((m) => m.label?.content === pseudo.code)!.label!.borderColor).toBe('#C5CCD6');
+    expect(P.markers.find((m) => m.label?.content === unitNo(pseudo.code))!.label!.borderColor).toBe(
+      '#C5CCD6',
+    );
+  });
+
+  it('lists in the legend only the plate styles the map shows, then the drawn areas', () => {
+    const cat = model.cats.find((k) => model.units.some((u) => checkLook(u.checks[k]) === 'pseudo'))!;
+    const words = legendItems(model, cat, { gray: true, circle: true }).map((i) => i.word);
+    expect(words[0]).toBe('绕路太远');
+    expect(words.slice(-1)).toEqual(['直线圈']);
+    const looks = new Set(model.units.map((u) => checkLook(u.checks[cat])));
+    expect(words.includes('走得到')).toBe(looks.has('ok'));
+    expect(legendItems(model, cat, { gray: false, circle: false }).map((i) => i.kind)).not.toContain('line');
+  });
+
+  it('numbers the plates, and names the chosen community on its plate', () => {
+    const u = model.units[0]!;
+    const L = buildLayers({ ...base, selected: u.code });
+    const plates = L.markers.filter((m) => m.label).map((m) => m.label!.content);
+    expect(plates).toContain(`${unitNo(u.code)} ${u.nameMain}`);
+    expect(plates.filter((c) => /^\d+$/.test(c))).toHaveLength(model.units.length - 1);
   });
 
   it('grows the reach with time and shrinks it for a slower walker', () => {

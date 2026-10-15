@@ -30,7 +30,14 @@ export default function SearchPage() {
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') return;
     const app = Taro.getApp<{ __zdd?: Record<string, unknown> }>();
-    app.__zdd = { ...(app.__zdd ?? {}), type: (t: string) => setQ(t) };
+    app.__zdd = {
+      ...(app.__zdd ?? {}),
+      type: (t: string) => setQ(t),
+      go: () => search(),
+      choose: (i = 0) => {
+        if (found.status === 'list' && found.items[i]) check(found.items[i]!);
+      },
+    };
   });
   const ctl = useRef<AbortController | null>(null);
 
@@ -188,8 +195,9 @@ export default function SearchPage() {
           </>
         ) : null}
 
-        {recent.length ? <Text className="s-h">最近的体检</Text> : null}
-        {recent.map((o) => (
+        {/* once the user types, the search is what the page is about */}
+        {recent.length && !q.trim() ? <Text className="s-h">最近的体检</Text> : null}
+        {(q.trim() ? [] : recent).map((o) => (
           <View key={o.key} className="s-row" onClick={o.open ?? undefined} hoverClass="row-pressed">
             <Text className="s-code num live">实时</Text>
             <View className="s-row-text">

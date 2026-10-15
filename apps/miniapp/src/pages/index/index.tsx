@@ -28,9 +28,9 @@ import { facilitySummary, type FacilityRow } from '@web/model/facilities';
 import { sitePins, whatIf, type SitePin } from '@web/model/siting';
 import { initialPlan, initialUi, uiReducer, type Evidence, type PlanState } from '@web/state';
 import { Layers } from '../../components/Layers';
-import { MapButtons, PickCard, SearchCapsule } from '../../components/MapChrome';
+import { MapButtons, MapLegend, PickCard, SearchCapsule } from '../../components/MapChrome';
 import { Sheet, type Snap } from '../../components/Sheet';
-import { gcj02ToBd09, type MarkerHit } from '../../map/layers';
+import { gcj02ToBd09, legendItems, type MarkerHit } from '../../map/layers';
 import { MapView } from '../../map/MapView';
 import { lifeCircleScore } from '../../model/score';
 import * as store from '../../state/store';
@@ -348,7 +348,11 @@ function Screen({ shown, frame }: { shown: store.Shown; frame: ReturnType<typeof
       setPlan((p) => ({ ...p, hotSite: site.key }));
       setFocus({
         key: `site:${site.key}`,
-        points: [site.xy, ...site.covers.flatMap((c) => (c.unit ? [c.unit.centroid] : []))],
+        // where the plates are drawn: the communities it would reach must show with their numbers
+        points: [
+          site.xy,
+          ...site.covers.flatMap((c) => (c.unit ? [c.unit.label_xy ?? c.unit.centroid] : [])),
+        ],
       });
     },
     [model, onPlaceAt],
@@ -523,7 +527,13 @@ function Screen({ shown, frame }: { shown: store.Shown; frame: ReturnType<typeof
   const area = useMemo(() => reachArea(model.raster, ui.T, timeScale), [model.raster, ui.T, timeScale]);
   const missShare = useMemo(() => circleMissShare(model, scale, timeScale), [model, scale, timeScale]);
   const sheetH = frame.heights[snap];
-  const insetBottom = Math.min(sheetH, frame.heights.half) + 10;
+  const legend = useMemo(
+    () => legendItems(model, cat, { gray: ui.gray, circle: ui.circle }),
+    [model, cat, ui.gray, ui.circle],
+  );
+  // the legend sits on the sheet's edge; while 走一遍 plays every plate is neutral
+  const legendOn = snap !== 'full' && !ui.playing && !pick && legend.length > 0;
+  const insetBottom = Math.min(sheetH, frame.heights.half) + 10 + (legend.length ? 30 : 0);
   const route = evidence?.status === 'done' ? evidence.route : null;
   const mapPlan = useMemo(
     () =>
@@ -750,6 +760,7 @@ function Screen({ shown, frame }: { shown: store.Shown; frame: ReturnType<typeof
           }}
         />
       )}
+      {legendOn ? <MapLegend bottom={sheetH + 8} items={legend} /> : null}
       {pick?.at ? (
         <PickCard
           bottom={frame.heights[snap] + 12}

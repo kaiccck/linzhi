@@ -93,3 +93,55 @@
   background: var(--line-2);
   color: var(--ink-3);
 }
+
+/* 图例 */
+.legend-card {
+  position: absolute;
+  left: 12px;
+  right: 64px;
+  z-index: 16;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px 8px;
+  width: fit-content;
+  max-width: calc(100% - 76px);
+  padding: 5px 8px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-float);
+  pointer-events: none;
+}
+.lg-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.lg-sw {
+  flex: none;
+  box-sizing: border-box;
+}
+.lg-plate {
+  width: 14px;
+  height: 10px;
+  border-width: 1px;
+  border-radius: 5px;
+}
+.lg-area {
+  width: 11px;
+  height: 10px;
+  border-width: 1px;
+  border-radius: 2px;
+}
+.lg-line {
+  width: 12px;
+  height: 0;
+  border-top-width: 1.5px;
+  border-top-style: dashed;
+}
+.lg-w {
+  font-size: 10.5px;
+  line-height: 14px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}

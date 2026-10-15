@@ -23,6 +23,7 @@ import { Radar } from '../../components/Radar';
 import { RadarHead, ScoreBlock } from '../../components/ScoreScale';
 import { fmt } from '../../components/ui';
 import { lifeCircleScore } from '../../model/score';
+import { unitNo } from '../../model/unitNo';
 import { Icon } from '../../platform/Icons';
 import * as store from '../../state/store';
 import { walkText } from '../../views/AreaView';
@@ -194,7 +195,7 @@ export default function ReportPage() {
             {model.boardOrder.map((u) => (
               <View key={u.code} className="rp-tr" onClick={() => openUnit(u.code)}>
                 <View className="rp-td unit">
-                  <Text className="rp-code num">{u.code}</Text>
+                  <Text className="rp-code num">{unitNo(u.code)}</Text>
                   <Text className="rp-uname">
                     {u.nameMain}
                     {u.nameSub ? ` ${u.nameSub}` : ''}

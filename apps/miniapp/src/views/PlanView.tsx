@@ -118,10 +118,8 @@ export function PlanView({
             </View>
           ) : null}
           <Text className="wi-codes">
-            {(measured
-              ? measured.newly_covered
-              : estimate.flips.map((f) => `${f.unit.code} ${f.unit.nameMain}`)
-            ).join('、') || '一个也补不上：离缺口小区太远或被河道、高架隔开'}
+            {(measured ? measured.newly_covered : estimate.flips.map((f) => f.unit.nameMain)).join('、') ||
+              '一个也补不上：离缺口小区太远或被河道、高架隔开'}
           </Text>
           {measured ? (
             <Text className="wi-note">
@@ -165,7 +163,7 @@ export function PlanView({
                 <View className="site-main">
                   <Text className="site-label">{p.label ? siteWords(p.label) : `建议 ${p.rank}`}</Text>
                   <Text className="site-covers">
-                    补上 {p.covers.length} 个：{p.covers.map((c) => c.unit?.code ?? c.name).join('、')}
+                    补上 {p.covers.length} 个：{p.covers.map((c) => c.unit?.nameMain ?? c.name).join('、')}
                   </Text>
                   {gain(p.covers.length) > 0 ? (
                     <Text className="site-gain num">评分 +{gain(p.covers.length)}</Text>

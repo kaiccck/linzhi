@@ -12,3 +12,8 @@ data/official
 docs/deck/index.html
 docs/deck/assets
 docs/deck/png
+docs/video/mini/cards/
+docs/video/mini/raw/
+docs/video/mini/parts/
+docs/video/mini/audio/
+docs/video/mini/rect.json

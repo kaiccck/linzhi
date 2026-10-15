@@ -110,7 +110,9 @@ export async function postEvents<T>(
   });
   if (!res.ok || !/event-stream/i.test(res.headers.get('content-type') ?? '') || !res.body) {
     const j = (await res.json().catch(() => null)) as { error?: string; message?: string } | null;
-    throw new ApiError(j?.error ?? `http_${res.status}`, errorText(j?.error, j?.message));
+    // no readable body (a runtime that drops a stream request's error body): the status still says why
+    const code = j?.error ?? (res.status === 429 ? 'rate_limited' : res.status === 503 ? 'busy' : undefined);
+    throw new ApiError(code ?? `http_${res.status}`, errorText(code, j?.message));
   }
   const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
   let buf = '';

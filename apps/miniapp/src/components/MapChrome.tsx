@@ -3,6 +3,7 @@
  * and the round buttons on the right — 图层 and 回到中心.
  */
 import { Text, View } from '@tarojs/components';
+import type { LegendItem } from '../map/layers';
 import { Icon } from '../platform/Icons';
 import './MapChrome.css';
 
@@ -95,6 +96,32 @@ export function MapButtons({
       <View className="map-btn" onClick={onRecenter} hoverClass="pressed" aria-label="回到片区中心">
         <Icon id="ui-locate" color="#2468F2" size={19} />
       </View>
+    </View>
+  );
+}
+
+/** 图例: what the plates' colours and the drawn areas mean, at the foot of the map. */
+export function MapLegend({ bottom, items }: { bottom: number; items: readonly LegendItem[] }) {
+  if (!items.length) return null;
+  return (
+    <View className="legend-card" style={{ bottom: `${bottom}px` }}>
+      {items.map((it) => (
+        <View key={it.key} className="lg-item">
+          <View
+            className={`lg-sw lg-${it.kind}`}
+            style={
+              it.kind === 'line'
+                ? { borderTopColor: it.border }
+                : {
+                    background: it.bg,
+                    borderColor: it.border,
+                    borderStyle: it.dashed ? 'dashed' : 'solid',
+                  }
+            }
+          />
+          <Text className="lg-w">{it.word}</Text>
+        </View>
+      ))}
     </View>
   );
 }

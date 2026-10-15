@@ -13,6 +13,7 @@ import {
   profileSentence,
   provenance,
   reachSentence,
+  scoreSentence,
   type Overview,
 } from '../summary.js';
 import type { LocateResult, Profile } from '../types.js';
@@ -87,6 +88,7 @@ export function analysisSummary(o: Overview, book: FactBook, note = ''): string 
   const parts = [
     `${o.name}（analysis_id: ${o.analysis_id}${tag}；${src}）：`,
     gapSentence(o, book),
+    scoreSentence(o, book),
     reachSentence(o, book),
     categorySentence(o, book),
     profileSentence(o, book),

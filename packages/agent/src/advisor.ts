@@ -533,6 +533,14 @@ async function templateAnswer(turn: Turn, question: string, opts: AskOptions): P
       }
       break;
     }
+    case 'score': {
+      const r = await turn.run('analyze_life_circle', { analysis_id: target.id, ...elderArg(intent) });
+      const s = citeSentences(stripHeader(r.result.summary), r.id);
+      const score = s.filter((x) => /^体检评分|^评分是|^分档/.test(x));
+      lead = score[0] ?? s[0] ?? '';
+      bullets.push(...score.slice(1), ...s.filter((x) => x.startsWith('画圆法')));
+      break;
+    }
     case 'reach': {
       const r = await turn.run('analyze_life_circle', { analysis_id: target.id, ...elderArg(intent) });
       const s = citeSentences(stripHeader(r.result.summary), r.id);

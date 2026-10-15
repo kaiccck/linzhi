@@ -228,6 +228,29 @@ export interface PhraseOptions {
 }
 
 /**
+ * 体检评分 in the product's words (the app shows the same number): the score and its band, the score
+ * the straight line would give, each category's coverage, and how it is counted. Empty without a
+ * verified check.
+ */
+export function scoreSentence(o: Overview, book: FactBook, opts: PhraseOptions = {}): string {
+  const p = opts.labelPrefix ?? '';
+  const sc = o.score;
+  const covered = sc.coverage.filter((c) => c.walk_pct !== null);
+  if (!covered.length) return '';
+  const cov = covered
+    .map(
+      (c) =>
+        `${c.category} ${book.num(`${p}${c.category}覆盖率（实测步行）`, c.walk_pct!, '%')}%（按直线 ${book.num(`${p}${c.category}覆盖率（按直线距离）`, c.circle_pct!, '%')}%）`,
+    )
+    .join('、');
+  return (
+    `体检评分（实测步行）${book.num(`${p}体检评分`, sc.walk, '分')} 分，等级“${sc.grade}”；同样的设施和判定距离按直线距离算是 ${book.num(`${p}按直线距离算的体检评分`, sc.circle, '分')} 分。` +
+    `评分是各类设施覆盖率的平均：${cov}；覆盖率＝步行 ${o.rule_text} 内走得到这类设施的小区 ÷ 已核实的小区。` +
+    `分档：${book.num('良好分档线', 90, '分')} 分及以上良好、${book.num('基本达标分档线', 75, '分')} 分及以上基本达标、${book.num('需关注分档线', 60, '分')} 分及以上需关注，其余待改善。`
+  );
+}
+
+/**
  * The product's lead sentence: gaps the circle finds vs verified gaps on foot. Returns '' when there
  * is nothing to compare (no checks).
  */

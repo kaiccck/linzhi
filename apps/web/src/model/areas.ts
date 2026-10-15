@@ -38,7 +38,17 @@ export function areaOptions(opts: {
   onOpenHistory?(item: HistoryItem): void;
 }): { live: AreaOption[]; samples: AreaOption[] } {
   const { history } = opts;
-  const lives = (history ?? []).filter((h) => !h.sample).slice(0, 8);
+  // one row per place and profile: checking the same place again replaces its row (newest first)
+  const seen = new Set<string>();
+  const lives = (history ?? [])
+    .filter((h) => !h.sample)
+    .filter((h) => {
+      const key = `${h.name}|${h.label ?? ''}|${h.profile ?? 'adult'}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 8);
   const byId = new Map((history ?? []).map((h) => [h.id, h]));
   const live: AreaOption[] = lives.map((h) => ({
     key: h.id,

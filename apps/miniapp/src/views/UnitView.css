@@ -7,8 +7,8 @@
 .unit-code {
   flex: none;
   height: 34px;
-  min-width: 58px;
-  padding: 0 10px;
+  min-width: 34px;
+  padding: 0 8px;
   border-radius: 17px;
   background: var(--fill);
   font-size: 16px;
