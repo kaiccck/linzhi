@@ -54,6 +54,7 @@
 ### 1. 服务端（Docker，推荐评审使用，无需任何 Key）
 
 ```bash
+git clone https://github.com/kaiccck/linzhi.git && cd linzhi
 docker compose up --build
 ```
 
