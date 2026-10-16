@@ -1,7 +1,7 @@
 {
   "name": "@zoudedao/baidu",
   "version": "0.1.0",
-  "description": "走得到的百度地图 Web 服务客户端：按接口鉴权（SN/IP）、限流、缓存、配额账本、降级。",
+  "description": "邻至的百度地图 Web 服务客户端：按接口鉴权（SN/IP）、限流、缓存、配额账本、降级。",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {

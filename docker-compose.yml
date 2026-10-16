@@ -1,4 +1,4 @@
-# 走得到：docker compose up --build，然后打开 http://localhost:8787
+# 邻至：docker compose up --build，然后打开 http://localhost:8787
 # - 没有 .env.local：样例回放模式，不需要任何 Key。
 # - 有 .env.local（从 .env.example 复制）：服务端 Key 在运行时注入，自动进入实时模式。
 # - 浏览器端 AK 在构建时写入前端，需要让 compose 读取 .env.local 做变量替换：

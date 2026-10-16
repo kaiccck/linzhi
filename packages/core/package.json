@@ -1,7 +1,7 @@
 {
   "name": "@zoudedao/core",
   "version": "0.1.0",
-  "description": "走得到核心算法：坐标转换、去趋势插值、等时圈、盲区判定、选址。纯函数，无 I/O，浏览器与 Node 通用。",
+  "description": "邻至核心算法：坐标转换、去趋势插值、等时圈、盲区判定、选址。纯函数，无 I/O，浏览器与 Node 通用。",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {

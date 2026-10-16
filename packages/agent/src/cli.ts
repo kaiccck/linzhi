@@ -11,7 +11,7 @@ import { createAdvisor } from './advisor.js';
 import { HttpBackend, LocalBackend } from './backend.js';
 import { describeLlm, llmConfigFromEnv } from './llm.js';
 
-const HELP = `走得到 · 体检顾问（命令行）
+const HELP = `邻至 · 体检顾问（命令行）
 
 用法：
   zoudedao-advisor "申城佳苑的老人买菜方便吗？"

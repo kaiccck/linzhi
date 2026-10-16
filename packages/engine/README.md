@@ -1,6 +1,6 @@
 # @zoudedao/engine
 
-走得到的实时分析引擎：输入一个中心点，按阶段调用百度地图 Web 服务，用 `@zoudedao/core` 的纯算法算出完整的 `AnalysisResult`（字段与 `data/samples/zj-a.json` 相同，Web 直接渲染）。服务端（SSE）、MCP Server 和 CLI 共用它。
+邻至的实时分析引擎：输入一个中心点，按阶段调用百度地图 Web 服务，用 `@zoudedao/core` 的纯算法算出完整的 `AnalysisResult`（字段与 `data/samples/zj-a.json` 相同，Web 直接渲染）。服务端（SSE）、MCP Server 和 CLI 共用它。
 
 引擎只做编排：百度客户端由调用方注入，所有数字都来自 core 算法对百度应答的计算。设计依据见 `docs/技术设计文档.md` §3.3（数据流与预算）、§4（接口策略）、§5（等时圈）、§7（盲区与选址），事件格式以 `docs/api.md` 为准。
 

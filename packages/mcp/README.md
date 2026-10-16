@@ -1,4 +1,4 @@
-# @zoudedao/mcp · 走得到 MCP Server
+# @zoudedao/mcp · 邻至 MCP Server
 
 把“15 分钟生活圈体检”开放给任何支持 MCP 的 AI 助手：Claude Desktop、Cursor、Cherry Studio 等。助手可以直接问“申城佳苑的老人买菜方便吗”，由本服务按百度地图的**实测步行路线**给出等时圈、服务缺口、新增设施估算和体检报告。
 
@@ -17,19 +17,19 @@ pnpm --filter "@zoudedao/mcp..." build        # 依次构建 core、agent、mcp
 node packages/mcp/dist/cli.js --help
 ```
 
-| 启动方式               | 命令                                                                                    |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| stdio（由客户端启动）  | `node <仓库>/packages/mcp/dist/cli.js`                                                  |
-| Streamable HTTP        | `node <仓库>/packages/mcp/dist/cli.js --http --port 8788` → `http://127.0.0.1:8788/mcp` |
-| 连接运行中的走得到服务 | 加 `--api http://localhost:8787` 或设置环境变量 `ZDD_API_URL`                           |
+| 启动方式              | 命令                                                                                    |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| stdio（由客户端启动） | `node <仓库>/packages/mcp/dist/cli.js`                                                  |
+| Streamable HTTP       | `node <仓库>/packages/mcp/dist/cli.js --http --port 8788` → `http://127.0.0.1:8788/mcp` |
+| 连接运行中的邻至服务  | 加 `--api http://localhost:8787` 或设置环境变量 `ZDD_API_URL`                           |
 
-| 选项 / 环境变量                              | 说明                                                                                                                             |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `--api`、`ZDD_API_URL`                       | 走得到服务地址（`apps/server`）。服务端配置了百度 Key 时可以体检任意地点（约 1 分钟，逐阶段发送 MCP 进度通知）；否则只能查看样例 |
-| `--samples`、`ZDD_SAMPLES_DIR`               | 样例目录；默认依次尝试仓库的 `data/samples` 和当前目录下的 `data/samples`                                                        |
-| `--http`、`--port`、`ZDD_MCP_PORT`、`--host` | HTTP 模式、端口（默认 8788）和监听地址（默认 `127.0.0.1`）                                                                       |
+| 选项 / 环境变量                              | 说明                                                                                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `--api`、`ZDD_API_URL`                       | 邻至服务地址（`apps/server`）。服务端配置了百度 Key 时可以体检任意地点（约 1 分钟，逐阶段发送 MCP 进度通知）；否则只能查看样例 |
+| `--samples`、`ZDD_SAMPLES_DIR`               | 样例目录；默认依次尝试仓库的 `data/samples` 和当前目录下的 `data/samples`                                                      |
+| `--http`、`--port`、`ZDD_MCP_PORT`、`--host` | HTTP 模式、端口（默认 8788）和监听地址（默认 `127.0.0.1`）                                                                     |
 
-日志只写到 stderr（stdio 模式下 stdout 是协议通道）。MCP Server 本身不持有任何百度 Key：实时分析由走得到服务完成，Key 只在服务端。
+日志只写到 stderr（stdio 模式下 stdout 是协议通道）。MCP Server 本身不持有任何百度 Key：实时分析由邻至服务完成，Key 只在服务端。
 
 ## 工具
 
@@ -85,7 +85,7 @@ stdio（推荐）：
 }
 ```
 
-连接运行中的走得到服务（实时体检任意地点）：在上面的配置里加 `"env": { "ZDD_API_URL": "http://localhost:8787" }`。
+连接运行中的邻至服务（实时体检任意地点）：在上面的配置里加 `"env": { "ZDD_API_URL": "http://localhost:8787" }`。
 
 HTTP：Claude Desktop 的配置文件只接受 stdio 服务；可以先用 `--http` 启动本服务，再用社区工具 [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) 桥接（远程连接器的添加方式请以 Claude 官方文档为准）：
 
@@ -164,7 +164,7 @@ HTTP：Claude Desktop 的配置文件只接受 stdio 服务；可以先用 `--ht
 
 ### 组合演示：一个模型同时用两个 MCP Server（`demo/combo.ts`）
 
-`demo/combo.ts` 是一个最小的智能体循环：大模型（DeepSeek 等 OpenAI 兼容接口，经 `@zoudedao/agent` 的客户端）同时连接两个 MCP Server——**百度地图官方 MCP**（SSE）负责地理编码、地点检索和路线规划，**走得到 MCP**（stdio，`dist/cli.js --api http://localhost:8787`）负责逐个小区核对“步行能不能走到”。两边的工具一起交给模型，调用轨迹逐步打印；最终回答经过与体检顾问相同的数字溯源校验（引用补全，再修正一次）。
+`demo/combo.ts` 是一个最小的智能体循环：大模型（DeepSeek 等 OpenAI 兼容接口，经 `@zoudedao/agent` 的客户端）同时连接两个 MCP Server——**百度地图官方 MCP**（SSE）负责地理编码、地点检索和路线规划，**邻至 MCP**（stdio，`dist/cli.js --api http://localhost:8787`）负责逐个小区核对“步行能不能走到”。两边的工具一起交给模型，调用轨迹逐步打印；最终回答经过与体检顾问相同的数字溯源校验（引用补全，再修正一次）。
 
 ```bash
 pnpm --filter "@zoudedao/mcp..." build
@@ -176,7 +176,7 @@ node --env-file=../../.env.local demo/combo.ts --list             # 只连接并
 
 | 选项                          | 说明                                                                                                         |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `--api <地址>`                | 走得到服务，默认 `http://localhost:8787`；写 `none` 直接读仓库样例                                           |
+| `--api <地址>`                | 邻至服务，默认 `http://localhost:8787`；写 `none` 直接读仓库样例                                             |
 | `--baidu-transport sse\|http` | 默认 SSE（控制台的“MCP(SSE)”服务）；`http` 为 Streamable HTTP                                                |
 | `--max-baidu-calls <n>`       | 每次最多调用几次百度地图 MCP 工具，默认 5：官方工具消耗这个 AK 自己的日配额（个人认证的地点检索每天 100 次） |
 | `--allow-live`                | 允许走得到对新地点实时体检（约 1 分钟、100 多次路线规划配额）；默认只用已体检的片区                          |
@@ -192,19 +192,19 @@ node --env-file=../../.env.local demo/combo.ts --list             # 只连接并
 | Streamable HTTP（官方推荐） | `https://mcp.map.baidu.com/mcp?ak=<AK>` |
 
 - AK 须为控制台创建的**服务端** AK，并勾选 **MCP(SSE)** 服务。实测服务端为 `mcp-server-baidu-maps` 1.28.0，有 14 个工具（`map_geocode`、`map_search_places`、`map_directions`、`map_directions_matrix` 等，坐标写作“纬度,经度”）；演示只开放其中 3 个。
-- 官方 Server 用裸 AK 调用各 Web 服务接口，**不带 SN 签名**：SN 校验方式的 AK 能连上、能列出工具，但第一次调用工具就会被拒（`Authentication failed: APP SN校验失败`，即 Web 服务状态码 211）；IP 白名单方式的 AK 需要允许百度自己的服务器调用。建议为 MCP 单独建一个 IP 白名单方式的服务端 AK（开通 MCP(SSE)），填到 `BAIDU_MCP_AK`，不影响走得到服务端使用的 SN 校验 AK。
+- 官方 Server 用裸 AK 调用各 Web 服务接口，**不带 SN 签名**：SN 校验方式的 AK 能连上、能列出工具，但第一次调用工具就会被拒（`Authentication failed: APP SN校验失败`，即 Web 服务状态码 211）；IP 白名单方式的 AK 需要允许百度自己的服务器调用。建议为 MCP 单独建一个 IP 白名单方式的服务端 AK（开通 MCP(SSE)），填到 `BAIDU_MCP_AK`，不影响邻至服务端使用的 SN 校验 AK。
 - 安全：AK 只出现在连接地址里，从不打印；所有输出都先去掉 AK、`ak=…` 参数和 Bearer 令牌（`demo/baidu.ts`，有离线测试）。百度 MCP 拒绝 AK 时，演示识别错误类别（SN 校验、IP 白名单、服务未开通、Key 无效、配额），撤下百度工具，并告诉模型改用走得到、如实说明。
 - 走得到这一侧只读取已有的分析：不开放 `locate_place`（经服务端会调用百度地理编码），`analyze_life_circle` 对新坐标的实时体检默认拦截。
 
 #### 一次运行的完整轨迹（2026-09-28，deepseek-flash）
 
-本仓库配置的 `BAIDU_SERVER_AK` 是 SN 校验方式，所以百度地图这一步被拒，演示按设计退回只用走得到 MCP：
+本仓库配置的 `BAIDU_SERVER_AK` 是 SN 校验方式，所以百度地图这一步被拒，演示按设计退回只用邻至 MCP：
 
 ```text
 ## 连接
 
 - 百度地图官方 MCP（SSE，mcp-server-baidu-maps）：14 个工具——map_geocode、map_reverse_geocode、map_search_places、map_place_details、map_directions_matrix、map_directions、map_weather、map_ip_location、map_road_traffic、map_search_pro、map_district_search、map_uri、map_mark、map_geoconv
-- 走得到 MCP（stdio，--api http://localhost:8787）：7 个工具——locate_place、analyze_life_circle、get_isochrone、list_service_gaps、simulate_facility、compare_sites、export_report
+- 邻至 MCP（stdio，--api http://localhost:8787）：7 个工具——locate_place、analyze_life_circle、get_isochrone、list_service_gaps、simulate_facility、compare_sites、export_report
 - 开放给模型的工具：map_geocode（百度地图）、map_search_places（百度地图）、map_directions（百度地图）、analyze_life_circle（走得到）、list_service_gaps（走得到）、compare_sites（走得到）
 - 大模型：deepseek-flash @ api.deepseek.com
 
@@ -212,7 +212,7 @@ node --env-file=../../.env.local demo/combo.ts --list             # 只连接并
 
 1. 模型 → [百度地图] map_geocode {"address":"学林路地铁站","city":"上海市"}
    ✗ [百度地图] map_geocode：AK 为 SN 校验方式，调用未带签名（status 211：Authentication failed: APP SN校验失败）
-   ⚠ 百度地图 MCP 拒绝了这个 AK，本次改为只用走得到 MCP
+   ⚠ 百度地图 MCP 拒绝了这个 AK，本次改为只用邻至 MCP
 1. 模型 → [走得到] analyze_life_circle {"sample_id":"zj-a","profile":"elder"}
    ← T1 申城佳苑片区（analysis_id: zj-a~elder，老年人画像；样例数据，2026-09-26 百度地图实测，按老年人步速换算）：画圆法（直线 1 km）只找到 1 个服务缺口，按实测步行距离已核实 8 个，画圆漏掉了其中 7 个（87.5%）。另有 2 项待核实，不计入缺口。15 分钟步行实际可达 1.113 km²，只有直线 15 分钟圆（2.061 km²）的 54%，画圆把可达面积高估了 1.85 倍。15 分钟有效步…
 2. 模型 → [走得到] analyze_life_circle {"sample_id":"zj-b","profile":"elder"}
@@ -240,10 +240,10 @@ node --env-file=../../.env.local demo/combo.ts --list             # 只连接并
 4. AI小镇服务中心周边：菜市场覆盖 0（伪覆盖 6、盲区 6），15 分钟内小学、幼儿园、菜市场、超市、药店、公交、公园一处都走不到，只有地铁 1 处步行 12.3 分钟 [T4]；画圆高估最严重（3.00 倍），有效步行半径中位数仅 487.5 m [T7]。
 5. 四个片区横向对比：15 分钟可达面积最大的是万科翡翠公园片区 1.294 km²，其次申城佳苑 1.113 km²、玉兰香苑 1.059 km²、AI小镇 0.686 km²；已核实步行缺口最少的是申城佳苑（8 个），玉兰香苑最多（21 个）[T7]。注意“待核实”不等于缺口，申城佳苑还有 2 项药店检查待核实 [T1]。
 
-信息来源：走得到 MCP 的已体检片区数据（申城佳苑、玉兰香苑、万科翡翠公园、AI小镇服务中心周边，老年人画像）；本次没有用到百度地图的数据。
+信息来源：邻至 MCP 的已体检片区数据（申城佳苑、玉兰香苑、万科翡翠公园、AI小镇服务中心周边，老年人画像）；本次没有用到百度地图的数据。
 
 数字核验：通过，共 53 个数字
-调用：大模型 4 次；百度地图 MCP 1 次；走得到 MCP 7 次；用时 8.4 秒
+调用：大模型 4 次；百度地图 MCP 1 次；邻至 MCP 7 次；用时 8.4 秒
 百度地图 MCP：AK 为 SN 校验方式，调用未带签名（status 211：Authentication failed: APP SN校验失败）
 ```
 
@@ -254,7 +254,7 @@ node --env-file=../../.env.local demo/combo.ts --list             # 只连接并
 ## 安全
 
 - HTTP 模式默认只监听 `127.0.0.1`，并校验 `Host` 与 `Origin` 头（防 DNS 重绑定）；改用 `--host 0.0.0.0` 会对局域网开放，请自行评估。
-- 工具都是只读的，不会修改任何数据；实时体检会消耗走得到服务端的百度配额，服务端有按 IP 的限流与配额账本。
+- 工具都是只读的，不会修改任何数据；实时体检会消耗邻至服务端的百度配额，服务端有按 IP 的限流与配额账本。
 - 日志不包含任何 Key。
 
 ## 开发

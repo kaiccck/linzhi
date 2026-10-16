@@ -1,4 +1,4 @@
-# 走得到 API 约定（v0）
+# 邻至 API 约定（v0）
 
 服务端（`apps/server`，默认端口 8787）与 Web（`apps/web`，开发端口 5173，`/api` 代理到服务端）之间的接口。数据结构以 `packages/core/src/types.ts` 的 `AnalysisResult` 为准。字段沿用 snake_case，与 `data/samples/*.json` 保持一致。
 

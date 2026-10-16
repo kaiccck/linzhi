@@ -1,6 +1,6 @@
 # @zoudedao/server
 
-走得到的服务端（Fastify 5）：样例查询、SSE 流式体检、体检顾问问询（SSE）、托管构建好的 Web。接口约定以 [`docs/api.md`](../../docs/api.md) 为准，数据结构以 `packages/core/src/types.ts` 的 `AnalysisResult` 为准。
+邻至的服务端（Fastify 5）：样例查询、SSE 流式体检、体检顾问问询（SSE）、托管构建好的 Web。接口约定以 [`docs/api.md`](../../docs/api.md) 为准，数据结构以 `packages/core/src/types.ts` 的 `AnalysisResult` 为准。
 
 ## 运行模式
 

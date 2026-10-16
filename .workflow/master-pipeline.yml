@@ -2,7 +2,7 @@
 # 注意：推到 Gitee 后需在 Gitee Go 中确认可选的 Node.js 版本（项目要求 >= 22.12）。
 version: '1.0'
 name: master-pipeline
-displayName: 走得到 · 构建与测试
+displayName: 邻至 · 构建与测试
 triggers:
   trigger: auto
   push:

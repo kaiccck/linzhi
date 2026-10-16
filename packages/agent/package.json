@@ -1,7 +1,7 @@
 {
   "name": "@zoudedao/agent",
   "version": "0.1.0",
-  "description": "走得到 AI 层：体检顾问 Agent、工具注册表（与 MCP Server 共用）、数字溯源校验、体检报告生成、OpenAI 兼容 LLM 客户端。",
+  "description": "邻至 AI 层：体检顾问 Agent、工具注册表（与 MCP Server 共用）、数字溯源校验、体检报告生成、OpenAI 兼容 LLM 客户端。",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {

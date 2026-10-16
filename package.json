@@ -2,7 +2,7 @@
   "name": "zoudedao",
   "version": "0.1.0",
   "private": true,
-  "description": "走得到：15 分钟生活圈智能体检与规划助手（基于百度地图开放能力）",
+  "description": "邻至：15 分钟生活圈智能体检与规划助手（基于百度地图开放能力）",
   "license": "Apache-2.0",
   "type": "module",
   "packageManager": "pnpm@10.33.0",

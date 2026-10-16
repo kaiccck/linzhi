@@ -1,4 +1,4 @@
-# 走得到：单镜像同时托管 Web 与 API（apps/server 在 8787 端口提供 /api 与构建好的 Web）。
+# 邻至：单镜像同时托管 Web 与 API（apps/server 在 8787 端口提供 /api 与构建好的 Web）。
 #   docker build -t zoudedao .
 #   docker run --rm -p 8787:8787 zoudedao            # 未配置 Key：样例回放模式
 #   docker run --rm -p 8787:8787 --env-file .env.local zoudedao
@@ -34,7 +34,7 @@ RUN pnpm --filter @zoudedao/server deploy --prod --legacy /out/server
 # ---- runtime
 FROM ${NODE_IMAGE} AS runtime
 LABEL org.opencontainers.image.title="zoudedao" \
-      org.opencontainers.image.description="走得到：15 分钟生活圈智能体检与规划助手" \
+      org.opencontainers.image.description="邻至：15 分钟生活圈智能体检与规划助手" \
       org.opencontainers.image.licenses="Apache-2.0"
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
